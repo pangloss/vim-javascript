@@ -32,6 +32,7 @@ syntax sync fromstart
 "" JavaScript comments
 syntax keyword javaScriptCommentTodo    TODO FIXME XXX TBD contained
 syntax region  javaScriptLineComment    start=+\/\/+ end=+$+ keepend contains=javaScriptCommentTodo,@Spell
+syntax region  javaScriptEnvComment     start=+^#!+ end=+$+ keepend contains=javaScriptCommentTodo,@Spell
 syntax region  javaScriptLineComment    start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=javaScriptCommentTodo,@Spell fold
 syntax region  javaScriptCvsTag         start="\$\cid:" end="\$" oneline contained
 syntax region  javaScriptComment        start="/\*"  end="\*/" contains=javaScriptCommentTodo,javaScriptCvsTag,@Spell fold
@@ -199,6 +200,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   endif
   HiLink javaScriptComment              Comment
   HiLink javaScriptLineComment          Comment
+  HiLink javaScriptEnvComment           Comment
   HiLink javaScriptDocComment           Comment
   HiLink javaScriptCommentTodo          Todo
   HiLink javaScriptCvsTag               Function
