@@ -167,7 +167,7 @@ function s:IndentWithContinuation(lnum, ind, width)
   " TODO: the || s:IsInString() thing worries me a bit.
   if p_lnum != lnum
     if s:Match(p_lnum,s:continuation_regex)||s:IsInString(p_lnum,strlen(line))
-      return a:ind + a:width
+      return a:ind
     endif
   endif
 
