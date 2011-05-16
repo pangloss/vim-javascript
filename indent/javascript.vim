@@ -33,15 +33,13 @@ set cpo&vim
 " ============
 
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = '\<javaScript\%(RegexpString\|CommentTodo\|LineComment\|Comment\|DocComment\)\>'
+let s:syng_strcom = 'javaScript\%(String\|RegexpString\|CommentTodo\|LineComment\|Comment\|DocComment\)'
 
 " Regex of syntax group names that are strings.
-let s:syng_string =
-      \ '\<javaScript\%(RegexpString\)\>'
+let s:syng_string = 'javaScript\%(RegexpString\)'
 
 " Regex of syntax group names that are strings or documentation.
-let s:syng_stringdoc =
-  \'\<javaScriptDocComment\>'
+let s:syng_stringdoc = 'javaScriptDocComment'
 
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
