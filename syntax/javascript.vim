@@ -176,8 +176,6 @@ if exists("b:javascript_fold")
     syntax region  javaScriptFuncBlock      contained matchgroup=javaScriptFuncBlock start="{" end="}" contains=@javaScriptAll,javaScriptParensErrA,javaScriptParensErrB,javaScriptParen,javaScriptBracket,javaScriptBlock fold
 else
     syntax keyword javaScriptFunction       function
-    setlocal foldmethod<
-    setlocal foldlevel<
 endif
 
 " Define the default highlighting.
