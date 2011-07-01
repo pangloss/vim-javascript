@@ -60,7 +60,8 @@ if !exists("javascript_ignore_javaScriptdoc")
 
   syntax region javaScriptDocType         start="{" end="}" oneline contained nextgroup=javaScriptDocParam skipwhite
   syntax match  javaScriptDocType         contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+" nextgroup=javaScriptDocParam skipwhite
-  syntax match  javaScriptDocTypeNoParam  contained "\%(#\|\"\|{\|}\|\w\|\.\|:\|\/\)\+"
+  syntax region javaScriptDocTypeNoParam  start="{" end="}" oneline contained
+  syntax match  javaScriptDocTypeNoParam  contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+"
   syntax match  javaScriptDocParam        contained "\%(#\|\"\|{\|}\|\w\|\.\|:\|\/\)\+"
   syntax region javaScriptDocSeeTag       contained matchgroup=javaScriptDocSeeTag start="{" end="}" contains=javaScriptDocTags
 
