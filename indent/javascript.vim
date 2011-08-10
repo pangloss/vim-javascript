@@ -39,7 +39,7 @@ let s:syng_strcom = 'javaScript\%(String\|RegexpString\|CommentTodo\|LineComment
 let s:syng_string = 'javaScript\%(RegexpString\)'
 
 " Regex of syntax group names that are strings or documentation.
-let s:syng_stringdoc = 'javaScriptDocComment'
+let s:syng_stringdoc = 'javaScriptDocComment\|javaScriptComment'
 
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
