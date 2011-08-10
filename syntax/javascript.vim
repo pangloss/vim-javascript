@@ -58,8 +58,10 @@ if !exists("javascript_ignore_javaScriptdoc")
   " other tags (no extra syntax)
   syntax match  javaScriptDocTags         contained "@\(access\|addon\|alias\|author\|beta\|constant\|constructor\|copyright\|deprecated\|description\|event\|example\|exec\|field\|fileOverview\|fileoverview\|function\|global\|ignore\|inner\|license\|overview\|private\|protected\|project\|public\|readonly\|since\|static\)\>"
 
-  syntax match  javaScriptDocType         contained "\%(#\|\"\|{\|}\|\w\|\.\|:\|\/\)\+" nextgroup=javaScriptDocParam skipwhite
-  syntax match  javaScriptDocTypeNoParam  contained "\%(#\|\"\|{\|}\|\w\|\.\|:\|\/\)\+"
+  syntax region javaScriptDocType         start="{" end="}" oneline contained nextgroup=javaScriptDocParam skipwhite
+  syntax match  javaScriptDocType         contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+" nextgroup=javaScriptDocParam skipwhite
+  syntax region javaScriptDocTypeNoParam  start="{" end="}" oneline contained
+  syntax match  javaScriptDocTypeNoParam  contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+"
   syntax match  javaScriptDocParam        contained "\%(#\|\"\|{\|}\|\w\|\.\|:\|\/\)\+"
   syntax region javaScriptDocSeeTag       contained matchgroup=javaScriptDocSeeTag start="{" end="}" contains=javaScriptDocTags
 
