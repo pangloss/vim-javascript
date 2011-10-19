@@ -4,4 +4,6 @@ endif
 let b:did_ftplugin = 1
 
 "" dollar sign is permitted anywhere in an identifier
-setlocal iskeyword+=$
+if &filetype == "html"
+    setlocal iskeyword+=$
+endif
