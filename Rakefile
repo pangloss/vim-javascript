@@ -1,7 +1,7 @@
 require 'rake'
 require 'rake/clean'
 
-files = ['syntax/javascript.vim', 'indent/javascript.vim']
+files = ['syntax/javascript.vim', 'indent/javascript.vim', 'ftplugin/javascript_pvj.vim', 'ftplugin/html_pvj.vim']
 
 CLEAN.include 'tmp/*_ctags'
 
