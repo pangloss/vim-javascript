@@ -18,13 +18,13 @@ if !exists("main_syntax")
   let main_syntax = 'javascript'
 endif
 
-"" Drop fold if it set but VIM doesn't support it.
+"" Drop fold if it is set but VIM doesn't support it.
 let b:javascript_fold='true'
 if version < 600    " Don't support the old version
   unlet! b:javascript_fold
 endif
 
-"" dollar sigh is permittd anywhere in an identifier
+"" dollar sign is permittd anywhere in an identifier
 setlocal iskeyword+=$
 
 syntax sync fromstart
@@ -74,16 +74,16 @@ syntax case match
 syntax match   javaScriptSpecial        "\\\d\d\d\|\\x\x\{2\}\|\\u\x\{4\}\|\\."
 syntax region  javaScriptStringD        start=+"+  skip=+\\\\\|\\$"+  end=+"+  contains=javaScriptSpecial,@htmlPreproc
 syntax region  javaScriptStringS        start=+'+  skip=+\\\\\|\\$'+  end=+'+  contains=javaScriptSpecial,@htmlPreproc
-syntax region  javaScriptRegexpCharClass start=+\[\]\|\[^\]\|\[+ end=+\]+ contained
+syntax region  javaScriptRegexpCharClass start=+\[+ end=+\]+ contained
 syntax region  javaScriptRegexpString   start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]"']\|\d\|\w\)\s*\)\@<!\)/\(\*\|/\)\@!+ skip=+\\\\\|\\/+ end=+/[gim]\{,3}+ contains=javaScriptSpecial,javaScriptRegexpCharClass,@htmlPreproc oneline
 syntax match   javaScriptNumber         /\<-\=\d\+L\=\>\|\<0[xX]\x\+\>/
 syntax match   javaScriptFloat          /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
-syntax match   javaScriptLabel          /\(?\s*\)\@<!\<\w\+\(\s*:\)\@=/
+syntax match   javaScriptLabel          /\<\w\+\(\s*:\)\@=/
 
 "" JavaScript Prototype
 syntax keyword javaScriptPrototype      prototype
 
-"" Programm Keywords
+"" Program Keywords
 syntax keyword javaScriptSource         import export
 syntax keyword javaScriptType           const undefined var void yield 
 syntax keyword javaScriptOperator       delete new in instanceof let typeof
@@ -153,10 +153,13 @@ endif "DOM/HTML/CSS
 
 
 "" Code blocks
-syntax cluster javaScriptAll       contains=javaScriptComment,javaScriptLineComment,javaScriptDocComment,javaScriptStringD,javaScriptStringS,javaScriptRegexpString,javaScriptNumber,javaScriptFloat,javaScriptLabel,javaScriptSource,javaScriptThis,javaScriptType,javaScriptOperator,javaScriptBoolean,javaScriptNull,javaScriptFunction,javaScriptConditional,javaScriptRepeat,javaScriptBranch,javaScriptStatement,javaScriptGlobalObjects,javaScriptExceptions,javaScriptFutureKeys,javaScriptDomErrNo,javaScriptDomNodeConsts,javaScriptHtmlEvents,javaScriptDotNotation
+" there is a name collision with javaScriptExpression in html.vim, hence the use of the '2' here
+syntax cluster javaScriptExpression2 contains=javaScriptComment,javaScriptLineComment,javaScriptDocComment,javaScriptStringD,javaScriptStringS,javaScriptRegexpString,javaScriptNumber,javaScriptFloat,javaScriptSource,javaScriptThis,javaScriptType,javaScriptOperator,javaScriptBoolean,javaScriptNull,javaScriptFunction,javaScriptGlobalObjects,javaScriptExceptions,javaScriptFutureKeys,javaScriptDomErrNo,javaScriptDomNodeConsts,javaScriptHtmlEvents,javaScriptDotNotation,javaScriptBracket,javaScriptParen,javaScriptBlock,javaScriptParenError
+syntax cluster javaScriptAll       contains=@javaScriptExpression2,javaScriptLabel,javaScriptConditional,javaScriptRepeat,javaScriptBranch,javaScriptStatement,javaScriptTernaryIf
 syntax region  javaScriptBracket   matchgroup=javaScriptBracket transparent start="\[" end="\]" contains=@javaScriptAll,javaScriptParensErrB,javaScriptParensErrC,javaScriptBracket,javaScriptParen,javaScriptBlock,@htmlPreproc
 syntax region  javaScriptParen     matchgroup=javaScriptParen   transparent start="("  end=")"  contains=@javaScriptAll,javaScriptParensErrA,javaScriptParensErrC,javaScriptParen,javaScriptBracket,javaScriptBlock,@htmlPreproc
 syntax region  javaScriptBlock     matchgroup=javaScriptBlock   transparent start="{"  end="}"  contains=@javaScriptAll,javaScriptParensErrA,javaScriptParensErrB,javaScriptParen,javaScriptBracket,javaScriptBlock,@htmlPreproc 
+syntax region  javaScriptTernaryIf matchgroup=javaScriptTernaryIfOperator start=+?+  end=+:+  contains=@javaScriptExpression2
 
 "" catch errors caused by wrong parenthesis
 syntax match   javaScriptParensError    ")\|}\|\]"
@@ -203,6 +206,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink javaScriptDocParam             Label
   HiLink javaScriptStringS              String
   HiLink javaScriptStringD              String
+  HiLink javaScriptTernaryIfOperator    Conditional
   HiLink javaScriptRegexpString         String
   HiLink javaScriptRegexpCharClass      Character
   HiLink javaScriptCharacter            Character
