@@ -39,7 +39,7 @@ let s:syng_strcom = 'javaScript\%(String\|RegexpString\|CommentTodo\|LineComment
 let s:syng_string = 'javaScript\%(RegexpString\)'
 
 " Regex of syntax group names that are strings or documentation.
-let s:syng_stringdoc = 'javaScriptDocComment\|javaScriptComment'
+let s:syng_multiline = 'javaScriptDocComment\|javaScriptComment'
 
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
@@ -71,9 +71,9 @@ function s:IsInString(lnum, col)
   return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_string
 endfunction
 
-" Check if the character at lnum:col is inside a string or documentation.
-function s:IsInStringOrDocumentation(lnum, col)
-  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_stringdoc
+" Check if the character at lnum:col is inside a multi-line comment.
+function s:IsInMultilineComment(lnum, col)
+  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_multiline
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
@@ -226,7 +226,6 @@ function GetJavascriptIndent()
   let line = getline(v:lnum)
   let ind = -1
 
-
   " If we got a closing bracket on an empty line, find its match and indent
   " according to it.  For parentheses we indent to its column - 1, for the
   " others we indent to the containing line's MSL's level.  Return -1 if fail.
@@ -244,14 +243,9 @@ function GetJavascriptIndent()
     return ind
   endif
 
-  " If we have a /* or */ set indent to first column.
-  if match(line, '^\s*\%(/\*\|\*/\)$') != -1
-    return 0
-  endif
-
-  " If we are in a multi-line string or line-comment, don't do anything to it.
-  if s:IsInStringOrDocumentation(v:lnum, matchend(line, '^\s*') + 1)
-    return indent('.')
+  " If we are in a multi-line comment, cindent does the right thing.
+  if s:IsInMultilineComment(v:lnum, 1)
+    return cindent(v:lnum)
   endif
 
   " 3.3. Work on the previous line. {{{2
