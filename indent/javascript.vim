@@ -251,11 +251,19 @@ function GetJavascriptIndent()
   " 3.3. Work on the previous line. {{{2
   " -------------------------------
 
+  " If the line is empty and the previous nonblank line was a multi-line
+  " comment, use that comment's indent. Deduct one char to account for the
+  " space in ' */'.
+  let nonblank_lnum = prevnonblank(v:lnum - 1)
+  if line =~ '^\s*$' && s:IsInMultilineComment(nonblank_lnum, 1)
+    return indent(nonblank_lnum) - 1
+  endif
+
   " Find a non-blank, non-multi-line string line above the current line.
   let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
   " If the line is empty and inside a string, use the previous line.
-  if line =~ '^\s*$' && lnum != prevnonblank(v:lnum - 1)
+  if line =~ '^\s*$' && lnum != nonblank_lnum
     return indent(prevnonblank(v:lnum))
   endif
 
