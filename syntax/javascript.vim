@@ -253,6 +253,8 @@ endif
 "syntax clear javaScriptExpression
 syntax cluster  htmlJavaScript contains=@javaScriptAll,javaScriptBracket,javaScriptParen,javaScriptBlock,javaScriptParenError
 syntax cluster  javaScriptExpression contains=@javaScriptAll,javaScriptBracket,javaScriptParen,javaScriptBlock,javaScriptParenError,@htmlPreproc
+" Vim's default html.vim highlights all javascript as 'Special'
+hi! def link javaScript NONE
 
 let b:current_syntax = "javascript"
 if main_syntax == 'javascript'
