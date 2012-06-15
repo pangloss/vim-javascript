@@ -106,7 +106,7 @@ syntax keyword javaScriptFutureKeys     abstract enum int short boolean export i
 "" DOM/HTML/CSS specified things
 
   " DOM2 Objects
-  syntax keyword javaScriptGlobalObjects  DOMImplementation DocumentFragment Document Node NodeList NamedNodeMap CharacterData Attr Element Text Comment CDATASection DocumentType Notation Entity EntityReference ProcessingInstruction
+  syntax keyword javaScriptGlobalObjects  DOMImplementation DocumentFragment Document Node NodeList NamedNodeMap CharacterData Attr Element Text Comment CDATASection DocumentType Notation Entity EntityReference ProcessingInstruction console document history localStorage location navigator parent self sessionStorage top window
   syntax keyword javaScriptExceptions     DOMException
 
   " DOM2 CONSTANT
