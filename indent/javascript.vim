@@ -59,7 +59,7 @@ let s:one_line_scope_regex = '\<\%(if\|else\|for\|while\)\>[^{;]*' . s:line_term
 let s:block_regex = '\%({\)\s*\%(|\%([*@]\=\h\w*,\=\s*\)\%(,\s*[*@]\=\h\w*\)*|\)\=' . s:line_term
 
 " Var string
-let s:var_regex = '\s*var\s.\+[^;]\s*\(//.*\)\?$'
+let s:var_regex = '\s*var\s[^;]\+$'
 
 " 2. Auxiliary Functions {{{1
 " ======================
