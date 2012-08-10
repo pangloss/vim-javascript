@@ -159,7 +159,7 @@ function s:IndentWithContinuation(lnum, ind, width)
   " Set up variables to use and search for MSL to the previous line.
   let p_lnum = a:lnum
   let lnum = s:GetMSL(a:lnum, 1)
-  let line = getline(line)
+  let line = getline(lnum)
 
   " If the previous line wasn't a MSL and is continuation return its indent.
   " TODO: the || s:IsInString() thing worries me a bit.
