@@ -4,7 +4,21 @@ JavaScript bundle for vim, this bundle provides syntax and indent plugins.
 
 > Indentation of javascript in vim is terrible, and this is the very end of it.
 
-## Feature
+## Maintainer(s) wanted
+
+This project does not get too much love because, frankly I don't use JS all that
+much anymore. This project's maintenance isn't much work, but it would be helpful to
+everyone if one or two people would evaluate pull requests and merge them if they're
+good.  There are also a couple of valid issues that have been filed that would make
+lots of people happy if they were addressed.  Plus it might be good if someone updated
+the script on vim.org occasionally.  By the way, I'd be happy to put more effort into
+helping a new maintainer get going than what I put in actually maintaining the project
+myself. If you're interested, please comment on issue #65.
+
+Cheers!
+Darrick
+
+## Features
 
 1. very correct indentation for javascript
 2. support javascript indentation in html (provided by [lepture](https://github.com/lepture))
