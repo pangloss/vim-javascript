@@ -13,7 +13,7 @@ good.  There are also a couple of valid issues that have been filed that would m
 lots of people happy if they were addressed.  Plus it might be good if someone updated
 the script on vim.org occasionally.  By the way, I'd be happy to put more effort into
 helping a new maintainer get going than what I put in actually maintaining the project
-myself. If you're interested, please comment on issue #65.
+myself. If you're interested, please comment on issue [#65](https://github.com/pangloss/vim-javascript/issues/65).
 
 Cheers!
 Darrick
