@@ -230,7 +230,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink javaScriptLabel                Label
   HiLink javaScriptSpecial              Special
   HiLink javaScriptSource               Special
-  HiLink javaScriptCommonJS             Define
+  HiLink javaScriptCommonJS             Include
   HiLink javaScriptGlobalObjects        Special
   HiLink javaScriptExceptions           Special
 
