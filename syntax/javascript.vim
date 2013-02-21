@@ -83,6 +83,7 @@ syntax keyword javaScriptPrototype      prototype
 
 "" Program Keywords
 syntax keyword javaScriptSource         import export
+syntax keyword javaScriptCommonJS       require module exports
 syntax keyword javaScriptType           const undefined var void yield
 syntax keyword javaScriptOperator       delete new in instanceof let typeof
 syntax keyword javaScriptBoolean        true false
@@ -229,6 +230,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink javaScriptLabel                Label
   HiLink javaScriptSpecial              Special
   HiLink javaScriptSource               Special
+  HiLink javaScriptCommonJS             Define
   HiLink javaScriptGlobalObjects        Special
   HiLink javaScriptExceptions           Special
 
