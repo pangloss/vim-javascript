@@ -41,6 +41,9 @@ let s:syng_string = 'regex\c'
 " Regex of syntax group names that are strings or documentation.
 let s:syng_multiline = 'comment\c'
 
+" Regex of syntax group names that are line comment.
+let s:syng_linecom = 'linecomment'
+
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
 
@@ -74,6 +77,11 @@ endfunction
 " Check if the character at lnum:col is inside a multi-line comment.
 function s:IsInMultilineComment(lnum, col)
   return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_multiline
+endfunction
+
+" Check if the character at lnum:col is a line comment.
+function s:IsLineComment(lnum, col)
+  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_linecom
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
@@ -244,7 +252,7 @@ function GetJavascriptIndent()
   endif
 
   " If we are in a multi-line comment, cindent does the right thing.
-  if s:IsInMultilineComment(v:lnum, 1)
+  if s:IsInMultilineComment(v:lnum, 1) && !s:IsLineComment(v:lnum, 1)
     return cindent(v:lnum)
   endif
 
