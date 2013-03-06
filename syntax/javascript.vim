@@ -232,6 +232,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsCommonJS             Include
   HiLink jsGlobalObjects        Special
   HiLink jsExceptions           Special
+  HiLink jsFutureKeys           Special
 
   HiLink jsDomErrNo             Constant
   HiLink jsDomNodeConsts        Constant
