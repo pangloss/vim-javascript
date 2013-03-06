@@ -1,10 +1,6 @@
 " Vim indent file
-" Language:		Javascript
-" Maintainer:		Darrick Wiebe <darrick at innatesoftware.com>
-" URL:			http://github.com/pangloss/vim-javascript
-" Version:              1.0.0
-" Last Change:          August 31, 2009
-" Acknowledgement:      Based off of vim-ruby maintained by Nikolai Weibull http://vim-ruby.rubyforge.org
+" Language: Javascript
+" Acknowledgement: Based off of vim-ruby maintained by Nikolai Weibull http://vim-ruby.rubyforge.org
 
 " 0. Initialization {{{1
 " =================
@@ -117,11 +113,11 @@ function s:GetMSL(lnum, in_one_line_scope)
       " flag in_one_line_scope is set to 1
       "
       if a:in_one_line_scope
-	break
+        break
       end
       let msl_one_line = s:Match(lnum, s:one_line_scope_regex)
       if msl_one_line == 0
-	break
+        break
       endif
     endif
     let lnum = s:PrevNonBlankNonString(lnum - 1)
@@ -202,7 +198,7 @@ function s:ExitingOneLineScope(lnum)
     else
       let prev_msl = s:GetMSL(msl - 1, 1)
       if s:Match(prev_msl, s:one_line_scope_regex)
-	return prev_msl
+        return prev_msl
       endif
     endif
   endif
@@ -325,6 +321,3 @@ endfunction
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
-
-" vim:set sw=2 sts=2 ts=8 noet:
-
