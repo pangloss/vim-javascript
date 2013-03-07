@@ -54,6 +54,9 @@ let s:one_line_scope_regex = '\<\%(if\|else\|for\|while\)\>[^{;]*' . s:line_term
 " Regex that defines blocks.
 let s:block_regex = '\%({\)\s*\%(|\%([*@]\=\h\w*,\=\s*\)\%(,\s*[*@]\=\h\w*\)*|\)\=' . s:line_term
 
+" Var string
+let s:var_regex = '\s*var\s[^;]\+$'
+
 " 2. Auxiliary Functions {{{1
 " ======================
 
@@ -124,6 +127,49 @@ function s:GetMSL(lnum, in_one_line_scope)
   endwhile
   return msl
 endfunction
+
+" Find if the string is inside var statement (but not the first string)
+function s:InVarStatement(lnum)
+    let lnum = s:PrevNonBlankNonString(a:lnum - 1)
+    
+    while lnum > 0
+        let line = getline(lnum)
+
+        " if line has var statement, return it's number
+        if ( line =~ s:var_regex )
+            return lnum
+        endif
+
+        " if line has brackets or semi-colon, return 0
+        if ( line =~ '[{};]' )
+            return 0
+        endif
+
+        let lnum = s:PrevNonBlankNonString(lnum - 1)
+    endwhile
+
+    return 0
+endfunction
+
+" Find line above with beginning of the var statement or returns 0 if it's not
+" this statement
+function s:GetVarIndent(lnum)
+    let lvar = s:InVarStatement(a:lnum)
+    let prev_lnum = s:PrevNonBlankNonString(a:lnum - 1)
+    let prev_lvar = s:InVarStatement(prev_lnum)
+
+    if ( lvar )
+        return indent(lvar) + &sw 
+    endif
+
+    if ( prev_lvar )
+        return indent(prev_lvar)
+    endif
+
+    return 'null'
+    
+endfunction
+        
 
 " Check if line 'lnum' has more opening brackets than closing ones.
 function s:LineHasOpeningBrackets(lnum)
@@ -242,6 +288,12 @@ function GetJavascriptIndent()
   " If we are in a multi-line comment, cindent does the right thing.
   if s:IsInMultilineComment(v:lnum, 1)
     return cindent(v:lnum)
+  endif
+
+  " Work with var statements' blocks
+  let var_indent = s:GetVarIndent(v:lnum)
+  if var_indent != 'null'
+    return var_indent
   endif
 
   " 3.3. Work on the previous line. {{{2
