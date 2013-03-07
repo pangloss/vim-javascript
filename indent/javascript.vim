@@ -42,7 +42,7 @@ let s:syng_string = 'regex\c'
 let s:syng_multiline = 'comment\c'
 
 " Regex of syntax group names that are line comment.
-let s:syng_linecom = 'linecomment'
+let s:syng_linecom = 'linecomment\c'
 
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
