@@ -176,7 +176,7 @@ function s:GetVarIndent(lnum)
     if (line !~ ',\s*$')
       return indent(lvar)
     else
-      return indent(lvar) + &sw
+      return indent(lvar) + &sw * 2
     endif
   endif
 
@@ -337,7 +337,7 @@ function GetJavascriptIndent()
 
   " Check for multiple var assignments
   let var_indent = s:GetVarIndent(v:lnum)
-  if var_indent != 'null'
+  if var_indent !~ 'null'
     return var_indent
   endif
 
