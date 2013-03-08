@@ -15,7 +15,7 @@ setlocal nosmartindent
 
 " Now, set up our indentation expression and keys that trigger it.
 setlocal indentexpr=GetJavascriptIndent()
-setlocal indentkeys=0{,0},0),0],!^F,o,O,e
+setlocal indentkeys=0{,0},0),0],0\,,!^F,o,O,e
 
 " Only define the function once.
 if exists("*GetJavascriptIndent")
@@ -55,7 +55,9 @@ let s:one_line_scope_regex = '\<\%(if\|else\|for\|while\)\>[^{;]*' . s:line_term
 let s:block_regex = '\%({\)\s*\%(|\%([*@]\=\h\w*,\=\s*\)\%(,\s*[*@]\=\h\w*\)*|\)\=' . s:line_term
 
 " Var string
-let s:var_regex = '\s*var\s[^;]\+$'
+let s:var_regex = '\s*var\(.*\),$'
+
+let s:comma_first = '^\s*,'
 
 " 2. Auxiliary Functions {{{1
 " ======================
@@ -128,48 +130,55 @@ function s:GetMSL(lnum, in_one_line_scope)
   return msl
 endfunction
 
+function s:RemoveTrailingComments(content)
+  let single = '\/\/\(.*\)\s*$'
+  let multi = '\/\*\(.*\)\*\/\s*$'
+  return substitute(substitute(a:content, single, '', ''), multi, '', '')
+endfunction
+
 " Find if the string is inside var statement (but not the first string)
 function s:InVarStatement(lnum)
-    let lnum = s:PrevNonBlankNonString(a:lnum - 1)
-    
-    while lnum > 0
-        let line = getline(lnum)
+  let lnum = s:PrevNonBlankNonString(a:lnum - 1)
 
-        " if line has var statement, return it's number
-        if ( line =~ s:var_regex )
-            return lnum
-        endif
+  while lnum > 0
+    let line = getline(lnum)
 
-        " if line has brackets or semi-colon, return 0
-        if ( line =~ '[{};]' )
-            return 0
-        endif
+    " if line has var statement, return its number
+    if (line =~ s:var_regex)
+      return lnum
+    endif
 
-        let lnum = s:PrevNonBlankNonString(lnum - 1)
-    endwhile
+    let lnum = s:PrevNonBlankNonString(lnum - 1)
+  endwhile
 
-    return 0
+  return 0
 endfunction
 
 " Find line above with beginning of the var statement or returns 0 if it's not
 " this statement
 function s:GetVarIndent(lnum)
-    let lvar = s:InVarStatement(a:lnum)
-    let prev_lnum = s:PrevNonBlankNonString(a:lnum - 1)
-    let prev_lvar = s:InVarStatement(prev_lnum)
+  let lvar = s:InVarStatement(a:lnum)
+  let prev_lnum = s:PrevNonBlankNonString(a:lnum - 1)
+  let prev_lvar = s:InVarStatement(prev_lnum)
 
-    if ( lvar )
-        return indent(lvar) + &sw 
+  if (lvar)
+    let line = s:RemoveTrailingComments(getline(prev_lnum))
+
+    " if the line doesn't end in a comma, return to regular indent
+    if (line !~ ',\s*$')
+      return indent(lvar)
+    else
+      return indent(lvar) + &sw
     endif
+  endif
 
-    if ( prev_lvar )
-        return indent(prev_lvar)
-    endif
+  if (prev_lvar)
+    return indent(prev_lvar)
+  endif
 
-    return 'null'
-    
+  return 'null'
 endfunction
-        
+
 
 " Check if line 'lnum' has more opening brackets than closing ones.
 function s:LineHasOpeningBrackets(lnum)
@@ -264,16 +273,39 @@ function GetJavascriptIndent()
   " 3.2. Work on the current line {{{2
   " -----------------------------
 
+  let ind = -1
   " Get the current line.
   let line = getline(v:lnum)
-  let ind = -1
+  " previous nonblank line number
+  let prevline = prevnonblank(v:lnum - 1)
 
   " If we got a closing bracket on an empty line, find its match and indent
   " according to it.  For parentheses we indent to its column - 1, for the
   " others we indent to the containing line's MSL's level.  Return -1 if fail.
-  let col = matchend(line, '^\s*[]})]')
+  let col = matchend(line, '^\s*[],})]')
   if col > 0 && !s:IsInStringOrComment(v:lnum, col)
     call cursor(v:lnum, col)
+
+    let lvar = s:InVarStatement(v:lnum)
+    if lvar
+      let prevline_contents = s:RemoveTrailingComments(getline(prevline))
+
+      " check for comma first
+      if (line[col - 1] =~ ',')
+        " if the previous line ends in comma or semicolon don't indent
+        if (prevline_contents =~ '[;,]\s*$')
+          return indent(s:GetMSL(line('.'), 0))
+        " get previous line indent, if it's comma first return prevline indent
+        elseif (prevline_contents =~ s:comma_first)
+          return indent(prevline)
+        " otherwise we indent 1 level
+        else
+          return indent(prevline) + &sw
+        endif
+      endif
+    endif
+
+
     let bs = strpart('(){}[]', stridx(')}]', line[col - 1]) * 2, 2)
     if searchpair(escape(bs[0], '\['), '', bs[1], 'bW', s:skip_expr) > 0
       if line[col-1]==')' && col('.') != col('$') - 1
@@ -285,12 +317,17 @@ function GetJavascriptIndent()
     return ind
   endif
 
+  " If the line is comma first, dedent 1 level
+  if (getline(prevline) =~ s:comma_first)
+    return indent(prevline) - &sw
+  endif
+
   " If we are in a multi-line comment, cindent does the right thing.
   if s:IsInMultilineComment(v:lnum, 1)
     return cindent(v:lnum)
   endif
 
-  " Work with var statements' blocks
+  " Check for multiple var assignments
   let var_indent = s:GetVarIndent(v:lnum)
   if var_indent != 'null'
     return var_indent
@@ -302,16 +339,15 @@ function GetJavascriptIndent()
   " If the line is empty and the previous nonblank line was a multi-line
   " comment, use that comment's indent. Deduct one char to account for the
   " space in ' */'.
-  let nonblank_lnum = prevnonblank(v:lnum - 1)
-  if line =~ '^\s*$' && s:IsInMultilineComment(nonblank_lnum, 1)
-    return indent(nonblank_lnum) - 1
+  if line =~ '^\s*$' && s:IsInMultilineComment(prevline, 1)
+    return indent(prevline) - 1
   endif
 
   " Find a non-blank, non-multi-line string line above the current line.
   let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
   " If the line is empty and inside a string, use the previous line.
-  if line =~ '^\s*$' && lnum != nonblank_lnum
+  if line =~ '^\s*$' && lnum != prevline
     return indent(prevnonblank(v:lnum))
   endif
 
