@@ -87,13 +87,14 @@ syntax keyword jsCommonJS       require module exports
 syntax keyword jsType           const undefined var void yield
 syntax keyword jsOperator       delete new in instanceof let typeof
 syntax keyword jsBoolean        true false
-syntax keyword jsNull           null
-syntax keyword jsThis           this
+syntax keyword jsNull           null conceal cchar=ø
+syntax keyword jsThis           this conceal cchar=@
 
 "" Statement Keywords
 syntax keyword jsConditional    if else
 syntax keyword jsRepeat         do while for
-syntax keyword jsBranch         break continue switch case default return
+syntax keyword jsBranch         break continue switch case default
+syntax keyword jsReturn         return conceal cchar=⇚
 syntax keyword jsStatement      try catch throw with finally
 
 syntax keyword jsGlobalObjects  Array Boolean Date Function Infinity JavaArray JavaClass JavaObject JavaPackage Math Number NaN Object Packages RegExp String Undefined java netscape sun
@@ -153,7 +154,7 @@ endif "DOM/HTML/CSS
 
 "" Code blocks
 syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsSource,jsCommonJS,jsThis,jsType,jsOperator,jsBoolean,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsParenError
-syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsBranch,jsStatement,jsTernaryIf
+syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsBranch,jsReturn,jsStatement,jsTernaryIf
 syntax region  jsBracket    matchgroup=jsBracket transparent start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc
 syntax region  jsParen      matchgroup=jsParen   transparent start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc
 syntax region  jsBlock      matchgroup=jsBlock   transparent start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,@htmlPreproc
@@ -173,13 +174,15 @@ endif
 
 "" Fold control
 if exists("b:javascript_fold")
-    syntax match   jsFunction       /\<function\>/ nextgroup=jsFuncName skipwhite
+    syntax match   jsFunction       /\<function\>/ nextgroup=jsFuncName skipwhite conceal cchar=ƒ
     syntax match   jsOpAssign       /=\@<!=/ nextgroup=jsFuncBlock skipwhite skipempty
     syntax region  jsFuncName       contained matchgroup=jsFuncName start=/\%(\$\|\w\)*\s*(/ end=/)/ contains=jsLineComment,jsComment nextgroup=jsFuncBlock skipwhite skipempty
     syntax region  jsFuncBlock      contained matchgroup=jsFuncBlock start="{" end="}" contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock fold
 else
-    syntax keyword jsFunction       function
+    syntax keyword jsFunction       function conceal cchar=ƒ
 endif
+
+
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
@@ -211,6 +214,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsPrototype            Type
   HiLink jsConditional          Conditional
   HiLink jsBranch               Conditional
+  HiLink jsReturn               Type
   HiLink jsRepeat               Repeat
   HiLink jsStatement            Statement
   HiLink jsFunction             Function
