@@ -76,7 +76,7 @@ syntax region  jsRegexpCharClass start=+\[+ end=+\]+ contained
 syntax match   jsRegexpBoundary   "\v%(\<@![\^$]|\\[bB])" contained
 syntax match   jsRegexpBackRef   "\v\\[1-9][0-9]*" contained
 syntax match   jsRegexpQuantifier "\v\\@<!%([?*+]|\{\d+%(,|,\d+)?})\??" contained
-syntax match   jsRegexpOr        "\v\<@!\|"
+syntax match   jsRegexpOr        "\v\<@!\|" contained
 syntax match   jsRegexpMod       "\v\(@<=\?[:=!>]" contained
 syntax cluster jsRegexpSpecial   contains=jsRegexpBoundary,jsRegexpBackRef,jsRegexpQuantifier,jsRegexpOr,jsRegexpMod
 syntax region  jsRegexpGroup     start="\\\@<!(" matchgroup=jsRegexGroup end="\\\@<!)" contained contains=jsRegexpCharClass,@jsRegexpSpecial
