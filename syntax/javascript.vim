@@ -178,6 +178,7 @@ if exists("b:javascript_fold")
     syntax match   jsOpAssign       /=\@<!=/ nextgroup=jsFuncBlock skipwhite skipempty
     syntax region  jsFuncName       contained matchgroup=jsFuncName start=/\%(\$\|\w\)*\s*(/ end=/)/ contains=jsLineComment,jsComment nextgroup=jsFuncBlock skipwhite skipempty
     syntax region  jsFuncBlock      contained matchgroup=jsFuncBlock start="{" end="}" contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock fold
+    syntax region  jsBlock          contained matchgroup=jsBlock fold transparent start="{" end="}" contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,@htmlPreproc
 else
     syntax keyword jsFunction       function conceal cchar=ƒ
 endif
