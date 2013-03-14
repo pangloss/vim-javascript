@@ -16,6 +16,10 @@ if !exists("main_syntax")
   let main_syntax = 'javascript'
 endif
 
+if !exists('g:javascript_conceal')
+  let g:javascript_conceal = 0
+endif
+
 "" Drop fold if it is set but VIM doesn't support it.
 let b:javascript_fold='true'
 if version < 600    " Don't support the old version
@@ -87,14 +91,21 @@ syntax keyword jsCommonJS       require module exports
 syntax keyword jsType           const undefined var void yield
 syntax keyword jsOperator       delete new in instanceof let typeof
 syntax keyword jsBoolean        true false
-syntax keyword jsNull           null conceal cchar=ø
-syntax keyword jsThis           this conceal cchar=@
+
+if g:javascript_conceal == 1
+  syntax keyword jsNull           null conceal cchar=ø
+  syntax keyword jsThis           this conceal cchar=@
+  syntax keyword jsReturn         return conceal cchar=⇚
+else
+  syntax keyword jsNull           null
+  syntax keyword jsThis           this
+  syntax keyword jsReturn         return
+endif
 
 "" Statement Keywords
 syntax keyword jsConditional    if else
 syntax keyword jsRepeat         do while for
 syntax keyword jsBranch         break continue switch case default
-syntax keyword jsReturn         return conceal cchar=⇚
 syntax keyword jsStatement      try catch throw with finally
 
 syntax keyword jsGlobalObjects  Array Boolean Date Function Infinity JavaArray JavaClass JavaObject JavaPackage Math Number NaN Object Packages RegExp String Undefined java netscape sun
@@ -174,12 +185,21 @@ endif
 
 "" Fold control
 if exists("b:javascript_fold")
+  if g:javascript_conceal == 1
     syntax match   jsFunction       /\<function\>/ nextgroup=jsFuncName skipwhite conceal cchar=ƒ
-    syntax match   jsOpAssign       /=\@<!=/ nextgroup=jsFuncBlock skipwhite skipempty
-    syntax region  jsFuncName       contained matchgroup=jsFuncName start=/\%(\$\|\w\)*\s*(/ end=/)/ contains=jsLineComment,jsComment nextgroup=jsFuncBlock skipwhite skipempty
-    syntax region  jsFuncBlock      contained matchgroup=jsFuncBlock start="{" end="}" contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock fold
+  else
+    syntax match   jsFunction       /\<function\>/ nextgroup=jsFuncName skipwhite
+  endif
+
+  syntax match   jsOpAssign       /=\@<!=/ nextgroup=jsFuncBlock skipwhite skipempty
+  syntax region  jsFuncName       contained matchgroup=jsFuncName start=/\%(\$\|\w\)*\s*(/ end=/)/ contains=jsLineComment,jsComment nextgroup=jsFuncBlock skipwhite skipempty
+  syntax region  jsFuncBlock      contained matchgroup=jsFuncBlock start="{" end="}" contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock fold
 else
+  if g:javascript_conceal == 1
     syntax keyword jsFunction       function conceal cchar=ƒ
+  else
+    syntax keyword jsFunction       function
+  endif
 endif
 
 
