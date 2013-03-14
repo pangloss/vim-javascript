@@ -73,11 +73,18 @@ endif   "" JSDoc end
 syntax case match
 
 "" Syntax in the JavaScript code
-syntax match   jsSpecial         "\\\d\d\d\|\\x\x\{2\}\|\\u\x\{4\}\|\\."
+syntax match   jsSpecial         "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)"
 syntax region  jsStringD         start=+"+  skip=+\\\\\|\\$"+  end=+"+  contains=jsSpecial,@htmlPreproc
 syntax region  jsStringS         start=+'+  skip=+\\\\\|\\$'+  end=+'+  contains=jsSpecial,@htmlPreproc
 syntax region  jsRegexpCharClass start=+\[+ end=+\]+ contained
-syntax region  jsRegexpString    start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]"']\|\d\|\w\)\s*\)\@<!\)/\(\*\|/\)\@!+ skip=+\\\\\|\\/+ end=+/[gimy]\{,4}+ contains=jsSpecial,jsRegexpCharClass,@htmlPreproc oneline
+syntax match   jsRegexpBoundary   "\v%(\<@![\^$]|\\[bB])" contained
+syntax match   jsRegexpBackRef   "\v\\[1-9][0-9]*" contained
+syntax match   jsRegexpQuantifier "\v\\@<!%([?*+]|\{\d+%(,|,\d+)?})\??" contained
+syntax match   jsRegexpOr        "\v\<@!\|" contained
+syntax match   jsRegexpMod       "\v\(@<=\?[:=!>]" contained
+syntax cluster jsRegexpSpecial   contains=jsRegexpBoundary,jsRegexpBackRef,jsRegexpQuantifier,jsRegexpOr,jsRegexpMod
+syntax region  jsRegexpGroup     start="\\\@<!(" matchgroup=jsRegexGroup end="\\\@<!)" contained contains=jsRegexpCharClass,@jsRegexpSpecial
+syntax region  jsRegexpString    start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]"']\|\d\|\w\)\s*\)\@<!\)/\(\*\|/\)\@!+ skip=+\\\\\|\\/+ end=+/[gimy]\{,4}+ contains=jsSpecial,jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial,@htmlPreproc oneline
 syntax match   jsNumber          /\<-\=\d\+L\=\>\|\<0[xX]\x\+\>/
 syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
 syntax match   jsLabel           /\<[a-zA-Z_$][0-9a-zA-Z_$\-]*\(\s*:\)\@=/
@@ -229,6 +236,12 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsStringD              String
   HiLink jsTernaryIfOperator    Conditional
   HiLink jsRegexpString         String
+  HiLink jsRegexpBoundary       SpecialChar
+  HiLink jsRegexpQuantifier     SpecialChar
+  HiLink jsRegexpOr             Conditional
+  HiLink jsRegexpMod            SpecialChar
+  HiLink jsRegexpBackRef        SpecialChar
+  HiLink jsRegexpGroup          jsRegexpString
   HiLink jsRegexpCharClass      Character
   HiLink jsCharacter            Character
   HiLink jsPrototype            Type
