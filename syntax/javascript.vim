@@ -35,7 +35,7 @@ syntax sync fromstart
 syntax keyword jsCommentTodo    TODO FIXME XXX TBD contained
 syntax region  jsLineComment    start=+\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell
 syntax region  jsEnvComment     start="\%^#!" end="$" display
-syntax region  jsLineComment    start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell fold
+syntax region  jsLineComment    start=+^\s*\/\/+ skip=+\s*\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell fold
 syntax region  jsCvsTag         start="\$\cid:" end="\$" oneline contained
 syntax region  jsComment        start="/\*"  end="\*/" contains=jsCommentTodo,jsCvsTag,@Spell fold
 
