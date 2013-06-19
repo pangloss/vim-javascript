@@ -50,15 +50,15 @@ if !exists("javascript_ignore_javaScriptdoc")
   syntax region jsDocComment      matchgroup=jsComment start="/\*\*\s*"  end="\*/" contains=jsDocTags,jsCommentTodo,jsCvsTag,@jsHtml,@Spell fold
 
   " tags containing a param
-  syntax match  jsDocTags         contained "@\(augments\|base\|borrows\|class\|constructs\|default\|exception\|exports\|extends\|file\|member\|memberOf\|methodOf\|module\|name\|namespace\|optional\|requires\|title\|throws\|version\)\>" nextgroup=jsDocParam skipwhite
+  syntax match  jsDocTags         contained "@\(alias\|augments\|borrows\|class\|constructs\|default\|defaultvalue\|emits\|exception\|exports\|extends\|file\|fires\|kind\|listens\|member\|memberOf\|mixes\|module\|name\|namespace\|requires\|throws\|var\|variation\|version\)\>" nextgroup=jsDocParam skipwhite
   " tags containing type and param
-  syntax match  jsDocTags         contained "@\(argument\|param\|property\)\>" nextgroup=jsDocType skipwhite
+  syntax match  jsDocTags         contained "@\(arg\|argument\|param\|property\)\>" nextgroup=jsDocType skipwhite
   " tags containing type but no param
-  syntax match  jsDocTags         contained "@\(type\|return\|returns\|api\)\>" nextgroup=jsDocTypeNoParam skipwhite
+  syntax match  jsDocTags         contained "@\(callback\|enum\|external\|this\|type\|typedef\|return\|returns\)\>" nextgroup=jsDocTypeNoParam skipwhite
   " tags containing references
-  syntax match  jsDocTags         contained "@\(lends\|link\|see\)\>" nextgroup=jsDocSeeTag skipwhite
+  syntax match  jsDocTags         contained "@\(lends\|see\)\>" nextgroup=jsDocSeeTag skipwhite
   " other tags (no extra syntax)
-  syntax match  jsDocTags         contained "@\(access\|addon\|alias\|author\|beta\|constant\|const\|constructor\|copyright\|deprecated\|description\|event\|example\|exec\|field\|fileOverview\|fileoverview\|function\|global\|ignore\|inner\|license\|overview\|private\|protected\|project\|public\|readonly\|since\|static\)\>"
+  syntax match  jsDocTags         contained "@\(abstract\|access\|author\|classdesc\|constant\|const\|constructor\|copyright\|deprecated\|desc\|description\|event\|example\|fileOverview\|function\|global\|ignore\|inner\|instance\|license\|method\|mixin\|overview\|private\|protected\|public\|readonly\|since\|static\|todo\|summary\|undocumented\|virtual\)\>"
 
   syntax region jsDocType         start="{" end="}" oneline contained nextgroup=jsDocParam skipwhite
   syntax match  jsDocType         contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+" nextgroup=jsDocParam skipwhite
