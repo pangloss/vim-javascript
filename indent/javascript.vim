@@ -79,7 +79,7 @@ endfunction
 
 " Check if the character at lnum:col is inside a multi-line comment.
 function s:IsInMultilineComment(lnum, col)
-  return !IsLineComment(a:lnum, a:col) && synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_multiline
+  return !s:IsLineComment(a:lnum, a:col) && synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_multiline
 endfunction
 
 " Check if the character at lnum:col is a line comment.
