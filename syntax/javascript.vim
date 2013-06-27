@@ -35,7 +35,7 @@ syntax sync fromstart
 syntax keyword jsCommentTodo    TODO FIXME XXX TBD contained
 syntax region  jsLineComment    start=+\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell
 syntax region  jsEnvComment     start="\%^#!" end="$" display
-syntax region  jsLineComment    start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell fold
+syntax region  jsLineComment    start=+\/\/+ skip=+\s*\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell fold
 syntax region  jsCvsTag         start="\$\cid:" end="\$" oneline contained
 syntax region  jsComment        start="/\*"  end="\*/" contains=jsCommentTodo,jsCvsTag,@Spell fold
 
@@ -95,8 +95,8 @@ syntax keyword jsPrototype      prototype
 "" Program Keywords
 syntax keyword jsSource         import export
 syntax keyword jsCommonJS       require module exports
-syntax keyword jsType           const undefined var void yield
-syntax keyword jsOperator       delete new in instanceof let typeof
+syntax keyword jsType           const undefined var void yield window
+syntax keyword jsOperator       delete new in instanceof let typeof prototype $ ø
 syntax keyword jsBoolean        true false
 
 if g:javascript_conceal == 1
