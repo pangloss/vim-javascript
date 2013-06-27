@@ -96,7 +96,7 @@ syntax keyword jsPrototype      prototype
 syntax keyword jsSource         import export
 syntax keyword jsCommonJS       require module exports
 syntax keyword jsType           const undefined var void yield window
-syntax keyword jsOperator       delete new in instanceof let typeof prototype $
+syntax keyword jsOperator       delete new in instanceof let typeof prototype $ ø
 syntax keyword jsBoolean        true false
 
 if g:javascript_conceal == 1
