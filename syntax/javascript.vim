@@ -90,6 +90,7 @@ syntax region  jsRegexpString    start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]
 syntax match   jsNumber          /\<-\=\d\+L\=\>\|\<0[xX]\x\+\>/
 syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
 syntax match   jsLabel           /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\)\@=/
+syntax match   jsNoise           /\%(:\|,\|\;\|\.\)/
 
 "" JavaScript Prototype
 syntax keyword jsPrototype      prototype
@@ -172,10 +173,10 @@ endif "DOM/HTML/CSS
 
 "" Code blocks
 syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsType,jsOperator,jsBoolean,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsParenError,jsIdentifier,jsFuncCall
-syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsBranch,jsReturn,jsStatement,jsTernaryIf
-syntax region  jsBracket    matchgroup=jsBracket transparent start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc
-syntax region  jsParen      matchgroup=jsParen   transparent start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc
-syntax region  jsBlock      matchgroup=jsBlock   transparent start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,@htmlPreproc
+syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsBranch,jsReturn,jsStatement,jsTernaryIf,jsNoise
+syntax region  jsBracket    matchgroup=Noise   start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc
+syntax region  jsParen      matchgroup=Noise   start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc
+syntax region  jsBlock      matchgroup=Noise   start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,@htmlPreproc
 syntax region  jsTernaryIf  matchgroup=jsTernaryIfOperator start=+?+  end=+:+  contains=@jsExpression
 
 "" catch errors caused by wrong parenthesis
@@ -266,6 +267,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFloat                Number
   HiLink jsBoolean              Boolean
   HiLink jsLabel                Identifier
+  HiLink jsNoise                Noise
   HiLink jsSpecial              Special
   HiLink jsGlobalObjects        Special
   HiLink jsExceptions           Special
