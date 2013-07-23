@@ -247,10 +247,11 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsPrototype            Type
   HiLink jsConditional          Conditional
   HiLink jsBranch               Conditional
-  HiLink jsReturn               Type
+  HiLink jsReturn               Statement
   HiLink jsRepeat               Repeat
   HiLink jsStatement            Statement
-  HiLink jsFunction             Function
+  HiLink jsFunction             Type
+  HiLink jsFuncName             Function
   HiLink jsFuncCall             Function
   HiLink jsError                Error
   HiLink jsParensError          Error
@@ -259,9 +260,9 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsParensErrC           Error
   HiLink jsOperator             Operator
   HiLink jsType                 Type
-  HiLink jsThis                 Type
-  HiLink jsNull                 Type
+  HiLink jsThis                 Special
   HiLink jsNan                  Constant
+  HiLink jsNull                 Constant
   HiLink jsUndefined            Constant
   HiLink jsNumber               Number
   HiLink jsFloat                Number
