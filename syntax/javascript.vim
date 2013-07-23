@@ -265,7 +265,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsNumber               Number
   HiLink jsFloat                Number
   HiLink jsBoolean              Boolean
-  HiLink jsLabel                Label
+  HiLink jsLabel                Identifier
   HiLink jsSpecial              Special
   HiLink jsGlobalObjects        Special
   HiLink jsExceptions           Special
