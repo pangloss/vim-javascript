@@ -106,11 +106,13 @@ if g:javascript_conceal == 1
   syntax keyword jsThis           this conceal cchar=@
   syntax keyword jsReturn         return conceal cchar=⇚
   syntax keyword jsUndefined      undefined conceal cchar=¿
+  syntax keyword jsNan            NaN conceal cchar=ℕ
 else
   syntax keyword jsNull           null
   syntax keyword jsThis           this
   syntax keyword jsReturn         return
   syntax keyword jsUndefined      undefined
+  syntax keyword jsNan            NaN
 endif
 
 "" Statement Keywords
@@ -119,7 +121,7 @@ syntax keyword jsRepeat         do while for
 syntax keyword jsBranch         break continue switch case default
 syntax keyword jsStatement      try catch throw with finally
 
-syntax keyword jsGlobalObjects  Array Boolean Date Function Infinity JavaArray JavaClass JavaObject JavaPackage Math Number NaN Object Packages RegExp String Undefined java netscape sun
+syntax keyword jsGlobalObjects  Array Boolean Date Function Infinity JavaArray JavaClass JavaObject JavaPackage Math Number Object Packages RegExp String Undefined java netscape sun
 
 syntax keyword jsExceptions     Error EvalError RangeError ReferenceError SyntaxError TypeError URIError
 
@@ -175,7 +177,7 @@ endif "DOM/HTML/CSS
 
 
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsType,jsOperator,jsBoolean,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsParenError,jsIdentifier,jsFuncCall,jsUndefined
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsType,jsOperator,jsBoolean,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsParenError,jsIdentifier,jsFuncCall,jsUndefined,jsNan
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsBranch,jsReturn,jsStatement,jsTernaryIf,jsNoise
 syntax region  jsBracket    matchgroup=Noise   start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc
 syntax region  jsParen      matchgroup=Noise   start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc
@@ -266,6 +268,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsType                 Type
   HiLink jsThis                 Type
   HiLink jsNull                 Type
+  HiLink jsNan                  Constant
   HiLink jsUndefined            Constant
   HiLink jsNumber               Number
   HiLink jsFloat                Number
