@@ -196,26 +196,19 @@ if main_syntax == "javascript"
   syntax sync match jsHighlight grouphere jsBlock /{/
 endif
 
-"" Fold control
-if exists("b:javascript_fold")
-  if g:javascript_conceal == 1
-    syntax match   jsFunction       /\<function\>/ nextgroup=jsFuncName skipwhite conceal cchar=ƒ
-  else
-    syntax match   jsFunction       /\<function\>/ nextgroup=jsFuncName skipwhite
-  endif
-
-  syntax match   jsOpAssign       /=\@<!=/ nextgroup=jsFuncBlock skipwhite skipempty
-  syntax region  jsFuncName       contained matchgroup=jsFuncName start=/\%(\$\|\w\)*\s*(/ end=/)/ contains=jsLineComment,jsComment nextgroup=jsFuncBlock skipwhite skipempty
-  syntax region  jsFuncBlock      contained matchgroup=jsFuncBlock start="{" end="}" contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock fold
+if g:javascript_conceal == 1
+  syntax match   jsFunction       /\<function\>/ nextgroup=jsFuncName skipwhite conceal cchar=ƒ
 else
-  if g:javascript_conceal == 1
-    syntax keyword jsFunction       function conceal cchar=ƒ
-  else
-    syntax keyword jsFunction       function
-  endif
+  syntax match   jsFunction       /\<function\>/ nextgroup=jsFuncName skipwhite
 endif
 
+syntax match   jsOpAssign       /=\@<!=/ nextgroup=jsFuncBlock skipwhite skipempty
+syntax match   jsFuncName       contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/
 
+"" Fold control
+if exists("b:javascript_fold")
+  syntax region  jsFuncBlock      contained matchgroup=jsFuncBlock start="{" end="}" contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock fold
+endif
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
