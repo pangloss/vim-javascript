@@ -89,7 +89,7 @@ syntax region  jsRegexpGroup     start="\\\@<!(" matchgroup=jsRegexGroup end="\\
 syntax region  jsRegexpString    start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]"']\|\d\|\w\)\s*\)\@<!\)/\(\*\|/\)\@!+ skip=+\\\\\|\\/+ end=+/[gimy]\{,4}+ contains=jsSpecial,jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial,@htmlPreproc oneline
 syntax match   jsNumber          /\<-\=\d\+L\=\>\|\<0[xX]\x\+\>/
 syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
-syntax match   jsLabel           /\<[a-zA-Z_$][0-9a-zA-Z_$\-]*\(\s*:\)\@=/
+syntax match   jsLabel           /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\)\@=/
 
 "" JavaScript Prototype
 syntax keyword jsPrototype      prototype
