@@ -124,9 +124,12 @@ syntax keyword jsLabel          case default
 syntax keyword jsKeyword        new in with
 syntax keyword jsException      try catch throw finally
 
-syntax keyword jsGlobalObjects  Array Boolean Date Function Infinity JavaArray JavaClass JavaObject JavaPackage Math Number Object Packages RegExp String Undefined java netscape sun
+syntax keyword jsGlobalObjects   Array Boolean Date Function Iterator Number Object RegExp String Proxy ParallelArray ArrayBuffer DataView Float32Array Float64Array Int16Array Int32Array Int8Array Uint16Array Uint32Array Uint8Array Uint8ClampedArray Intl JSON Math console JavaArray JavaClass JavaObject JavaPackage Packages java netscape sun
+syntax match   jsGlobalObjects  /\%(Intl\.\)\@<=\(Collator\|DateTimeFormat\|NumberFormat\)/
 
-syntax keyword jsExceptions     Error EvalError RangeError ReferenceError SyntaxError TypeError URIError
+syntax keyword jsExceptions     Error EvalError InternalError RangeError ReferenceError StopIteration SyntaxError TypeError URIError
+
+syntax keyword jsBuiltins       decodeURI decodeURIComponent encodeURI encodeURIComponent eval isFinite isNaN parseFloat parseInt uneval
 
 syntax keyword jsFutureKeys     abstract enum int short boolean export interface static byte extends long super char final native synchronized class float package throws goto private transient debugger implements protected volatile double import public
 
@@ -180,7 +183,7 @@ endif "DOM/HTML/CSS
 
 
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsType,jsOperator,jsBoolean,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsParenError,jsIdentifier,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsType,jsOperator,jsBoolean,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsParenError,jsIdentifier,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsBranch,jsReturn,jsStatement,jsTernaryIf,jsNoise,jsException
 syntax region  jsBracket    matchgroup=Noise   start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc
 syntax region  jsParen      matchgroup=Noise   start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc
@@ -247,7 +250,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsRegexpGroup          jsRegexpString
   HiLink jsRegexpCharClass      Character
   HiLink jsCharacter            Character
-  HiLink jsPrototype            Type
+  HiLink jsPrototype            Special
   HiLink jsConditional          Conditional
   HiLink jsBranch               Conditional
   HiLink jsLabel                Label
@@ -279,6 +282,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsGlobalObjects        Special
   HiLink jsExceptions           Special
   HiLink jsFutureKeys           Special
+  HiLink jsBuiltins             Special
 
   HiLink jsDomErrNo             Constant
   HiLink jsDomNodeConsts        Constant
