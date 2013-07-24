@@ -31,6 +31,8 @@ setlocal iskeyword+=$
 
 syntax sync fromstart
 
+syntax match   jsNoise           /\%(:\|,\|\;\|\.\)/
+
 "" JavaScript comments
 syntax keyword jsCommentTodo    TODO FIXME XXX TBD contained
 syntax region  jsLineComment    start=+\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell
@@ -90,7 +92,6 @@ syntax region  jsRegexpString    start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]
 syntax match   jsNumber          /\<-\=\d\+L\=\>\|\<0[xX]\x\+\>/
 syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
 syntax match   jsLabel           /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\)\@=/
-syntax match   jsNoise           /\%(:\|,\|\;\|\.\)/
 
 "" JavaScript Prototype
 syntax keyword jsPrototype      prototype
