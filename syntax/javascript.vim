@@ -275,7 +275,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsNull                 Type
   HiLink jsUndefined            Type
   HiLink jsNumber               Number
-  HiLink jsFloat                Number
+  HiLink jsFloat                Float
   HiLink jsBoolean              Boolean
   HiLink jsNoise                Noise
   HiLink jsSpecial              Special
