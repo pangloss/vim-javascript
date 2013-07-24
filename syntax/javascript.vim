@@ -91,14 +91,13 @@ syntax region  jsRegexpGroup     start="\\\@<!(" matchgroup=jsRegexGroup end="\\
 syntax region  jsRegexpString    start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]"']\|\d\|\w\)\s*\)\@<!\)/\(\*\|/\)\@!+ skip=+\\\\\|\\/+ end=+/[gimy]\{,4}+ contains=jsSpecial,jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial,@htmlPreproc oneline
 syntax match   jsNumber          /\<-\=\d\+L\=\>\|\<0[xX]\x\+\>/
 syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
-syntax match   jsLabel           /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\)\@=/
 
 "" JavaScript Prototype
 syntax keyword jsPrototype      prototype
 
 "" Program Keywords
 syntax keyword jsType           const var function
-syntax keyword jsOperator       delete new in instanceof let typeof void yield
+syntax keyword jsOperator       delete instanceof typeof void
 syntax match   jsOperator       /\(!\|||\|&&\|+\|-\|<\|>\|=\)/
 syntax keyword jsBoolean        true false
 
@@ -117,10 +116,12 @@ else
 endif
 
 "" Statement Keywords
-syntax keyword jsConditional    if else
+syntax keyword jsStatement      yield break continue
+syntax keyword jsConditional    if else switch
 syntax keyword jsRepeat         do while for
-syntax keyword jsBranch         break continue switch case default
-syntax keyword jsStatement      try catch throw with finally
+syntax keyword jsLabel          case default
+syntax keyword jsKeyword        new in with
+syntax keyword jsException      try catch throw finally
 
 syntax keyword jsGlobalObjects  Array Boolean Date Function Infinity JavaArray JavaClass JavaObject JavaPackage Math Number Object Packages RegExp String Undefined java netscape sun
 
@@ -178,8 +179,8 @@ endif "DOM/HTML/CSS
 
 
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsType,jsOperator,jsBoolean,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsParenError,jsIdentifier,jsFuncCall,jsUndefined,jsNan
-syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsBranch,jsReturn,jsStatement,jsTernaryIf,jsNoise
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsType,jsOperator,jsBoolean,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsParenError,jsIdentifier,jsFuncCall,jsUndefined,jsNan,jsKeyword
+syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsBranch,jsReturn,jsStatement,jsTernaryIf,jsNoise,jsException
 syntax region  jsBracket    matchgroup=Noise   start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc
 syntax region  jsParen      matchgroup=Noise   start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc
 syntax region  jsBlock      matchgroup=Noise   start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,@htmlPreproc
@@ -248,9 +249,12 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsPrototype            Type
   HiLink jsConditional          Conditional
   HiLink jsBranch               Conditional
+  HiLink jsLabel                Label
   HiLink jsReturn               Statement
   HiLink jsRepeat               Repeat
   HiLink jsStatement            Statement
+  HiLink jsException            Exception
+  HiLink jsKeyword              Keyword
   HiLink jsFunction             Type
   HiLink jsFuncName             Function
   HiLink jsFuncCall             Function
@@ -268,7 +272,6 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsNumber               Number
   HiLink jsFloat                Number
   HiLink jsBoolean              Boolean
-  HiLink jsLabel                Identifier
   HiLink jsNoise                Noise
   HiLink jsSpecial              Special
   HiLink jsGlobalObjects        Special
