@@ -96,7 +96,8 @@ syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-
 syntax keyword jsPrototype      prototype
 
 "" Program Keywords
-syntax keyword jsType           const var function
+syntax keyword jsType           function Infinity
+syntax keyword jsStorageClass   const var let
 syntax keyword jsOperator       delete instanceof typeof void
 syntax match   jsOperator       /\(!\|||\|&&\|+\|-\|<\|>\|=\)/
 syntax keyword jsBoolean        true false
@@ -179,7 +180,7 @@ endif "DOM/HTML/CSS
 
 
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsType,jsOperator,jsBoolean,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsParenError,jsIdentifier,jsFuncCall,jsUndefined,jsNan,jsKeyword
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsType,jsOperator,jsBoolean,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsParenError,jsIdentifier,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsBranch,jsReturn,jsStatement,jsTernaryIf,jsNoise,jsException
 syntax region  jsBracket    matchgroup=Noise   start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc
 syntax region  jsParen      matchgroup=Noise   start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc
@@ -265,10 +266,11 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsParensErrC           Error
   HiLink jsOperator             Operator
   HiLink jsType                 Type
+  HiLink jsStorageClass         StorageClass
   HiLink jsThis                 Special
-  HiLink jsNan                  Constant
-  HiLink jsNull                 Constant
-  HiLink jsUndefined            Constant
+  HiLink jsNan                  Type
+  HiLink jsNull                 Type
+  HiLink jsUndefined            Type
   HiLink jsNumber               Number
   HiLink jsFloat                Number
   HiLink jsBoolean              Boolean
