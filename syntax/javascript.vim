@@ -99,7 +99,7 @@ syntax keyword jsPrototype      prototype
 syntax keyword jsType           function Infinity
 syntax keyword jsStorageClass   const var let
 syntax keyword jsOperator       delete instanceof typeof void
-syntax match   jsOperator       /\(!\|||\|&&\|+\|-\|<\|>\|=\)/
+syntax match   jsOperator       /\(!\||\|&\|+\|-\|<\|>\|=\|%\|\/\|*\|\~\|\^\)/
 syntax keyword jsBoolean        true false
 
 if g:javascript_conceal == 1
