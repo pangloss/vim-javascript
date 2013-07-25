@@ -272,7 +272,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsType                 Type
   HiLink jsStorageClass         StorageClass
   HiLink jsThis                 Special
-  HiLink jsNan                  Type
+  HiLink jsNan                  Number
   HiLink jsNull                 Type
   HiLink jsUndefined            Type
   HiLink jsNumber               Number
