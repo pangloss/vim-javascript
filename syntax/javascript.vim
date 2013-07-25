@@ -90,13 +90,14 @@ syntax cluster jsRegexpSpecial   contains=jsRegexpBoundary,jsRegexpBackRef,jsReg
 syntax region  jsRegexpGroup     start="\\\@<!(" matchgroup=jsRegexGroup end="\\\@<!)" contained contains=jsRegexpCharClass,@jsRegexpSpecial
 syntax region  jsRegexpString    start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]"']\|\d\|\w\)\s*\)\@<!\)/\(\*\|/\)\@!+ skip=+\\\\\|\\/+ end=+/[gimy]\{,4}+ contains=jsSpecial,jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial,@htmlPreproc oneline
 syntax match   jsNumber          /\<-\=\d\+L\=\>\|\<0[xX]\x\+\>/
+syntax keyword jsNumber          Infinity
 syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
 
 "" JavaScript Prototype
 syntax keyword jsPrototype      prototype
 
 "" Program Keywords
-syntax keyword jsType           function Infinity
+syntax keyword jsType           function
 syntax keyword jsStorageClass   const var let
 syntax keyword jsOperator       delete instanceof typeof void
 syntax match   jsOperator       /\(!\||\|&\|+\|-\|<\|>\|=\|%\|\/\|*\|\~\|\^\)/
