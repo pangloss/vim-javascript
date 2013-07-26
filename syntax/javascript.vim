@@ -33,6 +33,13 @@ syntax sync fromstart
 
 syntax match   jsNoise           /\%(:\|,\|\;\|\.\)/
 
+"" Program Keywords
+syntax keyword jsType           function
+syntax keyword jsStorageClass   const var let
+syntax keyword jsOperator       delete instanceof typeof void
+syntax match   jsOperator       /\(!\||\|&\|+\|-\|<\|>\|=\|%\|\/\|*\|\~\|\^\)/
+syntax keyword jsBoolean        true false
+
 "" JavaScript comments
 syntax keyword jsCommentTodo    TODO FIXME XXX TBD contained
 syntax region  jsLineComment    start=+\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell
@@ -95,13 +102,6 @@ syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-
 
 "" JavaScript Prototype
 syntax keyword jsPrototype      prototype
-
-"" Program Keywords
-syntax keyword jsType           function
-syntax keyword jsStorageClass   const var let
-syntax keyword jsOperator       delete instanceof typeof void
-syntax match   jsOperator       /\(!\||\|&\|+\|-\|<\|>\|=\|%\|\/\|*\|\~\|\^\)/
-syntax keyword jsBoolean        true false
 
 if g:javascript_conceal == 1
   syntax keyword jsNull           null conceal cchar=ø
