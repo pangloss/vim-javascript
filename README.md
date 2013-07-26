@@ -47,6 +47,12 @@ let g:html_indent_style1 = "inc"
 Head over to [vim.org](http://www.vim.org/scripts/script.php?script_id=2075)
 for more information.
 
+## Contributing
+
+If you'd like to be added as a contributor the price of admission is 1 pull request.
+Please follow the general code style guides (read the code) and in your pull request explain
+the reason for the proposed change and how it is valuable.
+
 ## Bug report
 
 Report a bug on [GitHub Issues](https://github.com/pangloss/vim-javascript/issues).
