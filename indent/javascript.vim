@@ -64,6 +64,11 @@ let s:var_stmt = '^\s*var'
 let s:comma_first = '^\s*,'
 let s:comma_last = ',\s*$'
 
+if exists('g:javascript_indent_var')
+  let s:var_indent = g:javascript_indent_var
+else
+  let s:var_indent = 0
+endif
 " 2. Auxiliary Functions {{{1
 " ======================
 
@@ -345,10 +350,12 @@ function GetJavascriptIndent()
   endif
 
   " Check for multiple var assignments
-"  let var_indent = s:GetVarIndent(v:lnum)
-"  if var_indent >= 0
-"    return var_indent
-"  endif
+  if s:var_indent
+    let var_indent = s:GetVarIndent(v:lnum)
+    if var_indent >= 0
+      return var_indent
+    endif
+  endif
 
   " 3.3. Work on the previous line. {{{2
   " -------------------------------
