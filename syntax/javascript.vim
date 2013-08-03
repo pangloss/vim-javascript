@@ -261,6 +261,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFuncParens           Function
   HiLink jsFuncArgCommas        Function
   HiLink jsFuncArgs             Function
+  HiLink jsFuncBlocks           Function
   HiLink jsError                Error
   HiLink jsParensError          Error
   HiLink jsParensErrA           Error
