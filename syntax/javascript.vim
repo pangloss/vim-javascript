@@ -36,7 +36,7 @@ syntax match   jsNoise           /\%(:\|,\|\;\|\.\)/
 "" Program Keywords
 syntax keyword jsType           function
 syntax keyword jsStorageClass   const var let
-syntax keyword jsOperator       delete instanceof typeof void
+syntax keyword jsOperator       delete instanceof typeof void new in
 syntax match   jsOperator       /\(!\||\|&\|+\|-\|<\|>\|=\|%\|\/\|*\|\~\|\^\)/
 syntax keyword jsBoolean        true false
 
@@ -117,11 +117,11 @@ else
 endif
 
 "" Statement Keywords
-syntax keyword jsStatement      yield break continue
+syntax keyword jsStatement      break continue with
 syntax keyword jsConditional    if else switch
 syntax keyword jsRepeat         do while for
 syntax keyword jsLabel          case default
-syntax keyword jsKeyword        new in with
+syntax keyword jsKeyword        yield
 syntax keyword jsException      try catch throw finally
 
 syntax keyword jsGlobalObjects   Array Boolean Date Function Iterator Number Object RegExp String Proxy ParallelArray ArrayBuffer DataView Float32Array Float64Array Int16Array Int32Array Int8Array Uint16Array Uint32Array Uint8Array Uint8ClampedArray Intl JSON Math console document window
