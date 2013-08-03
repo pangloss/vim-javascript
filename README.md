@@ -2,6 +2,8 @@
 
 JavaScript bundle for vim, this bundle provides syntax and indent plugins.
 
+> Indentation of javascript in vim is terrible, and this is the very end of it.
+
 ## Installation
 
 - Install with [Vundle](https://github.com/gmarik/vundle)
@@ -19,35 +21,6 @@ And install it:
 
     cd ~/.vim/bundle
     git clone https://github.com/pangloss/vim-javascript.git
-
-## Configuration
-
-The following variables control certain syntax highlighting features. You can
-add them to your `.vimrc` to enable/disable their features.
-
-#### javascript_enable_domhtmlcss
-
-Enables HTML/CSS syntax highlighting in your JavaScript file.
-
-Default Value: 0
-
-#### b:javascript_fold
-
-Enables JavaScript code folding.
-
-Default Value: 1
-
-#### g:javascript_conceal
-
-Enables concealing characters. For example, `function` is replaced with `ƒ`
-
-Default Value: 0
-
-#### javascript_ignore_javaScriptdoc
-
-Disables JSDoc syntax highlighting
-
-Default Value: 0
 
 ## Contributing
 
