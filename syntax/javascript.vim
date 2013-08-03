@@ -124,7 +124,7 @@ syntax keyword jsLabel          case default
 syntax keyword jsKeyword        new in with
 syntax keyword jsException      try catch throw finally
 
-syntax keyword jsGlobalObjects   Array Boolean Date Function Iterator Number Object RegExp String Proxy ParallelArray ArrayBuffer DataView Float32Array Float64Array Int16Array Int32Array Int8Array Uint16Array Uint32Array Uint8Array Uint8ClampedArray Intl JSON Math console JavaArray JavaClass JavaObject JavaPackage Packages java netscape sun document window
+syntax keyword jsGlobalObjects   Array Boolean Date Function Iterator Number Object RegExp String Proxy ParallelArray ArrayBuffer DataView Float32Array Float64Array Int16Array Int32Array Int8Array Uint16Array Uint32Array Uint8Array Uint8ClampedArray Intl JSON Math console document window
 syntax match   jsGlobalObjects  /\%(Intl\.\)\@<=\(Collator\|DateTimeFormat\|NumberFormat\)/
 
 syntax keyword jsExceptions     Error EvalError InternalError RangeError ReferenceError StopIteration SyntaxError TypeError URIError
