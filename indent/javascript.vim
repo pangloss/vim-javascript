@@ -65,6 +65,7 @@ let s:comma_first = '^\s*,'
 let s:comma_last = ',\s*$'
 
 let s:ternary = '^\s\+[?|:]'
+let s:ternary_q = '^\s\+?'
 
 " 2. Auxiliary Functions {{{1
 " ======================
@@ -342,7 +343,7 @@ function GetJavascriptIndent()
   endif
 
   if (line =~ s:ternary)
-    if (getline(prevline) =~ s:ternary)
+    if (getline(prevline) =~ s:ternary_q)
       return indent(prevline)
     else
       return indent(prevline) + &sw
