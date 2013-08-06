@@ -259,10 +259,6 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFunction             Type
   HiLink jsFuncName             Function
   HiLink jsFuncCall             Function
-  HiLink jsFuncParens           Function
-  HiLink jsFuncArgCommas        Function
-  HiLink jsFuncArgs             Function
-  HiLink jsFuncBlocks           Function
   HiLink jsArgsObj              Special
   HiLink jsError                Error
   HiLink jsParensError          Error
