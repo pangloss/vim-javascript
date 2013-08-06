@@ -212,6 +212,7 @@ syntax match   jsOpAssign       /=\@<!=/ nextgroup=jsFuncBlock skipwhite skipemp
 syntax match   jsFuncName       contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/ nextgroup=jsFuncArgs skipwhite
 syntax region  jsFuncArgs       contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas nextgroup=jsFuncBlock keepend skipwhite
 syntax match   jsFuncArgCommas  contained ','
+syntax keyword jsArgsObj        arguments contained containedin=jsFuncBlock
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
@@ -262,6 +263,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFuncArgCommas        Function
   HiLink jsFuncArgs             Function
   HiLink jsFuncBlocks           Function
+  HiLink jsArgsObj              Special
   HiLink jsError                Error
   HiLink jsParensError          Error
   HiLink jsParensErrA           Error
