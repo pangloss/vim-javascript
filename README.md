@@ -1,4 +1,4 @@
-# vim-javascript v0.1.3
+# vim-javascript v0.1.4
 
 JavaScript bundle for vim, this bundle provides syntax and indent plugins.
 
