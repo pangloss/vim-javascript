@@ -186,8 +186,8 @@ syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStri
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsBranch,jsReturn,jsStatement,jsTernaryIf,jsNoise,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc
 syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc
-syntax region  jsBlock      matchgroup=jsBlocks       start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,@htmlPreproc
-syntax region  jsFuncBlock  matchgroup=jsFuncBlocks   start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,@htmlPreproc contained
+syntax region  jsBlock      matchgroup=jsBraces       start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,@htmlPreproc
+syntax region  jsFuncBlock  matchgroup=jsFuncBraces   start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,@htmlPreproc contained
 syntax region  jsTernaryIf  matchgroup=jsTernaryIfOperator start=+?+  end=+:+  contains=@jsExpression
 
 "" catch errors caused by wrong parenthesis
@@ -277,7 +277,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsNoise                Noise
   HiLink jsBrackets             Noise
   HiLink jsParens               Noise
-  HiLink jsBlocks               Noise
+  HiLink jsBraces               Noise
   HiLink jsSpecial              Special
   HiLink jsGlobalObjects        Special
   HiLink jsExceptions           Special
