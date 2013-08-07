@@ -53,7 +53,8 @@ Default Value: 0
 
 If you'd like to be added as a contributor the price of admission is 1 pull request.
 Please follow the general code style guides (read the code) and in your pull request explain
-the reason for the proposed change and how it is valuable.
+the reason for the proposed change and how it is valuable. Development is done 
+on the `beta` branch, so be sure to fork from and send pull requests there.
 
 ## Bug report
 
