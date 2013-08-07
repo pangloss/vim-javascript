@@ -37,7 +37,8 @@ syntax match   jsNoise           /\%(:\|,\|\;\|\.\)/
 syntax keyword jsStorageClass   const var let
 syntax keyword jsOperator       delete instanceof typeof void new in
 syntax match   jsOperator       /\(!\||\|&\|+\|-\|<\|>\|=\|%\|\/\|*\|\~\|\^\)/
-syntax keyword jsBoolean        true false
+syntax keyword jsBooleanTrue    true
+syntax keyword jsBooleanFalse   false
 
 "" JavaScript comments
 syntax keyword jsCommentTodo    TODO FIXME XXX TBD contained
@@ -182,7 +183,7 @@ endif "DOM/HTML/CSS
 
 
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBoolean,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsParenError,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsParenError,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsBranch,jsReturn,jsStatement,jsTernaryIf,jsNoise,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc
 syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc
@@ -273,7 +274,8 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsUndefined            Type
   HiLink jsNumber               Number
   HiLink jsFloat                Float
-  HiLink jsBoolean              Boolean
+  HiLink jsBooleanTrue          Boolean
+  HiLink jsBooleanFalse         Boolean
   HiLink jsNoise                Noise
   HiLink jsBrackets             Noise
   HiLink jsParens               Noise
