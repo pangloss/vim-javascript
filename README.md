@@ -1,4 +1,4 @@
-# vim-javascript v0.1.3
+# vim-javascript v0.1.4
 
 JavaScript bundle for vim, this bundle provides syntax and indent plugins.
 
@@ -52,7 +52,7 @@ Default Value: 0
 ## Contributing
 
 This project uses the [git 
-flow](//nvie.com/posts/a-successful-git-branching-model/) model for 
+flow](http://nvie.com/posts/a-successful-git-branching-model/) model for 
 development. There's [a handy git module for git 
 flow](//github.com/nvie/gitflow). If you'd like to be added as a contributor, 
 the price of admission is 1 pull request. Please follow the general code style 
