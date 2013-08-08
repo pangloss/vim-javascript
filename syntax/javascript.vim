@@ -281,6 +281,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsParens               Noise
   HiLink jsBraces               Noise
   HiLink jsFuncBraces           Noise
+  HiLink jsFuncParens           Noise
   HiLink jsSpecial              Special
   HiLink jsGlobalObjects        Special
   HiLink jsExceptions           Special
