@@ -210,7 +210,6 @@ else
   syntax match   jsFunction       /\<function\>/ nextgroup=jsFuncName,jsFuncArgs skipwhite
 endif
 
-syntax match   jsOpAssign       /=\@<!=/ nextgroup=jsFuncBlock skipwhite skipempty
 syntax match   jsFuncName       contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/ nextgroup=jsFuncArgs skipwhite
 syntax region  jsFuncArgs       contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas nextgroup=jsFuncBlock keepend skipwhite
 syntax match   jsFuncArgCommas  contained ','
