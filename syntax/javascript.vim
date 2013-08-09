@@ -94,7 +94,7 @@ syntax match   jsRegexpOr        "\v\<@!\|" contained
 syntax match   jsRegexpMod       "\v\(@<=\?[:=!>]" contained
 syntax cluster jsRegexpSpecial   contains=jsRegexpBoundary,jsRegexpBackRef,jsRegexpQuantifier,jsRegexpOr,jsRegexpMod
 syntax region  jsRegexpGroup     start="\\\@<!(" matchgroup=jsRegexGroup end="\\\@<!)" contained contains=jsRegexpCharClass,@jsRegexpSpecial
-syntax region  jsRegexpString    start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]"']\|\d\|\w\)\s*\)\@<!\)/\(\*\|/\)\@!+ skip=+\\\\\|\\/+ end=+/[gimy]\{,4}+ contains=jsSpecial,jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial,@htmlPreproc oneline
+syntax region  jsRegexpString    start=+\(\(\(return\|case\)\=\s\+\)\@<=\|\(\([)\]"']\|\d\|\w\)\s*\)\@<!\)/\(\*\|/\)\@!+ skip=+\\\\\|\\/+ end=+/[gimy]\{,4}+ contains=jsSpecial,jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial,@htmlPreproc oneline
 syntax match   jsNumber          /\<-\=\d\+L\=\>\|\<0[xX]\x\+\>/
 syntax keyword jsNumber          Infinity
 syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
