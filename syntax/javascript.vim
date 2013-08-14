@@ -93,7 +93,7 @@ syntax match   jsRegexpQuantifier "\v\\@<!%([?*+]|\{\d+%(,|,\d+)?})\??" containe
 syntax match   jsRegexpOr        "\v\<@!\|" contained
 syntax match   jsRegexpMod       "\v\(@<=\?[:=!>]" contained
 syntax cluster jsRegexpSpecial   contains=jsRegexpBoundary,jsRegexpBackRef,jsRegexpQuantifier,jsRegexpOr,jsRegexpMod
-syntax region  jsRegexpGroup     matchgroup=jsRegexGroup start="\\\@<!(" end="\\\@<!)" contained contains=jsRegexpCharClass,@jsRegexpSpecial keepend
+syntax region  jsRegexpGroup     start="\\\@<!(" end="\\\@<!)" contained contains=jsRegexpCharClass,@jsRegexpSpecial keepend
 syntax region  jsRegexpString    start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]"']\|\d\|\w\)\s*\)\@<!\)/\(\*\|/\)\@!+ skip=+\\\\\|\\/+ end=+/[gimy]\{,4}+ contains=jsSpecial,jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial,@htmlPreproc oneline keepend
 syntax match   jsNumber          /\<-\=\d\+L\=\>\|\<0[xX]\x\+\>/
 syntax keyword jsNumber          Infinity
@@ -246,7 +246,6 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsRegexpMod            SpecialChar
   HiLink jsRegexpBackRef        SpecialChar
   HiLink jsRegexpGroup          jsRegexpString
-  HiLink jsRegexGroup           jsRegexpString
   HiLink jsRegexpCharClass      Character
   HiLink jsCharacter            Character
   HiLink jsPrototype            Special
