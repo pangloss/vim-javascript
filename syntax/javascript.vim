@@ -1,11 +1,7 @@
 " Vim syntax file
 " Language:     JavaScript
-" Maintainer:   Josh Perez <josh at goatslacker.com>
-" Version:      0.7.9
+" Maintainer:   vim-javascript community
 " URL:          https://github.com/pangloss/vim-javascript
-"
-" TODO:
-"  - Add the HTML syntax inside the JSDoc
 
 if !exists("main_syntax")
   if version < 600
