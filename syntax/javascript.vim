@@ -180,7 +180,7 @@ endif "DOM/HTML/CSS
 
 
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunc,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsNoise,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc fold
 syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc fold
@@ -200,13 +200,16 @@ if main_syntax == "javascript"
   syntax sync match jsHighlight grouphere jsBlock /{/
 endif
 
+syntax match   jsFunc                 /\([a-zA-Z_$][0-9a-zA-Z_$]*\s*[:=]\s*\)\=function\(\s*[a-zA-Z_$][0-9a-zA-Z_$]*\)\=\s*\(([^)]*)\)/ contains=jsFuncAssignment,jsFuncMethodAssignment,jsFunction,jsFuncArgs skipwhite
+syntax match   jsFuncAssignment       contained /=/ skipwhite
+syntax match   jsFuncMethodAssignment contained /:/ skipwhite
+
 if g:javascript_conceal == 1
-  syntax match   jsFunction       /\<function\>/ nextgroup=jsFuncName,jsFuncArgs skipwhite conceal cchar=ƒ
+  syntax match   jsFunction       contained /\<function\>/ nextgroup=jsFuncArgs skipwhite conceal cchar=ƒ
 else
-  syntax match   jsFunction       /\<function\>/ nextgroup=jsFuncName,jsFuncArgs skipwhite
+  syntax match   jsFunction       contained /\<function\>/ nextgroup=jsFuncArgs skipwhite
 endif
 
-syntax match   jsFuncName       contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/ nextgroup=jsFuncArgs skipwhite
 syntax region  jsFuncArgs       contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas nextgroup=jsFuncBlock keepend skipwhite
 syntax match   jsFuncArgCommas  contained ','
 syntax keyword jsArgsObj        arguments contained containedin=jsFuncBlock
@@ -253,8 +256,10 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsStatement            Statement
   HiLink jsException            Exception
   HiLink jsKeyword              Keyword
+  HiLink jsFunc                 Function
+  HiLink jsFuncAssignment       Operator
+  HiLink jsFuncMethodAssignment Noise
   HiLink jsFunction             Type
-  HiLink jsFuncName             Function
   HiLink jsArgsObj              Special
   HiLink jsError                Error
   HiLink jsParensError          Error
