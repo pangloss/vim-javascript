@@ -94,8 +94,8 @@ syntax region  jsRegexpString    start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]
 syntax match   jsNumber          /\<-\=\d\+L\=\>\|\<0[xX]\x\+\>/
 syntax keyword jsNumber          Infinity
 syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
-syntax match   jsObjectKey       /\<[a-zA-Z_$][0-9a-zA-Z_$\-]*\(\s*:\)\@=/ contains=jsFunctionKey
-syntax match   jsFunctionKey     /\<[a-zA-Z_$][0-9a-zA-Z_$\-]*\(\s*:\sfunction\)\@=/ contained
+syntax match   jsObjectKey       /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\)\@=/ contains=jsFunctionKey
+syntax match   jsFunctionKey     /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\sfunction\)\@=/ contained
 
 "" JavaScript Prototype
 syntax keyword jsPrototype      prototype
