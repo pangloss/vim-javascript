@@ -94,8 +94,9 @@ syntax region  jsRegexpString    start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]
 syntax match   jsNumber          /\<-\=\d\+L\=\>\|\<0[xX]\x\+\>/
 syntax keyword jsNumber          Infinity
 syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
-syntax match   jsObjectKey       /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\)\@=/ contains=jsFunctionKey
-syntax match   jsFunctionKey     /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\s*function\s*\)\@=/ contained
+syntax match   jsObjectKey       /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\)\@=/ contains=jsFunctionKey contained
+syntax match   jsFunctionKey     /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\s*function\s*\)\@=/ contained
+syntax match   jsFunctionVar     /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*=\s*function\s*\)\@=/
 
 "" JavaScript Prototype
 syntax keyword jsPrototype      prototype
@@ -181,7 +182,7 @@ endif "DOM/HTML/CSS
 
 
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsFunctionVar,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsNoise,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc fold
 syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc fold
