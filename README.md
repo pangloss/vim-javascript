@@ -12,12 +12,13 @@ Add to vimrc:
 
 And install it:
 
-    :so ~/.vimrc  
-    :BundleInstall  
+    :so ~/.vimrc
+    :BundleInstall
 
 - Install with [pathogen](https://github.com/tpope/vim-pathogen)
 
-    `pushd .; cd ~/.vim/bundle; git clone https://github.com/pangloss/vim-javascript.git; popd`
+    `cd ~/.vim/bundle  
+    git clone https://github.com/pangloss/vim-javascript.git`
 
 ## Configuration
 
