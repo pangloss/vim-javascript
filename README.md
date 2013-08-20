@@ -17,7 +17,7 @@ And install it:
 
 - Install with [pathogen](https://github.com/tpope/vim-pathogen)
 
-    pushd .; cd ~/.vim/bundle; git clone https://github.com/pangloss/vim-javascript.git; popd
+    :pushd .; cd ~/.vim/bundle; git clone https://github.com/pangloss/vim-javascript.git; popd
 
 ## Configuration
 
