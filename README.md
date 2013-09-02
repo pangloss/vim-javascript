@@ -2,6 +2,24 @@
 
 JavaScript bundle for vim, this bundle provides syntax and indent plugins.
 
+## A Quick Note on Regexes
+
+Vim 7.4 was released recently, and unfortunately broke how this plugin
+handles regexes. There was no real easy way for us to fix this unless we
+completely rewrote how regexes work.
+
+Good News: There was a recent update to Vim 7.4 that fixes this issue.
+
+Make sure you are at least using Vim 7.4, with patches 1-7.
+
+If you are stuck on an older version of Vim 7.4 with no way to update,
+then simply perform the following commands to fix your current buffer:
+
+```
+:set regexpengine=1
+:syntax enable
+```
+
 ## Installation
 
 - Install with [Vundle](https://github.com/gmarik/vundle)
