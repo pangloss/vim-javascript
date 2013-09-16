@@ -35,8 +35,10 @@ And install it:
 
 - Install with [pathogen](https://github.com/tpope/vim-pathogen)
 
-    cd ~/.vim/bundle
-    git clone https://github.com/pangloss/vim-javascript.git
+```
+cd ~/.vim/bundle
+git clone https://github.com/pangloss/vim-javascript.git
+```
 
 ## Configuration
 
