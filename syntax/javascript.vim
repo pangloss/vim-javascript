@@ -106,12 +106,14 @@ if g:javascript_conceal == 1
   syntax keyword jsReturn         return conceal cchar=⇚
   syntax keyword jsUndefined      undefined conceal cchar=¿
   syntax keyword jsNan            NaN conceal cchar=ℕ
+  syntax keyword jsPrototype      prototype conceal cchar=¶
 else
   syntax keyword jsNull           null
   syntax keyword jsThis           this
   syntax keyword jsReturn         return
   syntax keyword jsUndefined      undefined
   syntax keyword jsNan            NaN
+  syntax keyword jsPrototype      prototype
 endif
 
 "" Statement Keywords
