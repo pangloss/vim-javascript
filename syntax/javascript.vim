@@ -97,21 +97,20 @@ syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-
 syntax match   jsObjectKey       /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\)\@=/ contains=jsFunctionKey
 syntax match   jsFunctionKey     /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\s*function\s*\)\@=/ contained
 
-"" JavaScript Prototype
-syntax keyword jsPrototype      prototype
-
 if g:javascript_conceal == 1
   syntax keyword jsNull           null conceal cchar=ø
   syntax keyword jsThis           this conceal cchar=@
   syntax keyword jsReturn         return conceal cchar=⇚
   syntax keyword jsUndefined      undefined conceal cchar=¿
   syntax keyword jsNan            NaN conceal cchar=ℕ
+  syntax keyword jsPrototype      prototype conceal cchar=¶
 else
   syntax keyword jsNull           null
   syntax keyword jsThis           this
   syntax keyword jsReturn         return
   syntax keyword jsUndefined      undefined
   syntax keyword jsNan            NaN
+  syntax keyword jsPrototype      prototype
 endif
 
 "" Statement Keywords
