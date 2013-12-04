@@ -97,9 +97,6 @@ syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-
 syntax match   jsObjectKey       /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\)\@=/ contains=jsFunctionKey
 syntax match   jsFunctionKey     /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\s*function\s*\)\@=/ contained
 
-"" JavaScript Prototype
-syntax keyword jsPrototype      prototype
-
 if g:javascript_conceal == 1
   syntax keyword jsNull           null conceal cchar=ø
   syntax keyword jsThis           this conceal cchar=@
