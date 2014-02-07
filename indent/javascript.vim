@@ -11,6 +11,10 @@ if exists("b:did_indent")
 endif
 let b:did_indent = 1
 
+if !exists("g:javascript_indent_vars")
+  let g:javascript_indent_vars = 0
+endif
+
 setlocal nosmartindent
 
 " Now, set up our indentation expression and keys that trigger it.
@@ -356,10 +360,12 @@ function GetJavascriptIndent()
   endif
 
   " Check for multiple var assignments
-"  let var_indent = s:GetVarIndent(v:lnum)
-"  if var_indent >= 0
-"    return var_indent
-"  endif
+  if g:javascript_indent_vars
+    let var_indent = s:GetVarIndent(v:lnum)
+    if var_indent >= 0
+      return var_indent + 2
+    endif
+  endif
 
   " 3.3. Work on the previous line. {{{2
   " -------------------------------
