@@ -25,6 +25,10 @@ endif
 let s:cpo_save = &cpo
 set cpo&vim
 
+if !exists('g:javascript_indent_to_parens')
+  let g:javascript_indent_to_parens = 1
+endif
+
 " 1. Variables {{{1
 " ============
 
@@ -398,7 +402,7 @@ function GetJavascriptIndent()
   if line =~ '[[({]'
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts[0] == '1' && searchpair('(', '', ')', 'bW', s:skip_expr) > 0
-      if col('.') + 1 == col('$')
+      if col('.') + 1 == col('$') || g:javascript_indent_to_parens == 0
         return ind + &sw
       else
         return virtcol('.')
