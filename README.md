@@ -49,6 +49,18 @@ Disables JSDoc syntax highlighting
 
 Default Value: 0
 
+#### javascript_indent_vars
+
+Indent vars in the same level:
+
+```javascript
+var foo,
+    bar,
+    baz;
+```
+
+Default Value: 0
+
 ## Contributing
 
 This project uses the [git
