@@ -82,7 +82,7 @@ syntax match   jsFuncCall        /\k\+\%(\s*(\)\@=/
 syntax match   jsSpecial         "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)"
 syntax region  jsStringD         start=+"+  skip=+\\\\\|\\$"+  end=+"+  contains=jsSpecial,@htmlPreproc
 syntax region  jsStringS         start=+'+  skip=+\\\\\|\\$'+  end=+'+  contains=jsSpecial,@htmlPreproc
-syntax region  jsRegexpCharClass start=+\[+ end=+\]+ contained
+syntax region  jsRegexpCharClass start=+\[+ skip=+\\.+ end=+\]+ contained
 syntax match   jsRegexpBoundary   "\v%(\<@![\^$]|\\[bB])" contained
 syntax match   jsRegexpBackRef   "\v\\[1-9][0-9]*" contained
 syntax match   jsRegexpQuantifier "\v\\@<!%([?*+]|\{\d+%(,|,\d+)?})\??" contained
@@ -90,7 +90,7 @@ syntax match   jsRegexpOr        "\v\<@!\|" contained
 syntax match   jsRegexpMod       "\v\(@<=\?[:=!>]" contained
 syntax cluster jsRegexpSpecial   contains=jsRegexpBoundary,jsRegexpBackRef,jsRegexpQuantifier,jsRegexpOr,jsRegexpMod
 syntax region  jsRegexpGroup     start="\\\@<!(" end="\\\@<!)" contained contains=jsRegexpCharClass,@jsRegexpSpecial keepend
-syntax region  jsRegexpString    start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]"']\|\d\|\w\)\s*\)\@<!\)/\(\*\|/\)\@!+ skip=+\\\\\|\\/+ end=+/[gimy]\{,4}+ contains=jsSpecial,jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial,@htmlPreproc oneline keepend
+syntax region  jsRegexpString    start=+\(\(\(return\|case\)\s\+\)\@<=\|\(\([)\]"']\|\d\|\w\)\s*\)\@<!\)/\(\*\|/\)\@!+ skip=+\\.\|\[\(\\.\|[^]]\)*\]+ end=+/[gimy]\{,4}+ contains=jsSpecial,jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial,@htmlPreproc oneline keepend
 syntax match   jsNumber          /\<-\=\d\+L\=\>\|\<0[xX]\x\+\>/
 syntax keyword jsNumber          Infinity
 syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
