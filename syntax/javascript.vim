@@ -82,7 +82,7 @@ syntax match   jsFuncCall        /\k\+\%(\s*(\)\@=/
 syntax match   jsSpecial         "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)"
 syntax region  jsStringD         start=+"+  skip=+\\\\\|\\$"+  end=+"+  contains=jsSpecial,@htmlPreproc
 syntax region  jsStringS         start=+'+  skip=+\\\\\|\\$'+  end=+'+  contains=jsSpecial,@htmlPreproc
-syntax region  jsRegexpCharClass start=+\[+ end=+\]+ contained
+syntax region  jsRegexpCharClass start=+\[+ skip=+\\.+ end=+\]+ contained
 syntax match   jsRegexpBoundary   "\v%(\<@![\^$]|\\[bB])" contained
 syntax match   jsRegexpBackRef   "\v\\[1-9][0-9]*" contained
 syntax match   jsRegexpQuantifier "\v\\@<!%([?*+]|\{\d+%(,|,\d+)?})\??" contained
