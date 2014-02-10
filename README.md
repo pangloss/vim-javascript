@@ -67,6 +67,21 @@ Disables JSDoc syntax highlighting
 
 Default Value: 0
 
+#### g:javascript_indent_to_parens
+
+Aligns arguments on multi-line expressions to the opening parenthesis:
+
+    function myFunction(arg1,
+                        arg2)
+
+If set to 0, arguments are indented by one level which works better with long
+function names and if tabs are used for indentation:
+
+    function myFunction(arg1,
+        arg2)
+
+Default Value: 1
+
 ## Contributing
 
 This project uses the [git
