@@ -80,8 +80,10 @@ syntax case match
 "" Syntax in the JavaScript code
 syntax match   jsFuncCall        /\k\+\%(\s*(\)\@=/
 syntax match   jsSpecial         "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)"
+syntax match   jsTemplateVar     "\${.\{-}}"
 syntax region  jsStringD         start=+"+  skip=+\\\\\|\\$"+  end=+"+  contains=jsSpecial,@htmlPreproc,@Spell
 syntax region  jsStringS         start=+'+  skip=+\\\\\|\\$'+  end=+'+  contains=jsSpecial,@htmlPreproc,@Spell
+syntax region  jsTemplateString  start=+`+  skip=+\\\\\|\\$`+  end=+`+  contains=jsTemplateVar,jsSpecial,@htmlPreproc
 syntax region  jsRegexpCharClass start=+\[+ skip=+\\.+ end=+\]+ contained
 syntax match   jsRegexpBoundary   "\v%(\<@![\^$]|\\[bB])" contained
 syntax match   jsRegexpBackRef   "\v\\[1-9][0-9]*" contained
@@ -180,7 +182,7 @@ endif "DOM/HTML/CSS
 
 
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc fold
 syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc fold
@@ -236,6 +238,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsDocParam             Label
   HiLink jsStringS              String
   HiLink jsStringD              String
+  HiLink jsTemplateString       String
   HiLink jsTernaryIfOperator    Conditional
   HiLink jsRegexpString         String
   HiLink jsRegexpBoundary       SpecialChar
@@ -281,6 +284,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFuncBraces           Noise
   HiLink jsFuncParens           Noise
   HiLink jsSpecial              Special
+  HiLink jsTemplateVar          Special
   HiLink jsGlobalObjects        Special
   HiLink jsExceptions           Special
   HiLink jsFutureKeys           Special
