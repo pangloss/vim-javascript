@@ -37,7 +37,7 @@ syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
 
 "" JavaScript comments
-syntax match jsCommentTodo    ".*\(TODO\|FIXME\|XXX\|TBD\|HACKHACK\).*" contained
+syntax match jsCommentTodo    ".*\(TODO\|FIXME\|XXX\|TBD\|HACK\).*" contained
 syntax region  jsLineComment    start=+\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell
 syntax region  jsEnvComment     start="\%^#!" end="$" display
 syntax region  jsLineComment    start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell fold
