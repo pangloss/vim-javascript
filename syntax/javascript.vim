@@ -209,8 +209,9 @@ else
 endif
 
 syntax match   jsFuncName       contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/ nextgroup=jsFuncArgs skipwhite
-syntax region  jsFuncArgs       contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas nextgroup=jsFuncBlock keepend skipwhite skipempty
+syntax region  jsFuncArgs       contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas,jsFuncArgRest nextgroup=jsFuncBlock keepend skipwhite skipempty
 syntax match   jsFuncArgCommas  contained ','
+syntax match   jsFuncArgRest    contained /\%(\.\.\.[a-zA-Z_$][0-9a-zA-Z_$]*\))/
 syntax keyword jsArgsObj        arguments contained containedin=jsFuncBlock
 
 syntax match jsArrowFunction /=>/
@@ -225,6 +226,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   else
     command -nargs=+ HiLink hi def link <args>
   endif
+  HiLink jsFuncArgRest          Special
   HiLink jsComment              Comment
   HiLink jsLineComment          Comment
   HiLink jsEnvComment           PreProc
