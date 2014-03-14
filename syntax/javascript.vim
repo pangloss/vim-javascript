@@ -179,9 +179,11 @@ endif "DOM/HTML/CSS
 
 "" end DOM/HTML/CSS specified things
 
+"" Strict mode
+syntax match jsUseStrict +^\s*\("use strict"\|'use strict'\);\?\s*$+ display
 
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsUseStrict,jsNoise
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc fold
 syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc fold
@@ -283,6 +285,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsExceptions           Special
   HiLink jsFutureKeys           Special
   HiLink jsBuiltins             Special
+  HiLink jsUseStrict            PreProc
 
   HiLink jsDomErrNo             Constant
   HiLink jsDomNodeConsts        Constant
