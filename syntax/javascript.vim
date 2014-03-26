@@ -38,7 +38,7 @@ syntax keyword jsBooleanFalse   false
 syntax keyword jsCommonJS       require module exports
 
 "" JavaScript comments
-syntax keyword jsCommentTodo    TODO FIXME XXX TBD contained
+syntax match jsCommentTodo    ".*\(TODO\|FIXME\|XXX\|TBD\|HACK\).*" contained
 syntax region  jsLineComment    start=+\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell
 syntax region  jsEnvComment     start="\%^#!" end="$" display
 syntax region  jsLineComment    start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell fold
@@ -56,7 +56,7 @@ if !exists("javascript_ignore_javaScriptdoc")
   syntax region jsDocComment      matchgroup=jsComment start="/\*\*\s*"  end="\*/" contains=jsDocTags,jsCommentTodo,jsCvsTag,@jsHtml,@Spell fold
 
   " tags containing a param
-  syntax match  jsDocTags         contained "@\(alias\|augments\|borrows\|class\|constructs\|default\|defaultvalue\|emits\|exception\|exports\|extends\|file\|fires\|kind\|listens\|member\|member[oO]f\|mixes\|module\|name\|namespace\|requires\|throws\|var\|variation\|version\)\>" nextgroup=jsDocParam skipwhite
+  syntax match  jsDocTags         contained "@\(alias\|augments\|borrows\|class\|constructs\|default\|defaultvalue\|emits\|exception\|exports\|extends\|file\|fires\|kind\|listens\|member\|member[oO]f\|mixes\|module\|name\|namespace\|requires\|throws\|var\|variation\|version\|ngdoc\|methodOf\|propertyOf\|eventOf\|link\|priority\|scope\|restrict\|eventType\)\>" nextgroup=jsDocParam skipwhite
   " tags containing type and param
   syntax match  jsDocTags         contained "@\(arg\|argument\|param\|property\)\>" nextgroup=jsDocType skipwhite
   " tags containing type but no param
@@ -64,7 +64,7 @@ if !exists("javascript_ignore_javaScriptdoc")
   " tags containing references
   syntax match  jsDocTags         contained "@\(lends\|see\|tutorial\)\>" nextgroup=jsDocSeeTag skipwhite
   " other tags (no extra syntax)
-  syntax match  jsDocTags         contained "@\(abstract\|access\|author\|classdesc\|constant\|const\|constructor\|copyright\|deprecated\|desc\|description\|event\|example\|file[oO]verview\|function\|global\|ignore\|inner\|instance\|license\|method\|mixin\|overview\|private\|protected\|public\|readonly\|since\|static\|todo\|summary\|undocumented\|virtual\)\>"
+  syntax match  jsDocTags         contained "@\(abstract\|access\|author\|classdesc\|constant\|const\|constructor\|copyright\|deprecated\|desc\|description\|event\|example\|file[oO]verview\|function\|global\|ignore\|inner\|instance\|license\|method\|mixin\|overview\|private\|protected\|public\|readonly\|since\|static\|todo\|summary\|undocumented\|virtual\|animations\)\>"
 
   syntax region jsDocType         start="{" end="}" oneline contained nextgroup=jsDocParam skipwhite
   syntax match  jsDocType         contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+" nextgroup=jsDocParam skipwhite
