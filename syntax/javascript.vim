@@ -100,21 +100,12 @@ syntax match   jsFloat           /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-
 syntax match   jsObjectKey       /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\)\@=/ contains=jsFunctionKey contained
 syntax match   jsFunctionKey     /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*:\s*function\s*\)\@=/ contained
 
-if g:javascript_conceal == 1
-  syntax keyword jsNull           null conceal cchar=ø
-  syntax keyword jsThis           this conceal cchar=@
-  syntax keyword jsReturn         return conceal cchar=⇚
-  syntax keyword jsUndefined      undefined conceal cchar=¿
-  syntax keyword jsNan            NaN conceal cchar=ℕ
-  syntax keyword jsPrototype      prototype conceal cchar=¶
-else
-  syntax keyword jsNull           null
-  syntax keyword jsThis           this
-  syntax keyword jsReturn         return
-  syntax keyword jsUndefined      undefined
-  syntax keyword jsNan            NaN
-  syntax keyword jsPrototype      prototype
-endif
+exe 'syntax keyword jsNull      null      '.(exists('g:javascript_conceal_null')        ? 'conceal cchar='.g:javascript_conceal_null        : '')
+exe 'syntax keyword jsReturn    return    '.(exists('g:javascript_conceal_return')      ? 'conceal cchar='.g:javascript_conceal_return      : '')
+exe 'syntax keyword jsUndefined undefined '.(exists('g:javascript_conceal_undefined')   ? 'conceal cchar='.g:javascript_conceal_undefined   : '')
+exe 'syntax keyword jsNan       NaN       '.(exists('g:javascript_conceal_NaN')         ? 'conceal cchar='.g:javascript_conceal_NaN         : '')
+exe 'syntax keyword jsPrototype prototype '.(exists('g:javascript_conceal_prototype')   ? 'conceal cchar='.g:javascript_conceal_prototype   : '')
+exe 'syntax keyword jsThis      this      '.(exists('g:javascript_conceal_this')        ? 'conceal cchar='.g:javascript_conceal_this        : '')
 
 "" Statement Keywords
 syntax keyword jsStatement      break continue with
@@ -203,11 +194,7 @@ if main_syntax == "javascript"
   syntax sync match jsHighlight grouphere jsBlock /{/
 endif
 
-if g:javascript_conceal == 1
-  syntax match   jsFunction       /\<function\>/ nextgroup=jsFuncName,jsFuncArgs skipwhite conceal cchar=ƒ
-else
-  syntax match   jsFunction       /\<function\>/ nextgroup=jsFuncName,jsFuncArgs skipwhite
-endif
+exe 'syntax match jsFunction /\<function\>/ nextgroup=jsFuncName,jsFuncArgs skipwhite '.(exists('g:javascript_conceal_function') ? 'conceal cchar='.g:javascript_conceal_function : '')
 
 syntax match   jsFuncName       contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/ nextgroup=jsFuncArgs skipwhite
 syntax region  jsFuncArgs       contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas,jsFuncArgRest nextgroup=jsFuncBlock keepend skipwhite skipempty
