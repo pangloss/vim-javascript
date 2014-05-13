@@ -121,7 +121,7 @@ syntax keyword jsStatement      break continue with
 syntax keyword jsConditional    if else switch
 syntax keyword jsRepeat         do while for
 syntax keyword jsLabel          case default
-syntax keyword jsKeyword        yield
+syntax keyword jsKeyword        yield import export default extends class
 syntax keyword jsException      try catch throw finally
 
 syntax keyword jsGlobalObjects   Array Boolean Date Function Iterator Number Object RegExp String Proxy ParallelArray ArrayBuffer DataView Float32Array Float64Array Int16Array Int32Array Int8Array Uint16Array Uint32Array Uint8Array Uint8ClampedArray Intl JSON Math console document window
@@ -131,7 +131,7 @@ syntax keyword jsExceptions     Error EvalError InternalError RangeError Referen
 
 syntax keyword jsBuiltins       decodeURI decodeURIComponent encodeURI encodeURIComponent eval isFinite isNaN parseFloat parseInt uneval
 
-syntax keyword jsFutureKeys     abstract enum int short boolean export interface static byte extends long super char final native synchronized class float package throws goto private transient debugger implements protected volatile double import public
+syntax keyword jsFutureKeys     abstract enum int short boolean interface static byte long super char final native synchronized float package throws goto private transient debugger implements protected volatile double public
 
 "" DOM/HTML/CSS specified things
 
