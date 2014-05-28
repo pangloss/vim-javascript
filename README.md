@@ -26,12 +26,12 @@ then simply perform the following commands to fix your current buffer:
 
 Add to vimrc:
 
-    Bundle "pangloss/vim-javascript"
+    Plugin "pangloss/vim-javascript"
 
 And install it:
 
     :so ~/.vimrc
-    :BundleInstall
+    :PluginInstall
 
 ### Install with [pathogen](https://github.com/tpope/vim-pathogen)
 
