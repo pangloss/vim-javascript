@@ -22,9 +22,6 @@ if version < 600    " Don't support the old version
   unlet! b:javascript_fold
 endif
 
-"" dollar sign is permittd anywhere in an identifier
-setlocal iskeyword+=$
-
 syntax sync fromstart
 
 syntax match   jsNoise           /\%(:\|,\|\;\|\.\)/
