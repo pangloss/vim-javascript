@@ -8,6 +8,11 @@ the price of admission is 1 pull request. Please follow the general code style
 guides (read the code) and in your pull request explain the reason for the
 proposed change and how it is valuable.
 
+## Pull Requests
+
+Please make your pull requests against the `develop` branch; we stage changes
+for testing there to avoid unexpected breakages for our users. :)
+
 ## Bug report
 
 Report a bug on [GitHub Issues](https://github.com/pangloss/vim-javascript/issues).
