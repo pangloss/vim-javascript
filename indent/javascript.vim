@@ -442,6 +442,10 @@ unlet s:cpo_save
 function! Fixedgq(lnum, count)
     let l:count = a:count
 
+    if mode() == 'i' " gq was not pressed, but tw was set
+        return 1
+    endif
+
     if len(getline(a:lnum)) < 80 && l:count == 1 " No need for gq
         return 1
     endif
@@ -468,7 +472,7 @@ function! Fixedgq(lnum, count)
     endif
 
     " Try breaking after string
-    if breakpoint[1] == indent(a:lnum)
+    if breakpoint[1] <= indent(a:lnum)
         call cursor(a:lnum, 81)
         let breakpoint = searchpairpos('\.', '', ' ', 'cW', s:skip_expr, a:lnum)
     endif
