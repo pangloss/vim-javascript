@@ -440,13 +440,15 @@ let &cpo = s:cpo_save
 unlet s:cpo_save
 
 function! Fixedgq(lnum, count)
+    let l:tw = &tw ? &tw : 72;
+
     let l:count = a:count
 
     if mode() == 'i' " gq was not pressed, but tw was set
         return 1
     endif
 
-    if len(getline(a:lnum)) < 80 && l:count == 1 " No need for gq
+    if len(getline(a:lnum)) < l:tw && l:count == 1 " No need for gq
         return 1
     endif
 
@@ -460,9 +462,9 @@ function! Fixedgq(lnum, count)
 
     let l:winview = winsaveview()
 
-    call cursor(a:lnum, 81)
+    call cursor(a:lnum, l:tw + 1)
     let orig_breakpoint = searchpairpos(' ', '', '\.', 'bcW', '', a:lnum)
-    call cursor(a:lnum, 81)
+    call cursor(a:lnum, l:tw + 1)
     let breakpoint = searchpairpos(' ', '', '\.', 'bcW', s:skip_expr, a:lnum)
 
     " No need for special treatment, normal gq handles edgecases better
@@ -473,7 +475,7 @@ function! Fixedgq(lnum, count)
 
     " Try breaking after string
     if breakpoint[1] <= indent(a:lnum)
-        call cursor(a:lnum, 81)
+        call cursor(a:lnum, l:tw + 1)
         let breakpoint = searchpairpos('\.', '', ' ', 'cW', s:skip_expr, a:lnum)
     endif
 
