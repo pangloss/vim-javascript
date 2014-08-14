@@ -440,7 +440,7 @@ let &cpo = s:cpo_save
 unlet s:cpo_save
 
 function! Fixedgq(lnum, count)
-    let l:tw = &tw ? &tw : 72;
+    let l:tw = &tw ? &tw : 80;
 
     let l:count = a:count
 
