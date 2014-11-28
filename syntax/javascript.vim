@@ -31,7 +31,7 @@ syntax match   jsNoise           /\%(:\|,\|\;\|\.\)/
 
 "" Program Keywords
 syntax keyword jsStorageClass   const var let
-syntax keyword jsOperator       delete instanceof typeof void new in
+syntax keyword jsOperator       delete instanceof typeof void new in of
 syntax match   jsOperator       /\(!\||\|&\|+\|-\|<\|>\|=\|%\|\/\|*\|\~\|\^\)/
 syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
