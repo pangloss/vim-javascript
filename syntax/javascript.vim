@@ -80,6 +80,7 @@ syntax case match
 
 "" Syntax in the JavaScript code
 syntax match   jsFuncCall        /\k\+\%(\s*(\)\@=/
+syntax match   jsFuncDef         /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*=\(\s*[a-zA-Z_$][0-9a-zA-Z_$]*\(\.[a-zA-Z_$][0-9a-zA-Z_$]*\)*\s*=\)*\s*function\s*\)\@=/
 syntax match   jsSpecial         "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)" contained
 syntax match   jsTemplateVar     "\${.\{-}}" contained
 syntax region  jsStringD         start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@htmlPreproc,@Spell
@@ -174,7 +175,7 @@ endif "DOM/HTML/CSS
 
 
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsCommonJS
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsDocComment,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsFuncDef,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsCommonJS
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc fold
 syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc fold
