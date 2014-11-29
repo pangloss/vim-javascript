@@ -80,7 +80,7 @@ syntax case match
 
 "" Syntax in the JavaScript code
 syntax match   jsFuncCall        /\k\+\%(\s*(\)\@=/
-syntax match   jsFuncDef         /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*=\(\s*[a-zA-Z_$][0-9a-zA-Z_$]*\(\.[a-zA-Z_$][0-9a-zA-Z_$]*\)*\s*=\)*\s*function\s*\)\@=/
+syntax match   jsFuncIdenDef     /\<[a-zA-Z_$][0-9a-zA-Z_$]*\(\s*=\(\s*[a-zA-Z_$][0-9a-zA-Z_$]*\(\.[a-zA-Z_$][0-9a-zA-Z_$]*\)*\s*=\)*\s*function\s*(\)\@=/
 syntax match   jsSpecial         "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)" contained
 syntax match   jsTemplateVar     "\${.\{-}}" contained
 syntax region  jsStringD         start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@htmlPreproc,@Spell
