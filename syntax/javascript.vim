@@ -194,8 +194,9 @@ if main_syntax == "javascript"
   syntax sync match jsHighlight grouphere jsBlock /{/
 endif
 
-exe 'syntax match jsFunction /\<function\>/ nextgroup=jsFuncName,jsFuncArgs skipwhite '.(exists('g:javascript_conceal_function') ? 'conceal cchar='.g:javascript_conceal_function : '')
+exe 'syntax match jsFunction /\<function\>/ nextgroup=jsGenerator,jsFuncName,jsFuncArgs skipwhite '.(exists('g:javascript_conceal_function') ? 'conceal cchar='.g:javascript_conceal_function : '')
 
+syntax match   jsGenerator      contained '\*' nextgroup=jsFuncName skipwhite
 syntax match   jsFuncName       contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/ nextgroup=jsFuncArgs skipwhite
 syntax region  jsFuncArgs       contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas,jsFuncArgRest nextgroup=jsFuncBlock keepend skipwhite skipempty
 syntax match   jsFuncArgCommas  contained ','
@@ -250,6 +251,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsKeyword              Keyword
   HiLink jsArrowFunction        Type
   HiLink jsFunction             Type
+  HiLink jsGenerator            jsFunction
   HiLink jsFuncName             Function
   HiLink jsArgsObj              Special
   HiLink jsError                Error
