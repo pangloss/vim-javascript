@@ -268,11 +268,11 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsBooleanTrue          Boolean
   HiLink jsBooleanFalse         Boolean
   HiLink jsNoise                Noise
-  HiLink jsBrackets             Noise
-  HiLink jsParens               Noise
-  HiLink jsBraces               Noise
-  HiLink jsFuncBraces           Noise
-  HiLink jsFuncParens           Noise
+  HiLink jsBrackets             Function
+  HiLink jsFuncBraces           Function
+  HiLink jsBraces               Function
+  HiLink jsParens               Structure
+  HiLink jsFuncParens           Structure
   HiLink jsSpecial              Special
   HiLink jsTemplateVar          Special
   HiLink jsGlobalObjects        Special
