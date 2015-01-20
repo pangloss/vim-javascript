@@ -35,7 +35,7 @@ syntax keyword jsOperator       delete instanceof typeof void new in
 syntax match   jsOperator       /\(!\||\|&\|+\|-\|<\|>\|=\|%\|\/\|*\|\~\|\^\)/
 syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
-syntax keyword jsCommonJS       require module exports
+syntax keyword jsModules        import export default from as
 
 "" JavaScript comments
 syntax keyword jsCommentTodo    TODO FIXME XXX TBD contained
@@ -118,7 +118,8 @@ syntax keyword jsStatement      break continue with
 syntax keyword jsConditional    if else switch
 syntax keyword jsRepeat         do while for
 syntax keyword jsLabel          case default
-syntax keyword jsKeyword        yield import export default extends class
+syntax keyword jsKeyword        yield
+syntax keyword jsClass          extends class
 syntax keyword jsException      try catch throw finally
 
 syntax keyword jsGlobalObjects   Array Boolean Date Function Iterator Number Object RegExp String Proxy ParallelArray ArrayBuffer DataView Float32Array Float64Array Int16Array Int32Array Int8Array Uint16Array Uint32Array Uint8Array Uint8ClampedArray Intl JSON Math console document window
@@ -180,7 +181,7 @@ endif "DOM/HTML/CSS
 
 
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsBlockComment,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsCommonJS,jsAssignmentExpr
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsBlockComment,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsCommonJS,jsAssignmentExpr,jsModules
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc fold
 syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc fold
@@ -267,6 +268,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsParensErrC           Error
   HiLink jsOperator             Operator
   HiLink jsStorageClass         StorageClass
+  HiLink jsClass                Structure
   HiLink jsThis                 Special
   HiLink jsNan                  Number
   HiLink jsNull                 Type
@@ -287,7 +289,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsExceptions           Special
   HiLink jsFutureKeys           Special
   HiLink jsBuiltins             Special
-  HiLink jsCommonJS             Include
+  HiLink jsModules              Include
 
   HiLink jsDomErrNo             Constant
   HiLink jsDomNodeConsts        Constant
