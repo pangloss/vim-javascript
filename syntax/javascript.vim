@@ -37,6 +37,7 @@ syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
 syntax match   jsModules        /import\|export/
 syntax keyword jsModuleWords    default from as contained
+syntax keyword jsOf             of contained
 
 syntax region jsImportContainer      start="import \?" end="$" contains=jsModuleWords,jsModules,jsComment,jsStringS,jsStringD,jsTemplateString
 
@@ -191,7 +192,7 @@ endif "DOM/HTML/CSS
 syntax cluster jsExpression contains=jsComment,jsLineComment,jsBlockComment,jsTaggedTemplate,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsStatic,jsSuper,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsCommonJS,jsAssignmentExpr,jsImportContainer,jsExportContainer
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc fold
-syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc fold
+syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsOf,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc fold
 syntax region  jsBlock      matchgroup=jsBraces       start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,jsObjectKey,@htmlPreproc fold
 syntax region  jsFuncBlock  matchgroup=jsFuncBraces   start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,@htmlPreproc contained fold
 syntax region  jsTernaryIf  matchgroup=jsTernaryIfOperator start=+?+  end=+:+  contains=@jsExpression,jsTernaryIf
@@ -275,6 +276,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsParensErrB           Error
   HiLink jsParensErrC           Error
   HiLink jsOperator             Operator
+  HiLink jsOf                   Operator
   HiLink jsStorageClass         StorageClass
   HiLink jsClass                Structure
   HiLink jsThis                 Special
