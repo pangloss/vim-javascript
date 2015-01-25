@@ -35,7 +35,11 @@ syntax keyword jsOperator       delete instanceof typeof void new in
 syntax match   jsOperator       /\(!\||\|&\|+\|-\|<\|>\|=\|%\|\/\|*\|\~\|\^\)/
 syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
-syntax keyword jsModules        import export default from as
+syntax match jsModules          /import\|export/
+syntax keyword jsModuleWords    default from as contained
+
+syntax region jsModuleContainer      start="\(import\|export\) \?" end="$" contains=jsModuleWords,jsStringS,jsStringD,jsTemplateString,jsModules,jsArrowFunction,jsClass,jsFunction,jsStorageClass,jsOperator
+
 
 "" JavaScript comments
 syntax keyword jsCommentTodo    TODO FIXME XXX TBD contained
@@ -84,7 +88,7 @@ syntax match   jsSpecial          "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)" c
 syntax match   jsTemplateVar      "\${.\{-}}" contained
 syntax region  jsStringD          start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@htmlPreproc,@Spell
 syntax region  jsStringS          start=+'+  skip=+\\\('\|$\)+  end=+'\|$+  contains=jsSpecial,@htmlPreproc,@Spell
-syntax region  jsTemplateString   start=+`+  skip=+\\\(`\|$\)+  end=+`\|$+  contains=jsTemplateVar,jsSpecial,@htmlPreproc
+syntax region  jsTemplateString   start=+`+  skip=+\\\(`\|$\)+  end=+`+  contains=jsTemplateVar,jsSpecial,@htmlPreproc
 syntax region  jsRegexpCharClass  start=+\[+ skip=+\\.+ end=+\]+ contained
 syntax match   jsRegexpBoundary   "\v%(\<@![\^$]|\\[bB])" contained
 syntax match   jsRegexpBackRef    "\v\\[1-9][0-9]*" contained
@@ -179,9 +183,8 @@ endif "DOM/HTML/CSS
 
 "" end DOM/HTML/CSS specified things
 
-
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsBlockComment,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsCommonJS,jsAssignmentExpr,jsModules
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsBlockComment,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsCommonJS,jsAssignmentExpr,jsModuleContainer
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc fold
 syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc fold
@@ -290,6 +293,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFutureKeys           Special
   HiLink jsBuiltins             Special
   HiLink jsModules              Include
+  HiLink jsModuleWords          Include
 
   HiLink jsDomErrNo             Constant
   HiLink jsDomNodeConsts        Constant
