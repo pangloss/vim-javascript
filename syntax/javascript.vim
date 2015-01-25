@@ -35,7 +35,7 @@ syntax keyword jsOperator       delete instanceof typeof void new in
 syntax match   jsOperator       /\(!\||\|&\|+\|-\|<\|>\|=\|%\|\/\|*\|\~\|\^\)/
 syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
-syntax match jsModules          /import\|export/
+syntax match   jsModules        /import\|export/
 syntax keyword jsModuleWords    default from as contained
 
 syntax region jsImportContainer      start="import \?" end="$" contains=jsModuleWords,jsModules,jsComment,jsStringS,jsStringD,jsTemplateString
