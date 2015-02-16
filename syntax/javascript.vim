@@ -91,7 +91,7 @@ syntax match   jsTemplateVar      "\${.\{-}}" contained
 syntax region  jsStringD          start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@htmlPreproc,@Spell
 syntax region  jsStringS          start=+'+  skip=+\\\('\|$\)+  end=+'\|$+  contains=jsSpecial,@htmlPreproc,@Spell
 syntax region  jsTemplateString   start=+`+  skip=+\\\(`\|$\)+  end=+`+     contains=jsTemplateVar,jsSpecial,@htmlPreproc
-syntax region  jsTaggedTemplate   start=/\k\+\(\(\n\|\s\)\+\)\?`/ end=+`\|$+ contains=jsTemplateString
+syntax region  jsTaggedTemplate   start=/\k\+\(\(\n\|\s\)\+\)\?`/ end=+`+ contains=jsTemplateString keepend
 syntax region  jsRegexpCharClass  start=+\[+ skip=+\\.+ end=+\]+ contained
 syntax match   jsRegexpBoundary   "\v%(\<@![\^$]|\\[bB])" contained
 syntax match   jsRegexpBackRef    "\v\\[1-9][0-9]*" contained
