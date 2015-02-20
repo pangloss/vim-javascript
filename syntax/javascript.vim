@@ -325,6 +325,10 @@ syntax cluster  javaScriptExpression contains=@jsAll,jsBracket,jsParen,jsBlock,@
 " Vim's default html.vim highlights all javascript as 'Special'
 hi! def link javaScript              NONE
 
+" Reasert the htmlScriptTag region because otherwise html.vim treats the
+" opening <script> tag as part of the javascript region
+syntax region  htmlScriptTag     contained start=+<script+ end=+>+ fold contains=htmlTagN,htmlString,htmlArg,htmlValue,htmlTagError,htmlEvent
+
 let b:current_syntax = "javascript"
 if main_syntax == 'javascript'
   unlet main_syntax
