@@ -68,6 +68,16 @@ let s:comma_last = ',\s*$'
 let s:ternary = '^\s\+[?|:]'
 let s:ternary_q = '^\s\+?'
 
+let s:case_indent = &sw
+let s:case_indent_after = &sw
+let m = matchlist(&cinoptions, ':\(.\)')
+if (len(m) > 2)
+    let s:case_indent = m[1]
+endif
+let m = matchlist(&cinoptions, '=\(.\)')
+if (len(m) > 2)
+    let s:case_indent_after = m[1]
+endif
 " 2. Auxiliary Functions {{{1
 " ======================
 
@@ -305,9 +315,9 @@ function GetJavascriptIndent()
       return indent(prevline)
     else
       if (getline(prevline) =~ s:block_regex)
-        return indent(prevline) + &sw/2
+        return indent(prevline) + s:case_indent
       else
-        return indent(prevline) - &sw/2
+        return indent(prevline) - s:case_indent_after
       endif
     endif
   endif
@@ -354,7 +364,7 @@ function GetJavascriptIndent()
     return indent(prevline) - &sw
   endif
   if (getline(prevline) =~ s:expr_case)
-    return indent(prevline) + &sw/2
+    return indent(prevline) + s:case_indent_after
   endif
 
   if (line =~ s:ternary)
