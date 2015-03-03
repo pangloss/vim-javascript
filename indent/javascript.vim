@@ -303,7 +303,7 @@ function GetJavascriptIndent()
   " If we got a closing bracket on an empty line, find its match and indent
   " according to it.  For parentheses we indent to its column - 1, for the
   " others we indent to the containing line's MSL's level.  Return -1 if fail.
-  let col = matchend(line, '^\s*[],})]')
+  let col = matchend(line, '^\s*[],.})]')
   if col > 0 && !s:IsInStringOrComment(v:lnum, col)
     call cursor(v:lnum, col)
 
