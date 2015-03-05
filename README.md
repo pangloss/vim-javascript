@@ -26,7 +26,7 @@ then simply perform the following commands to fix your current buffer:
 
 Add to vimrc:
 
-    Plugin "pangloss/vim-javascript"
+    Plugin 'pangloss/vim-javascript'
 
 And install it:
 
