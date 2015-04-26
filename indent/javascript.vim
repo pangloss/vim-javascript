@@ -29,7 +29,7 @@ set cpo&vim
 " 1. Variables {{{1
 " ============
 
-let s:js_keywords = '^\s*\(break\|case\|catch\|continue\|debugger\|default\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)'
+let s:js_keywords = '^\s*\(break\|case\|catch\|const\|continue\|debugger\|default\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)'
 
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = 'string\|regex\|comment\c'
@@ -60,7 +60,7 @@ let s:one_line_scope_regex = '\<\%(if\|else\|for\|while\)\>[^{;]*' . s:line_term
 " Regex that defines blocks.
 let s:block_regex = '\%([{[]\)\s*\%(|\%([*@]\=\h\w*,\=\s*\)\%(,\s*[*@]\=\h\w*\)*|\)\=' . s:line_term
 
-let s:var_stmt = '^\s*var'
+let s:var_stmt = '^\s*(const\|let\|var)'
 
 let s:comma_first = '^\s*,'
 let s:comma_last = ',\s*$'
