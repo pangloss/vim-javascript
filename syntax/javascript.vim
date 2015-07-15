@@ -42,7 +42,7 @@ syntax keyword jsArgsObj        arguments
 
 syntax region jsImportContainer      start="^\s\?import \?" end="$" contains=jsModules,jsModuleWords,jsComment,jsStringS,jsStringD,jsTemplateString,jsNoise,jsBlock
 
-syntax region jsExportContainer      start="^\s\?export \?" end="$" contains=jsModules,jsModuleWords,jsComment,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsClass,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsAssignmentExpr,jsArgsObj
+syntax region jsExportContainer      start="^\s\?export \?" end="$" contains=jsModules,jsModuleWords,jsComment,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsClass,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsAssignmentExpr,jsArgsObj,jsBlock
 
 "" JavaScript comments
 syntax keyword jsCommentTodo    TODO FIXME XXX TBD contained
