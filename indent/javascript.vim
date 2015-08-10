@@ -258,7 +258,9 @@ function s:IndentWithContinuation(lnum, ind, width)
   " indents an extra level.
   if s:Match(lnum, s:continuation_regex)
     if lnum == p_lnum
-      return msl_ind + a:width
+      let continuation_indent = exists('g:javascript_continuation_indent') ?
+            \ g:javascript_continuation_indent : a:width
+      return msl_ind + continuation_indent
     else
       return msl_ind
     endif
