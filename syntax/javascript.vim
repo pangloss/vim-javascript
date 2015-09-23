@@ -221,7 +221,7 @@ syntax region  jsFuncArgs       contained matchgroup=jsFuncParens start='(' end=
 syntax match   jsFuncArgCommas  contained ','
 syntax match   jsFuncArgRest    contained /\%(\.\.\.[a-zA-Z_$][0-9a-zA-Z_$]*\))/
 
-syntax match jsArrowFunction /=>/
+exe 'syntax match jsArrowFunction /=>/ '.(exists('g:javascript_conceal_arrow_function') ? 'conceal cchar='.g:javascript_conceal_arrow_function : '')
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
