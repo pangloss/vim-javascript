@@ -77,7 +77,7 @@ if !exists("javascript_ignore_javaScriptdoc")
   syntax match  jsDocType         contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+" nextgroup=jsDocParam skipwhite
   syntax region jsDocTypeNoParam  start="{" end="}" oneline contained
   syntax match  jsDocTypeNoParam  contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+"
-  syntax match  jsDocParam        contained "\%(#\|'\|\"\|{\|}\|\w\|\.\|:\|\/\|\[\|]\|=\)\+"
+  syntax match  jsDocParam        contained "\%(#\|-\|'\|\"\|{\|}\|\w\|\.\|:\|\/\|\[\|]\|=\)\+"
   syntax region jsDocSeeTag       contained matchgroup=jsDocSeeTag start="{" end="}" contains=jsDocTags
 
   syntax case match
