@@ -88,7 +88,7 @@ syntax case match
 "" Syntax in the JavaScript code
 syntax match   jsFuncCall         /\k\+\%(\s*(\)\@=/
 syntax match   jsSpecial          "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)" contained
-syntax match   jsTemplateVar      "\${.\{-}}" contained
+syntax region  jsTemplateVar      matchgroup=jsBraces start=+${+ end=+}+ contained contains=@jsExpression
 syntax region  jsStringD          start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@htmlPreproc,@Spell
 syntax region  jsStringS          start=+'+  skip=+\\\('\|$\)+  end=+'\|$+  contains=jsSpecial,@htmlPreproc,@Spell
 syntax region  jsTemplateString   start=+`+  skip=+\\\(`\|$\)+  end=+`+     contains=jsTemplateVar,jsSpecial,@htmlPreproc
