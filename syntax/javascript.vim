@@ -217,7 +217,7 @@ exe 'syntax match jsFunction /\<function\>/ nextgroup=jsGenerator,jsFuncName,jsF
 
 syntax match   jsGenerator      contained '\*' nextgroup=jsFuncName skipwhite
 syntax match   jsFuncName       contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/ nextgroup=jsFuncArgs skipwhite
-syntax region  jsFuncArgs       contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas,jsFuncArgRest,jsAssignmentExpr,jsComment nextgroup=jsFuncBlock keepend skipwhite skipempty
+syntax region  jsFuncArgs       contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas,jsFuncArgRest,jsAssignmentExpr,jsComment,jsLineComment nextgroup=jsFuncBlock keepend skipwhite skipempty
 syntax match   jsFuncArgCommas  contained ','
 syntax match   jsFuncArgRest    contained /\%(\.\.\.[a-zA-Z_$][0-9a-zA-Z_$]*\))/
 
