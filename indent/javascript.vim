@@ -70,13 +70,13 @@ let s:ternary_q = '^\s\+?'
 
 let s:case_indent = &sw
 let s:case_indent_after = &sw
-let m = matchlist(&cinoptions, ':\(.\)')
-if (len(m) > 2)
-    let s:case_indent = m[1]
+let s:m = matchlist(&cinoptions, ':\(.\)')
+if (len(s:m) > 2)
+    let s:case_indent = s:m[1]
 endif
-let m = matchlist(&cinoptions, '=\(.\)')
-if (len(m) > 2)
-    let s:case_indent_after = m[1]
+let s:m = matchlist(&cinoptions, '=\(.\)')
+if (len(s:m) > 2)
+    let s:case_indent_after = s:m[1]
 endif
 " 2. Auxiliary Functions {{{1
 " ======================
