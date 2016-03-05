@@ -224,8 +224,9 @@ syntax match   jsFuncArgRest    contained /\%(\.\.\.[a-zA-Z_$][0-9a-zA-Z_$]*\))/
 exe 'syntax match jsArrowFunction /=>/ '.(exists('g:javascript_conceal_arrow_function') ? 'conceal cchar='.g:javascript_conceal_arrow_function : '')
 
 syntax keyword jsClassKeywords extends class contained
+syntax match   jsClassNoise /\./ contained
 syntax keyword jsClassMethodDefinitions get set static contained nextgroup=jsFuncName skipwhite skipempty
-syntax match jsClassDefinition /class [a-zA-Z_$][0-9a-zA-Z_$ \n]*/  contains=jsClassKeywords nextgroup=jsClassBlock skipwhite skipempty
+syntax match   jsClassDefinition /class [a-zA-Z_$][0-9a-zA-Z_$ \n.]*/  contains=jsClassKeywords,jsClassNoise nextgroup=jsClassBlock skipwhite skipempty
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
@@ -304,6 +305,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFuncBraces           Noise
   HiLink jsFuncParens           Noise
   HiLink jsClassBraces          Noise
+  HiLink jsClassNoise           Noise
   HiLink jsSpecial              Special
   HiLink jsTemplateVar          Special
   HiLink jsGlobalObjects        Special
