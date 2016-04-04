@@ -216,7 +216,7 @@ endif
 exe 'syntax match jsFunction /\<function\>/ nextgroup=jsGenerator,jsFuncName,jsFuncArgs skipwhite '.(exists('g:javascript_conceal_function') ? 'conceal cchar='.g:javascript_conceal_function : '')
 exe 'syntax match jsArrowFunction /=>/ skipwhite nextgroup=jsFuncBlock contains=jsFuncBraces '.(exists('g:javascript_conceal_arrow_function') ? 'conceal cchar='.g:javascript_conceal_arrow_function : '')
 
-syntax match   jsGenerator       contained '\*' nextgroup=jsFuncName skipwhite
+syntax match   jsGenerator       contained '\*' nextgroup=jsFuncName,jsFuncArgs skipwhite
 syntax match   jsFuncName        contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/ nextgroup=jsFuncArgs skipwhite
 syntax region  jsFuncArgs        contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas,jsFuncArgRest,jsAssignmentExpr,jsComment,jsLineComment nextgroup=jsFuncBlock keepend skipwhite skipempty
 syntax match   jsFuncArgCommas   contained ','
