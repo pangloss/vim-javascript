@@ -226,7 +226,7 @@ syntax match   jsFuncArgRestDots contained /\.\.\./
 " Matches a single keyword argument with no parens
 syntax match   jsArrowFuncArgs  /\(\k\)\+\s\+\(=>\)\@=/ skipwhite contains=jsFuncArgs extend
 " Matches a series of arguments surrounded in parens
-syntax match   jsArrowFuncArgs  /(\(\k\|,\|\s\|\n\)*)\s\+\(=>\)\@=/ skipwhite contains=jsFuncArgs extend
+syntax match   jsArrowFuncArgs  /(\(\k\|,\|\s\|\n\|\.\)*)\s\+\(=>\)\@=/ skipwhite contains=jsFuncArgs extend
 
 syntax keyword jsClassKeywords extends class contained
 syntax match   jsClassNoise /\./ contained
