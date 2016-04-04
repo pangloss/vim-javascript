@@ -218,15 +218,16 @@ exe 'syntax match jsArrowFunction /=>/ skipwhite nextgroup=jsFuncBlock contains=
 
 syntax match   jsGenerator       contained '\*' nextgroup=jsFuncName,jsFuncArgs skipwhite
 syntax match   jsFuncName        contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/ nextgroup=jsFuncArgs skipwhite
-syntax region  jsFuncArgs        contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas,jsFuncArgRest,jsAssignmentExpr,jsComment,jsLineComment nextgroup=jsFuncBlock keepend skipwhite skipempty
+syntax region  jsFuncArgs        contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas,jsFuncArgRest,jsComment,jsLineComment,jsStringS,jsStringD,jsNumber,jsFuncArgDestructuring nextgroup=jsFuncBlock keepend skipwhite skipempty
 syntax match   jsFuncArgCommas   contained ','
 syntax match   jsFuncArgRest     contained /\%(\.\.\.[a-zA-Z_$][0-9a-zA-Z_$]*\))/ contains=jsFuncArgRestDots
 syntax match   jsFuncArgRestDots contained /\.\.\./
+syntax match   jsFuncArgDestructuring contained /\({\|}\|=\|:\|(\|)\)/ extend
 
 " Matches a single keyword argument with no parens
-syntax match   jsArrowFuncArgs  /\(\k\)\+\s\+\(=>\)\@=/ skipwhite contains=jsFuncArgs extend
+syntax match   jsArrowFuncArgs  /\(\k\)\+\s*\(=>\)\@=/ skipwhite contains=jsFuncArgs nextgroup=jsArrowFunction
 " Matches a series of arguments surrounded in parens
-syntax match   jsArrowFuncArgs  /(\(\k\|,\|\s\|\n\|\.\)*)\s\+\(=>\)\@=/ skipwhite contains=jsFuncArgs extend
+syntax match   jsArrowFuncArgs  /(\%(.\)*)\s*\(=>\)\@=/ skipempty skipwhite contains=jsFuncArgs nextgroup=jsArrowFunction
 
 syntax keyword jsClassKeywords extends class contained
 syntax match   jsClassNoise /\./ contained
@@ -323,6 +324,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsModuleWords          Include
   HiLink jsDecorator            Special
   HiLink jsFuncArgRestDots      Noise
+  HiLink jsFuncArgDestructuring Noise
 
   HiLink jsDomErrNo             Constant
   HiLink jsDomNodeConsts        Constant
