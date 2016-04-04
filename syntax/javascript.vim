@@ -46,11 +46,11 @@ syntax region jsExportContainer      start="^\s\?export \?" end="$" contains=jsM
 
 "" JavaScript comments
 syntax keyword jsCommentTodo    TODO FIXME XXX TBD contained
-syntax region  jsLineComment    start=+\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell
+syntax region  jsLineComment    start=+\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell extend
 syntax region  jsEnvComment     start="\%^#!" end="$" display
 syntax region  jsLineComment    start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell fold
 syntax region  jsCvsTag         start="\$\cid:" end="\$" oneline contained
-syntax region  jsComment        start="/\*"  end="\*/" contains=jsCommentTodo,jsCvsTag,@Spell fold
+syntax region  jsComment        start="/\*"  end="\*/" contains=jsCommentTodo,jsCvsTag,@Spell fold extend
 
 "" JSDoc / JSDoc Toolkit
 if !exists("javascript_ignore_javaScriptdoc")
