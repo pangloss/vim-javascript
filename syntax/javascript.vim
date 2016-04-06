@@ -46,11 +46,11 @@ syntax region jsExportContainer      start="^\s\?export \?" end="$" contains=jsM
 
 "" JavaScript comments
 syntax keyword jsCommentTodo    TODO FIXME XXX TBD contained
-syntax region  jsLineComment    start=+\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell
+syntax region  jsLineComment    start=+\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell extend
 syntax region  jsEnvComment     start="\%^#!" end="$" display
 syntax region  jsLineComment    start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell fold
 syntax region  jsCvsTag         start="\$\cid:" end="\$" oneline contained
-syntax region  jsComment        start="/\*"  end="\*/" contains=jsCommentTodo,jsCvsTag,@Spell fold
+syntax region  jsComment        start="/\*"  end="\*/" contains=jsCommentTodo,jsCvsTag,@Spell fold extend
 
 "" JSDoc / JSDoc Toolkit
 if !exists("javascript_ignore_javaScriptdoc")
@@ -196,9 +196,9 @@ syntax cluster jsExpression contains=jsComment,jsLineComment,jsBlockComment,jsTa
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc fold
 syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsOf,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc fold
-syntax region  jsBlock      matchgroup=jsBraces       start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,jsObjectKey,@htmlPreproc,jsClassDefinition fold
 syntax region  jsClassBlock matchgroup=jsClassBraces  start="{"  end="}"  contains=jsFuncName,jsClassMethodDefinitions contained fold
 syntax region  jsFuncBlock  matchgroup=jsFuncBraces   start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,@htmlPreproc,jsClassDefinition fold
+syntax region  jsBlock      matchgroup=jsBraces       start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,jsObjectKey,@htmlPreproc,jsClassDefinition fold
 syntax region  jsTernaryIf  matchgroup=jsTernaryIfOperator start=+?+  end=+:+  contains=@jsExpression,jsTernaryIf
 
 "" catch errors caused by wrong parenthesis
@@ -218,15 +218,16 @@ exe 'syntax match jsArrowFunction /=>/ skipwhite nextgroup=jsFuncBlock contains=
 
 syntax match   jsGenerator       contained '\*' nextgroup=jsFuncName,jsFuncArgs skipwhite
 syntax match   jsFuncName        contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/ nextgroup=jsFuncArgs skipwhite
-syntax region  jsFuncArgs        contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas,jsFuncArgRest,jsAssignmentExpr,jsComment,jsLineComment nextgroup=jsFuncBlock keepend skipwhite skipempty
+syntax region  jsFuncArgs        contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas,jsFuncArgRest,jsComment,jsLineComment,jsStringS,jsStringD,jsNumber,jsFuncArgDestructuring nextgroup=jsFuncBlock keepend skipwhite skipempty
 syntax match   jsFuncArgCommas   contained ','
 syntax match   jsFuncArgRest     contained /\%(\.\.\.[a-zA-Z_$][0-9a-zA-Z_$]*\))/ contains=jsFuncArgRestDots
 syntax match   jsFuncArgRestDots contained /\.\.\./
+syntax match   jsFuncArgDestructuring contained /\({\|}\|=\|:\|(\|)\)/ extend
 
 " Matches a single keyword argument with no parens
-syntax match   jsArrowFuncArgs  /\(\k\)\+\s\+\(=>\)\@=/ skipwhite contains=jsFuncArgs extend
+syntax match   jsArrowFuncArgs  /\(\k\)\+\s*\(=>\)\@=/ skipwhite contains=jsFuncArgs nextgroup=jsArrowFunction
 " Matches a series of arguments surrounded in parens
-syntax match   jsArrowFuncArgs  /(\(\k\|,\|\s\|\n\|\.\)*)\s\+\(=>\)\@=/ skipwhite contains=jsFuncArgs extend
+syntax match   jsArrowFuncArgs  /(\%(.\)*)\s*\(=>\)\@=/ skipempty skipwhite contains=jsFuncArgs nextgroup=jsArrowFunction
 
 syntax keyword jsClassKeywords extends class contained
 syntax match   jsClassNoise /\./ contained
@@ -323,6 +324,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsModuleWords          Include
   HiLink jsDecorator            Special
   HiLink jsFuncArgRestDots      Noise
+  HiLink jsFuncArgDestructuring Noise
 
   HiLink jsDomErrNo             Constant
   HiLink jsDomNodeConsts        Constant
