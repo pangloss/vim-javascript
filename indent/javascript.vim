@@ -26,6 +26,17 @@ endif
 let s:cpo_save = &cpo
 set cpo&vim
 
+" Get shiftwidth value
+if exists('*shiftwidth')
+  func s:sw()
+    return shiftwidth()
+  endfunc
+else
+  func s:sw()
+    return &sw
+  endfunc
+endif
+
 " 1. Variables {{{1
 " ============
 
@@ -55,7 +66,7 @@ let s:continuation_regex = '\%([\\*+/.:]\|\%(<%\)\@<![=-]\|\W[|&?]\|||\|&&\|[^=]
 " TODO: this needs to deal with if ...: and so on
 let s:msl_regex = s:continuation_regex.'|'.s:expr_case
 
-let s:one_line_scope_regex = '\<\%(if\|else\|for\|while\)\>[^{;]*' . s:line_term
+let s:one_line_scope_regex = '\%(\<else\>\|\<\%(if\|for\|while\)\>\s*(.*)\)' . s:line_term
 
 " Regex that defines blocks.
 let s:block_regex = '\%([{[]\)\s*\%(|\%([*@]\=\h\w*,\=\s*\)\%(,\s*[*@]\=\h\w*\)*|\)\=' . s:line_term
@@ -68,15 +79,15 @@ let s:comma_last = ',\s*$'
 let s:ternary = '^\s\+[?|:]'
 let s:ternary_q = '^\s\+?'
 
-let s:case_indent = &sw
-let s:case_indent_after = &sw
-let m = matchlist(&cinoptions, ':\(.\)')
-if (len(m) > 2)
-    let s:case_indent = m[1]
+let s:case_indent = s:sw()
+let s:case_indent_after = s:sw()
+let s:m = matchlist(&cinoptions, ':\(.\)')
+if (len(s:m) > 2)
+    let s:case_indent = s:m[1]
 endif
-let m = matchlist(&cinoptions, '=\(.\)')
-if (len(m) > 2)
-    let s:case_indent_after = m[1]
+let s:m = matchlist(&cinoptions, '=\(.\)')
+if (len(s:m) > 2)
+    let s:case_indent_after = s:m[1]
 endif
 " 2. Auxiliary Functions {{{1
 " ======================
@@ -201,9 +212,9 @@ function s:GetVarIndent(lnum)
 
     " if the previous line doesn't end in a comma, return to regular indent
     if (line !~ s:comma_last)
-      return indent(prev_lnum) - &sw
+      return indent(prev_lnum) - s:sw()
     else
-      return indent(lvar) + &sw
+      return indent(lvar) + s:sw()
     endif
   endif
 
@@ -342,7 +353,7 @@ function GetJavascriptIndent()
           return indent(prevline)
         " otherwise we indent 1 level
         else
-          return indent(lvar) + &sw
+          return indent(lvar) + s:sw()
         endif
       endif
     endif
@@ -361,7 +372,7 @@ function GetJavascriptIndent()
 
   " If the line is comma first, dedent 1 level
   if (getline(prevline) =~ s:comma_first)
-    return indent(prevline) - &sw
+    return indent(prevline) - s:sw()
   endif
   if (getline(prevline) =~ s:expr_case)
     return indent(prevline) + s:case_indent_after
@@ -371,7 +382,7 @@ function GetJavascriptIndent()
     if (getline(prevline) =~ s:ternary_q)
       return indent(prevline)
     else
-      return indent(prevline) + &sw
+      return indent(prevline) + s:sw()
     endif
   endif
 
@@ -413,9 +424,9 @@ function GetJavascriptIndent()
   " If the previous line ended with a block opening, add a level of indent.
   if s:Match(lnum, s:block_regex)
     if (line =~ s:expr_case)
-      return indent(s:GetMSL(lnum, 0)) + &sw/2
+      return indent(s:GetMSL(lnum, 0)) + s:sw()/2
     else
-      return indent(s:GetMSL(lnum, 0)) + &sw
+      return indent(s:GetMSL(lnum, 0)) + s:sw()
     endif
   endif
 
@@ -428,12 +439,12 @@ function GetJavascriptIndent()
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts[0] == '1' && searchpair('(', '', ')', 'bW', s:skip_expr) > 0
       if col('.') + 1 == col('$')
-        return ind + &sw
+        return ind + s:sw()
       else
         return virtcol('.')
       endif
     elseif counts[1] == '1' || counts[2] == '1'
-      return ind + &sw
+      return ind + s:sw()
     else
       call cursor(v:lnum, vcol)
     end
@@ -443,18 +454,18 @@ function GetJavascriptIndent()
   " --------------------------
 
   let ind_con = ind
-  let ind = s:IndentWithContinuation(lnum, ind_con, &sw)
+  let ind = s:IndentWithContinuation(lnum, ind_con, s:sw())
 
   " }}}2
   "
   "
   let ols = s:InOneLineScope(lnum)
   if ols > 0
-    let ind = ind + &sw
+    let ind = ind + s:sw()
   else
     let ols = s:ExitingOneLineScope(lnum)
     while ols > 0 && ind > 0
-      let ind = ind - &sw
+      let ind = ind - s:sw()
       let ols = s:InOneLineScope(ols - 1)
     endwhile
   endif
