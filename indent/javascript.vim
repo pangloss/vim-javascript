@@ -384,6 +384,8 @@ function GetJavascriptIndent()
     else
       return indent(prevline) + s:sw()
     endif
+  elseif (getline(prevline) =~ '^\s\+:')
+      return indent(prevline) - s:sw()
   endif
 
   " If we are in a multi-line comment, cindent does the right thing.
