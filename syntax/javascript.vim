@@ -227,7 +227,7 @@ syntax match   jsFuncArgDestructuring contained /\({\|}\|=\|:\|(\|)\)/ extend
 " Matches a single keyword argument with no parens
 syntax match   jsArrowFuncArgs  /\(\k\)\+\s*\(=>\)\@=/ skipwhite contains=jsFuncArgs nextgroup=jsArrowFunction
 " Matches a series of arguments surrounded in parens
-syntax match   jsArrowFuncArgs  /(\%(.\)*)\s*\(=>\)\@=/ skipempty skipwhite contains=jsFuncArgs nextgroup=jsArrowFunction
+syntax match   jsArrowFuncArgs  /(\%(.)\)*)\s*\(=>\)\@=/ skipempty skipwhite contains=jsFuncArgs nextgroup=jsArrowFunction
 
 syntax keyword jsClassKeywords extends class contained
 syntax match   jsClassNoise /\./ contained
