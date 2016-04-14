@@ -222,7 +222,7 @@ syntax region  jsFuncArgs        contained matchgroup=jsFuncParens start='(' end
 syntax match   jsFuncArgCommas   contained ','
 syntax match   jsFuncArgRest     contained /\%(\.\.\.[a-zA-Z_$][0-9a-zA-Z_$]*\))/ contains=jsFuncArgRestDots
 syntax match   jsFuncArgRestDots contained /\.\.\./
-syntax match   jsFuncArgDestructuring contained /\({\|}\|=\|:\|(\|)\)/ extend
+syntax match   jsFuncArgDestructuring contained /\({\|}\|=\|:\|(\|)\|\[\|\]\)/ extend
 
 " Matches a single keyword argument with no parens
 syntax match   jsArrowFuncArgs  /\(\k\)\+\s*\(=>\)\@=/ skipwhite contains=jsFuncArgs nextgroup=jsArrowFunction
