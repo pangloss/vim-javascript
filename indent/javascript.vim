@@ -78,6 +78,7 @@ let s:comma_last = ',\s*$'
 
 let s:ternary = '^\s\+[?|:]'
 let s:ternary_q = '^\s\+?'
+let s:ternary_s = '^\s\+:'
 
 let s:case_indent = s:sw()
 let s:case_indent_after = s:sw()
@@ -378,12 +379,17 @@ function GetJavascriptIndent()
     return indent(prevline) + s:case_indent_after
   endif
 
+  " If in a multi line ternary, indent the next line
   if (line =~ s:ternary)
     if (getline(prevline) =~ s:ternary_q)
       return indent(prevline)
     else
       return indent(prevline) + s:sw()
     endif
+  endif
+  " If the previous line was the last part of a multiline ternary, dedent
+  if (getline(prevline) =~ s:ternary_s)
+    return indent(prevline) - &sw
   endif
 
   " If we are in a multi-line comment, cindent does the right thing.
