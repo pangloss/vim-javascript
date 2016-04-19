@@ -196,7 +196,7 @@ syntax cluster jsExpression contains=jsComment,jsLineComment,jsBlockComment,jsTa
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc fold
 syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsOf,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc fold
-syntax region  jsClassBlock matchgroup=jsClassBraces  start="{"  end="}"  contains=jsFuncName,jsClassMethodDefinitions contained fold
+syntax region  jsClassBlock matchgroup=jsClassBraces  start="{"  end="}"  contains=jsComment,jsLineComment,jsBlockComment,jsFuncName,jsClassMethodDefinitions contained fold
 syntax region  jsFuncBlock  matchgroup=jsFuncBraces   start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,@htmlPreproc,jsClassDefinition fold
 syntax region  jsBlock      matchgroup=jsBraces       start="{"  end="}"  contains=@jsAll,jsParensErrA,jsParensErrB,jsParen,jsBracket,jsBlock,jsObjectKey,@htmlPreproc,jsClassDefinition fold
 syntax region  jsTernaryIf  matchgroup=jsTernaryIfOperator start=+?+  end=+:+  contains=@jsExpression,jsTernaryIf
