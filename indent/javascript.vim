@@ -78,9 +78,6 @@ let s:var_stmt = '^\s*\%(const\|let\|var\)'
 let s:comma_first = '^\s*,'
 let s:comma_last = ',\s*$'
 
-let s:ternary = '^\s\+[?|:]'
-let s:ternary_q = '^\s\+?'
-
 let s:case_indent = s:sw()
 let s:case_indent_after = s:sw()
 let s:m = matchlist(&cinoptions, ':\(.\)')
