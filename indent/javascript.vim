@@ -71,13 +71,12 @@ let s:one_line_scope_regex = '\%(\%(\<else\>\|\<\%(if\|for\|while\)\>\s*(.*)\)\|
 " Regex that defines blocks.
 let s:block_regex = '\%([{([]\)\s*\%(|\%([*@]\=\h\w*,\=\s*\)\%(,\s*[*@]\=\h\w*\)*|\)\=' . s:line_term
 
+let s:operator_first = '^\s*\%([-*/+.:?]\|||\|&&\)'
+
 let s:var_stmt = '^\s*\%(const\|let\|var\)'
 
 let s:comma_first = '^\s*,'
 let s:comma_last = ',\s*$'
-
-let s:ternary = '^\s\+[?|:]'
-let s:ternary_q = '^\s\+?'
 
 let s:case_indent = s:sw()
 let s:case_indent_after = s:sw()
@@ -378,13 +377,31 @@ function GetJavascriptIndent()
     return indent(prevline) + s:case_indent_after
   endif
 
-  if (line =~ s:ternary)
-    if (getline(prevline) =~ s:ternary_q)
+  " If line starts with operator...
+  if (s:Match(v:lnum, s:operator_first))
+    if (s:Match(prevline, s:operator_first))
+      " and so does previous line, don't indent
       return indent(prevline)
-    else
+    end
+    let counts = s:LineHasOpeningBrackets(prevline)
+    if counts[0] == '2'
+      call cursor(prevline, 1)
+      " Search for the opening tag
+      let mnum = searchpair('(', '', ')', 'bW', s:skip_expr)
+      if mnum > 0 && s:Match(mnum, s:operator_first)
+        return indent(mnum)
+      end
+    elseif counts[0] != '1' && counts[1] != '1' && counts[2] != '1'
+      " otherwise, indent 1 level
       return indent(prevline) + s:sw()
-    endif
-  endif
+    end
+    " If previous line starts with a operator...
+  elseif s:Match(prevline, s:operator_first) && !s:Match(prevline, s:comma_last)
+    let countscur = s:LineHasOpeningBrackets(v:lnum)
+    if countscur[0] != '2'
+      return indent(prevline) - s:sw()
+    end
+  end
 
   " If we are in a multi-line comment, cindent does the right thing.
   if s:IsInMultilineComment(v:lnum, 1) && !s:IsLineComment(v:lnum, 1)
