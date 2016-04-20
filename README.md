@@ -37,6 +37,17 @@ And install it:
 
       git clone https://github.com/pangloss/vim-javascript.git ~/.vim/bundle/vim-javascript
 
+### Install with [vim-plug](https://github.com/junegunn/vim-plug)
+
+Add to vimrc:
+    
+    Plug 'pangloss/vim-javascript'
+    
+And install it:
+
+    :so ~/.vimrc
+    :PlugInstall
+    
 ## Configuration
 
 The following variables control certain syntax highlighting features. You can
