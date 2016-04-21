@@ -119,13 +119,13 @@ function s:PrevNonBlankNonString(lnum)
     " Go in and out of blocks comments as necessary.
     " If the line isn't empty (with opt. comment) or in a string, end search.
     let line = getline(lnum)
-    if line =~ '/\*'
+    if s:IsInMultilineComment(lnum, matchend(line, '/\*') - 1)
       if in_block
         let in_block = 0
       else
         break
       endif
-    elseif !in_block && line =~ '\*/'
+    elseif !in_block && s:IsInMultilineComment(lnum, matchend(line, '\*/') - 1)
       let in_block = 1
     elseif !in_block && line !~ '^\s*\%(//\).*$' && !(s:IsInStringOrComment(lnum, 1) && s:IsInStringOrComment(lnum, strlen(line)))
       break
