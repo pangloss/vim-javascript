@@ -214,7 +214,7 @@ syntax match   jsFuncArgRest     contained /\%(\.\.\.[a-zA-Z_$][0-9a-zA-Z_$]*\))
 syntax match   jsFuncArgRestDots contained /\.\.\./
 
 " Matches a single keyword argument with no parens
-syntax match   jsArrowFuncArgs  /\(\k\)\+\s*\(=>\)\@=/ skipwhite contains=jsFuncArgs nextgroup=jsArrowFunction extend
+syntax match   jsArrowFuncArgs  /\k\+\s*\%(=>\)\@=/ skipwhite contains=jsFuncArgs nextgroup=jsArrowFunction extend
 " Matches a series of arguments surrounded in parens
 syntax match   jsArrowFuncArgs  /([^()]*)\s*\(=>\)\@=/ skipempty skipwhite contains=jsFuncArgs nextgroup=jsArrowFunction extend
 
