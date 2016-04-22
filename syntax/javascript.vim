@@ -21,12 +21,12 @@ setlocal iskeyword+=$
 
 syntax sync fromstart
 
-syntax match   jsNoise           /\%(:\|,\|\;\|\.\)/
+syntax match   jsNoise           /[:,\;\.]\{1}/
 
 "" Program Keywords
 syntax keyword jsStorageClass   const var let
 syntax keyword jsOperator       delete instanceof typeof void new in
-syntax match   jsOperator       /\(!\||\|&\|+\|-\|<\|>\|=\|%\|\/\|*\|\~\|\^\)/
+syntax match   jsOperator       /[\!\|\&\+\-\<\>\=\%\/\*\~\^]\{1}/
 syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
 syntax keyword jsModules        import export contained
