@@ -196,12 +196,6 @@ syntax match   jsParensErrA     contained "\]"
 syntax match   jsParensErrB     contained ")"
 syntax match   jsParensErrC     contained "}"
 
-if main_syntax == "javascript"
-  syntax sync clear
-  syntax sync ccomment jsComment minlines=200
-  syntax sync match jsHighlight grouphere jsBlock /{/
-endif
-
 syntax match   jsFuncArgDestructuring contained /\({\|}\|=\|:\|\[\|\]\)/ extend
 exe 'syntax match jsFunction /\<function\>/ nextgroup=jsGenerator,jsFuncName,jsFuncArgs skipwhite '.(exists('g:javascript_conceal_function') ? 'conceal cchar='.g:javascript_conceal_function : '')
 exe 'syntax match jsArrowFunction /=>/ skipwhite nextgroup=jsFuncBlock contains=jsFuncBraces '.(exists('g:javascript_conceal_arrow_function') ? 'conceal cchar='.g:javascript_conceal_arrow_function : '')
