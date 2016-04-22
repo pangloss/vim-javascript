@@ -36,7 +36,7 @@ syntax keyword jsArgsObj        arguments
 
 syntax region jsImportContainer      start="^\s\?import \?" end=";\|$" contains=jsModules,jsModuleWords,jsLineComment,jsComment,jsStringS,jsStringD,jsTemplateString,jsNoise,jsBlock
 
-syntax region jsExportContainer      start="^\s\?export \?" end="$" contains=jsModules,jsModuleWords,jsComment,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsAssignmentExpr,jsArgsObj,jsBlock,jsClassDefinition
+syntax region jsExportContainer      start="^\s\?export \?" end="$" contains=jsModules,jsModuleWords,jsComment,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsArgsObj,jsBlock,jsClassDefinition
 
 "" JavaScript comments
 syntax keyword jsCommentTodo    TODO FIXME XXX TBD contained
@@ -105,12 +105,6 @@ syntax match   jsObjectKey        /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\)\@=/ cont
 syntax match   jsFunctionKey      /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\s*function\s*\)\@=/ contained
 syntax match   jsDecorator        "@" display contains=jsDecoratorFunction nextgroup=jsDecoratorFunction skipwhite
 syntax match   jsDecoratorFunction "[a-zA-Z_][a-zA-Z0-9_.]*" display contained nextgroup=jsFunc skipwhite
-
-syntax match   jsAssignmentExpr     /\v%([a-zA-Z_$]\k*\.)*[a-zA-Z_$]\k*\s*\=\>@!/ contains=jsFuncAssignExpr,jsAssignExpIdent,jsPrototype,jsOperator,jsThis,jsNoise,jsArgsObj
-syntax match   jsAssignExpIdent     /\v[a-zA-Z_$]\k*\ze%(\s*\=)/ contained
-syntax match   jsFuncAssignExpr     /\v%(%([a-zA-Z_$]\k*\.)*[a-zA-Z_$]\k*\s*\=\s*){-1,}\ze%(function\s*\*?\s*\()/ contains=jsFuncAssignObjChain,jsFuncAssignIdent,jsFunction,jsPrototype,jsOperator,jsThis,jsArgsObj contained
-syntax match   jsFuncAssignObjChain /\v%([a-zA-Z_$]\k*\.)+/ contains=jsPrototype,jsNoise contained
-syntax match   jsFuncAssignIdent    /\v[a-zA-Z_$]\k*\ze%(\s*\=)/ contained
 
 exe 'syntax keyword jsNull      null      '.(exists('g:javascript_conceal_null')        ? 'conceal cchar='.g:javascript_conceal_null        : '')
 exe 'syntax keyword jsReturn    return    '.(exists('g:javascript_conceal_return')      ? 'conceal cchar='.g:javascript_conceal_return      : '')
@@ -188,7 +182,7 @@ endif "DOM/HTML/CSS
 "" end DOM/HTML/CSS specified things
 
 "" Code blocks
-syntax cluster jsExpression contains=jsComment,jsLineComment,jsBlockComment,jsTaggedTemplate,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsStatic,jsSuper,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsCommonJS,jsAssignmentExpr,jsImportContainer,jsExportContainer,jsArgsObj,jsDecorator,jsAsyncKeyword,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs
+syntax cluster jsExpression contains=jsComment,jsLineComment,jsBlockComment,jsTaggedTemplate,jsTemplateString,jsStringD,jsStringS,jsRegexpString,jsNumber,jsFloat,jsThis,jsStatic,jsSuper,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsBlock,jsFuncCall,jsUndefined,jsNan,jsKeyword,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsCommonJS,jsImportContainer,jsExportContainer,jsArgsObj,jsDecorator,jsAsyncKeyword,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs
 syntax cluster jsAll        contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsException
 syntax region  jsBracket    matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensErrB,jsParensErrC,jsBracket,jsParen,jsBlock,@htmlPreproc fold
 syntax region  jsParen      matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsOf,jsParensErrA,jsParensErrC,jsParen,jsBracket,jsBlock,@htmlPreproc fold extend
