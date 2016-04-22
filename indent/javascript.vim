@@ -43,7 +43,10 @@ endif
 let s:js_keywords = '^\s*\(break\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)'
 let s:expr_case = '^\s*\(case\s\+[^\:]*\|default\)\s*:\s*'
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = 'string\|regex\|comment\c'
+let s:syng_strcom = '\%(\%(template\)\@<!string\|regex\|comment\)\c'
+
+" Regex of syntax group names that are or delimit template strings
+let s:syng_template = 'template\c'
 
 " Regex of syntax group names that are strings.
 let s:syng_string = 'regex\c'
@@ -99,6 +102,11 @@ endfunction
 " Check if the character at lnum:col is inside a string.
 function s:IsInString(lnum, col)
   return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_string
+endfunction
+
+" Check if the character at lnum:col is inside a template string.
+function s:IsInTempl(lnum, col)
+  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_template
 endfunction
 
 " Check if the character at lnum:col is inside a multi-line comment.
@@ -409,6 +417,14 @@ function GetJavascriptIndent()
       return indent(prevline) - s:sw()
     end
   end
+
+  if getline(prevline) =~ '^\s*`$' && s:IsInTempl(v:lnum, 1)
+    if line !~ '^\s*`$'
+      return indent(prevline) + s:sw()
+    endif
+  elseif line =~ '^\s*`$' && s:IsInTempl(prevline, 1)
+    return indent(prevline) - s:sw()
+  endif
 
   " If we are in a multi-line comment, cindent does the right thing.
   if s:IsInMultilineComment(v:lnum, 1) && !s:IsLineComment(v:lnum, 1)
