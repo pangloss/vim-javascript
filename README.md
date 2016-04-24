@@ -57,6 +57,17 @@ Disables JSDoc syntax highlighting
 
 Default Value: 0
 
+-----------------
+
+```
+set foldmethod=syntax
+```
+
+Enables code folding based on our syntax file.
+
+Please note this can have a dramatic effect on performance and because it is a
+global vim option, we do not set it ourselves.
+
 
 ## Concealing Characters
 
