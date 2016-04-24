@@ -67,8 +67,10 @@ if !exists("javascript_ignore_javaScriptdoc")
   " other tags (no extra syntax)
   syntax match  jsDocTags         contained "@\(abstract\|access\|accessor\|author\|classdesc\|constant\|const\|constructor\|copyright\|deprecated\|desc\|description\|dict\|event\|example\|file\|file[oO]verview\|final\|function\|global\|ignore\|inheritDoc\|inner\|instance\|interface\|license\|localdoc\|method\|mixin\|nosideeffects\|override\|overview\|preserve\|private\|protected\|public\|readonly\|since\|static\|struct\|todo\|summary\|undocumented\|virtual\)\>"
 
-  syntax region jsDocType         start="{" end="}" oneline contained nextgroup=jsDocParam skipwhite
+  syntax region jsDocType         matchgroup=jsDocTypeBrackets start="{" end="}" oneline contained nextgroup=jsDocParam skipwhite contains=jsDocTypeRecord
   syntax match  jsDocType         contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+" nextgroup=jsDocParam skipwhite
+  syntax region jsDocTypeRecord   start=/{/ end=/}/ contained extend contains=jsDocTypeRecord
+  syntax region jsDocTypeRecord   start=/\[/ end=/\]/ contained extend contains=jsDocTypeRecord
   syntax region jsDocTypeNoParam  start="{" end="}" oneline contained
   syntax match  jsDocTypeNoParam  contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+"
   syntax match  jsDocParam        contained "\%(#\|\$\|-\|'\|\"\|{.\{-}}\|\w\|\.\|:\|\/\|\[.{-}]\|=\)\+"
@@ -248,6 +250,8 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsDocTags              Special
   HiLink jsDocSeeTag            Function
   HiLink jsDocType              Type
+  HiLink jsDocTypeBrackets      jsDocType
+  HiLink jsDocTypeRecord        jsDocType
   HiLink jsDocTypeNoParam       Type
   HiLink jsDocParam             Label
   HiLink jsStringS              String
