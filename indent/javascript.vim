@@ -159,7 +159,7 @@ function s:GetMSL(lnum, in_one_line_scope)
       let msl = lnum
 
     " if there are more closing brackets, continue from the line which has the matching opening bracket
-    elseif col2 > 0 && !s:IsInStringOrComment(msl, col2) && s:LineHasOpeningBrackets(msl)[0] == '2'
+    elseif col2 > 0 && !s:IsInStringOrComment(msl, col2) && s:LineHasOpeningBrackets(msl)[0] == '2' && !a:in_one_line_scope
       call cursor(msl, 1)
       if searchpair('(', '', ')', 'bW', s:skip_expr) > 0
         let lnum = line('.')
@@ -490,12 +490,12 @@ function GetJavascriptIndent()
   if line =~ '[[({]'
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts[0] == '1' && searchpair('(', '', ')', 'bW', s:skip_expr) > 0
-      if col('.') + 1 == col('$')
+      if col('.') + 1 == col('$') || line =~ s:one_line_scope_regex
         return ind + s:sw()
       else
         return virtcol('.')
       endif
-    elseif counts[1] == '1' || counts[2] == '1'
+    elseif counts[1] == '1' || counts[2] == '1' && counts[0] != '2'
       return ind + s:sw()
     else
       call cursor(v:lnum, vcol)
