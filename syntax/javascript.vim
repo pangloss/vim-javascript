@@ -16,12 +16,6 @@ if !exists('g:javascript_conceal')
   let g:javascript_conceal = 0
 endif
 
-"" Drop fold if it is set but VIM doesn't support it.
-let b:javascript_fold='true'
-if version < 600    " Don't support the old version
-  unlet! b:javascript_fold
-endif
-
 "" dollar sign is permittd anywhere in an identifier
 setlocal iskeyword+=$
 
