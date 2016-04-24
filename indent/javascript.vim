@@ -63,7 +63,7 @@ let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_st
 let s:line_term = '\s*\%(\%(\/\/\).*\)\=$'
 
 " Regex that defines continuation lines, not including (, {, or [.
-let s:continuation_regex = '\%([\\*+/.:]\|\%(<%\)\@<![=-]\|\W[|&?]\|||\|&&\|[^=]=[^=>].*,\)' . s:line_term
+let s:continuation_regex = '\%([\\*/.:]\|+\@<!+\|-\@<!-\|\%(<%\)\@<!=\|\W[|&?]\|||\|&&\|[^=]=[^=>].*,\)' . s:line_term
 
 " Regex that defines continuation lines.
 " TODO: this needs to deal with if ...: and so on
@@ -74,7 +74,7 @@ let s:one_line_scope_regex = '\%(\%(\<else\>\|\<\%(if\|for\|while\)\>\s*(\%([^()
 " Regex that defines blocks.
 let s:block_regex = '\%([{([]\)\s*\%(|\%([*@]\=\h\w*,\=\s*\)\%(,\s*[*@]\=\h\w*\)*|\)\=' . s:line_term
 
-let s:operator_first = '^\s*\%([-*/+.:?]\|||\|&&\)'
+let s:operator_first = '^\s*\%([*/.:?]\|\([-+]\)\1\@!\|||\|&&\)'
 
 let s:var_stmt = '^\s*\%(const\|let\|var\)'
 
