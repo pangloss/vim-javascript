@@ -65,10 +65,6 @@ let s:line_term = '\s*\%(\%(\/\/\).*\)\=$'
 " Regex that defines continuation lines, not including (, {, or [.
 let s:continuation_regex = '\%([\\*/.:]\|+\@<!+\|-\@<!-\|\%(<%\)\@<!=\|\W[|&?]\|||\|&&\|[^=]=[^=>].*,\)' . s:line_term
 
-" Regex that defines continuation lines.
-" TODO: this needs to deal with if ...: and so on
-let s:msl_regex = s:continuation_regex.'\|'.s:expr_case
-
 let s:one_line_scope_regex = '\%(\%(\<else\>\|\<\%(if\|for\|while\)\>\s*(\%([^()]*\|[^()]*(\%([^()]*\|[^()]*(\%([^()]*\|[^()]*([^()]*)[^()]*\))[^()]*\))[^()]*\))\)\|=>\)' . s:line_term
 
 " Regex that defines blocks.
@@ -81,16 +77,6 @@ let s:var_stmt = '^\s*\%(const\|let\|var\)'
 let s:comma_first = '^\s*,'
 let s:comma_last = ',\s*$'
 
-let s:case_indent = s:sw()
-let s:case_indent_after = s:sw()
-let s:m = matchlist(&cinoptions, ':\(.\)')
-if (len(s:m) > 2)
-    let s:case_indent = s:m[1]
-endif
-let s:m = matchlist(&cinoptions, '=\(.\)')
-if (len(s:m) > 2)
-    let s:case_indent_after = s:m[1]
-endif
 " 2. Auxiliary Functions {{{1
 " ======================
 
@@ -152,10 +138,10 @@ function s:GetMSL(lnum, in_one_line_scope)
     " If we have a continuation line, or we're in a string, use line as MSL.
     " Otherwise, terminate search as we have found our MSL already.
     let line = getline(lnum)
-    let col = match(line, s:msl_regex) + 1
+    let col = match(line, s:continuation_regex) + 1
     let line2 = getline(msl)
     let col2 = matchend(line2, ')')
-    if (col > 0 && !s:IsInStringOrComment(lnum, col)) || s:IsInString(lnum, strlen(line))
+    if (col > 0 && !s:IsInStringOrComment(lnum, col) && !s:Match(lnum, s:expr_case)) || s:IsInString(lnum, strlen(line))
       let msl = lnum
 
     " if there are more closing brackets, continue from the line which has the matching opening bracket
@@ -327,7 +313,6 @@ endfunction
 function GetJavascriptIndent()
   " 3.1. Setup {{{2
   " ----------
-
   " Set up variables for restoring position in file.  Could use v:lnum here.
   let vcol = col('.')
 
@@ -341,15 +326,7 @@ function GetJavascriptIndent()
   let prevline = prevnonblank(v:lnum - 1)
 
   if (line =~ s:expr_case)
-    if (getline(prevline) =~ s:expr_case)
-      return indent(prevline)
-    else
-      if (getline(prevline) =~ s:block_regex)
-        return indent(prevline) + s:case_indent
-      else
-        return indent(prevline) - s:case_indent_after
-      endif
-    endif
+    return cindent(v:lnum)
   endif
   " If we got a closing bracket on an empty line, find its match and indent
   " according to it.  For parentheses we indent to its column - 1, for the
@@ -392,9 +369,6 @@ function GetJavascriptIndent()
   " If the line is comma first, dedent 1 level
   if (getline(prevline) =~ s:comma_first)
     return indent(prevline) - s:sw()
-  endif
-  if (getline(prevline) =~ s:expr_case)
-    return indent(prevline) + s:case_indent_after
   endif
 
   " If line starts with an operator...
@@ -475,11 +449,7 @@ function GetJavascriptIndent()
 
   " If the previous line ended with a block opening, add a level of indent.
   if s:Match(lnum, s:block_regex)
-    if (line =~ s:expr_case)
-      return indent(s:GetMSL(lnum, 0)) + s:sw()/2
-    else
-      return indent(s:GetMSL(lnum, 0)) + s:sw()
-    endif
+    return indent(s:GetMSL(lnum, 0)) + s:sw()
   endif
 
   " Set up variables for current line.
