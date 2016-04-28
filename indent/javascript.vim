@@ -360,7 +360,7 @@ function GetJavascriptIndent()
       if line[col-1]==')' && col('.') != col('$') - 1
         let ind = virtcol('.')-1
       else
-        let ind = indent(s:GetMSL(line('.'), 0))
+        let ind = s:InMultiVarStatement(line('.')) ? indent(line('.')) : indent(s:GetMSL(line('.'), 0))
       endif
     endif
     return ind
@@ -369,7 +369,9 @@ function GetJavascriptIndent()
   " If the line is comma first, dedent 1 level
   if (getline(prevline) =~ s:comma_first)
     return indent(prevline) - s:sw()
-  endif
+  elseif getline(s:PrevNonBlankNonString(prevline - 1)) =~ '[])}]' . s:comma_last && getline(prevline) !~ s:comma_last && getline(prevline) !~ s:block_regex
+    return indent(prevline) - s:sw()
+  end
 
   " If line starts with an operator...
   if (s:Match(v:lnum, s:operator_first))
@@ -390,17 +392,26 @@ function GetJavascriptIndent()
       return indent(prevline) + s:sw()
     end
     " If previous line starts with an operator...
-  elseif s:Match(prevline, s:operator_first) && !s:Match(prevline, s:comma_last) && !s:Match(prevline, '};\=' . s:line_term)
+  elseif (s:Match(prevline, s:operator_first) && !s:Match(prevline, s:comma_last) && !s:Match(prevline, '};\=' . s:line_term)) || s:Match(prevline, ');\=' . s:line_term)
     let counts = s:LineHasOpeningBrackets(prevline)
-    if counts[0] == '2' && counts[1] == '1'
+    if counts[0] == '2' && !s:Match(prevline, s:operator_first)
       call cursor(prevline, 1)
       " Search for the opening tag
       let mnum = searchpair('(', '', ')', 'bW', s:skip_expr)
-      if mnum > 0 && !s:Match(mnum, s:operator_first)
-        return indent(mnum) + s:sw()
+      if mnum > 0 && s:Match(mnum, s:operator_first)
+        return indent(mnum) - s:sw()
       end
-    elseif counts[0] != '1' && counts[1] != '1' && counts[2] != '1'
-      return indent(prevline) - s:sw()
+    elseif s:Match(prevline, s:operator_first)
+      if counts[0] == '2' && counts[1] == '1'
+        call cursor(prevline, 1)
+        " Search for the opening tag
+        let mnum = searchpair('(', '', ')', 'bW', s:skip_expr)
+        if mnum > 0 && !s:Match(mnum, s:operator_first)
+          return indent(mnum) + s:sw()
+        end
+      elseif counts[0] != '1' && counts[1] != '1' && counts[2] != '1'
+        return indent(prevline) - s:sw()
+      end
     end
   end
 
@@ -449,7 +460,7 @@ function GetJavascriptIndent()
 
   " If the previous line ended with a block opening, add a level of indent.
   if s:Match(lnum, s:block_regex)
-    return indent(s:GetMSL(lnum, 0)) + s:sw()
+    return s:InMultiVarStatement(lnum) ? indent(lnum) + s:sw() : indent(s:GetMSL(lnum, 0)) + s:sw()
   endif
 
   " Set up variables for current line.
@@ -457,7 +468,7 @@ function GetJavascriptIndent()
   let ind = indent(lnum)
   " If the previous line contained an opening bracket, and we are still in it,
   " add indent depending on the bracket type.
-  if line =~ '[[({]'
+  if line =~ '[[({})\]]'
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts[0] == '1' && searchpair('(', '', ')', 'bW', s:skip_expr) > 0
       if col('.') + 1 == col('$') || line =~ s:one_line_scope_regex
@@ -465,29 +476,17 @@ function GetJavascriptIndent()
       else
         return virtcol('.')
       endif
-    elseif counts[1] == '1' || counts[2] == '1' && counts[0] != '2'
-      return ind + s:sw()
-    else
-      call cursor(v:lnum, vcol)
-    end
-  elseif line =~ '.\+};\=' . s:line_term
-    call cursor(lnum, 1)
-    " Search for the opening tag
-    let mnum = searchpair('{', '', '}', 'bW', s:skip_expr)
-    if mnum > 0
-      return indent(s:GetMSL(mnum, 0)) 
-    end
-  elseif line =~ '.\+);\=' || line =~ s:comma_last
-    let counts = s:LineHasOpeningBrackets(lnum)
-    if counts[0] == '2'
+    elseif counts[0] == '2'
       call cursor(lnum, 1)
       " Search for the opening tag
       let mnum = searchpair('(', '', ')', 'bW', s:skip_expr)
       if mnum > 0
         return indent(s:GetMSL(mnum, 0)) 
       end
-    elseif line !~ s:var_stmt
-      return indent(prevline)
+    elseif counts[1] == '1' || counts[2] == '1' && counts[0] != '2'
+      return ind + s:sw()
+    else
+      call cursor(v:lnum, vcol)
     end
   end
 
