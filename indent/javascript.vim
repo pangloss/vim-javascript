@@ -70,7 +70,7 @@ let s:one_line_scope_regex = '\%(\%(\<else\>\|\<\%(if\|for\|while\)\>\s*(\%([^()
 " Regex that defines blocks.
 let s:block_regex = '\%([{([]\)\s*\%(|\%([*@]\=\h\w*,\=\s*\)\%(,\s*[*@]\=\h\w*\)*|\)\=' . s:line_term
 
-let s:operator_first = '^\s*\%([*/.:?]\|\([-+]\)\1\@!\|||\|&&\)'
+let s:operator_first = '^\s*\%([*.:?]\|\([/-+]\)\1\@!\|||\|&&\)'
 
 let s:var_stmt = '^\s*\%(const\|let\|var\)'
 
