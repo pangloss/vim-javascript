@@ -325,6 +325,11 @@ function GetJavascriptIndent()
   " previous nonblank line number
   let prevline = prevnonblank(v:lnum - 1)
 
+  " If we are in a multi-line comment, cindent does the right thing.
+  if s:IsInMultilineComment(v:lnum, 1) && !s:IsLineComment(v:lnum, 1)
+    return cindent(v:lnum)
+  endif
+
   if (line =~ s:expr_case)
     return cindent(v:lnum)
   endif
@@ -421,11 +426,6 @@ function GetJavascriptIndent()
     endif
   elseif line =~ '^\s*`$' && s:IsInTempl(prevline, 1)
     return indent(prevline) - s:sw()
-  endif
-
-  " If we are in a multi-line comment, cindent does the right thing.
-  if s:IsInMultilineComment(v:lnum, 1) && !s:IsLineComment(v:lnum, 1)
-    return cindent(v:lnum)
   endif
 
   " Check for multiple var assignments
