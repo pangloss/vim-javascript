@@ -65,7 +65,22 @@ let s:line_term = '\s*\%(\%(\/\/\).*\)\=$'
 " Regex that defines continuation lines, not including (, {, or [.
 let s:continuation_regex = '\%([\\*/.:]\|+\@<!+\|-\@<!-\|\%(<%\)\@<!=\|\W[|&?]\|||\|&&\|[^=]=[^=>].*,\)' . s:line_term
 
-let s:one_line_scope_regex = '\%(\%(\<else\>\|\<\%(if\|for\|while\)\>\s*(\%([^()]*\|[^()]*(\%([^()]*\|[^()]*(\%([^()]*\|[^()]*([^()]*)[^()]*\))[^()]*\))[^()]*\))\)\|=>\)' . s:line_term
+let s:one_line_scope_regex = '\%(\<else\>\|=>\)' . s:line_term
+
+function s:Onescope(lnum)
+  if getline(a:lnum) =~ s:one_line_scope_regex
+    return 1
+  end
+  let mypos = col('.')
+  call cursor(a:lnum, 1)
+  if search('\<\%(while\|for\|if\)\>\s*(', 'ce', a:lnum) > 0 && searchpair('(', '', ')', 'W', s:skip_expr, a:lnum) > 0 && col('.') + 1 == col('$')
+    call cursor(a:lnum, mypos)
+    return 1
+  else
+    call cursor(a:lnum, mypos)
+    return 0
+  end
+endfunction
 
 " Regex that defines blocks.
 let s:block_regex = '\%([{([]\)\s*\%(|\%([*@]\=\h\w*,\=\s*\)\%(,\s*[*@]\=\h\w*\)*|\)\=' . s:line_term
@@ -160,7 +175,7 @@ function s:GetMSL(lnum, in_one_line_scope)
       if a:in_one_line_scope
         break
       end
-      let msl_one_line = s:Match(lnum, s:one_line_scope_regex)
+      let msl_one_line = s:Onescope(lnum)
       if msl_one_line == 0
         break
       endif
@@ -285,7 +300,7 @@ endfunction
 
 function s:InOneLineScope(lnum)
   let msl = s:GetMSL(a:lnum, 1)
-  if msl > 0 && s:Match(msl, s:one_line_scope_regex)
+  if msl > 0 && s:Onescope(msl)
     return msl
   endif
   return 0
@@ -295,11 +310,11 @@ function s:ExitingOneLineScope(lnum)
   let msl = s:GetMSL(a:lnum, 1)
   if msl > 0
     " if the current line is in a one line scope ..
-    if s:Match(msl, s:one_line_scope_regex)
+    if s:Onescope(msl)
       return 0
     else
       let prev_msl = s:GetMSL(msl - 1, 1)
-      if s:Match(prev_msl, s:one_line_scope_regex)
+      if s:Onescope(prev_msl)
         return prev_msl
       endif
     endif
@@ -472,7 +487,7 @@ function GetJavascriptIndent()
   if line =~ '[[({})\]]'
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts[0] == '1' && searchpair('(', '', ')', 'bW', s:skip_expr) > 0
-      if col('.') + 1 == col('$') || line =~ s:one_line_scope_regex
+      if col('.') + 1 == col('$') || s:Onescope(lnum)
         return ind + s:sw()
       else
         return virtcol('.')
