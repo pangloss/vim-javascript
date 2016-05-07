@@ -43,7 +43,7 @@ endif
 let s:js_keywords = '^\s*\(break\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)'
 let s:expr_case = '^\s*\(case\s\+[^\:]*\|default\)\s*:\s*'
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = '\%(\%(template\)\@<!string\|regex\|comment\)\c'
+let s:syng_strcom = '\%(string\|regex\|comment\)\c'
 
 " Regex of syntax group names that are or delimit template strings
 let s:syng_template = 'template\c'
@@ -136,7 +136,7 @@ function s:PrevNonBlankNonString(lnum)
       endif
     elseif !in_block && s:IsInMultilineComment(lnum, matchend(line, '\*/') - 1)
       let in_block = 1
-    elseif !in_block && line !~ '^\s*\%(//\).*$' && !(s:IsInStringOrComment(lnum, 1) && s:IsInStringOrComment(lnum, strlen(line)))
+    elseif !in_block && line !~ '^\s*\%(//\).*$' && !(s:IsInStringOrComment(lnum, 1) && !s:IsInTempl(lnum,1) && s:IsInStringOrComment(lnum, strlen(line)))
       break
     endif
     let lnum = prevnonblank(lnum - 1)
