@@ -17,6 +17,7 @@ setlocal nosmartindent
 setlocal indentexpr=GetJavascriptIndent()
 setlocal formatexpr=Fixedgq(v:lnum,v:count)
 setlocal indentkeys=0{,0},0),0],0\,:,!^F,o,O,e
+setlocal cinoptions+=j1,J1
 
 " Only define the function once.
 if exists("*GetJavascriptIndent")
