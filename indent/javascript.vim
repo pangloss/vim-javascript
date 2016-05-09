@@ -345,6 +345,11 @@ function GetJavascriptIndent()
   if s:IsInMultilineComment(v:lnum, 1) && !s:IsLineComment(v:lnum, 1)
     return cindent(v:lnum)
   endif
+  
+  " single opening bracket will assume you want a c style of indenting
+  if s:Match(v:lnum, '^\s*{' . s:line_term) && s:GetMSL(v:lnum,0) == v:lnum
+    return cindent(v:lnum)
+  endif
 
   " cindent each line which has a switch label
   if (line =~ s:expr_case)
