@@ -44,7 +44,7 @@ endif
 let s:js_keywords = '^\s*\(break\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)'
 let s:expr_case = '^\s*\(case\s\+[^\:]*\|default\)\s*:\s*'
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = '\%(string\|regex\|comment\|template\)\c'
+let s:syng_strcom = '\%(string\|regex\|comment\|templates\)\c'
 
 " Regex of syntax group names that are or delimit template strings
 let s:syng_template = 'template\c'
@@ -347,7 +347,7 @@ function GetJavascriptIndent()
   endif
   
   " single opening bracket will assume you want a c style of indenting
-  if s:Match(v:lnum, '^\s*{' . s:line_term) && s:GetMSL(v:lnum,0) == v:lnum
+  if s:Match(v:lnum, '^\s*{' . s:line_term)
     return cindent(v:lnum)
   endif
 
