@@ -347,7 +347,7 @@ function GetJavascriptIndent()
   endif
   
   " single opening bracket will assume you want a c style of indenting
-  if s:Match(v:lnum, '^\s*{' . s:line_term) && s:GetMSL(v:lnum,0) == v:lnum
+  if s:Match(v:lnum, '^\s*{' . s:line_term)
     return cindent(v:lnum)
   endif
 
