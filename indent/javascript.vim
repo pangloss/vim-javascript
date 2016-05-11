@@ -340,6 +340,11 @@ function GetJavascriptIndent()
   let line = getline(v:lnum)
   " previous nonblank line number
   let prevline = prevnonblank(v:lnum - 1)
+  
+  " to not change multiline string values 
+  if (synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string' || s:IsInTempl(v:lnum, 1)) && line !~ '^\s*[''"`]'
+    return
+  endif
 
   " If we are in a multi-line comment, cindent does the right thing.
   if s:IsInMultilineComment(v:lnum, 1) && !s:IsLineComment(v:lnum, 1)
