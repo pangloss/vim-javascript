@@ -291,10 +291,10 @@ function s:IndentWithContinuation(lnum, ind, width)
   if s:Match(lnum, s:continuation_regex)
     if lnum == p_lnum
       return msl_ind + a:width
-    elseif !s:InMultiVarStatement(a:lnum)
-      return msl_ind
-    else
+    elseif s:InMultiVarStatement(lnum)
       return msl_ind - a:width
+    else
+      return msl_ind
     end
   endif
 
