@@ -291,9 +291,11 @@ function s:IndentWithContinuation(lnum, ind, width)
   if s:Match(lnum, s:continuation_regex)
     if lnum == p_lnum
       return msl_ind + a:width
-    else
+    elseif !s:InMultiVarStatement(a:lnum)
       return msl_ind
-    endif
+    else
+      return msl_ind - a:width
+    end
   endif
 
   return a:ind
@@ -401,8 +403,12 @@ function GetJavascriptIndent()
   " If the line is comma first, dedent 1 level
   if (getline(prevline) =~ s:comma_first)
     return indent(prevline) - s:sw()
-  elseif getline(s:PrevNonBlankNonString(prevline - 1)) =~ '[])}]' . s:comma_last && getline(prevline) !~ s:comma_last && getline(prevline) !~ s:block_regex
-    return indent(prevline) - s:sw()
+  elseif getline(s:PrevNonBlankNonString(prevline - 1)) =~ '[])}]' . s:comma_last && getline(prevline) !~ s:block_regex
+    if getline(prevline) !~ s:comma_last
+      return indent(prevline) - s:sw()
+    else
+      return indent(prevline)
+    end
   end
 
   " If line starts with an operator...
@@ -447,13 +453,13 @@ function GetJavascriptIndent()
     end
   end
 
-  if getline(prevline) =~ '^\s*`$' && s:IsInTempl(v:lnum, 1)
-    if line !~ '^\s*`$'
-      return indent(prevline) + s:sw()
-    endif
-  elseif line =~ '^\s*`$' && s:IsInTempl(prevline, 1)
-    return indent(prevline) - s:sw()
-  endif
+  " if getline(prevline) =~ '^\s*`$' && s:IsInTempl(v:lnum, 1)
+  "   if line !~ '^\s*`$'
+  "     return indent(prevline) + s:sw()
+  "   endif
+  " elseif line =~ '^\s*`$' && s:IsInTempl(prevline, 1)
+  "   return indent(prevline) - s:sw()
+  " endif
 
   " Check for multiple var assignments
 "  let var_indent = s:GetVarIndent(v:lnum)
