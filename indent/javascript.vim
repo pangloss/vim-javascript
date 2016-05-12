@@ -74,7 +74,7 @@ function s:Onescope(lnum)
   end
   let mypos = col('.')
   call cursor(a:lnum, 1)
-  if search('\<\%(while\|for\|if\)\>\s*(', 'ce', a:lnum) > 0 && searchpair('(', '', ')', 'W', s:skip_expr, a:lnum) > 0 && col('.') + 1 == col('$')
+  if search('\<\%(while\|for\|if\)\>\s*(', 'ce', a:lnum) > 0 && searchpair('(', '', ')', 'W', s:skip_expr, a:lnum) > 0 && col('.') == strlen(s:RemoveTrailingComments(getline(a:lnum)))
     call cursor(a:lnum, mypos)
     return 1
   else
@@ -189,7 +189,7 @@ endfunction
 function s:RemoveTrailingComments(content)
   let single = '\/\/\(.*\)\s*$'
   let multi = '\/\*\(.*\)\*\/\s*$'
-  return substitute(substitute(a:content, single, '', ''), multi, '', '')
+  return substitute(substitute(substitute(a:content, single, '', ''), multi, '', ''), '\s\+$', '', '')
 endfunction
 
 " Find if the string is inside var statement (but not the first string)
