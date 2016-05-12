@@ -291,7 +291,7 @@ function s:IndentWithContinuation(lnum, ind, width)
   if s:Match(lnum, s:continuation_regex)
     if lnum == p_lnum
       return msl_ind + a:width
-    elseif s:InMultiVarStatement(lnum)
+    elseif s:InMultiVarStatement(lnum) && getline(lnum) =~ s:comma_last
       return msl_ind - a:width
     else
       return msl_ind
