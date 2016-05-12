@@ -345,7 +345,7 @@ function GetJavascriptIndent()
   
   " to not change multiline string values 
   if (synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string' || s:IsInTempl(v:lnum, 1)) && line !~ '^\s*[''"`]'
-    return
+    return indent(v:lnum)
   endif
 
   " If we are in a multi-line comment, cindent does the right thing.
