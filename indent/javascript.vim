@@ -46,9 +46,6 @@ let s:expr_case = '^\s*\(case\s\+[^\:]*\|default\)\s*:\s*'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(string\|regex\|comment\|template\)\c'
 
-" Regex of syntax group names that are or delimit template strings
-let s:syng_template = 'template\c'
-
 " Regex of syntax group names that are strings.
 let s:syng_string = 'regex\c'
 
@@ -104,11 +101,6 @@ endfunction
 " Check if the character at lnum:col is inside a string.
 function s:IsInString(lnum, col)
   return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_string
-endfunction
-
-" Check if the character at lnum:col is inside a template string.
-function s:IsInTempl(lnum, col)
-  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_template
 endfunction
 
 " Check if the character at lnum:col is inside a multi-line comment.
@@ -344,7 +336,7 @@ function GetJavascriptIndent()
   let prevline = prevnonblank(v:lnum - 1)
   
   " to not change multiline string values 
-  if (synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string' || s:IsInTempl(v:lnum, 1)) && line !~ '^\s*[''"`]'
+  if synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template' && line !~ '^\s*[''"`]'
     return indent(v:lnum)
   endif
 
