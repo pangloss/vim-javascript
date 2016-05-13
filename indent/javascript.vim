@@ -137,7 +137,7 @@ function s:PrevNonBlankNonString(lnum)
       endif
     elseif !in_block && s:IsInMultilineComment(lnum, matchend(line, '\*/') - 1)
       let in_block = 1
-    elseif !in_block && line !~ '^\s*\%(//\).*$' && !(s:IsInStringOrComment(lnum, 1) && !s:IsInTempl(lnum,1) && s:IsInStringOrComment(lnum, strlen(line)))
+    elseif !in_block && line !~ '^\s*\%(//\).*$' && !(s:IsInStringOrComment(lnum, 1) && s:IsInStringOrComment(lnum, strlen(line)))
       break
     endif
     let lnum = prevnonblank(lnum - 1)
@@ -329,12 +329,12 @@ endfunction
 " =========================
 
 function GetJavascriptIndent()
-  " 3.1. Setup {{{2
+  " 3.1. Setup {{{1
   " ----------
   " Set up variables for restoring position in file.  Could use v:lnum here.
   let vcol = col('.')
 
-  " 3.2. Work on the current line {{{2
+  " 3.2. Work on the current line {{{1
   " -----------------------------
 
   let ind = -1
@@ -453,21 +453,13 @@ function GetJavascriptIndent()
     end
   end
 
-  " if getline(prevline) =~ '^\s*`$' && s:IsInTempl(v:lnum, 1)
-  "   if line !~ '^\s*`$'
-  "     return indent(prevline) + s:sw()
-  "   endif
-  " elseif line =~ '^\s*`$' && s:IsInTempl(prevline, 1)
-  "   return indent(prevline) - s:sw()
-  " endif
-
   " Check for multiple var assignments
 "  let var_indent = s:GetVarIndent(v:lnum)
 "  if var_indent >= 0
 "    return var_indent
 "  endif
 
-  " 3.3. Work on the previous line. {{{2
+  " 3.3. Work on the previous line. {{{1
   " -------------------------------
 
   " If the line is empty and the previous nonblank line was a multi-line
@@ -523,7 +515,7 @@ function GetJavascriptIndent()
     end
   end
 
-  " 3.4. Work on the MSL line. {{{2
+  " 3.4. Work on the MSL line. {{{1
   " --------------------------
 
   let ind_con = ind
@@ -550,7 +542,7 @@ endfunction
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
-
+" gq{{{2
 function! Fixedgq(lnum, count)
     let l:tw = &tw ? &tw : 80;
 
@@ -611,3 +603,5 @@ function! Fixedgq(lnum, count)
 
     return 0
 endfunction
+"}}}
+" vim: foldmethod=marker:foldlevel=1
