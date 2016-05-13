@@ -46,9 +46,6 @@ let s:expr_case = '^\s*\(case\s\+[^\:]*\|default\)\s*:\s*'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(string\|regex\|comment\|template\)\c'
 
-" Regex of syntax group names that are or delimit template strings
-let s:syng_template = 'template\c'
-
 " Regex of syntax group names that are strings.
 let s:syng_string = 'regex\c'
 
@@ -106,11 +103,6 @@ function s:IsInString(lnum, col)
   return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_string
 endfunction
 
-" Check if the character at lnum:col is inside a template string.
-function s:IsInTempl(lnum, col)
-  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_template
-endfunction
-
 " Check if the character at lnum:col is inside a multi-line comment.
 function s:IsInMultilineComment(lnum, col)
   return !s:IsLineComment(a:lnum, a:col) && synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_multiline
@@ -137,7 +129,7 @@ function s:PrevNonBlankNonString(lnum)
       endif
     elseif !in_block && s:IsInMultilineComment(lnum, matchend(line, '\*/') - 1)
       let in_block = 1
-    elseif !in_block && line !~ '^\s*\%(//\).*$' && !(s:IsInStringOrComment(lnum, 1) && !s:IsInTempl(lnum,1) && s:IsInStringOrComment(lnum, strlen(line)))
+    elseif !in_block && line !~ '^\s*\%(//\).*$' && !(s:IsInStringOrComment(lnum, 1) && s:IsInStringOrComment(lnum, strlen(line)))
       break
     endif
     let lnum = prevnonblank(lnum - 1)
@@ -329,12 +321,12 @@ endfunction
 " =========================
 
 function GetJavascriptIndent()
-  " 3.1. Setup {{{2
+  " 3.1. Setup {{{1
   " ----------
   " Set up variables for restoring position in file.  Could use v:lnum here.
   let vcol = col('.')
 
-  " 3.2. Work on the current line {{{2
+  " 3.2. Work on the current line {{{1
   " -----------------------------
 
   let ind = -1
@@ -344,7 +336,7 @@ function GetJavascriptIndent()
   let prevline = prevnonblank(v:lnum - 1)
   
   " to not change multiline string values 
-  if (synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string' || s:IsInTempl(v:lnum, 1)) && line !~ '^\s*[''"`]'
+  if synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template' && line !~ '^\s*[''"`]'
     return indent(v:lnum)
   endif
 
@@ -453,21 +445,13 @@ function GetJavascriptIndent()
     end
   end
 
-  " if getline(prevline) =~ '^\s*`$' && s:IsInTempl(v:lnum, 1)
-  "   if line !~ '^\s*`$'
-  "     return indent(prevline) + s:sw()
-  "   endif
-  " elseif line =~ '^\s*`$' && s:IsInTempl(prevline, 1)
-  "   return indent(prevline) - s:sw()
-  " endif
-
   " Check for multiple var assignments
 "  let var_indent = s:GetVarIndent(v:lnum)
 "  if var_indent >= 0
 "    return var_indent
 "  endif
 
-  " 3.3. Work on the previous line. {{{2
+  " 3.3. Work on the previous line. {{{1
   " -------------------------------
 
   " If the line is empty and the previous nonblank line was a multi-line
@@ -523,7 +507,7 @@ function GetJavascriptIndent()
     end
   end
 
-  " 3.4. Work on the MSL line. {{{2
+  " 3.4. Work on the MSL line. {{{1
   " --------------------------
 
   let ind_con = ind
@@ -550,7 +534,7 @@ endfunction
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
-
+" gq{{{2
 function! Fixedgq(lnum, count)
     let l:tw = &tw ? &tw : 80;
 
@@ -611,3 +595,5 @@ function! Fixedgq(lnum, count)
 
     return 0
 endfunction
+"}}}
+" vim: foldmethod=marker:foldlevel=1
