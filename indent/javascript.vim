@@ -63,7 +63,7 @@ let s:line_term = '\s*\%(\%(\/\/\).*\)\=$'
 " Regex that defines continuation lines, not including (, {, or [.
 let s:continuation_regex = '\%([\\*/.?:]\|+\@<!+\|-\@<!-\|=\|||\|&&\|\%(=>.*\)\@<!=[^=>],\)' . s:line_term
 
-let s:one_line_scope_regex = '\%(\<else\>\|=>\)' . s:line_term
+let s:one_line_scope_regex = '\%(\<else\>\|=>\)\C' . s:line_term
 
 function s:Onescope(lnum)
   if getline(a:lnum) =~ s:one_line_scope_regex
@@ -71,7 +71,7 @@ function s:Onescope(lnum)
   end
   let mypos = col('.')
   call cursor(a:lnum, 1)
-  if search('\<\%(while\|for\|if\)\>\s*(', 'ce', a:lnum) > 0 && searchpair('(', '', ')', 'W', s:skip_expr, a:lnum) > 0 && col('.') == strlen(s:RemoveTrailingComments(getline(a:lnum)))
+  if search('\<\%(while\|for\|if\)\>\s*(\C', 'ce', a:lnum) > 0 && searchpair('(', '', ')', 'W', s:skip_expr, a:lnum) > 0 && col('.') == strlen(s:RemoveTrailingComments(getline(a:lnum)))
     call cursor(a:lnum, mypos)
     return 1
   else
@@ -88,7 +88,7 @@ let s:operator_first = '^\s*\%([*.:?]\|\([-/+]\)\1\@!\|||\|&&\)'
 let s:var_stmt = '^\s*\%(const\|let\|var\)\s\+\C'
 
 let s:comma_first = '^\s*,'
-let s:comma_last = ',\s*$'
+let s:comma_last = ',' . s:line_term
 
 " 2. Auxiliary Functions {{{1
 " ======================
