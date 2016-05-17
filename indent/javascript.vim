@@ -42,7 +42,7 @@ endif
 " ============
 
 let s:js_keywords = '^\s*\%(break\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)\>\C'
-let s:expr_case = '^\s*\%(case\s\+[^\:]*\|default\)\s*:\s*'
+let s:expr_case = '^\s*\%(case\s\+[^\:]*\|default\)\s*:\s*\C'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(string\|regex\|comment\|template\)\c'
 
