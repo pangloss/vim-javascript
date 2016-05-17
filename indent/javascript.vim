@@ -41,7 +41,7 @@ endif
 " 1. Variables {{{1
 " ============
 
-let s:js_keywords = '^\s*\%(break\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)'
+let s:js_keywords = '^\s*\%(break\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)\>\C'
 let s:expr_case = '^\s*\%(case\s\+[^\:]*\|default\)\s*:\s*'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(string\|regex\|comment\|template\)\c'
@@ -85,7 +85,7 @@ let s:block_regex = '\%([{([]\)\s*\%(|\%([*@]\=\h\w*,\=\s*\)\%(,\s*[*@]\=\h\w*\)
 
 let s:operator_first = '^\s*\%([*.:?]\|\([-/+]\)\1\@!\|||\|&&\)'
 
-let s:var_stmt = '^\s*\%(const\|let\|var\)'
+let s:var_stmt = '^\s*\%(const\|let\|var\)\s\+\C'
 
 let s:comma_first = '^\s*,'
 let s:comma_last = ',\s*$'
@@ -188,14 +188,11 @@ endfunction
 function s:InMultiVarStatement(lnum, cont, prev)
   let lnum = s:PrevNonBlankNonString(a:lnum - 1)
 
-"  let type = synIDattr(synID(lnum, indent(lnum) + 1, 0), 'name')
+  "  let type = synIDattr(synID(lnum, indent(lnum) + 1, 0), 'name')
 
   " loop through previous expressions to find a var statement
-  while lnum > 0 && (getline(lnum) =~ s:comma_last || (a:cont && getline(lnum) =~ '^\s*}') || (a:prev && getline(a:prev) =~ s:comma_last ))
+  while lnum > 0 && (s:Match(lnum, s:comma_last) || (a:cont && getline(lnum) =~ '^\s*}') || (a:prev && s:Match(a:prev, s:comma_last)))
     let line = getline(lnum)
-  " if searchpair('{', '', '}', 'bW', s:skip_expr) > 0
-  "   let lnum = line('.')
-  " end
     " if the line is a js keyword
     if (line =~ s:js_keywords)
       " check if the line is a var stmt
@@ -214,6 +211,7 @@ function s:InMultiVarStatement(lnum, cont, prev)
       call cursor(lnum,1)
       if searchpair('{', '', '}', 'bW', s:skip_expr) > 0
         let lnum = line('.')
+        continue
       end
     end
     let lnum = s:PrevNonBlankNonString(lnum - 1)
@@ -403,12 +401,6 @@ function GetJavascriptIndent()
   " If the line is comma first, dedent 1 level
   if (getline(prevline) =~ s:comma_first)
     return indent(prevline) - s:sw()
-  " elseif getline(s:PrevNonBlankNonString(prevline - 1)) =~ '[])}]' . s:comma_last && getline(prevline) !~ s:block_regex && s:hasOwn
-  "   if getline(prevline) !~ s:comma_last
-  "     return indent(prevline) - s:sw()
-  "   else
-  "     return indent(prevline)
-  "   end
   end
 
   " If line starts with an operator...
@@ -453,12 +445,6 @@ function GetJavascriptIndent()
     end
   end
 
-  " Check for multiple var assignments
-"  let var_indent = s:GetVarIndent(v:lnum)
-"  if var_indent >= 0
-"    return var_indent
-"  endif
-
   " 3.3. Work on the previous line. {{{1
   " -------------------------------
 
@@ -493,7 +479,7 @@ function GetJavascriptIndent()
   let ind = indent(lnum)
   " If the previous line contained an opening bracket, and we are still in it,
   " add indent depending on the bracket type.
-  if line =~ '[[({})\]]'
+  if s:Match(lnum, '[[({})\]]')
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts[0] == '2'
       call cursor(lnum, 1)
@@ -522,7 +508,7 @@ function GetJavascriptIndent()
 
   " 3.4. Work on the MSL line. {{{1
   " --------------------------
-  if line =~ s:comma_last && getline(lnum) !~ s:continuation_regex
+  if s:Match(lnum, s:comma_last) && !s:Match(lnum,  s:continuation_regex)
     return line =~ s:var_stmt ? indent(lnum) + s:sw() : indent(lnum)
 
   elseif s:InMultiVarStatement(lnum, 1, v:lnum) && line !~ s:var_stmt 
