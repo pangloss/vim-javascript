@@ -194,6 +194,12 @@ function s:InMultiVarStatement(lnum, cont, prev)
   while lnum > 0 && (s:Match(lnum, s:comma_last) || (a:cont && getline(lnum) =~ '^\s*}') || (a:prev && s:Match(a:prev, s:comma_last)))
     let line = getline(lnum)
     " if the line is a js keyword
+    if a:cont
+      call cursor(lnum,1)
+      if searchpair('{', '', '}', 'bW', s:skip_expr) > 0
+        let lnum = line('.')
+      end
+    end
     if (line =~ s:js_keywords)
       " check if the line is a var stmt
       " if the line has a comma first or comma last then we can assume that we
@@ -207,13 +213,6 @@ function s:InMultiVarStatement(lnum, cont, prev)
         return 0
       end
     endif
-    if a:cont
-      call cursor(lnum,1)
-      if searchpair('{', '', '}', 'bW', s:skip_expr) > 0
-        let lnum = line('.')
-        continue
-      end
-    end
     let lnum = s:PrevNonBlankNonString(lnum - 1)
   endwhile
 
@@ -511,8 +510,10 @@ function GetJavascriptIndent()
   if s:Match(lnum, s:comma_last) && !s:Match(lnum,  s:continuation_regex)
     return line =~ s:var_stmt ? indent(lnum) + s:sw() : indent(lnum)
 
-  elseif s:InMultiVarStatement(lnum, 1, v:lnum) && line !~ s:var_stmt 
-    return indent(lnum) - s:sw()
+  elseif getline(s:PrevNonBlankNonString(lnum - 1)) =~ s:comma_last
+    if getline(lnum) !~ s:comma_last && s:InMultiVarStatement(lnum,1,0)
+      return indent(lnum) - s:sw()
+    end
   end
   let ind_con = ind
   let ind = s:IndentWithContinuation(lnum, ind_con, s:sw())
