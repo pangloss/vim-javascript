@@ -61,7 +61,7 @@ let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_st
 let s:line_term = '\s*\%(\%(\/\/\).*\)\=$'
 
 " Regex that defines continuation lines, not including (, {, or [.
-let s:continuation_regex = '\%([\\*/.?:]\|+\@<!+\|-\@<!-\|=\|||\|&&\|\%(=>.*\)\@<!=[^=>],\)' . s:line_term
+let s:continuation_regex = '\%([\\*/.?:]\|+\@<!+\|-\@<!-\|=\|||\|&&\)' . s:line_term
 
 let s:one_line_scope_regex = '\%(\<else\>\|=>\)\C' . s:line_term
 
@@ -85,7 +85,7 @@ let s:block_regex = '\%([{([]\)\s*\%(|\%([*@]\=\h\w*,\=\s*\)\%(,\s*[*@]\=\h\w*\)
 
 let s:operator_first = '^\s*\%([*.:?]\|\([-/+]\)\1\@!\|||\|&&\)'
 
-let s:var_stmt = '^\s*\%(const\|let\|var\)\s\+\C'
+let s:var_stmt = '^\s*\%(\%(const\|let\|var\)\s\+\|class\>\)\C'
 
 let s:comma_first = '^\s*,'
 let s:comma_last = ',' . s:line_term
