@@ -85,7 +85,7 @@ let s:block_regex = '\%([{([]\)\s*\%(|\%([*@]\=\h\w*,\=\s*\)\%(,\s*[*@]\=\h\w*\)
 
 let s:operator_first = '^\s*\%([*.:?]\|\([-/+]\)\1\@!\|||\|&&\)'
 
-let s:var_stmt = '^\s*\%(\%(const\|let\|var\)\s\+\|class\>\)\C'
+let s:var_stmt = '^\s*\%(const\|let\|var\)\s\+\C'
 
 let s:comma_first = '^\s*,'
 let s:comma_last = ',' . s:line_term
@@ -220,25 +220,25 @@ function s:InMultiVarStatement(lnum, cont, prev)
   return 0
 endfunction
 
-" Find line above with beginning of the var statement or returns 0 if it's not
+" Find line above with beginning of the var statement or returns 0 if it's not"{{{2
 " this statement
-function s:GetVarIndent(lnum)
-  let lvar = s:InMultiVarStatement(a:lnum, 0,0)
-  let prev_lnum = s:PrevNonBlankNonString(a:lnum - 1)
+" function s:GetVarIndent(lnum)
+"   let lvar = s:InMultiVarStatement(a:lnum, 0,0)
+"   let prev_lnum = s:PrevNonBlankNonString(a:lnum - 1)
 
-  if lvar
-    let line = s:RemoveTrailingComments(getline(prev_lnum))
+"   if lvar
+"     let line = s:RemoveTrailingComments(getline(prev_lnum))
 
-    " if the previous line doesn't end in a comma, return to regular indent
-    if (line !~ s:comma_last)
-      return indent(prev_lnum) - s:sw()
-    else
-      return indent(lvar) + s:sw()
-    endif
-  endif
+"     " if the previous line doesn't end in a comma, return to regular indent
+"     if (line !~ s:comma_last)
+"       return indent(prev_lnum) - s:sw()
+"     else
+"       return indent(lvar) + s:sw()
+"     endif
+"   endif
 
-  return -1
-endfunction
+"   return -1
+" endfunction"}}}
 
 
 " Check if line 'lnum' has more opening brackets than closing ones.
@@ -360,8 +360,13 @@ function GetJavascriptIndent()
   if (line =~ s:expr_case)
     return cindent(v:lnum)
   endif
-  if s:Match(v:lnum, s:comma_first) && s:Match(prevline,s:var_stmt)
-    return indent(prevline) + s:sw()
+
+  " the part first where we deal with comma first
+  if s:Match(v:lnum, s:comma_first)
+    let counts = s:LineHasOpeningBrackets(prevline)
+    if (s:Match(prevline,s:var_stmt) || counts[0] == '1' || counts[1] == '1' || counts[2] == '1')
+      return indent(prevline) + s:sw()
+    end
   end
   " If we got a closing bracket on an empty line, find its match and indent
   " according to it.  For parentheses we indent to its column - 1, for the
