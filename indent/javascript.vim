@@ -81,7 +81,7 @@ function s:Onescope(lnum)
 endfunction
 
 " Regex that defines blocks.
-let s:block_regex = '\%([{([]\)\s*\%(|\%([*@]\=\h\w*,\=\s*\)\%(,\s*[*@]\=\h\w*\)*|\)\=' . s:line_term
+let s:block_regex = '[{([]' . s:line_term
 
 let s:operator_first = '^\s*\%([*.:?]\|\([-/+]\)\1\@!\|||\|&&\)'
 
