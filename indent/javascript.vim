@@ -380,7 +380,7 @@ function GetJavascriptIndent()
       " check for comma first
       if (line[col - 1] =~ ',')
         " if the previous line ends in comma or semicolon don't indent
-        if (getline(prevline) =~ '[;,]\s*$' . s:line_term)
+        if (getline(prevline) =~ '[;,]' . s:line_term)
           return indent(s:GetMSL(line('.'), 0))
         " get previous line indent, if it's comma first return prevline indent
         elseif s:Match(prevline, s:comma_first)
