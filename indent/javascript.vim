@@ -291,7 +291,7 @@ function s:IndentWithContinuation(lnum, ind, width)
     else
       return msl_ind
     end
-  elseif s:InMultiVarStatement(p_lnum, 0,v:lnum)
+  elseif s:InMultiVarStatement(p_lnum, 0, s:PrevNonBlankNonString(p_lnum - 1))
     return indent(p_lnum) - s:sw()
   endif
 
