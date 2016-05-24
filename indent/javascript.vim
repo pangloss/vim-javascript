@@ -51,7 +51,7 @@ let s:syng_strcom = '\%(string\|regex\|comment\|template\)\c'
 let s:syng_string = 'regex\c'
 
 " Regex of syntax group names that are strings or documentation.
-let s:syng_multiline = 'comment\c'
+let s:syng_multiline = '\%(comment\|doc\)\c'
 
 " Regex of syntax group names that are line comment.
 let s:syng_linecom = 'linecomment\c'
@@ -347,7 +347,7 @@ function GetJavascriptIndent()
   endif
 
   " If we are in a multi-line comment, cindent does the right thing.
-  if s:IsInMultilineComment(v:lnum, 1) && !s:IsLineComment(v:lnum, 1) && s:IsInMultilineComment(v:lnum, strlen(v:lnum))
+  if s:IsInMultilineComment(v:lnum, 1) && !s:IsLineComment(v:lnum, 1) && s:IsInMultilineComment(v:lnum, strlen(line))
     return cindent(v:lnum)
   endif
   
