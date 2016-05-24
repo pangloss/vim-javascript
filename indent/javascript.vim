@@ -62,7 +62,7 @@ let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_st
 let s:line_term = '\s*\%(\%(\/\/.*\)\=\|\%(\/\*.*\*\/\s*\)*\)$'
 
 " Regex that defines continuation lines, not including (, {, or [.
-let s:continuation_regex = '\%([*/.?:]\|+\@<!+\|-\@<!-\|=\|||\|&&\)' . s:line_term
+let s:continuation_regex = '\%([*.?:]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\|||\|&&\)' . s:line_term
 
 let s:one_line_scope_regex = '\%(\<else\>\|=>\)\C' . s:line_term
 
