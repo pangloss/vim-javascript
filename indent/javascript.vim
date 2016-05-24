@@ -347,7 +347,7 @@ function GetJavascriptIndent()
   endif
 
   " If we are in a multi-line comment, cindent does the right thing.
-  if s:IsInMultilineComment(v:lnum, match(line, '\S') + 1) && !s:IsLineComment(v:lnum, 1) &&
+  if s:IsInMultilineComment(v:lnum, 1) && !s:IsLineComment(v:lnum, 1) &&
     \ s:IsInMultilineComment(v:lnum, match(line, '\s*$'))
     return cindent(v:lnum)
   endif
