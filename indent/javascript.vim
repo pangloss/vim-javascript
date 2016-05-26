@@ -389,20 +389,20 @@ function GetJavascriptIndent()
       return indent(prevline)
     end
     let counts = s:LineHasOpeningBrackets(prevline)
-    if counts[0] == '2'
+    if counts[0] == '2' || counts[1] == '2' || counts[2] == '2'
       call cursor(prevline, 1)
       " Search for the opening tag
-      let mnum = searchpair('(', '', ')', 'bW', s:skip_expr)
-      if mnum > 0 && s:Match(mnum, s:operator_first)
-        return indent(mnum)
+      let bs = strpart('(){}[]', stridx(')}]', line[col - 1]) * 2, 2)
+      if searchpair(escape(bs[0], '\['), '', bs[1], 'bW', s:skip_expr) > 0 && s:Match(line('.'), s:operator_first)
+        return indent(line('.'))
       end
     elseif counts[0] != '1' && counts[1] != '1' && counts[2] != '1'
       " otherwise, indent 1 level
       return indent(prevline) + s:sw()
     end
+
     " If previous line starts with an operator...
-  elseif (s:Match(prevline, s:operator_first) && getline(prevline) !~ s:continuation_regex &&
-        \ getline(prevline) !~ '};\=' . s:line_term) || getline(prevline) =~ ');\=' . s:line_term
+  elseif (s:Match(prevline, s:operator_first) && !s:Match(prevline,s:continuation_regex))||getline(prevline) =~ ');\=' . s:line_term
     let counts = s:LineHasOpeningBrackets(prevline)
     if counts[0] == '2' && !s:Match(prevline, s:operator_first)
       call cursor(prevline, 1)
@@ -412,14 +412,7 @@ function GetJavascriptIndent()
         return indent(mnum) - s:sw()
       end
     elseif s:Match(prevline, s:operator_first)
-      if counts[0] == '2' && counts[1] == '1'
-        call cursor(prevline, 1)
-        " Search for the opening tag
-        let mnum = searchpair('(', '', ')', 'bW', s:skip_expr)
-        if mnum > 0 && !s:Match(mnum, s:operator_first)
-          return indent(mnum) + s:sw()
-        end
-      elseif counts[0] != '1' && counts[1] != '1' && counts[2] != '1'
+      if counts[0] != '1' && counts[1] != '1' && counts[2] != '1'
         return indent(prevline) - s:sw()
       end
     end
