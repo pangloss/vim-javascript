@@ -45,7 +45,7 @@ let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
 let s:js_keywords = s:line_pre . '\%(break\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)\>\C'
 let s:expr_case = s:line_pre . '\%(case\s\+[^\:]*\|default\)\s*:\s*\C'
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = '\%(string\|comment\|template\)\c'
+let s:syng_strcom = '\%(string\|regex\|comment\|template\)\c'
 
 " Regex of syntax group names that are strings.
 let s:syng_string = 'regex\c'
@@ -120,10 +120,10 @@ function s:PrevNonBlankNonString(lnum)
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
     let line = getline(lnum)
-    let com = match(line, '\*/') + 1
+    let com = match(line, '\*\/') + 1
     if s:IsInMultilineComment(lnum, com)
       call cursor(lnum, com)
-      let parlnum = search('/\*', 'nbW')
+      let parlnum = search('\/\*', 'nbW')
       if parlnum > 0
         let lnum = parlnum
       end
@@ -319,10 +319,10 @@ function GetJavascriptIndent()
   let line = getline(v:lnum)
   " previous nonblank line number
   let prevline = prevnonblank(v:lnum - 1)
-  
+
   " to not change multiline string values 
   if line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template'
-    return indent(v:lnum)
+    return -1
   endif
 
   " If we are in a multi-line comment, cindent does the right thing.
