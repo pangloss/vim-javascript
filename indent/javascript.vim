@@ -117,21 +117,19 @@ endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
 function s:PrevNonBlankNonString(lnum)
-  let in_block = 0
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
     " Go in and out of blocks comments as necessary.
     " If the line isn't empty (with opt. comment) or in a string, end search.
     let line = getline(lnum)
-    if s:IsInMultilineComment(lnum, matchend(line, '^\s*/\*') - 1) && line !~ s:line_pre . '$'
-      if in_block
-        let in_block = 0
-      else
-        break
-      endif
-    elseif !in_block && s:IsInMultilineComment(lnum, match(line, '\*/\s*$') + 1) && line !~ s:line_pre . '$'
-      let in_block = 1
-    elseif !in_block && line !~ s:line_pre . '\%(//\).*$' && !(s:IsInStringOrComment(lnum, 1) && s:IsInStringOrComment(lnum, strlen(line)))
+    let com = match(line, '\*\/') + 1
+    if s:IsInMultilineComment(lnum, com)
+      call cursor(lnum, com)
+      let parlnum = search('/\*', 'nbW')
+      if parlnum > 0
+        let lnum = parlnum
+      end
+    elseif line !~ '^' . s:line_term
       break
     endif
     let lnum = prevnonblank(lnum - 1)
@@ -223,6 +221,27 @@ function s:InMultiVarStatement(lnum, cont, prev)
   " beginning of program, not a var
   return 0
 endfunction
+
+" Find line above with beginning of the var statement or returns 0 if it's not"{{{2
+" this statement
+" function s:GetVarIndent(lnum)
+"   let lvar = s:InMultiVarStatement(a:lnum, 0,0)
+"   let prev_lnum = s:PrevNonBlankNonString(a:lnum - 1)
+
+"   if lvar
+"     let line = s:RemoveTrailingComments(getline(prev_lnum))
+
+"     " if the previous line doesn't end in a comma, return to regular indent
+"     if (line !~ s:comma_last)
+"       return indent(prev_lnum) - s:sw()
+"     else
+"       return indent(lvar) + s:sw()
+"     endif
+"   endif
+
+"   return -1
+" endfunction"}}}
+
 
 " Check if line 'lnum' has more opening brackets than closing ones.
 function s:LineHasOpeningBrackets(lnum)
@@ -359,15 +378,16 @@ function GetJavascriptIndent()
     return ind
   endif
 
+  let lnum = s:PrevNonBlankNonString(v:lnum - 1)
   " If line starts with an operator...
   if (line =~ s:operator_first)
-    if (s:Match(prevline, s:operator_first))
+    if (s:Match(lnum, s:operator_first))
       " and so does previous line, don't indent
-      return indent(prevline)
+      return indent(lnum)
     end
-    let counts = s:LineHasOpeningBrackets(prevline)
+    let counts = s:LineHasOpeningBrackets(lnum)
     if counts[0] == '2' || counts[1] == '2' || counts[2] == '2'
-      call cursor(prevline, 1)
+      call cursor(lnum, 1)
       " Search for the opening tag
       let parlnum = searchpair('(\|{\|\[', '', ')\|}\|\]', 'nbW', s:skip_expr)
       if parlnum > 0 && s:Match(parlnum, s:operator_first)
@@ -375,22 +395,22 @@ function GetJavascriptIndent()
       end
     elseif counts[0] != '1' && counts[1] != '1' && counts[2] != '1'
       " otherwise, indent 1 level
-      return indent(prevline) + s:sw()
+      return indent(lnum) + s:sw()
     end
 
     " If previous line starts with an operator...
-  elseif (s:Match(prevline, s:operator_first) && !s:Match(prevline,s:continuation_regex))||getline(prevline) =~ ');\=' . s:line_term
-    let counts = s:LineHasOpeningBrackets(prevline)
-    if counts[0] == '2' && !s:Match(prevline, s:operator_first)
-      call cursor(prevline, 1)
+  elseif (s:Match(lnum, s:operator_first) && !s:Match(lnum,s:continuation_regex))||getline(lnum) =~ ');\=' . s:line_term
+    let counts = s:LineHasOpeningBrackets(lnum)
+    if counts[0] == '2' && !s:Match(lnum, s:operator_first)
+      call cursor(lnum, 1)
       " Search for the opening tag
       let mnum = searchpair('(', '', ')', 'nbW', s:skip_expr)
       if mnum > 0 && s:Match(mnum, s:operator_first)
         return indent(mnum) - s:sw()
       end
-    elseif s:Match(prevline, s:operator_first)
+    elseif s:Match(lnum, s:operator_first)
       if counts[0] != '1' && counts[1] != '1' && counts[2] != '1'
-        return indent(prevline) - s:sw()
+        return indent(lnum) - s:sw()
       end
     end
   end
@@ -406,7 +426,6 @@ function GetJavascriptIndent()
   endif
 
   " Find a non-blank, non-multi-line string line above the current line.
-  let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
   " If the line is empty and inside a string, use the previous line.
   if line =~ '^\s*$' && lnum != prevline
