@@ -222,27 +222,6 @@ function s:InMultiVarStatement(lnum, cont, prev)
   return 0
 endfunction
 
-" Find line above with beginning of the var statement or returns 0 if it's not"{{{2
-" this statement
-" function s:GetVarIndent(lnum)
-"   let lvar = s:InMultiVarStatement(a:lnum, 0,0)
-"   let prev_lnum = s:PrevNonBlankNonString(a:lnum - 1)
-
-"   if lvar
-"     let line = s:RemoveTrailingComments(getline(prev_lnum))
-
-"     " if the previous line doesn't end in a comma, return to regular indent
-"     if (line !~ s:comma_last)
-"       return indent(prev_lnum) - s:sw()
-"     else
-"       return indent(lvar) + s:sw()
-"     endif
-"   endif
-
-"   return -1
-" endfunction"}}}
-
-
 " Check if line 'lnum' has more opening brackets than closing ones.
 function s:LineHasOpeningBrackets(lnum)
   let open_0 = 0
