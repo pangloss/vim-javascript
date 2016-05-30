@@ -119,10 +119,8 @@ endfunction
 function s:PrevNonBlankNonString(lnum)
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
-    " Go in and out of blocks comments as necessary.
-    " If the line isn't empty (with opt. comment) or in a string, end search.
     let line = getline(lnum)
-    let com = match(line, '\*\/') + 1
+    let com = match(line, '\*/') + 1
     if s:IsInMultilineComment(lnum, com)
       call cursor(lnum, com)
       let parlnum = search('/\*', 'nbW')
@@ -358,6 +356,7 @@ function GetJavascriptIndent()
   endif
 
   let lnum = s:PrevNonBlankNonString(v:lnum - 1)
+
   " If line starts with an operator...
   if (line =~ s:operator_first)
     if (s:Match(lnum, s:operator_first))
@@ -429,8 +428,8 @@ function GetJavascriptIndent()
   " add indent depending on the bracket type.
   if s:Match(lnum, '[[({})\]]')
     let counts = s:LineHasOpeningBrackets(lnum)
-    if counts[0] == '2' || (counts[1] == '2' && !s:Match(lnum, s:line_pre . '}'))
-          \ || (counts[2] == '2' && !s:Match(lnum, s:line_pre . ']'))
+    if counts[0] == '2' || (counts[1] == '2' && !s:Match(lnum, s:line_pre . '}')) ||
+          \ (counts[2] == '2' && !s:Match(lnum, s:line_pre . ']'))
       call cursor(lnum, 1)
       " Search for the opening tag
       let parlnum = searchpair('(\|{\|\[', '', ')\|}\|\]', 'nbW', s:skip_expr)
