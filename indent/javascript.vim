@@ -42,7 +42,7 @@ endif
 " ============
 
 let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
-let s:js_keywords = s:line_pre . '\%(break\|import\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)\>\C'
+let s:js_keywords = s:line_pre . '\%(break\|import\|export\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)\>\C'
 let s:expr_case = s:line_pre . '\%(case\s\+[^\:]*\|default\)\s*:\s*\C'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(string\|regex\|comment\|template\)\c'
@@ -193,13 +193,14 @@ endfunction
 " Find if the string is inside var statement (but not the first string)
 function s:InMultiVarStatement(lnum, cont, prev)
   let lnum = s:PrevNonBlankNonString(a:lnum - 1)
+  let prev = a:prev
 
   "  let type = synIDattr(synID(lnum, indent(lnum) + 1, 0), 'name')
 
   " loop through previous expressions to find a var statement
   while lnum > 0 && (s:Match(lnum, s:comma_last) ||(a:cont && getline(lnum) =~ s:line_pre . '}') ||
-        \ s:Match(lnum,s:continuation_regex)) || (a:prev && (s:Match(a:prev, s:comma_last) ||
-        \ s:Match(a:prev,s:continuation_regex)))
+        \ s:Match(lnum,s:continuation_regex)) || (prev && (s:Match(prev, s:comma_last) ||
+        \ s:Match(prev,s:continuation_regex)))
     " if the line is a js keyword
     if a:cont
       call cursor(lnum,1)
@@ -222,6 +223,7 @@ function s:InMultiVarStatement(lnum, cont, prev)
       end
     endif
     let lnum = s:PrevNonBlankNonString(lnum - 1)
+    let prev = prev && lnum > 0 ? prev : 0
   endwhile
 
   " beginning of program, not a var
