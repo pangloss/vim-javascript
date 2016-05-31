@@ -59,6 +59,14 @@ let s:syng_linecom = 'linecomment\c'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
 
+func s:searchpar(start,mid,end,flags,stop)
+  try 
+    return searchpair(a:start,a:mid,a:end,a:flags,s:skip_expr,a:stop,300)
+  catch /E118/
+    return searchpair(a:start,a:mid,a:end,a:flags,0,a:stop)
+  endtry
+endfunc
+
 let s:line_term = '\s*\%(\%(\/\/.*\)\=\|\%(\/\*.*\*\/\s*\)*\)$'
 
 " Regex that defines continuation lines, not including (, {, or [.
@@ -73,7 +81,7 @@ function s:Onescope(lnum)
   let mypos = col('.')
   call cursor(a:lnum, 1)
   if search('\<\%(while\|for\|if\)\>\s*(\C', 'ce', a:lnum) > 0 &&
-        \ searchpair('(', '', ')', 'W', s:skip_expr, a:lnum) > 0 &&
+        \ s:searchpar('(', '', ')', 'W', a:lnum) > 0 &&
         \ col('.') == strlen(s:RemoveTrailingComments(getline(a:lnum)))
     call cursor(a:lnum, mypos)
     return 1
@@ -153,7 +161,7 @@ function s:GetMSL(lnum, in_one_line_scope)
     " if there are more closing brackets, continue from the line which has the matching opening bracket
     elseif col2 > 0 && !s:IsInStringOrComment(msl, col2) && s:LineHasOpeningBrackets(msl)[0] == '2' && !a:in_one_line_scope
       call cursor(msl, 1)
-      if searchpair('(', '', ')', 'bW', s:skip_expr) > 0
+      if s:searchpar('(', '', ')', 'bW', 0) > 0
         let lnum = line('.')
         let msl = lnum
       endif
@@ -195,7 +203,7 @@ function s:InMultiVarStatement(lnum, cont, prev)
     " if the line is a js keyword
     if a:cont
       call cursor(lnum,1)
-      let parlnum = searchpair('(\|{\|\[', '', ')\|}\|\]', 'nbW', s:skip_expr)
+      let parlnum = s:searchpar('(\|{\|\[', '', ')\|}\|\]', 'nbW', 0)
       if parlnum > 0
         let lnum = parlnum
       end
@@ -348,7 +356,7 @@ function GetJavascriptIndent()
     call cursor(v:lnum, col)
 
 
-    let parlnum = searchpair('(\|{\|\[', '', ')\|}\|\]', 'nbW', s:skip_expr)
+    let parlnum = s:searchpar('(\|{\|\[', '', ')\|}\|\]', 'nbW', 0)
     if parlnum > 0
       let ind = s:InMultiVarStatement(parlnum, 0, 0) ? indent(parlnum) : indent(s:GetMSL(parlnum, 0))
     endif
@@ -367,7 +375,7 @@ function GetJavascriptIndent()
     if counts[0] == '2' || counts[1] == '2' || counts[2] == '2'
       call cursor(lnum, 1)
       " Search for the opening tag
-      let parlnum = searchpair('(\|{\|\[', '', ')\|}\|\]', 'nbW', s:skip_expr)
+      let parlnum = s:searchpar('(\|{\|\[', '', ')\|}\|\]', 'nbW', 0)
       if parlnum > 0 && s:Match(parlnum, s:operator_first)
         return indent(parlnum)
       end
@@ -382,7 +390,7 @@ function GetJavascriptIndent()
     if counts[0] == '2' && !s:Match(lnum, s:operator_first)
       call cursor(lnum, 1)
       " Search for the opening tag
-      let mnum = searchpair('(', '', ')', 'nbW', s:skip_expr)
+      let mnum = s:searchpar('(', '', ')', 'nbW', 0)
       if mnum > 0 && s:Match(mnum, s:operator_first)
         return indent(mnum) - s:sw()
       end
@@ -432,7 +440,7 @@ function GetJavascriptIndent()
           \ (counts[2] == '2' && !s:Match(lnum, s:line_pre . ']'))
       call cursor(lnum, 1)
       " Search for the opening tag
-      let parlnum = searchpair('(\|{\|\[', '', ')\|}\|\]', 'nbW', s:skip_expr)
+      let parlnum = s:searchpar('(\|{\|\[', '', ')\|}\|\]', 'nbW', 0)
       if parlnum > 0
         return indent(s:GetMSL(parlnum, 0)) 
       end
