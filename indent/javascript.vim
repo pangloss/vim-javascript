@@ -42,7 +42,7 @@ endif
 " ============
 
 let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
-let s:js_keywords = s:line_pre . '\%(break\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)\>\C'
+let s:js_keywords = s:line_pre . '\%(break\|import\|export\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)\>\C'
 let s:expr_case = s:line_pre . '\%(case\s\+[^\:]*\|default\)\s*:\s*\C'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(string\|regex\|comment\|template\)\c'
@@ -59,6 +59,14 @@ let s:syng_linecom = 'linecomment\c'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
 
+func s:lookForParens(start,end,flags,stop)
+  try 
+    return searchpair(a:start,'',a:end,a:flags,s:skip_expr,a:stop,300)
+  catch /E118/
+    return searchpair(a:start,'',a:end,a:flags,0,a:stop)
+  endtry
+endfunc
+
 let s:line_term = '\s*\%(\%(\/\/.*\)\=\|\%(\/\*.*\*\/\s*\)*\)$'
 
 " Regex that defines continuation lines, not including (, {, or [.
@@ -73,7 +81,7 @@ function s:Onescope(lnum)
   let mypos = col('.')
   call cursor(a:lnum, 1)
   if search('\<\%(while\|for\|if\)\>\s*(\C', 'ce', a:lnum) > 0 &&
-        \ searchpair('(', '', ')', 'W', s:skip_expr, a:lnum) > 0 &&
+        \ s:lookForParens('(', ')', 'W', a:lnum) > 0 &&
         \ col('.') == strlen(s:RemoveTrailingComments(getline(a:lnum)))
     call cursor(a:lnum, mypos)
     return 1
@@ -153,7 +161,7 @@ function s:GetMSL(lnum, in_one_line_scope)
     " if there are more closing brackets, continue from the line which has the matching opening bracket
     elseif col2 > 0 && !s:IsInStringOrComment(msl, col2) && s:LineHasOpeningBrackets(msl)[0] == '2' && !a:in_one_line_scope
       call cursor(msl, 1)
-      if searchpair('(', '', ')', 'bW', s:skip_expr) > 0
+      if s:lookForParens('(', ')', 'bW', 0) > 0
         let lnum = line('.')
         let msl = lnum
       endif
@@ -185,17 +193,18 @@ endfunction
 " Find if the string is inside var statement (but not the first string)
 function s:InMultiVarStatement(lnum, cont, prev)
   let lnum = s:PrevNonBlankNonString(a:lnum - 1)
+  let prev = a:prev
 
   "  let type = synIDattr(synID(lnum, indent(lnum) + 1, 0), 'name')
 
   " loop through previous expressions to find a var statement
   while lnum > 0 && (s:Match(lnum, s:comma_last) ||(a:cont && getline(lnum) =~ s:line_pre . '}') ||
-        \ s:Match(lnum,s:continuation_regex)) || (a:prev && (s:Match(a:prev, s:comma_last) ||
-        \ s:Match(a:prev,s:continuation_regex)))
+        \ s:Match(lnum,s:continuation_regex)) || (prev && (s:Match(prev, s:comma_last) ||
+        \ s:Match(prev,s:continuation_regex)))
     " if the line is a js keyword
     if a:cont
       call cursor(lnum,1)
-      let parlnum = searchpair('(\|{\|\[', '', ')\|}\|\]', 'nbW', s:skip_expr)
+      let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
       if parlnum > 0
         let lnum = parlnum
       end
@@ -214,6 +223,7 @@ function s:InMultiVarStatement(lnum, cont, prev)
       end
     endif
     let lnum = s:PrevNonBlankNonString(lnum - 1)
+    let prev = prev && lnum > 0 ? prev : 0
   endwhile
 
   " beginning of program, not a var
@@ -348,7 +358,7 @@ function GetJavascriptIndent()
     call cursor(v:lnum, col)
 
 
-    let parlnum = searchpair('(\|{\|\[', '', ')\|}\|\]', 'nbW', s:skip_expr)
+    let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
     if parlnum > 0
       let ind = s:InMultiVarStatement(parlnum, 0, 0) ? indent(parlnum) : indent(s:GetMSL(parlnum, 0))
     endif
@@ -367,7 +377,7 @@ function GetJavascriptIndent()
     if counts[0] == '2' || counts[1] == '2' || counts[2] == '2'
       call cursor(lnum, 1)
       " Search for the opening tag
-      let parlnum = searchpair('(\|{\|\[', '', ')\|}\|\]', 'nbW', s:skip_expr)
+      let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
       if parlnum > 0 && s:Match(parlnum, s:operator_first)
         return indent(parlnum)
       end
@@ -382,7 +392,7 @@ function GetJavascriptIndent()
     if counts[0] == '2' && !s:Match(lnum, s:operator_first)
       call cursor(lnum, 1)
       " Search for the opening tag
-      let mnum = searchpair('(', '', ')', 'nbW', s:skip_expr)
+      let mnum = s:lookForParens('(', ')', 'nbW', 0)
       if mnum > 0 && s:Match(mnum, s:operator_first)
         return indent(mnum) - s:sw()
       end
@@ -432,7 +442,7 @@ function GetJavascriptIndent()
           \ (counts[2] == '2' && !s:Match(lnum, s:line_pre . ']'))
       call cursor(lnum, 1)
       " Search for the opening tag
-      let parlnum = searchpair('(\|{\|\[', '', ')\|}\|\]', 'nbW', s:skip_expr)
+      let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
       if parlnum > 0
         return indent(s:GetMSL(parlnum, 0)) 
       end
