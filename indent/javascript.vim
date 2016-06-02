@@ -155,15 +155,11 @@ function s:GetMSL(lnum, in_one_line_scope)
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts[0] == '1' || counts[1] == '1' || counts[2] == '1'
       break
-    elseif s:Match(lnum,s:continuation_regex) &&
+    elseif (s:Match(lnum,s:continuation_regex) || s:Match(msl, s:operator_first)) &&
           \ !s:Match(lnum, s:expr_case) ||
           \ s:IsInString(lnum, strlen(line))
       let msl = lnum
-
-
     else
-
-
       " Don't use lines that are part of a one line scope as msl unless the
       " flag in_one_line_scope is set to 1
       "
@@ -212,17 +208,18 @@ function s:Match(lnum, regex)
   return col > 0 && !s:IsInStringOrComment(a:lnum, col) ? col : 0
 endfunction
 
-function s:IndentWithContinuation(lnum, ind, width)
+function s:IndentWithContinuation(lnum, ind, width,style)
   " Set up variables to use and search for MSL to the previous line.
-  let p_lnum = a:lnum
-  let lnum = s:GetMSL(a:lnum, 1)
+  let p_lnum = a:style ? a:lnum : s:PrevNonBlankNonString(a:lnum)
+  let lnum = s:GetMSL(p_lnum, 1)
   let line = getline(lnum)
+  let style = a:style ? s:continuation_regex : s:operator_first
 
   " If the previous line wasn't a MSL and is continuation return its indent.
   " TODO: the || s:IsInString() thing worries me a bit.
   if p_lnum != lnum
-    if s:Match(p_lnum,s:continuation_regex)||s:IsInString(p_lnum,strlen(line))
-      return a:ind
+    if s:Match(p_lnum,style)||s:IsInString(p_lnum,strlen(line))
+      return a:style ? a:ind : indent(lnum) + s:sw()
     else
       return a:ind - s:sw()
     end
@@ -233,14 +230,12 @@ function s:IndentWithContinuation(lnum, ind, width)
 
   " If the previous line ended with [*+/.-=], start a continuation that
   " indents an extra level.
-  if s:Match(lnum, s:continuation_regex)
+  if s:Match(lnum, style)
     if lnum == p_lnum
       return msl_ind + a:width
     else
       return msl_ind
     end
-  " elseif s:InMultiVarStatement(p_lnum, 0, s:PrevNonBlankNonString(p_lnum - 1))
-  "   return indent(p_lnum) - s:sw()
   endif
 
   return a:ind
@@ -325,42 +320,6 @@ function GetJavascriptIndent()
 
   let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
-  " If line starts with an operator...
-  if (line =~ s:operator_first)
-    if (s:Match(lnum, s:operator_first))
-      " and so does previous line, don't indent
-      return indent(lnum)
-    end
-    let counts = s:LineHasOpeningBrackets(lnum)
-    if counts[0] == '2' || counts[1] == '2' || counts[2] == '2'
-      call cursor(lnum, 1)
-      " Search for the opening tag
-      let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
-      if parlnum > 0 && s:Match(parlnum, s:operator_first)
-        return indent(parlnum)
-      end
-    elseif counts[0] != '1' && counts[1] != '1' && counts[2] != '1'
-      " otherwise, indent 1 level
-      return indent(lnum) + s:sw()
-    end
-
-    " If previous line starts with an operator...
-  elseif (s:Match(lnum, s:operator_first) && !s:Match(lnum,s:continuation_regex))||getline(lnum) =~ ');\=' . s:line_term
-    let counts = s:LineHasOpeningBrackets(lnum)
-    if counts[0] == '2' && !s:Match(lnum, s:operator_first)
-      call cursor(lnum, 1)
-      " Search for the opening tag
-      let mnum = s:lookForParens('(', ')', 'nbW', 0)
-      if mnum > 0 && s:Match(mnum, s:operator_first)
-        return indent(mnum) - s:sw()
-      end
-    elseif s:Match(lnum, s:operator_first)
-      if counts[0] != '1' && counts[1] != '1' && counts[2] != '1'
-        return indent(lnum) - s:sw()
-      end
-    end
-  end
-
   " 3.3. Work on the previous line. {{{1
   " -------------------------------
 
@@ -398,7 +357,7 @@ function GetJavascriptIndent()
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts[0] == '2' || (counts[1] == '2') ||
           \ (counts[2] == '2')
-      call cursor(lnum, 1)
+      call cursor(lnum, strlen(lnum))
       " Search for the opening tag
       let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
       if parlnum > 0
@@ -411,8 +370,12 @@ function GetJavascriptIndent()
     end
   end
 
-  let ind_con = ind
-  let ind = s:IndentWithContinuation(lnum, ind_con, s:sw())
+  if getline(v:lnum) =~ s:operator_first
+    let ind = s:IndentWithContinuation(v:lnum, indent(v:lnum), s:sw(), 0)
+  else
+    let ind_con = ind
+    let ind = s:IndentWithContinuation(lnum, ind_con, s:sw(), 1)
+  end
 
   " }}}2
   "
