@@ -193,16 +193,18 @@ endfunction
 " Find if the string is inside var statement (but not the first string)
 function s:InMultiVarStatement(lnum, cont, prev)
   let lnum = s:PrevNonBlankNonString(a:lnum - 1)
+  let cont = a:cont
   let prev = a:prev
 
   "  let type = synIDattr(synID(lnum, indent(lnum) + 1, 0), 'name')
 
   " loop through previous expressions to find a var statement
-  while lnum > 0 && (s:Match(lnum, s:comma_last) ||(a:cont && getline(lnum) =~ s:line_pre . '}') ||
+  while lnum > 0 && (s:Match(lnum, s:comma_last) ||(cont && getline(lnum) =~ s:line_pre . '[]})]') ||
         \ s:Match(lnum,s:continuation_regex)) || (prev && (s:Match(prev, s:comma_last) ||
         \ s:Match(prev,s:continuation_regex)))
     " if the line is a js keyword
-    if a:cont
+    if cont
+      let cont = 0
       call cursor(lnum,1)
       let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
       if parlnum > 0
@@ -381,7 +383,9 @@ function GetJavascriptIndent()
       if parlnum > 0 && s:Match(parlnum, s:operator_first)
         return indent(parlnum)
       end
-    elseif counts[0] != '1' && counts[1] != '1' && counts[2] != '1'
+    elseif (counts[0] != '1' && counts[1] != '1' && counts[2] != '1') && 
+          \ (!s:Match(s:PrevNonBlankNonString(lnum - 1), s:block_regex) ||
+          \ s:Match(lnum, s:var_stmt))
       " otherwise, indent 1 level
       return indent(lnum) + s:sw()
     end
