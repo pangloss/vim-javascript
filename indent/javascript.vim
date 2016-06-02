@@ -380,8 +380,8 @@ function GetJavascriptIndent()
       call cursor(lnum, 1)
       " Search for the opening tag
       let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
-      if parlnum > 0 && s:Match(parlnum, s:operator_first)
-        return indent(parlnum)
+      if parlnum > 0
+        return !s:Match(parlnum, s:operator_first) ? indent(lnum) + s:sw() : indent(parlnum)
       end
     elseif (counts[0] != '1' && counts[1] != '1' && counts[2] != '1') && 
           \ (!s:Match(s:PrevNonBlankNonString(lnum - 1), s:block_regex) ||
