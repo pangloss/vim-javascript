@@ -383,8 +383,9 @@ function GetJavascriptIndent()
       if parlnum > 0 && s:Match(parlnum, s:operator_first)
         return indent(parlnum)
       end
-    elseif (counts[0] != '1' && counts[1] != '1' && counts[2] != '1') &&
-          \ !s:Match(s:PrevNonBlankNonString(lnum - 1), s:block_regex)
+    elseif (counts[0] != '1' && counts[1] != '1' && counts[2] != '1') && 
+          \ (!s:Match(s:PrevNonBlankNonString(lnum - 1), s:block_regex) ||
+          \ s:Match(lnum, s:var_stmt))
       " otherwise, indent 1 level
       return indent(lnum) + s:sw()
     end
