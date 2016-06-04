@@ -384,7 +384,7 @@ function GetJavascriptIndent()
         return !s:Match(parlnum, s:operator_first) ? indent(lnum) + s:sw() : indent(parlnum)
       end
     elseif line !~ s:line_pre .
-          \ ',\s*\%(\%(\([''"]\)\%(\%(\\\\\)*\%(\\[''"rbvtn]\)*\|[^\\]\)*\1\)\|\%(\%(\h\|\$\)\%(\$\|\w\)*\)\)\s*:.*' .
+          \ ',\s*\%(\%(\([''"]\)\%(\%(\\\\\)*\%(\\[''"rbvtnxu\o]\)*\|[^\\]\)*\1\)\|\%(\%(\h\|\$\)\%(\$\|\w\)*\)\)\s*:.*' .
           \ s:line_term &&
           \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsbracket\|jsparen'
       " otherwise, if not in an key/val;array item;param, indent 1 level
