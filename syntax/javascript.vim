@@ -222,7 +222,7 @@ syntax match   jsArrowFuncArgs  /([^()]*)\s*\(=>\)\@=/ skipempty skipwhite conta
 syntax keyword jsClassKeywords extends class contained
 syntax match   jsClassNoise /\./ contained
 syntax match   jsClassMethodDefinitions /\%(get\|set\|static\)\%( \k\+\)\@=/ contained nextgroup=jsFuncName skipwhite skipempty
-syntax match   jsClassDefinition /\<class\>\%( \%(\h\|\$\)\%(\$\|\s\|\w\|\n.\)* \)*/  contains=jsClassKeywords,jsClassNoise nextgroup=jsClassBlock skipwhite skipempty
+syntax match   jsClassDefinition /\<class\>\%( \%(\h\|\$\)\%(\$\|\s\|\w\|\n.\)*\)*/  contains=jsClassKeywords,jsClassNoise nextgroup=jsClassBlock skipwhite skipempty
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
