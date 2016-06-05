@@ -30,28 +30,29 @@ syntax match   jsParensError    /\%()\|}\|\]\)/
 
 "" Program Keywords
 syntax keyword jsStorageClass   const var let
-syntax keyword jsOperator       delete instanceof typeof void new in
+syntax keyword jsOperator       delete instanceof typeof void new in of
 syntax match   jsOperator       /[\!\|\&\+\-\<\>\=\%\/\*\~\^]\{1}/
 syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
-syntax keyword jsModules        import export contained
+syntax keyword jsModules        contained import export
 " TODO: Not sure if jsObjectBlock should be nextgroup here
-syntax keyword jsModules        export contained nextgroup=jsObjectBlock skipwhite skipempty
-syntax keyword jsModuleWords    from as contained
-syntax keyword jsModuleWords    default contained nextgroup=jsObjectBlock skipwhite skipempty
-syntax keyword jsOf             of contained
-syntax keyword jsArgsObj        arguments
+syntax keyword jsModules        contained export nextgroup=jsObjectBlock skipwhite skipempty
+syntax keyword jsModuleWords    contained from as
+syntax keyword jsModuleWords    contained default nextgroup=jsObjectBlock skipwhite skipempty
+" TODO: This should be contained in jsFuncBlock only
+syntax keyword jsArgsObj        contained arguments
 
 syntax region jsImportContainer      start="^\s\?import \?" end=";\|$" contains=jsModules,jsModuleWords,jsComment,jsString,jsTemplateString,jsNoise,jsBlock
-syntax region jsExportContainer      start="^\s\?export \?" end="$" contains=jsModules,jsModuleWords,jsComment,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsFuncCall,jsUndefined,jsNan,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsArgsObj,jsBlock,jsClassDefinition
+" TODO: Can the contains just be @jsExpression?
+syntax region jsExportContainer      start="^\s\?export \?" end="$" contains=jsModules,jsModuleWords,jsComment,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsBracket,jsParen,jsFuncCall,jsUndefined,jsNan,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsArgsObj,jsBlock,jsClassDefinition
 
 "" JavaScript comments
-syntax keyword jsCommentTodo    TODO FIXME XXX TBD contained
+syntax keyword jsCommentTodo    contained TODO FIXME XXX TBD
 syntax region  jsComment        start=+\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell extend
 syntax region  jsComment        start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=jsCommentTodo,@Spell fold
 syntax region  jsComment        start="/\*"  end="\*/" contains=jsCommentTodo,jsCvsTag,@Spell fold extend
 syntax region  jsEnvComment     start="\%^#!" end="$" display
-syntax region  jsCvsTag         start="\$\cid:" end="\$" oneline contained
+syntax region  jsCvsTag         contained start="\$\cid:" end="\$" oneline
 
 "" JSDoc / JSDoc Toolkit
 if !exists("javascript_ignore_javaScriptdoc")
@@ -69,11 +70,11 @@ if !exists("javascript_ignore_javaScriptdoc")
   " other tags (no extra syntax)
   syntax match  jsDocTags         contained "@\(abstract\|access\|accessor\|author\|classdesc\|constant\|const\|constructor\|copyright\|deprecated\|desc\|description\|dict\|event\|example\|file\|file[oO]verview\|final\|function\|global\|ignore\|inheritDoc\|inner\|instance\|interface\|license\|localdoc\|method\|mixin\|nosideeffects\|override\|overview\|preserve\|private\|protected\|public\|readonly\|since\|static\|struct\|todo\|summary\|undocumented\|virtual\)\>"
 
-  syntax region jsDocType         matchgroup=jsDocTypeBrackets start="{" end="}" oneline contained nextgroup=jsDocParam skipwhite contains=jsDocTypeRecord
+  syntax region jsDocType         contained matchgroup=jsDocTypeBrackets start="{" end="}" oneline nextgroup=jsDocParam skipwhite contains=jsDocTypeRecord
   syntax match  jsDocType         contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+" nextgroup=jsDocParam skipwhite
-  syntax region jsDocTypeRecord   start=/{/ end=/}/ contained extend contains=jsDocTypeRecord
-  syntax region jsDocTypeRecord   start=/\[/ end=/\]/ contained extend contains=jsDocTypeRecord
-  syntax region jsDocTypeNoParam  start="{" end="}" oneline contained
+  syntax region jsDocTypeRecord   contained start=/{/ end=/}/ extend contains=jsDocTypeRecord
+  syntax region jsDocTypeRecord   contained start=/\[/ end=/\]/ extend contains=jsDocTypeRecord
+  syntax region jsDocTypeNoParam  contained start="{" end="}" oneline
   syntax match  jsDocTypeNoParam  contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+"
   syntax match  jsDocParam        contained "\%(#\|\$\|-\|'\|\"\|{.\{-}}\|\w\|\.\|:\|\/\|\[.{-}]\|=\)\+"
   syntax region jsDocSeeTag       contained matchgroup=jsDocSeeTag start="{" end="}" contains=jsDocTags
@@ -89,44 +90,46 @@ syntax keyword jsNumber           Infinity
 syntax match   jsFloat            /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
 
 " Regular Expressions
-syntax match   jsSpecial          "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)" contained
-syntax region  jsTemplateVar      matchgroup=jsTemplateBraces start=+${+ end=+}+ contained contains=@jsExpression
-syntax region  jsRegexpCharClass  start=+\[+ skip=+\\.+ end=+\]+ contained
-syntax match   jsRegexpBoundary   "\v%(\<@![\^$]|\\[bB])" contained
-syntax match   jsRegexpBackRef    "\v\\[1-9][0-9]*" contained
-syntax match   jsRegexpQuantifier "\v\\@<!%([?*+]|\{\d+%(,|,\d+)?})\??" contained
-syntax match   jsRegexpOr         "\v\<@!\|" contained
-syntax match   jsRegexpMod        "\v\(@<=\?[:=!>]" contained
-syntax cluster jsRegexpSpecial    contains=jsSpecial,jsRegexpBoundary,jsRegexpBackRef,jsRegexpQuantifier,jsRegexpOr,jsRegexpMod
-syntax region  jsRegexpGroup      start="\\\@<!(" skip="\\.\|\[\(\\.\|[^]]\)*\]" end="\\\@<!)" contained contains=jsRegexpCharClass,@jsRegexpSpecial keepend
+syntax match   jsSpecial          contained "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)"
+syntax region  jsTemplateVar      contained matchgroup=jsTemplateBraces start=+${+ end=+}+ contains=@jsExpression
+syntax region  jsRegexpCharClass  contained start=+\[+ skip=+\\.+ end=+\]+
+syntax match   jsRegexpBoundary   contained "\v%(\<@![\^$]|\\[bB])"
+syntax match   jsRegexpBackRef    contained "\v\\[1-9][0-9]*"
+syntax match   jsRegexpQuantifier contained "\v\\@<!%([?*+]|\{\d+%(,|,\d+)?})\??"
+syntax match   jsRegexpOr         contained "\v\<@!\|"
+syntax match   jsRegexpMod        contained "\v\(@<=\?[:=!>]"
+syntax region  jsRegexpGroup      contained start="\\\@<!(" skip="\\.\|\[\(\\.\|[^]]\)*\]" end="\\\@<!)" contains=jsRegexpCharClass,@jsRegexpSpecial keepend
 if v:version > 703 || v:version == 603 && has("patch1088")
   syntax region  jsRegexpString     start=+\%(\%(\%(return\|case\)\s\+\)\@50<=\|\%(\%([)\]"']\|\d\|\w\)\s*\)\@50<!\)/\(\*\|/\)\@!+ skip=+\\.\|\[\%(\\.\|[^]]\)*\]+ end=+/[gimy]\{,4}+ contains=jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial,@htmlPreproc oneline keepend
 else
   syntax region  jsRegexpString     start=+\%(\%(\%(return\|case\)\s\+\)\@<=\|\%(\%([)\]"']\|\d\|\w\)\s*\)\@<!\)/\(\*\|/\)\@!+ skip=+\\.\|\[\%(\\.\|[^]]\)*\]+ end=+/[gimy]\{,4}+ contains=jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial,@htmlPreproc oneline keepend
 endif
+syntax cluster jsRegexpSpecial    contains=jsSpecial,jsRegexpBoundary,jsRegexpBackRef,jsRegexpQuantifier,jsRegexpOr,jsRegexpMod
 
-syntax match   jsObjectKey        /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\)\@=/ contains=jsFunctionKey contained
-syntax match   jsFunctionKey      /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\s*function\s*\)\@=/ contained
+syntax match   jsObjectKey        contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\)\@=/ contains=jsFunctionKey
+syntax match   jsFunctionKey      contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\s*function\s*\)\@=/
 " TODO: Put this in jsClassBlock only
 syntax match   jsDecorator        "@" display contains=jsDecoratorFunction nextgroup=jsDecoratorFunction skipwhite
-syntax match   jsDecoratorFunction "[a-zA-Z_][a-zA-Z0-9_.]*" display contained nextgroup=jsFunc skipwhite
+" TODO: This should contained within function definition stuff...
+syntax match   jsDecoratorFunction contained "[a-zA-Z_][a-zA-Z0-9_.]*" display nextgroup=jsFunc skipwhite
 
 exe 'syntax keyword jsNull      null      '.(exists('g:javascript_conceal_null')        ? 'conceal cchar='.g:javascript_conceal_null        : '')
-exe 'syntax keyword jsReturn    return    '.(exists('g:javascript_conceal_return')      ? 'conceal cchar='.g:javascript_conceal_return      : '')
+exe 'syntax keyword jsReturn    return contained '.(exists('g:javascript_conceal_return')      ? 'conceal cchar='.g:javascript_conceal_return      : '')
 exe 'syntax keyword jsUndefined undefined '.(exists('g:javascript_conceal_undefined')   ? 'conceal cchar='.g:javascript_conceal_undefined   : '')
 exe 'syntax keyword jsNan       NaN       '.(exists('g:javascript_conceal_NaN')         ? 'conceal cchar='.g:javascript_conceal_NaN         : '')
 exe 'syntax keyword jsPrototype prototype '.(exists('g:javascript_conceal_prototype')   ? 'conceal cchar='.g:javascript_conceal_prototype   : '')
-exe 'syntax keyword jsThis      this      '.(exists('g:javascript_conceal_this')        ? 'conceal cchar='.g:javascript_conceal_this        : '')
-exe 'syntax keyword jsStatic    static    '.(exists('g:javascript_conceal_static')      ? 'conceal cchar='.g:javascript_conceal_static      : '')
-exe 'syntax keyword jsSuper     super     '.(exists('g:javascript_conceal_super')       ? 'conceal cchar='.g:javascript_conceal_super       : '')
+" TODO: This group should only be included in functions
+exe 'syntax keyword jsThis      this   contained '.(exists('g:javascript_conceal_this')        ? 'conceal cchar='.g:javascript_conceal_this        : '')
+" TODO: this group should only be contained in functions
+exe 'syntax keyword jsSuper     super  contained '.(exists('g:javascript_conceal_super')       ? 'conceal cchar='.g:javascript_conceal_super       : '')
 
 " Statement Keywords
-syntax keyword jsStatement      break continue with yield
+syntax keyword jsStatement      contained break continue with yield
 " TODO: Create special block regions for these 2 lines
 syntax keyword jsConditional    if else switch
 syntax keyword jsRepeat         do while for
 " TODO: Contain these in Switch block only
-syntax keyword jsLabel          case default
+syntax keyword jsLabel          contained case default
 " TODO: Create try/catch blocks
 syntax keyword jsException      try catch throw finally
 syntax keyword jsAsyncKeyword   async await
@@ -135,17 +138,21 @@ syntax keyword jsAsyncKeyword   async await
 syntax keyword jsGlobalObjects  Array Boolean Date Function Iterator Number Object Symbol Map WeakMap Set RegExp String Proxy Promise Buffer ParallelArray ArrayBuffer DataView Float32Array Float64Array Int16Array Int32Array Int8Array Uint16Array Uint32Array Uint8Array Uint8ClampedArray JSON Math console document window Intl Collator DateTimeFormat NumberFormat
 syntax keyword jsExceptions     Error EvalError InternalError RangeError ReferenceError StopIteration SyntaxError TypeError URIError
 syntax keyword jsBuiltins       decodeURI decodeURIComponent encodeURI encodeURIComponent eval isFinite isNaN parseFloat parseInt uneval
+" TODO: How imporant is this, really? Perhaps it should be linked to an error because I assume the keywords are reserved?
 syntax keyword jsFutureKeys     abstract enum int short boolean interface byte long char final native synchronized float package throws goto private transient debugger implements protected volatile double public
 
-"" DOM2 Objects
+" DISCUSS: Should we really be matching stuff like this?
+" DOM2 Objects
 syntax keyword jsGlobalObjects  DOMImplementation DocumentFragment Document Node NodeList NamedNodeMap CharacterData Attr Element Text Comment CDATASection DocumentType Notation Entity EntityReference ProcessingInstruction
 syntax keyword jsExceptions     DOMException
 
-"" DOM2 CONSTANT
+" DISCUSS: Should we really be matching stuff like this?
+" DOM2 CONSTANT
 syntax keyword jsDomErrNo       INDEX_SIZE_ERR DOMSTRING_SIZE_ERR HIERARCHY_REQUEST_ERR WRONG_DOCUMENT_ERR INVALID_CHARACTER_ERR NO_DATA_ALLOWED_ERR NO_MODIFICATION_ALLOWED_ERR NOT_FOUND_ERR NOT_SUPPORTED_ERR INUSE_ATTRIBUTE_ERR INVALID_STATE_ERR SYNTAX_ERR INVALID_MODIFICATION_ERR NAMESPACE_ERR INVALID_ACCESS_ERR
 syntax keyword jsDomNodeConsts  ELEMENT_NODE ATTRIBUTE_NODE TEXT_NODE CDATA_SECTION_NODE ENTITY_REFERENCE_NODE ENTITY_NODE PROCESSING_INSTRUCTION_NODE COMMENT_NODE DOCUMENT_NODE DOCUMENT_TYPE_NODE DOCUMENT_FRAGMENT_NODE NOTATION_NODE
 
-"" HTML events and internal variables
+" DISCUSS: Should we really be special matching on these props?
+" HTML events and internal variables
 syntax keyword jsHtmlEvents     onblur onclick oncontextmenu ondblclick onfocus onkeydown onkeypress onkeyup onmousedown onmousemove onmouseout onmouseover onmouseup onresize
 
 "" Code blocks
@@ -153,8 +160,8 @@ syntax keyword jsHtmlEvents     onblur onclick oncontextmenu ondblclick onfocus 
 syntax region  jsBracket     matchgroup=jsBrackets     start="\[" end="\]" contains=@jsAll,jsParensError,jsBracket,jsParen,jsBlock,@htmlPreproc fold
 " TODO: This is a region to create jsParensErrors. We'll need to create special contained regions for if/else/switch statements
 syntax region  jsParen       matchgroup=jsParens       start="("  end=")"  contains=@jsAll,jsOf,jsParensError,jsParen,jsBracket,jsBlock,@htmlPreproc fold extend
-syntax region  jsClassBlock  matchgroup=jsClassBraces  start="{"  end="}"  contains=jsFuncName,jsClassMethodDefinitions,jsOperator,jsArrowFunction,jsArrowFuncArgs,jsComment,jsGenerator contained fold
-syntax region  jsFuncBlock   matchgroup=jsFuncBraces   start="{"  end="}"  contains=@jsAll,jsParensError,jsParen,jsBracket,jsBlock,@htmlPreproc,jsClassDefinition fold extend
+syntax region  jsClassBlock  matchgroup=jsClassBraces  contained start="{"  end="}"  contains=jsFuncName,jsClassMethodDefinitions,jsOperator,jsArrowFunction,jsArrowFuncArgs,jsComment,jsGenerator  fold
+syntax region  jsFuncBlock   matchgroup=jsFuncBraces   contained start="{"  end="}"  contains=@jsAll,jsParensError,jsParen,jsBracket,jsBlock,@htmlPreproc,jsClassDefinition fold extend
 " TODO: jsBlock should be made ONLY for switch/if/else statements
 syntax region  jsBlock       matchgroup=jsBraces       start="{"  end="}"  contains=@jsAll,jsParensError,jsParen,jsBracket,jsBlock,jsObjectKey,@htmlPreproc,jsClassDefinition,jsObjectBlock extend
 " TODO: Should NOT include jsAll - should onyl accept aspects for keys, using nextgroup for everything else
@@ -165,13 +172,13 @@ syntax match   jsGenerator       contained /\*/ nextgroup=jsFuncName,jsFuncArgs 
 syntax match   jsFuncName        contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/ nextgroup=jsFuncArgs skipwhite skipempty
 " These versions of jsFuncName is for use in object declarations with no key -
 " TODO: May not need this at all actually
-syntax match   jsFuncName        contained /\%(^[\r\n\t ]*\)\@<=[*\r\n\t ]*[a-zA-Z_$][0-9a-zA-Z_$]*[\r\n\t ]*(\@=/ nextgroup=jsFuncArgs skipwhite skipempty containedin=jsObjectBlock contains=jsGenerator
-syntax match   jsFuncName        contained /\%(,[\r\n\t ]*\)\@<=[*\r\n\t ]*[a-zA-Z_$][0-9a-zA-Z_$]*[\r\n\t ]*(\@=/ nextgroup=jsFuncArgs skipwhite skipempty containedin=jsObjectBlock contains=jsGenerator
+syntax match   jsFuncName             contained /\%(^[\r\n\t ]*\)\@<=[*\r\n\t ]*[a-zA-Z_$][0-9a-zA-Z_$]*[\r\n\t ]*(\@=/ nextgroup=jsFuncArgs skipwhite skipempty containedin=jsObjectBlock contains=jsGenerator
+syntax match   jsFuncName             contained /\%(,[\r\n\t ]*\)\@<=[*\r\n\t ]*[a-zA-Z_$][0-9a-zA-Z_$]*[\r\n\t ]*(\@=/ nextgroup=jsFuncArgs skipwhite skipempty containedin=jsObjectBlock contains=jsGenerator
 syntax match   jsFuncArgDestructuring contained /\({\|}\|=\|:\|\[\|\]\)/ extend
-syntax region  jsFuncArgs        contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas,jsFuncArgRest,jsComment,jsString,jsNumber,jsFuncArgDestructuring,jsArrowFunction,jsParen,jsArrowFuncArgs nextgroup=jsFuncBlock keepend skipwhite skipempty
-syntax match   jsFuncArgCommas   contained ','
-syntax match   jsFuncArgRest     contained /\%(\.\.\.[a-zA-Z_$][0-9a-zA-Z_$]*\))/ contains=jsFuncArgRestDots
-syntax match   jsFuncArgRestDots contained /\.\.\./
+syntax region  jsFuncArgs             contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas,jsFuncArgRest,jsComment,jsString,jsNumber,jsFuncArgDestructuring,jsArrowFunction,jsParen,jsArrowFuncArgs nextgroup=jsFuncBlock keepend skipwhite skipempty
+syntax match   jsFuncArgCommas        contained ','
+syntax match   jsFuncArgRest          contained /\%(\.\.\.[a-zA-Z_$][0-9a-zA-Z_$]*\))/ contains=jsFuncArgRestDots
+syntax match   jsFuncArgRestDots      contained /\.\.\./
 
 " Matches a single keyword argument with no parens
 syntax match   jsArrowFuncArgs  /\k\+\s*\%(=>\)\@=/ skipwhite contains=jsFuncArgs nextgroup=jsArrowFunction extend
@@ -181,15 +188,15 @@ syntax match   jsArrowFuncArgs  /([^()]*)\s*\(=>\)\@=/ skipempty skipwhite conta
 exe 'syntax match jsFunction /\<function\>/ nextgroup=jsGenerator,jsFuncName,jsFuncArgs skipwhite '.(exists('g:javascript_conceal_function') ? 'conceal cchar='.g:javascript_conceal_function : '')
 exe 'syntax match jsArrowFunction /=>/ skipwhite nextgroup=jsFuncBlock contains=jsFuncBraces '.(exists('g:javascript_conceal_arrow_function') ? 'conceal cchar='.g:javascript_conceal_arrow_function : '')
 
-syntax keyword jsClassKeywords extends class contained
-syntax match   jsClassNoise /\./ contained
-syntax match   jsClassMethodDefinitions /\%(get\|set\|static\)\%( \k\+\)\@=/ contained nextgroup=jsFuncName skipwhite skipempty
-syntax match   jsClassDefinition /\<class\>\%( [a-zA-Z_$][0-9a-zA-Z_$ \n.]*\)*/  contains=jsClassKeywords,jsClassNoise nextgroup=jsClassBlock skipwhite skipempty
+syntax keyword jsClassKeywords          contained extends class
+syntax match   jsClassNoise             contained /\./
+syntax match   jsClassMethodDefinitions contained /\%(get\|set\|static\)\%( \k\+\)\@=/ nextgroup=jsFuncName skipwhite skipempty
+syntax match   jsClassDefinition        /\<class\>\%( [a-zA-Z_$][0-9a-zA-Z_$ \n.]*\)*/  contains=jsClassKeywords,jsClassNoise nextgroup=jsClassBlock skipwhite skipempty
 
 " TODO: Look to optimize this, so it can be properly used in nextgroup= stuff
-syntax cluster jsExpression  contains=jsComment,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsThis,jsStatic,jsSuper,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsDotNotation,jsBracket,jsParen,jsObjectBlock,jsBlock,jsFuncCall,jsUndefined,jsNan,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsCommonJS,jsImportContainer,jsExportContainer,jsArgsObj,jsDecorator,jsAsyncKeyword,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs
+syntax cluster jsExpression  contains=jsBracket,jsParen,jsObjectBlock,jsBlock,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs
 " TODO: This may actually need to be optimized
-syntax cluster jsAll         contains=@jsExpression,jsLabel,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsException
+syntax cluster jsAll         contains=@jsExpression,jsExportContainer,jsImportContainer,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsStatement,jsTernaryIf,jsException,jsComment,jsAsyncKeyword
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
@@ -248,7 +255,6 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsStorageClass         StorageClass
   HiLink jsClassKeywords        Structure
   HiLink jsThis                 Special
-  HiLink jsStatic               Special
   HiLink jsSuper                Special
   HiLink jsNan                  Number
   HiLink jsNull                 Type
