@@ -83,7 +83,7 @@ syntax case match
 
 "" Syntax in the JavaScript code
 syntax match   jsFuncCall         /\k\+\%(\s*(\)\@=/
-syntax match   jsSpecial          "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)" contained
+syntax match   jsSpecial          "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c\u|.)" contained
 syntax region  jsTemplateVar      matchgroup=jsTemplateBraces start=+${+ end=+}+ contained contains=@jsExpression
 syntax region  jsStringD          start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@htmlPreproc,@Spell
 syntax region  jsStringS          start=+'+  skip=+\\\('\|$\)+  end=+'\|$+  contains=jsSpecial,@htmlPreproc,@Spell
@@ -91,7 +91,7 @@ syntax region  jsTemplateString   start=+`+  skip=+\\\(`\|$\)+  end=+`+     cont
 syntax region  jsTaggedTemplate   start=/\k\+\%([\n\s]\+\)\?`/ end=+`+ contains=jsTemplateString keepend
 syntax region  jsRegexpCharClass  start=+\[+ skip=+\\.+ end=+\]+ contained
 syntax match   jsRegexpBoundary   "\v%(\<@![\^$]|\\[bB])" contained
-syntax match   jsRegexpBackRef    "\v\\[1-9][0-9]*" contained
+syntax match   jsRegexpBackRef    "\v\\[1-9]\d*" contained
 syntax match   jsRegexpQuantifier "\v\\@<!%([?*+]|\{\d+%(,|,\d+)?})\??" contained
 syntax match   jsRegexpOr         "\v\<@!\|" contained
 syntax match   jsRegexpMod        "\v\(@<=\?[:=!>]" contained
@@ -105,10 +105,10 @@ endif
 syntax match   jsNumber           /\<-\=\d\+\(L\|[eE][+-]\=\d\+\)\=\>\|\<0[xX]\x\+\>/
 syntax keyword jsNumber           Infinity
 syntax match   jsFloat            /\<-\=\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
-syntax match   jsObjectKey        /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\)\@=/ contains=jsFunctionKey contained
-syntax match   jsFunctionKey      /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\s*function\s*\)\@=/ contained
+syntax match   jsObjectKey        /\<\%(\h\|\$\)\%(\$\|\w\)*\>\(\s*:\)\@=/ contains=jsFunctionKey contained
+syntax match   jsFunctionKey      /\<\%(\h\|\$\)\%(\$\|\w\)*\>\(\s*:\s*function\s*\)\@=/ contained
 syntax match   jsDecorator        "@" display contains=jsDecoratorFunction nextgroup=jsDecoratorFunction skipwhite
-syntax match   jsDecoratorFunction "[a-zA-Z_][a-zA-Z0-9_.]*" display contained nextgroup=jsFunc skipwhite
+syntax match   jsDecoratorFunction "\h\%(\w\|\.\)*" display contained nextgroup=jsFunc skipwhite
 
 exe 'syntax keyword jsNull      null      '.(exists('g:javascript_conceal_null')        ? 'conceal cchar='.g:javascript_conceal_null        : '')
 exe 'syntax keyword jsReturn    return    '.(exists('g:javascript_conceal_return')      ? 'conceal cchar='.g:javascript_conceal_return      : '')
@@ -205,13 +205,13 @@ exe 'syntax match jsFunction /\<function\>/ nextgroup=jsGenerator,jsFuncName,jsF
 exe 'syntax match jsArrowFunction /=>/ skipwhite nextgroup=jsFuncBlock contains=jsFuncBraces '.(exists('g:javascript_conceal_arrow_function') ? 'conceal cchar='.g:javascript_conceal_arrow_function : '')
 
 syntax match   jsGenerator       contained /\*/ nextgroup=jsFuncName,jsFuncArgs skipwhite skipempty
-syntax match   jsFuncName        contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*/ nextgroup=jsFuncArgs skipwhite skipempty
+syntax match   jsFuncName        contained /\<\%(\h\|\$\)\%(\$\|\w\)*/ nextgroup=jsFuncArgs skipwhite skipempty
 " These versions of jsFuncName is for use in object declarations with no key
 " syntax match   jsFuncName        contained /\%(^[\r\n\t ]*\)\@<=[*\r\n\t ]*[a-zA-Z_$][0-9a-zA-Z_$]*[\r\n\t ]*(\@=/ nextgroup=jsFuncArgs skipwhite skipempty containedin=jsBlock contains=jsGenerator
 " syntax match   jsFuncName        contained /\%(,[\r\n\t ]*\)\@<=[*\r\n\t ]*[a-zA-Z_$][0-9a-zA-Z_$]*[\r\n\t ]*(\@=/ nextgroup=jsFuncArgs skipwhite skipempty containedin=jsBlock contains=jsGenerator
 syntax region  jsFuncArgs        contained matchgroup=jsFuncParens start='(' end=')' contains=jsFuncArgCommas,jsFuncArgRest,jsComment,jsLineComment,jsStringS,jsStringD,jsNumber,jsFuncArgDestructuring,jsArrowFunction,jsParen,jsArrowFuncArgs nextgroup=jsFuncBlock keepend skipwhite skipempty
 syntax match   jsFuncArgCommas   contained ','
-syntax match   jsFuncArgRest     contained /\%(\.\.\.[a-zA-Z_$][0-9a-zA-Z_$]*\))/ contains=jsFuncArgRestDots
+syntax match   jsFuncArgRest     contained /\%(\.\.\.\%(\h\|\$\)\%(\$\|\w\)*\))/ contains=jsFuncArgRestDots
 syntax match   jsFuncArgRestDots contained /\.\.\./
 
 " Matches a single keyword argument with no parens
@@ -222,7 +222,7 @@ syntax match   jsArrowFuncArgs  /([^()]*)\s*\(=>\)\@=/ skipempty skipwhite conta
 syntax keyword jsClassKeywords extends class contained
 syntax match   jsClassNoise /\./ contained
 syntax match   jsClassMethodDefinitions /\%(get\|set\|static\)\%( \k\+\)\@=/ contained nextgroup=jsFuncName skipwhite skipempty
-syntax match   jsClassDefinition /\<class\>\%( [a-zA-Z_$][0-9a-zA-Z_$ \n.]*\)*/  contains=jsClassKeywords,jsClassNoise nextgroup=jsClassBlock skipwhite skipempty
+syntax match   jsClassDefinition /\<class\>\%( \%(\h\|\$\)\%(\$\|\w\\n.\)* \)*/  contains=jsClassKeywords,jsClassNoise nextgroup=jsClassBlock skipwhite skipempty
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
