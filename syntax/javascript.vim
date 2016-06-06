@@ -32,6 +32,7 @@ syntax match   jsParensError    /\%()\|}\|\]\)/
 syntax keyword jsStorageClass   const var let
 syntax keyword jsOperator       delete instanceof typeof void new in of
 syntax match   jsOperator       /[\!\|\&\+\-\<\>\=\%\/\*\~\^]\{1}/
+syntax match   jsSpreadOperator /\.\.\./
 syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
 
@@ -135,7 +136,7 @@ syntax region  jsClassBlock  contained matchgroup=jsClassBraces       start=/{/ 
 syntax region  jsFuncBlock   contained matchgroup=jsFuncBraces        start=/{/  end=/}/  contains=@jsAll fold extend
 syntax region  jsBlock       contained matchgroup=jsBraces            start=/{/  end=/}/  contains=@jsAll extend fold
 syntax region  jsSwitchBlock contained matchgroup=jsBraces            start=/{/  end=/}/  contains=@jsAll,jsLabel extend fold
-syntax region  jsObject                matchgroup=jsObjectBraces      start=/{/  end=/}/  contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectGetSet,jsGenerator,jsComment extend
+syntax region  jsObject                matchgroup=jsObjectBraces      start=/{/  end=/}/  contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectGetSet,jsGenerator,jsComment,jsSpreadOperator extend
 syntax region  jsTernaryIf             matchgroup=jsTernaryIfOperator start=/?/  end=/:/  contains=@jsExpression
 
 syntax match   jsGenerator            contained /\*/ skipwhite skipempty nextgroup=jsFuncName,jsFuncArgs
@@ -200,7 +201,7 @@ if !exists("javascript_ignore_javaScriptdoc")
   syntax region jsDocSeeTag       contained matchgroup=jsDocSeeTag start="{" end="}" contains=jsDocTags
 endif   "" JSDoc end
 
-syntax cluster jsExpression  contains=jsArray,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper
+syntax cluster jsExpression  contains=jsArray,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsSpreadOperator
 syntax cluster jsAll         contains=@jsExpression,jsExportContainer,jsImportContainer,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsStatement,jsException,jsAsyncKeyword
 
 " Define the default highlighting.
@@ -297,6 +298,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFuncArgDestructuring Noise
   HiLink jsModuleAsterisk       Noise
   HiLink jsClassProperty        Identifier
+  HiLink jsSpreadOperator       Operator
 
   HiLink jsDomErrNo             Constant
   HiLink jsDomNodeConsts        Constant
