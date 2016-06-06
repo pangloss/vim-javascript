@@ -16,7 +16,7 @@ if !exists('g:javascript_conceal')
   let g:javascript_conceal = 0
 endif
 
-"" dollar sign is permittd anywhere in an identifier
+" Dollar sign is permittd anywhere in an identifier
 setlocal iskeyword+=$
 
 syntax sync fromstart
@@ -28,23 +28,24 @@ syntax match   jsNoise           /[:,\;\.]\{1}/
 syntax match   jsFuncCall         /\k\+\%(\s*(\)\@=/
 syntax match   jsParensError    /\%()\|}\|\]\)/
 
-"" Program Keywords
+" Program Keywords
 syntax keyword jsStorageClass   const var let
 syntax keyword jsOperator       delete instanceof typeof void new in of
 syntax match   jsOperator       /[\!\|\&\+\-\<\>\=\%\/\*\~\^]\{1}/
 syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
-syntax keyword jsModules        contained import export
-" TODO: Not sure if jsObjectBlock should be nextgroup here
-syntax keyword jsModules        contained export nextgroup=jsObjectBlock skipwhite skipempty
-syntax keyword jsModuleWords    contained from as
-syntax keyword jsModuleWords    contained default nextgroup=jsObjectBlock skipwhite skipempty
-syntax keyword jsArgsObj        contained arguments
 
-" TODO: Go over these contains with a fine toothed comb
-syntax region jsImportContainer      start="^\s\?import \?" end=";\|$" contains=jsModules,jsModuleWords,jsComment,jsString,jsTemplateString,jsNoise,jsBlock
-" TODO: Can the contains just be @jsExpression?
-syntax region jsExportContainer      start="^\s\?export \?" end="$" contains=jsModules,jsModuleWords,jsComment,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsThis,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsArray,jsParen,jsFuncCall,jsUndefined,jsNan,jsStorageClass,jsPrototype,jsBuiltins,jsNoise,jsArgsObj,jsBlock,jsClassDefinition
+" Modules
+syntax keyword jsModuleKeywords  contained import
+syntax keyword jsModuleKeywords  contained export skipwhite skipempty nextgroup=@jsExpression
+syntax keyword jsModuleOperators contained from
+syntax keyword jsModuleOperators contained as
+syntax region  jsModuleGroup     contained matchgroup=jsBraces start=/{/ end=/}/ contains=jsModuleOperators,jsNoise
+syntax match   jsModuleAsterisk  contained /*/
+syntax keyword jsModuleDefault   contained default skipwhite skipempty nextgroup=@jsExpression
+syntax region jsImportContainer  start=/\<import\> / end="\%(;\|$\)" contains=jsModuleKeywords,jsModuleOperators,jsComment,jsString,jsTemplateString,jsNoise,jsModuleGroup,jsModuleAsterisk
+syntax match  jsExportContainer   /\<export\> / contains=jsModuleKeywords skipwhite skipempty nextgroup=jsExportBlock,jsModuleDefault
+syntax region jsExportBlock      contained matchgroup=jsBraces start=/{/ end=/}/ contains=jsModuleOperators,jsNoise
 
 " Strings, Templates, Numbers
 syntax region  jsString           start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@Spell extend
@@ -149,6 +150,7 @@ syntax region  jsFuncArgs             contained matchgroup=jsFuncParens start='(
 syntax match   jsFuncArgCommas        contained ','
 syntax match   jsFuncArgRest          contained /\%(\.\.\.[a-zA-Z_$][0-9a-zA-Z_$]*\))/ contains=jsFuncArgRestDots
 syntax match   jsFuncArgRestDots      contained /\.\.\./
+syntax keyword jsArguments            contained arguments
 
 " Matches a single keyword argument with no parens
 syntax match   jsArrowFuncArgs  /\k\+\s*\%(=>\)\@=/ skipwhite contains=jsFuncArgs nextgroup=jsArrowFunction extend
@@ -197,7 +199,7 @@ if !exists("javascript_ignore_javaScriptdoc")
   syntax region jsDocSeeTag       contained matchgroup=jsDocSeeTag start="{" end="}" contains=jsDocTags
 endif   "" JSDoc end
 
-syntax cluster jsExpression  contains=jsArray,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArgsObj,jsThis,jsSuper
+syntax cluster jsExpression  contains=jsArray,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper
 syntax cluster jsAll         contains=@jsExpression,jsExportContainer,jsImportContainer,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsStatement,jsException,jsAsyncKeyword
 
 " Define the default highlighting.
@@ -251,7 +253,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsArrowFuncArgs        jsFuncArgs
   HiLink jsFuncName             Function
   HiLink jsObjectFuncName       Function
-  HiLink jsArgsObj              Special
+  HiLink jsArguments            Special
   HiLink jsError                Error
   HiLink jsParensError          Error
   HiLink jsOperator             Operator
@@ -284,11 +286,13 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsExceptions           Special
   HiLink jsFutureKeys           Special
   HiLink jsBuiltins             Special
-  HiLink jsModules              Include
-  HiLink jsModuleWords          Include
+  HiLink jsModuleKeywords       Include
+  HiLink jsModuleOperators      Include
+  HiLink jsModuleDefault        Include
   HiLink jsDecorator            Special
   HiLink jsFuncArgRestDots      Noise
   HiLink jsFuncArgDestructuring Noise
+  HiLink jsModuleAsterisk       Noise
 
   HiLink jsDomErrNo             Constant
   HiLink jsDomNodeConsts        Constant
