@@ -287,7 +287,6 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsTemplateBraces       jsBraces
   HiLink jsGlobalObjects        Special
   HiLink jsExceptions           Special
-  HiLink jsFutureKeys           Special
   HiLink jsBuiltins             Special
   HiLink jsModuleKeywords       Include
   HiLink jsModuleOperators      Include
