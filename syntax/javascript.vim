@@ -126,7 +126,7 @@ syntax keyword jsDomNodeConsts  ELEMENT_NODE ATTRIBUTE_NODE TEXT_NODE CDATA_SECT
 syntax keyword jsHtmlEvents     onblur onclick oncontextmenu ondblclick onfocus onkeydown onkeypress onkeyup onmousedown onmousemove onmouseout onmouseover onmouseup onresize
 
 "" Code blocks
-syntax region  jsArray                 matchgroup=jsBrackets          start="\[" end="\]" contains=@jsExpression fold extend
+syntax region  jsBracket               matchgroup=jsBrackets          start="\[" end="\]" contains=@jsExpression fold extend
 syntax region  jsParen                 matchgroup=jsParens            start=/(/  end=/)/  contains=@jsAll fold extend
 syntax region  jsParenIfElse contained matchgroup=jsParens            start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsBlock fold extend
 syntax region  jsParenRepeat contained matchgroup=jsParens            start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsBlock fold extend
@@ -201,7 +201,7 @@ if !exists("javascript_ignore_javaScriptdoc")
   syntax region jsDocSeeTag       contained matchgroup=jsDocSeeTag start="{" end="}" contains=jsDocTags
 endif   "" JSDoc end
 
-syntax cluster jsExpression  contains=jsArray,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsSpreadOperator
+syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsSpreadOperator
 syntax cluster jsAll         contains=@jsExpression,jsExportContainer,jsImportContainer,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsStatement,jsException,jsAsyncKeyword
 
 " Define the default highlighting.
@@ -318,8 +318,8 @@ if version >= 508 || !exists("did_javascript_syn_inits")
 endif
 
 " Define the htmlJavaScript for HTML syntax html.vim
-syntax cluster  htmlJavaScript       contains=@jsAll,jsArray,jsParen,jsBlock
-syntax cluster  javaScriptExpression contains=@jsAll,jsArray,jsParen,jsBlock
+syntax cluster  htmlJavaScript       contains=@jsAll
+syntax cluster  javaScriptExpression contains=@jsAll
 
 " Vim's default html.vim highlights all javascript as 'Special'
 hi! def link javaScript              NONE
