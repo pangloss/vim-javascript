@@ -120,7 +120,7 @@ function s:PrevNonBlankNonString(lnum)
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
     let line = getline(lnum)
-    let com = match(line, '\*\/') + 1
+    let com = match(line, '\%(\/\*.*\)\@<!\*\/') + 1
     if s:IsInComment(lnum, com)
       call cursor(lnum, com)
       let parlnum = search('\%(\/\/.*\)\@<!\/\*', 'nbW')
