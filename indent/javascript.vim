@@ -494,7 +494,7 @@ function! Fixedgq(lnum, count)
     endif
 
     " This gq is only meant to do code with strings, not comments
-    if s:IsLineComment(a:lnum, l:first_char) || s:IsInComment(a:lnum, l:first_char)
+    if s:IsInComment(a:lnum, l:first_char)
         return 1
     endif
 
