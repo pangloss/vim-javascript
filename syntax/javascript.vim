@@ -93,7 +93,7 @@ exe 'syntax keyword jsThis      this   contained '.(exists('g:javascript_conceal
 exe 'syntax keyword jsSuper     super  contained '.(exists('g:javascript_conceal_super')     ? 'conceal cchar='.g:javascript_conceal_super      : '')
 
 " Statement Keywords
-syntax keyword jsStatement    contained break continue with yield
+syntax keyword jsStatement    contained break continue with yield debugger
 syntax keyword jsConditional            if else      skipwhite skipempty nextgroup=jsParenIfElse,jsBlock
 syntax keyword jsConditional            switch       skipwhite skipempty nextgroup=jsParenSwitch
 syntax keyword jsRepeat                 while for    skipwhite skipempty nextgroup=jsParenRepeat
@@ -109,7 +109,7 @@ syntax keyword jsGlobalObjects  Array Boolean Date Function Iterator Number Obje
 syntax keyword jsExceptions     Error EvalError InternalError RangeError ReferenceError StopIteration SyntaxError TypeError URIError
 syntax keyword jsBuiltins       decodeURI decodeURIComponent encodeURI encodeURIComponent eval isFinite isNaN parseFloat parseInt uneval
 " DISCUSS: How imporant is this, really? Perhaps it should be linked to an error because I assume the keywords are reserved?
-syntax keyword jsFutureKeys     abstract enum int short boolean interface byte long char final native synchronized float package throws goto private transient debugger implements protected volatile double public
+syntax keyword jsFutureKeys     abstract enum int short boolean interface byte long char final native synchronized float package throws goto private transient implements protected volatile double public
 
 " DISCUSS: Should we really be matching stuff like this?
 " DOM2 Objects
