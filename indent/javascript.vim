@@ -16,7 +16,7 @@ setlocal nosmartindent
 " Now, set up our indentation expression and keys that trigger it.
 setlocal indentexpr=GetJavascriptIndent()
 setlocal formatexpr=Fixedgq(v:lnum,v:count)
-setlocal indentkeys=0{,0},0),0],0\,:,!^F,o,O,e
+setlocal indentkeys=0{,0},0),0],0\,*<Return>,:,!^F,o,O,e
 setlocal cinoptions+=j1,J1
 
 " Only define the function once.
@@ -127,7 +127,7 @@ function s:PrevNonBlankNonString(lnum)
       if parlnum > 0
         let lnum = parlnum
       end
-    elseif line !~ '^' . s:line_term
+    elseif line !~ '^' . s:line_term && !s:IsInStringOrComment(lnum,1)
       break
     endif
     let lnum = prevnonblank(lnum - 1)
