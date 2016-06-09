@@ -330,7 +330,7 @@ function GetJavascriptIndent()
   endif
 
   " If we are in a multi-line comment, cindent does the right thing.
-  if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)
+  if (line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)) || line =~ '\*\/\s*$'
     return cindent(v:lnum)
   endif
   
@@ -375,7 +375,7 @@ function GetJavascriptIndent()
       if parlnum > 0
         return !s:Match(parlnum, s:operator_first) ? indent(lnum) + s:sw() : indent(parlnum)
       end
-    elseif synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsarray\|jsparen\|jsobject'
+    elseif synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsbracket\|jsparen\|jsobject'
       " otherwise, if not in an key/val;array item;param, indent 1 level
       return indent(lnum) + s:sw()
     end
@@ -433,12 +433,12 @@ function GetJavascriptIndent()
   " add indent depending on the bracket type.
   if s:Match(lnum, '[[({})\]]')
     let counts = s:LineHasOpeningBrackets(lnum)
-    if counts[0] == '2' || (counts[1] == '2' && !s:Match(lnum, s:line_pre . '}')) ||
-          \ (counts[2] == '2' && !s:Match(lnum, s:line_pre . ']'))
+    if counts[0] == '2' || (counts[1] == '2') ||
+          \ (counts[2] == '2')
       call cursor(lnum, 1)
       " Search for the opening tag
       let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
-      if parlnum > 0
+      if parlnum > 0 && !s:InMultiVarStatement(parlnum,0,0)
         return indent(s:GetMSL(parlnum, 0)) 
       end
     elseif counts =~ '1' || s:Onescope(lnum)
