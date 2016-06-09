@@ -330,7 +330,7 @@ function GetJavascriptIndent()
   endif
 
   " If we are in a multi-line comment, cindent does the right thing.
-  if (line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)) || line =~ '\*\/\s*$'
+  if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)
     return cindent(v:lnum)
   endif
   
