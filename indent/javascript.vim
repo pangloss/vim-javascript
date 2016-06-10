@@ -353,7 +353,7 @@ function GetJavascriptIndent()
     call cursor(v:lnum, col)
     let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
     if parlnum > 0
-      let ind = indent(parlnum)
+      let ind = s:InMultiVarStatement(parlnum, 0, 0) ? indent(parlnum) : indent(s:GetMSL(parlnum, 0))
     endif
     return ind
   endif
