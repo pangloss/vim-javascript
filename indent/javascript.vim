@@ -145,18 +145,17 @@ function s:GetMSL(lnum, in_one_line_scope)
     " Otherwise, terminate search as we have found our MSL already.
     let line = getline(lnum)
     let line2 = getline(msl)
-    let col2 = matchend(line2, ')')
     if ((s:Match(lnum,s:continuation_regex) || s:Match(lnum, s:comma_last)) &&
           \ !s:Match(lnum, s:expr_case)) || s:IsInString(lnum, strlen(line))
       let msl = lnum
-
-    " if there are more closing brackets, continue from the line which has the matching opening bracket
-    elseif col2 > 0 && !s:IsInStringOrComment(msl, col2) && s:LineHasOpeningBrackets(msl)[0] == '2' && !a:in_one_line_scope
-      call cursor(msl, 1)
-      if s:lookForParens('(', ')', 'bW', 0) > 0
-        let lnum = line('.')
-        let msl = lnum
-      endif
+      if s:Match(lnum,'^\s*[]})]') && !a:in_one_line_scope
+        call cursor(lnum,1)
+        let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
+        if parlnum > 0
+          let lnum = parlnum
+          continue
+        end
+      end
 
     else
 
@@ -421,7 +420,7 @@ function GetJavascriptIndent()
 
   " If the previous line ended with a block opening, add a level of indent.
   if s:Match(lnum, s:block_regex)
-    return indent(lnum) + s:sw()
+    return s:InMultiVarStatement(lnum, 0, 0) ? indent(lnum) + s:sw() : indent(s:GetMSL(lnum, 0)) + s:sw()
   endif
 
   " Set up variables for current line.
