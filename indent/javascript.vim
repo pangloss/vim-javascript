@@ -347,19 +347,17 @@ function GetJavascriptIndent()
   " If we got a closing bracket on an empty line, find its match and indent
   " according to it.  For parentheses we indent to its column - 1, for the
   " others we indent to the containing line's MSL's level.  Return -1 if fail.
+  let lnum = s:PrevNonBlankNonString(v:lnum - 1)
   let col = matchend(line, s:line_pre . '[]})]')
   if col > 0 && !s:IsInStringOrComment(v:lnum, col)
     call cursor(v:lnum, col)
-
-
     let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
     if parlnum > 0
-      let ind = s:InMultiVarStatement(parlnum, 0, 0) ? indent(parlnum) : indent(s:GetMSL(parlnum, 0))
+      let ind = indent(parlnum)
     endif
     return ind
   endif
 
-  let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
   " If line starts with an operator...
   if (line =~ s:operator_first)
@@ -433,8 +431,7 @@ function GetJavascriptIndent()
   " add indent depending on the bracket type.
   if s:Match(lnum, '[[({})\]]')
     let counts = s:LineHasOpeningBrackets(lnum)
-    if counts[0] == '2' || (counts[1] == '2') ||
-          \ (counts[2] == '2')
+    if counts =~ '2'
       call cursor(lnum, 1)
       " Search for the opening tag
       let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
