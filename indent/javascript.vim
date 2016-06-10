@@ -347,7 +347,6 @@ function GetJavascriptIndent()
   " If we got a closing bracket on an empty line, find its match and indent
   " according to it.  For parentheses we indent to its column - 1, for the
   " others we indent to the containing line's MSL's level.  Return -1 if fail.
-  let lnum = s:PrevNonBlankNonString(v:lnum - 1)
   let col = matchend(line, s:line_pre . '[]})]')
   if col > 0 && !s:IsInStringOrComment(v:lnum, col)
     call cursor(v:lnum, col)
@@ -358,6 +357,7 @@ function GetJavascriptIndent()
     return ind
   endif
 
+  let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
   " If line starts with an operator...
   if (line =~ s:operator_first)
