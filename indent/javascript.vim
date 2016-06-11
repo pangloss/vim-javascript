@@ -148,7 +148,7 @@ function s:GetMSL(lnum, in_one_line_scope)
     if ((s:Match(lnum,s:continuation_regex) || s:Match(lnum, s:comma_last)) &&
           \ !s:Match(lnum, s:expr_case)) || s:IsInString(lnum, strlen(line))
       let msl = lnum
-      if s:Match(lnum,'^\s*[]})]') && !a:in_one_line_scope
+      if s:Match(lnum, s:line_pre . '[]})]') && !a:in_one_line_scope
         call cursor(lnum,1)
         let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
         if parlnum > 0
