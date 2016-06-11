@@ -336,7 +336,8 @@ function GetJavascriptIndent()
   endif
   
   " single opening bracket will assume you want a c style of indenting
-  if s:Match(v:lnum, s:line_pre . '{' . s:line_term) && !s:Match(lnum,s:block_regex)
+  if s:Match(v:lnum, s:line_pre . '{' . s:line_term) && !s:Match(lnum,s:block_regex) &&
+        \ !s:Match(lnum,s:comma_last)
     return cindent(v:lnum)
   endif
 
@@ -371,7 +372,9 @@ function GetJavascriptIndent()
       " Search for the opening tag
       let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
       if parlnum > 0
-        return !s:Match(parlnum, s:operator_first) ? indent(lnum) + s:sw() : indent(parlnum)
+        return !s:Match(parlnum, s:operator_first) &&
+              \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsbracket\|jsparen\|jsobject' ?
+              \ indent(lnum) + s:sw() : indent(parlnum)
       end
     elseif synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsbracket\|jsparen\|jsobject'
       " otherwise, if not in an key/val;array item;param, indent 1 level
