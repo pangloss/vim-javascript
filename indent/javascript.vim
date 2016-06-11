@@ -322,6 +322,8 @@ function GetJavascriptIndent()
   let line = getline(v:lnum)
   " previous nonblank line number
   let prevline = prevnonblank(v:lnum - 1)
+  " previous line of code
+  let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
   " to not change multiline string values 
   if line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template'
@@ -334,7 +336,7 @@ function GetJavascriptIndent()
   endif
   
   " single opening bracket will assume you want a c style of indenting
-  if s:Match(v:lnum, s:line_pre . '{' . s:line_term)
+  if s:Match(v:lnum, s:line_pre . '{' . s:line_term) && !s:Match(lnum,s:block_regex)
     return cindent(v:lnum)
   endif
 
@@ -356,7 +358,6 @@ function GetJavascriptIndent()
     return ind
   endif
 
-  let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
   " If line starts with an operator...
   if (line =~ s:operator_first)
