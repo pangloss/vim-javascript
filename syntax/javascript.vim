@@ -137,7 +137,7 @@ syntax region  jsFuncBlock   contained matchgroup=jsFuncBraces        start=/{/ 
 syntax region  jsBlock       contained matchgroup=jsBraces            start=/{/  end=/}/  contains=@jsAll extend fold
 syntax region  jsSwitchBlock contained matchgroup=jsBraces            start=/{/  end=/}/  contains=@jsAll,jsLabel extend fold
 syntax region  jsObject                matchgroup=jsObjectBraces      start=/{/  end=/}/  contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectGetSet,jsGenerator,jsComment,jsSpreadOperator extend fold
-syntax region  jsTernaryIf             matchgroup=jsTernaryIfOperator start=/?/  end=/:/  contains=@jsExpression
+syntax region  jsTernaryIf             matchgroup=jsTernaryIfOperator start=/?/  end=/\%(:\|[\}]\@=\)/  contains=@jsExpression
 
 syntax match   jsGenerator            contained /\*/ skipwhite skipempty nextgroup=jsFuncName,jsFuncArgs
 syntax match   jsFuncName             contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>/ skipwhite skipempty nextgroup=jsFuncArgs
