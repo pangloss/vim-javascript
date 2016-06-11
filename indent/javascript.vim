@@ -16,7 +16,7 @@ setlocal nosmartindent
 " Now, set up our indentation expression and keys that trigger it.
 setlocal indentexpr=GetJavascriptIndent()
 setlocal formatexpr=Fixedgq(v:lnum,v:count)
-setlocal indentkeys=0{,0},0),0],0\,:,!^F,o,O,e
+setlocal indentkeys=0{,0},0),0],0\,*<Return>,:,!^F,o,O,e
 setlocal cinoptions+=j1,J1
 
 " Only define the function once.
@@ -45,16 +45,13 @@ let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
 let s:js_keywords = s:line_pre . '\%(break\|import\|export\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)\>\C'
 let s:expr_case = s:line_pre . '\%(case\s\+[^\:]*\|default\)\s*:\s*\C'
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = '\%(string\|regex\|comment\|template\)\c'
+let s:syng_strcom = '\%(string\|regex\|special\|comment\|template\)\c'
 
 " Regex of syntax group names that are strings.
 let s:syng_string = 'regex\c'
 
 " Regex of syntax group names that are strings or documentation.
-let s:syng_multiline = '\%(comment\|doc\)\c'
-
-" Regex of syntax group names that are line comment.
-let s:syng_linecom = 'linecomment\c'
+let s:syng_comment = '\%(comment\|doc\)\c'
 
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
@@ -114,13 +111,8 @@ function s:IsInString(lnum, col)
 endfunction
 
 " Check if the character at lnum:col is inside a multi-line comment.
-function s:IsInMultilineComment(lnum, col)
-  return !s:IsLineComment(a:lnum, a:col) && synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_multiline
-endfunction
-
-" Check if the character at lnum:col is a line comment.
-function s:IsLineComment(lnum, col)
-  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_linecom
+function s:IsInComment(lnum, col)
+  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_comment
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
@@ -128,14 +120,14 @@ function s:PrevNonBlankNonString(lnum)
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
     let line = getline(lnum)
-    let com = match(line, '\*\/') + 1
-    if s:IsInMultilineComment(lnum, com)
+    let com = match(line, '\%(\/\*.*\)\@<!\*\/') + 1
+    if s:IsInComment(lnum, com)
       call cursor(lnum, com)
-      let parlnum = search('\/\*', 'nbW')
+      let parlnum = search('\%(\/\/.*\)\@<!\/\*', 'nbW')
       if parlnum > 0
         let lnum = parlnum
       end
-    elseif line !~ '^' . s:line_term
+    elseif line !~ '^' . s:line_term && !s:IsInStringOrComment(lnum,1)
       break
     endif
     let lnum = prevnonblank(lnum - 1)
@@ -153,18 +145,17 @@ function s:GetMSL(lnum, in_one_line_scope)
     " Otherwise, terminate search as we have found our MSL already.
     let line = getline(lnum)
     let line2 = getline(msl)
-    let col2 = matchend(line2, ')')
     if ((s:Match(lnum,s:continuation_regex) || s:Match(lnum, s:comma_last)) &&
           \ !s:Match(lnum, s:expr_case)) || s:IsInString(lnum, strlen(line))
       let msl = lnum
-
-    " if there are more closing brackets, continue from the line which has the matching opening bracket
-    elseif col2 > 0 && !s:IsInStringOrComment(msl, col2) && s:LineHasOpeningBrackets(msl)[0] == '2' && !a:in_one_line_scope
-      call cursor(msl, 1)
-      if s:lookForParens('(', ')', 'bW', 0) > 0
-        let lnum = line('.')
-        let msl = lnum
-      endif
+      if s:Match(lnum, s:line_pre . '[]})]') && !a:in_one_line_scope
+        call cursor(lnum,1)
+        let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
+        if parlnum > 0
+          let lnum = parlnum
+          continue
+        end
+      end
 
     else
 
@@ -331,6 +322,8 @@ function GetJavascriptIndent()
   let line = getline(v:lnum)
   " previous nonblank line number
   let prevline = prevnonblank(v:lnum - 1)
+  " previous line of code
+  let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
   " to not change multiline string values 
   if line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template'
@@ -338,12 +331,13 @@ function GetJavascriptIndent()
   endif
 
   " If we are in a multi-line comment, cindent does the right thing.
-  if s:IsInMultilineComment(v:lnum, 1) && line !~ '^\/\*'
+  if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)
     return cindent(v:lnum)
   endif
   
   " single opening bracket will assume you want a c style of indenting
-  if s:Match(v:lnum, s:line_pre . '{' . s:line_term)
+  if s:Match(v:lnum, s:line_pre . '{' . s:line_term) && !s:Match(lnum,s:block_regex) &&
+        \ !s:Match(lnum,s:comma_last)
     return cindent(v:lnum)
   endif
 
@@ -358,8 +352,6 @@ function GetJavascriptIndent()
   let col = matchend(line, s:line_pre . '[]})]')
   if col > 0 && !s:IsInStringOrComment(v:lnum, col)
     call cursor(v:lnum, col)
-
-
     let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
     if parlnum > 0
       let ind = s:InMultiVarStatement(parlnum, 0, 0) ? indent(parlnum) : indent(s:GetMSL(parlnum, 0))
@@ -367,7 +359,6 @@ function GetJavascriptIndent()
     return ind
   endif
 
-  let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
   " If line starts with an operator...
   if (line =~ s:operator_first)
@@ -376,16 +367,17 @@ function GetJavascriptIndent()
       return indent(lnum)
     end
     let counts = s:LineHasOpeningBrackets(lnum)
-    if counts[0] == '2' || counts[1] == '2' || counts[2] == '2'
+    if counts =~ '2'
       call cursor(lnum, 1)
       " Search for the opening tag
       let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
       if parlnum > 0
-        return !s:Match(parlnum, s:operator_first) ? indent(lnum) + s:sw() : indent(parlnum)
+        return !s:Match(parlnum, s:operator_first) &&
+              \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsbracket\|jsparen\|jsobject' ?
+              \ indent(lnum) + s:sw() : indent(parlnum)
       end
-    elseif line !~ s:line_pre . ',\s*\%(\%(\([''"]\).*\1\)\|\%(\h\w*\)\)\s*:.*' . s:line_term &&
-          \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsbracket\|jsparen'
-      " otherwise, indent 1 level
+    elseif synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsbracket\|jsparen\|jsobject'
+      " otherwise, if not in an key/val;array item;param, indent 1 level
       return indent(lnum) + s:sw()
     end
 
@@ -400,7 +392,7 @@ function GetJavascriptIndent()
         return indent(mnum) - s:sw()
       end
     elseif s:Match(lnum, s:operator_first)
-      if counts[0] != '1' && counts[1] != '1' && counts[2] != '1'
+      if counts !~ '1'
         return indent(lnum) - s:sw()
       end
     end
@@ -412,7 +404,8 @@ function GetJavascriptIndent()
   " If the line is empty and the previous nonblank line was a multi-line
   " comment, use that comment's indent. Deduct one char to account for the
   " space in ' */'.
-  if line =~ '^\s*$' && s:IsInMultilineComment(prevline, 1)
+  if line =~ '^\s*$' && getline(prevline) !~ '\%(\%(^\s*\/\/\|\/\*\).*\)\@<!\*\/' &&
+        \ s:IsInComment(prevline, 1)
     return indent(prevline) - 1
   endif
 
@@ -441,15 +434,14 @@ function GetJavascriptIndent()
   " add indent depending on the bracket type.
   if s:Match(lnum, '[[({})\]]')
     let counts = s:LineHasOpeningBrackets(lnum)
-    if counts[0] == '2' || (counts[1] == '2' && !s:Match(lnum, s:line_pre . '}')) ||
-          \ (counts[2] == '2' && !s:Match(lnum, s:line_pre . ']'))
+    if counts =~ '2'
       call cursor(lnum, 1)
       " Search for the opening tag
       let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
-      if parlnum > 0
+      if parlnum > 0 && !s:InMultiVarStatement(parlnum,0,0)
         return indent(s:GetMSL(parlnum, 0)) 
       end
-    elseif counts[1] == '1' || counts[2] == '1' || counts[0] == '1' || s:Onescope(lnum)
+    elseif counts =~ '1' || s:Onescope(lnum)
       return ind + s:sw()
     else
       call cursor(v:lnum, vcol)
@@ -502,7 +494,7 @@ function! Fixedgq(lnum, count)
     endif
 
     " This gq is only meant to do code with strings, not comments
-    if s:IsLineComment(a:lnum, l:first_char) || s:IsInMultilineComment(a:lnum, l:first_char)
+    if s:IsInComment(a:lnum, l:first_char)
         return 1
     endif
 
