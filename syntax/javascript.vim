@@ -220,7 +220,7 @@ endif   "" JSDoc end
 
 " FIXME: Will need to mask this behind an if statement, or make it a separate file that gets source separately.
 syntax region  jsFlowTypeStatement            start=/type/    end=/=/     oneline skipwhite skipempty nextgroup=jsFlowTypeObject
-syntax region  jsFlowDeclareBlock             start=/declare/ end=/[;\n]/ oneline contains=jsFlow,jsFlowDeclareKeyword,jsStorageClass
+syntax region  jsFlowDeclareBlock             start=/declare/ end=/[;\n]/ oneline contains=jsFlow,jsFlowDeclareKeyword,jsFlowStorageClass
 syntax region  jsFlow                         start=/:/       end=/\%(\%([),=;\n]\|{\%(.*}\)\@!\|\%({.*}\)\@<=\s*{\)\@=\|void\)/ contains=@jsFlowCluster oneline skipwhite skipempty nextgroup=jsFuncBlock
 syntax region  jsFlowReturn         contained start=/:/       end=/\%(\S\s*\%({\)\@=\|\n\)/ contains=@jsFlowCluster oneline skipwhite skipempty nextgroup=jsFuncBlock keepend
 syntax region  jsFlowTypeObject     contained start=/{/       end=/}/     skipwhite skipempty nextgroup=jsFunctionBlock extend
@@ -229,8 +229,9 @@ syntax region  jsFlowArray          contained matchgroup=jsFlowNoise start=/\[/ 
 syntax keyword jsFlowDeclareKeyword contained declare
 syntax keyword jsFlowType           contained boolean number string null void any mixed JSON array function object Array
 syntax match   jsFlowClassProperty  contained /\<[0-9a-zA-Z_$]*\>:\@=/ skipwhite skipempty nextgroup=jsFlow
-syntax match   jsFlowNoise          contained /[:;,]/
+syntax match   jsFlowNoise          contained /[:;,<>]/
 syntax cluster jsFlowCluster        contains=jsFlowType,jsFlowArray,jsFlowObject,jsFlowNoise
+syntax keyword jsFlowStorageClass   contained const var let
 
 syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper
 syntax cluster jsAll         contains=@jsExpression,jsExportContainer,jsImportContainer,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsStatement,jsException,jsTry,jsAsyncKeyword,jsFlow
@@ -361,6 +362,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFlowObject             PreProc
   HiLink jsFlowType               Type
   HiLink jsFlowDeclareKeyword     Type
+  HiLink jsFlowNoise              Noise
 
   delcommand HiLink
 endif
