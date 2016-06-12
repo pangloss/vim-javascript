@@ -134,8 +134,8 @@ syntax region  jsParenIfElse        contained matchgroup=jsParens              s
 syntax region  jsParenRepeat        contained matchgroup=jsParens              start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsBlock extend fold
 syntax region  jsParenSwitch        contained matchgroup=jsParens              start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsSwitchBlock extend fold
 syntax region  jsParenCatch         contained matchgroup=jsParens              start=/(/  end=/)/  skipwhite skipempty nextgroup=jsTryCatchBlock extend fold
-syntax region  jsFuncArgs           contained matchgroup=jsFuncParens          start=/(/  end=/)/  contains=jsFuncArgCommas,jsComment,jsFuncArgExpression,jsDestructuringBlock,jsRestExpression skipwhite skipempty nextgroup=jsFuncBlock,jsFlow extend fold
-syntax region  jsClassBlock         contained matchgroup=jsClassBraces         start=/{/  end=/}/  contains=jsClassFuncName,jsClassMethodDefinitions,jsOperator,jsArrowFunction,jsArrowFuncArgs,jsComment,jsGenerator,jsDecorator,jsClassProperty,jsClassPropertyComputed,jsClassStringKey,jsNoise extend fold
+syntax region  jsFuncArgs           contained matchgroup=jsFuncParens          start=/(/  end=/)/  contains=jsFuncArgCommas,jsComment,jsFuncArgExpression,jsDestructuringBlock,jsRestExpression,jsFlow skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturn extend fold
+syntax region  jsClassBlock         contained matchgroup=jsClassBraces         start=/{/  end=/}/  contains=jsClassFuncName,jsClassMethodDefinitions,jsOperator,jsArrowFunction,jsArrowFuncArgs,jsComment,jsGenerator,jsDecorator,jsClassProperty,jsClassPropertyComputed,jsClassStringKey,jsNoise,jsFlowClassProperty extend fold
 syntax region  jsFuncBlock          contained matchgroup=jsFuncBraces          start=/{/  end=/}/  contains=@jsAll extend fold
 syntax region  jsBlock              contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll extend fold
 syntax region  jsTryCatchBlock      contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll skipwhite skipempty nextgroup=jsCatch,jsFinally extend fold
@@ -146,6 +146,7 @@ syntax region  jsObject                       matchgroup=jsObjectBraces        s
 syntax region  jsTernaryIf                    matchgroup=jsTernaryIfOperator   start=/?/  end=/\%(:\|[\}]\@=\)/  contains=@jsExpression
 syntax region  jsSpreadExpression   contained matchgroup=jsSpreadOperator      start=/\.\.\./ end=/[,}\]]\@=/ contains=@jsExpression
 syntax region  jsRestExpression     contained matchgroup=jsRestOperator        start=/\.\.\./ end=/[,)]\@=/
+syntax region  jsTernaryIf                    matchgroup=jsTernaryIfOperator   start=/?/  end=/\%(:\|[\}]\@=\)/  contains=@jsExpression
 
 syntax match   jsGenerator            contained /\*/ skipwhite skipempty nextgroup=jsFuncName,jsFuncArgs
 syntax match   jsFuncName             contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>/ skipwhite skipempty nextgroup=jsFuncArgs
@@ -217,15 +218,22 @@ if !exists("javascript_ignore_javaScriptdoc")
   syntax region jsDocSeeTag       contained matchgroup=jsDocSeeTag start="{" end="}" contains=jsDocTags
 endif   "" JSDoc end
 
-" FIXME: Will need to mask this behind an if statement, or make it a separate
-" file that gets source separately.
-syntax region  jsFlow              contained start=/:/ end=/[={),]\@=/ contains=jsFlowType skipwhite skipempty nextgroup=jsFuncBlock
-syntax keyword jsFlowType          contained boolean number string null void any mixed JSON array function object
-syntax region  jsFlowStatement               start=/type/ end=/=/ skipwhite skipempty nextgroup=jsFlowObject
-syntax region  jsFlowObject        contained start=/{/ end=/}/
+" FIXME: Will need to mask this behind an if statement, or make it a separate file that gets source separately.
+syntax region  jsFlowTypeStatement            start=/type/    end=/=/     oneline skipwhite skipempty nextgroup=jsFlowTypeObject
+syntax region  jsFlowDeclareBlock             start=/declare/ end=/[;\n]/ oneline contains=jsFlow,jsFlowDeclareKeyword,jsStorageClass
+syntax region  jsFlow                         start=/:/       end=/\%(\%([),=;\n]\|{\%(.*}\)\@!\|\%({.*}\)\@<=\s*{\)\@=\|void\)/ contains=@jsFlowCluster oneline skipwhite skipempty nextgroup=jsFuncBlock
+syntax region  jsFlowReturn         contained start=/:/       end=/\%(\S\s*\%({\)\@=\|\n\)/ contains=@jsFlowCluster oneline skipwhite skipempty nextgroup=jsFuncBlock keepend
+syntax region  jsFlowTypeObject     contained start=/{/       end=/}/     skipwhite skipempty nextgroup=jsFunctionBlock extend
+syntax region  jsFlowObject         contained matchgroup=jsFlowNoise start=/{/       end=/}/     oneline contains=@jsFlowCluster
+syntax region  jsFlowArray          contained matchgroup=jsFlowNoise start=/\[/      end=/\]/    oneline contains=@jsFlowCluster
+syntax keyword jsFlowDeclareKeyword contained declare
+syntax keyword jsFlowType           contained boolean number string null void any mixed JSON array function object Array
+syntax match   jsFlowClassProperty  contained /\<[0-9a-zA-Z_$]*\>:\@=/ skipwhite skipempty nextgroup=jsFlow
+syntax match   jsFlowNoise          contained /[:;,]/
+syntax cluster jsFlowCluster        contains=jsFlowType,jsFlowArray,jsFlowObject,jsFlowNoise
 
 syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper
-syntax cluster jsAll         contains=@jsExpression,jsExportContainer,jsImportContainer,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsStatement,jsException,jsTry,jsAsyncKeyword
+syntax cluster jsAll         contains=@jsExpression,jsExportContainer,jsImportContainer,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsStatement,jsException,jsTry,jsAsyncKeyword,jsFlow
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
@@ -347,7 +355,12 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsObjectGetSet           Type
 
   HiLink jsFlow                   PreProc
+  HiLink jsFlowReturn             PreProc
+  HiLink jsFlowArray              PreProc
+  HiLink jsFlowDeclareBlock       PreProc
+  HiLink jsFlowObject             PreProc
   HiLink jsFlowType               Type
+  HiLink jsFlowDeclareKeyword     Type
 
   delcommand HiLink
 endif
