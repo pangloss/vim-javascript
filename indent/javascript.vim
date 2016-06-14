@@ -147,8 +147,8 @@ function s:GetMSL(lnum, in_one_line_scope)
     let line2 = getline(msl)
     if ((s:Match(lnum,s:continuation_regex) || s:Match(lnum, s:comma_last)) &&
           \ !s:Match(lnum, s:expr_case)) || s:IsInString(lnum, strlen(line))
-      let msl = lnum
-      if s:Match(lnum, s:line_pre . '[]})]') && !a:in_one_line_scope
+      let msl = s:LineHasOpeningBrackets(lnum) =~ '1' ? msl : lnum
+      if s:Match(lnum, '.*\zs[])}]') && !a:in_one_line_scope
         call cursor(lnum,1)
         let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
         if parlnum > 0
@@ -442,18 +442,17 @@ function GetJavascriptIndent()
   if s:Match(lnum, '[[({})\]]')
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts =~ '2'
-      call cursor(lnum,match(s:RemoveTrailingComments(line), '.*\zs[])}]') + 1)
-      while s:lookForParens('(\|{\|\[', ')\|}\|\]', 'bWz', 0) == lnum
-        call cursor(lnum, match(s:RemoveTrailingComments(strpart(line,0,col('.'))), '.*\zs[])}]') + 1)
+      call cursor(lnum,matchend(s:RemoveTrailingComments(line), '.*\zs[])}]'))
+      while s:lookForParens('(\|{\|\[', ')\|}\|\]', 'bW', 0) == lnum
+        call cursor(lnum, matchend(s:RemoveTrailingComments(strpart(line,0,col('.'))), '.*\zs[])}]'))
       endwhile
-      if line('.') > 0 && !s:InMultiVarStatement(line('.'),0,0)
+      if line('.') < lnum && !s:InMultiVarStatement(line('.'),0,0)
         return indent(s:GetMSL(line('.'), 0)) 
       end
     elseif counts =~ '1' || s:Onescope(lnum)
       return ind + s:sw()
-    else
-      call cursor(v:lnum, vcol)
     end
+    call cursor(v:lnum, vcol)
   end
 
   " 3.4. Work on the MSL line. {{{1
