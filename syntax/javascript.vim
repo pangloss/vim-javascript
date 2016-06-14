@@ -177,8 +177,10 @@ syntax region  jsClassStringKey         contained start=+'+  skip=+\\\('\|$\)+  
 " Destructuring
 syntax match   jsDestructuringProperty          contained /\<[0-9a-zA-Z_$]*\>\(\s*=\)\@=/ skipwhite skipempty nextgroup=jsDestructuringValue
 syntax match   jsDestructuringAssignment        contained /\<[0-9a-zA-Z_$]*\>\(\s*:\)\@=/ skipwhite skipempty nextgroup=jsDestructuringValue
-syntax region  jsDestructuringValue             contained start=/=/ start=/:/ end=/\%(,\|}\)\@=/ contains=@jsExpression extend
-syntax match   jsDestructuringNoise             contained /[,]/
+syntax match   jsDestructuringPropertyValue     contained /\<[0-9a-zA-Z_$]*\>/
+syntax region  jsDestructuringValue             contained start=/=/ end=/\%(,\|}\)\@=/ contains=@jsExpression extend
+syntax region  jsDestructuringValue             contained start=/:/ end=/\%(,\|}\)\@=/ contains=jsDestructuringPropertyValue,jsDestructuringBlock,jsNoise,jsDestructuringNoise extend
+syntax match   jsDestructuringNoise             contained /[,\[\]]/
 syntax region  jsDestructuringPropertyComputed  contained matchgroup=jsBrackets start=/\[/ end=/]/ contains=@jsExpresslon skipwhite skipempty nextgroup=jsDestructuringValue,jsDestructuringNoise extend fold
 
 " Comments
@@ -319,7 +321,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsSpreadOperator       Operator
 
   HiLink jsDestructuringBraces     Noise
-  HiLink jsDestructuringProperty   jsObjectKey
+  HiLink jsDestructuringProperty   jsFuncArgs
   HiLink jsDestructuringAssignment jsObjectKey
   HiLink jsDestructuringNoise      Noise
 
