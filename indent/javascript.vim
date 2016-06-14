@@ -443,10 +443,11 @@ function GetJavascriptIndent()
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts =~ '2'
       call cursor(lnum,match(s:RemoveTrailingComments(line), '.*\zs[])}]') + 1)
-      " Search for the opening tag
-      let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbWz', 0)
-      if parlnum > 0 && !s:InMultiVarStatement(parlnum,0,0)
-        return indent(s:GetMSL(parlnum, 0)) 
+      while s:lookForParens('(\|{\|\[', ')\|}\|\]', 'bWz', 0) == lnum
+        call cursor(lnum, match(s:RemoveTrailingComments(strpart(line,0,col('.'))), '.*\zs[])}]') + 1)
+      endwhile
+      if line('.') > 0 && !s:InMultiVarStatement(line('.'),0,0)
+        return indent(s:GetMSL(line('.'), 0)) 
       end
     elseif counts =~ '1' || s:Onescope(lnum)
       return ind + s:sw()
