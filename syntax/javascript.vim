@@ -142,8 +142,7 @@ syntax region  jsBlock              contained matchgroup=jsBraces              s
 syntax region  jsTryCatchBlock      contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll skipwhite skipempty nextgroup=jsCatch,jsFinally extend fold
 syntax region  jsSwitchBlock        contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll,jsLabel extend fold
 syntax region  jsDestructuringBlock contained matchgroup=jsDestructuringBraces start=/{/  end=/}/  contains=jsDestructuringProperty,jsDestructuringAssignment,jsDestructuringNoise,jsDestructuringPropertyComputed extend fold
-syntax region  jsDestructuringArray contained matchgroup=jsDestructuringBraces start=/\[/ end=/\]/ contains=jsDestructuringPropertyValue,jsNoise extend fold
-syntax region  jsObject                       matchgroup=jsObjectBraces        start=/{/  end=/}/  contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectGetSet,jsGenerator,jsComment,jsSpreadOperator,jsObjectStringKey extend fold
+syntax region  jsDestructuringArray contained matchgroup=jsDestructuringBraces start=/\[/ end=/\]/ contains=jsDestructuringPropertyValue,jsNoise,jsDestructuringProperty extend fold
 syntax region  jsObject                       matchgroup=jsObjectBraces        start=/{/  end=/}/  contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectGetSet,jsGenerator,jsComment,jsSpreadOperator,jsObjectStringKey extend fold
 syntax region  jsTernaryIf                    matchgroup=jsTernaryIfOperator   start=/?/  end=/\%(:\|[\}]\@=\)/  contains=@jsExpression
 
@@ -177,11 +176,11 @@ syntax region  jsClassStringKey         contained start=+"+  skip=+\\\("\|$\)+  
 syntax region  jsClassStringKey         contained start=+'+  skip=+\\\('\|$\)+  end=+'\|$+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs
 
 " Destructuring
-syntax match   jsDestructuringProperty          contained /\<[0-9a-zA-Z_$]*\>\(\s*=\)\@=/ skipwhite skipempty nextgroup=jsDestructuringValue
-syntax match   jsDestructuringAssignment        contained /\<[0-9a-zA-Z_$]*\>\(\s*:\)\@=/ skipwhite skipempty nextgroup=jsDestructuringValue
 syntax match   jsDestructuringPropertyValue     contained /\<[0-9a-zA-Z_$]*\>/
-syntax region  jsDestructuringValue             contained start=/=/ end=/\%(,\|}\)\@=/ contains=@jsExpression extend
-syntax region  jsDestructuringValue             contained start=/:/ end=/\%(,\|}\)\@=/ contains=jsDestructuringPropertyValue,jsDestructuringBlock,jsNoise,jsDestructuringNoise extend
+syntax match   jsDestructuringProperty          contained /\<[0-9a-zA-Z_$]*\>\(\s*=\)\@=/ skipwhite skipempty nextgroup=jsDestructuringValue
+syntax match   jsDestructuringAssignment        contained /\<[0-9a-zA-Z_$]*\>\(\s*:\)\@=/ skipwhite skipempty nextgroup=jsDestructuringValueAssignment
+syntax region  jsDestructuringValue             contained start=/=/ end=/[,}\]]\@=/ contains=@jsExpression extend
+syntax region  jsDestructuringValueAssignment   contained start=/:/ end=/[,}]\@=/ contains=jsDestructuringPropertyValue,jsDestructuringBlock,jsNoise,jsDestructuringNoise extend
 syntax match   jsDestructuringNoise             contained /[,\[\]]/
 syntax region  jsDestructuringPropertyComputed  contained matchgroup=jsBrackets start=/\[/ end=/]/ contains=@jsExpresslon skipwhite skipempty nextgroup=jsDestructuringValue,jsDestructuringNoise extend fold
 
