@@ -1,4 +1,4 @@
-# vim-javascript v1.0.0
+# vim-javascript
 
 JavaScript bundle for vim, this bundle provides syntax highlighting and
 improved indentation.
