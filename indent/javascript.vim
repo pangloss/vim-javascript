@@ -347,15 +347,21 @@ function GetJavascriptIndent()
   endif
 
   " If we got a closing bracket on an empty line, find its match and indent
-  " according to it.  For parentheses we indent to its column - 1, for the
-  " others we indent to the containing line's MSL's level.  Return -1 if fail.
-  let col = matchend(line, s:line_pre . '[]})]')
-  if col > 0 && !s:IsInStringOrComment(v:lnum, col)
-    call cursor(v:lnum, col)
-    let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
-    if parlnum > 0
-      let ind = s:InMultiVarStatement(parlnum, 0, 0) ? indent(parlnum) : indent(s:GetMSL(parlnum, 0))
-    endif
+  " according to it.
+  let col = s:Match(v:lnum,  s:line_pre . '[]})]')
+  if col > 0
+    let parlnum = v:lnum
+    while col
+      call cursor(parlnum, 1)
+      let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
+      let col = s:Match(parlnum,  s:line_pre . '[]})]')
+      if col
+        continue
+      end
+      if parlnum > 0
+        let ind = s:InMultiVarStatement(parlnum, 0, 0) ? indent(parlnum) : indent(s:GetMSL(parlnum, 0))
+      endif
+    endwhile
     return ind
   endif
 
@@ -424,7 +430,8 @@ function GetJavascriptIndent()
 
   " If the previous line ended with a block opening, add a level of indent.
   if s:Match(lnum, s:block_regex)
-    return s:InMultiVarStatement(lnum, 0, 0) ? indent(lnum) + s:sw() : indent(s:GetMSL(lnum, 0)) + s:sw()
+    return s:InMultiVarStatement(lnum, 0, 0) || s:Match(lnum, s:line_pre . '[]})]') ?
+          \ indent(lnum) + s:sw() : indent(s:GetMSL(lnum, 0)) + s:sw()
   endif
 
   " Set up variables for current line.
