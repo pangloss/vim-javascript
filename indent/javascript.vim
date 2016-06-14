@@ -147,10 +147,10 @@ function s:GetMSL(lnum, in_one_line_scope)
     let line2 = getline(msl)
     if ((s:Match(lnum,s:continuation_regex) || s:Match(lnum, s:comma_last)) &&
           \ !s:Match(lnum, s:expr_case)) || s:IsInString(lnum, strlen(line))
-      let msl = s:LineHasOpeningBrackets(lnum) =~ '1' ? msl : lnum
-      if s:Match(lnum, '.*\zs[])}]') && !a:in_one_line_scope
+      let msl = lnum
+      if s:Match(lnum, '[^{([]*\zs[])}]') && !a:in_one_line_scope
         call cursor(lnum,1)
-        let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
+        let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbWz', 0)
         if parlnum > 0
           let lnum = parlnum
           continue
