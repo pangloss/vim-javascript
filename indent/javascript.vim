@@ -120,10 +120,10 @@ function s:PrevNonBlankNonString(lnum)
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
     let line = getline(lnum)
-    let com = match(line, '\%(\/\*.*\)\@<!\%(\*\/\)') + 1
+    let com = match(line, '\%(\/\*.*\)\@<!\*\/') + 1
     if s:IsInComment(lnum, com)
       call cursor(lnum, com)
-      let parlnum = search('\%(\/\/.*\)\@<!\%(\/\*\)', 'nbW')
+      let parlnum = search('\%(\/\/.*\)\@<!\/\*', 'nbW')
       if parlnum > 0
         let lnum = parlnum
       end
@@ -147,7 +147,7 @@ function s:GetMSL(lnum, in_one_line_scope)
     let line2 = getline(msl)
     if ((s:Match(lnum,s:continuation_regex) || s:Match(lnum, s:comma_last)) &&
           \ !s:Match(lnum, s:expr_case)) || s:IsInString(lnum, strlen(line))
-      let msl = s:LineHasOpeningBrackets(lnum) =~ '1'  && (!s:Match(lnum,s:comma_last) && !s:Match(lnum, s:continuation_regex)) ? msl : lnum
+      let msl = lnum
       if s:Match(lnum, s:line_pre . '[]})]') && !a:in_one_line_scope
         call cursor(lnum,1)
         let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
@@ -258,7 +258,7 @@ function s:IndentWithContinuation(lnum, ind, width)
   " If the previous line wasn't a MSL and is continuation return its indent.
   " TODO: the || s:IsInString() thing worries me a bit.
   if p_lnum != lnum
-    if s:Match(p_lnum,s:continuation_regex)||s:IsInString(p_lnum,strlen(line)) 
+    if s:Match(p_lnum,s:continuation_regex)||s:IsInString(p_lnum,strlen(line))
       return a:ind
     endif
   endif
@@ -359,7 +359,8 @@ function GetJavascriptIndent()
         continue
       end
       if parlnum > 0
-        let ind = s:InMultiVarStatement(parlnum, 0, 0) ? indent(parlnum) : indent(s:GetMSL(parlnum, 0))
+        let ind = s:InMultiVarStatement(parlnum, 0, 0)|| s:LineHasOpeningBrackets(parlnum) !~ '2'
+              \ ? indent(parlnum) : indent(s:GetMSL(parlnum, 0))
       endif
     endwhile
     return ind
@@ -368,7 +369,7 @@ function GetJavascriptIndent()
 
   " If line starts with an operator...
   if (line =~ s:operator_first)
-    if (s:Match(lnum, s:operator_first))
+    if (s:Match(lnum, s:operator_first) || s:Match(lnum, s:line_pre . '[])}]'))
       " and so does previous line, don't indent
       return indent(lnum)
     end
@@ -427,10 +428,19 @@ function GetJavascriptIndent()
     return 0
   endif
 
+" foo('foo',
+"   bar('bar', function() {
+"     hi();
+"   })
+" );
 
+" function (a, b, c, d,
+"     e, f, g) {
+"       console.log('inner');
+" }
   " If the previous line ended with a block opening, add a level of indent.
   if s:Match(lnum, s:block_regex)
-    return s:InMultiVarStatement(lnum, 0, 0) || s:Match(lnum, s:line_pre . '[]})]') ?
+    return s:InMultiVarStatement(lnum, 0, 0) || s:LineHasOpeningBrackets(lnum) !~ '2' ?
           \ indent(lnum) + s:sw() : indent(s:GetMSL(lnum, 0)) + s:sw()
   endif
 
