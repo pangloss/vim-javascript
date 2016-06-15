@@ -120,10 +120,10 @@ function s:PrevNonBlankNonString(lnum)
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
     let line = getline(lnum)
-    let com = match(line, '\%(\/\*.*\)\@<!\*\/') + 1
+    let com = match(line, '\%(\/\*.*\)\@<!\%(\*\/\)') + 1
     if s:IsInComment(lnum, com)
       call cursor(lnum, com)
-      let parlnum = search('\%(\/\/.*\)\@<!\/\*', 'nbW')
+      let parlnum = search('\%(\/\/.*\)\@<!\%(\/\*\)', 'nbW')
       if parlnum > 0
         let lnum = parlnum
       end
@@ -147,8 +147,8 @@ function s:GetMSL(lnum, in_one_line_scope)
     let line2 = getline(msl)
     if ((s:Match(lnum,s:continuation_regex) || s:Match(lnum, s:comma_last)) &&
           \ !s:Match(lnum, s:expr_case)) || s:IsInString(lnum, strlen(line))
-      let msl = lnum
-      if s:Match(lnum, '[^{([]*\zs[])}]') && !a:in_one_line_scope
+      let msl = s:LineHasOpeningBrackets(lnum) =~ '1'  && (!s:Match(lnum,s:comma_last) && !s:Match(lnum, s:continuation_regex)) ? msl : lnum
+      if s:Match(lnum, s:line_pre . '[]})]') && !a:in_one_line_scope
         call cursor(lnum,1)
         let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
         if parlnum > 0
@@ -258,7 +258,7 @@ function s:IndentWithContinuation(lnum, ind, width)
   " If the previous line wasn't a MSL and is continuation return its indent.
   " TODO: the || s:IsInString() thing worries me a bit.
   if p_lnum != lnum
-    if s:Match(p_lnum,s:continuation_regex)||s:IsInString(p_lnum,strlen(line))
+    if s:Match(p_lnum,s:continuation_regex)||s:IsInString(p_lnum,strlen(line)) 
       return a:ind
     endif
   endif
@@ -439,7 +439,7 @@ function GetJavascriptIndent()
   let ind = indent(lnum)
   " If the previous line contained an opening bracket, and we are still in it,
   " add indent depending on the bracket type.
-  if s:Match(lnum, '[[({})\]]')
+  if s:Match(lnum, '\%([[({]\)\|\%([^\t \])}][})\]]\)')
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts =~ '2'
       call cursor(lnum,matchend(s:RemoveTrailingComments(line), '.\+\zs[])}]'))
@@ -452,7 +452,6 @@ function GetJavascriptIndent()
     elseif counts =~ '1' || s:Onescope(lnum)
       return ind + s:sw()
     end
-    call cursor(v:lnum, vcol)
   end
 
   " 3.4. Work on the MSL line. {{{1
