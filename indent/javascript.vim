@@ -45,7 +45,7 @@ let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
 let s:js_keywords = s:line_pre . '\%(break\|import\|export\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)\>\C'
 let s:expr_case = s:line_pre . '\%(case\s\+[^\:]*\|default\)\s*:\s*\C'
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = '\%(string\|regex\|special\|comment\|template\)\c'
+let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)\c'
 
 " Regex of syntax group names that are strings.
 let s:syng_string = 'regex\c'
@@ -150,7 +150,7 @@ function s:GetMSL(lnum, in_one_line_scope)
       let msl = lnum
       if s:Match(lnum, '[^{([]*\zs[])}]') && !a:in_one_line_scope
         call cursor(lnum,1)
-        let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbWz', 0)
+        let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
         if parlnum > 0
           let lnum = parlnum
           continue
@@ -442,12 +442,12 @@ function GetJavascriptIndent()
   if s:Match(lnum, '[[({})\]]')
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts =~ '2'
-      call cursor(lnum,matchend(s:RemoveTrailingComments(line), '.*\zs[])}]'))
+      call cursor(lnum,matchend(s:RemoveTrailingComments(line), '.\+\zs[])}]'))
       while s:lookForParens('(\|{\|\[', ')\|}\|\]', 'bW', 0) == lnum
         call cursor(lnum, matchend(s:RemoveTrailingComments(strpart(line,0,col('.'))), '.*\zs[])}]'))
       endwhile
       if line('.') < lnum && !s:InMultiVarStatement(line('.'),0,0)
-        return indent(s:GetMSL(line('.'), 0)) 
+        return indent(s:GetMSL(line('.'), 0))
       end
     elseif counts =~ '1' || s:Onescope(lnum)
       return ind + s:sw()
