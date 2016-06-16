@@ -45,7 +45,7 @@ let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
 let s:js_keywords = s:line_pre . '\%(break\|import\|export\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)\>\C'
 let s:expr_case = s:line_pre . '\%(case\s\+[^\:]*\|default\)\s*:\s*\C'
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = '\%(string\|regex\|special\|comment\|template\)\c'
+let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)\c'
 
 " Regex of syntax group names that are strings.
 let s:syng_string = 'regex\c'
@@ -347,22 +347,29 @@ function GetJavascriptIndent()
   endif
 
   " If we got a closing bracket on an empty line, find its match and indent
-  " according to it.  For parentheses we indent to its column - 1, for the
-  " others we indent to the containing line's MSL's level.  Return -1 if fail.
-  let col = matchend(line, s:line_pre . '[]})]')
-  if col > 0 && !s:IsInStringOrComment(v:lnum, col)
-    call cursor(v:lnum, col)
-    let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
-    if parlnum > 0
-      let ind = s:InMultiVarStatement(parlnum, 0, 0) ? indent(parlnum) : indent(s:GetMSL(parlnum, 0))
-    endif
+  " according to it.
+  let col = s:Match(v:lnum,  s:line_pre . '[]})]')
+  if col > 0
+    let parlnum = v:lnum
+    while col
+      call cursor(parlnum, 1)
+      let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
+      let col = s:Match(parlnum,  s:line_pre . '[]})]')
+      if col
+        continue
+      end
+      if parlnum > 0
+        let ind = s:InMultiVarStatement(parlnum, 0, 0)|| s:LineHasOpeningBrackets(parlnum) !~ '2'
+              \ ? indent(parlnum) : indent(s:GetMSL(parlnum, 0))
+      endif
+    endwhile
     return ind
   endif
 
 
   " If line starts with an operator...
   if (line =~ s:operator_first)
-    if (s:Match(lnum, s:operator_first))
+    if (s:Match(lnum, s:operator_first) || s:Match(lnum, s:line_pre . '[])}]'))
       " and so does previous line, don't indent
       return indent(lnum)
     end
@@ -421,10 +428,20 @@ function GetJavascriptIndent()
     return 0
   endif
 
+" foo('foo',
+"   bar('bar', function() {
+"     hi();
+"   })
+" );
 
+" function (a, b, c, d,
+"     e, f, g) {
+"       console.log('inner');
+" }
   " If the previous line ended with a block opening, add a level of indent.
   if s:Match(lnum, s:block_regex)
-    return s:InMultiVarStatement(lnum, 0, 0) ? indent(lnum) + s:sw() : indent(s:GetMSL(lnum, 0)) + s:sw()
+    return s:InMultiVarStatement(lnum, 0, 0) || s:LineHasOpeningBrackets(lnum) !~ '2' ?
+          \ indent(lnum) + s:sw() : indent(s:GetMSL(lnum, 0)) + s:sw()
   endif
 
   " Set up variables for current line.
@@ -432,19 +449,18 @@ function GetJavascriptIndent()
   let ind = indent(lnum)
   " If the previous line contained an opening bracket, and we are still in it,
   " add indent depending on the bracket type.
-  if s:Match(lnum, '[[({})\]]')
+  if s:Match(lnum, '\%([[({]\)\|\%([^\t \])}][})\]]\)')
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts =~ '2'
-      call cursor(lnum, 1)
-      " Search for the opening tag
-      let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
-      if parlnum > 0 && !s:InMultiVarStatement(parlnum,0,0)
-        return indent(s:GetMSL(parlnum, 0)) 
+      call cursor(lnum,matchend(s:RemoveTrailingComments(line), '.\+\zs[])}]'))
+      while s:lookForParens('(\|{\|\[', ')\|}\|\]', 'bW', 0) == lnum
+        call cursor(lnum, matchend(s:RemoveTrailingComments(strpart(line,0,col('.'))), '.*\zs[])}]'))
+      endwhile
+      if line('.') < lnum && !s:InMultiVarStatement(line('.'),0,0)
+        return indent(s:GetMSL(line('.'), 0))
       end
     elseif counts =~ '1' || s:Onescope(lnum)
       return ind + s:sw()
-    else
-      call cursor(v:lnum, vcol)
     end
   end
 
