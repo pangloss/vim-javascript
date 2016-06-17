@@ -369,7 +369,8 @@ function GetJavascriptIndent()
 
   " If line starts with an operator...
   if (line =~ s:operator_first)
-    if (s:Match(lnum, s:operator_first) || s:Match(lnum, s:line_pre . '[])}]'))
+    if (s:Match(lnum, s:operator_first) || (s:Match(lnum, s:line_pre . '[])}]') &&
+          \ !(s:Match(v:lnum,s:line_pre . '\.') && s:Match(lnum, ')' . s:line_term))))
       " and so does previous line, don't indent
       return indent(lnum)
     end
