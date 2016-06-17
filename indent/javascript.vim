@@ -334,7 +334,7 @@ function GetJavascriptIndent()
   if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)
     return cindent(v:lnum)
   endif
-  
+
   " single opening bracket will assume you want a c style of indenting
   if s:Match(v:lnum, s:line_pre . '{' . s:line_term) && !s:Match(lnum,s:block_regex) &&
         \ !s:Match(lnum,s:comma_last)
@@ -429,16 +429,16 @@ function GetJavascriptIndent()
     return 0
   endif
 
-" foo('foo',
-"   bar('bar', function() {
-"     hi();
-"   })
-" );
+  " foo('foo',
+  "   bar('bar', function() {
+  "     hi();
+  "   })
+  " );
 
-" function (a, b, c, d,
-"     e, f, g) {
-"       console.log('inner');
-" }
+  " function (a, b, c, d,
+  "     e, f, g) {
+  "       console.log('inner');
+  " }
   " If the previous line ended with a block opening, add a level of indent.
   if s:Match(lnum, s:block_regex)
     return s:InMultiVarStatement(lnum, 0, 0) || s:LineHasOpeningBrackets(lnum) !~ '2' ?
@@ -450,15 +450,17 @@ function GetJavascriptIndent()
   let ind = indent(lnum)
   " If the previous line contained an opening bracket, and we are still in it,
   " add indent depending on the bracket type.
-  if s:Match(lnum, '\%([[({]\)\|\%([^\t \])}][})\]]\)')
+  if s:Match(lnum, '[[({})\]]')
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts =~ '2'
       call cursor(lnum,matchend(s:RemoveTrailingComments(line), '.\+\zs[])}]'))
       while s:lookForParens('(\|{\|\[', ')\|}\|\]', 'bW', 0) == lnum
         call cursor(lnum, matchend(s:RemoveTrailingComments(strpart(line,0,col('.'))), '.*\zs[])}]'))
       endwhile
-      if line('.') < lnum && !s:InMultiVarStatement(line('.'),0,0)
-        return indent(s:GetMSL(line('.'), 0))
+      let cur = line('.')
+      if cur < lnum && !s:InMultiVarStatement(cur,0,0)
+        call cursor(v:lnum,1)
+        return indent(s:GetMSL(cur, 0))
       end
     elseif counts =~ '1' || s:Onescope(lnum)
       return ind + s:sw()
@@ -501,64 +503,64 @@ let &cpo = s:cpo_save
 unlet s:cpo_save
 " gq{{{2
 function! Fixedgq(lnum, count)
-    let l:tw = &tw ? &tw : 80;
+  let l:tw = &tw ? &tw : 80;
 
-    let l:count = a:count
-    let l:first_char = indent(a:lnum) + 1
+  let l:count = a:count
+  let l:first_char = indent(a:lnum) + 1
 
-    if mode() == 'i' " gq was not pressed, but tw was set
-        return 1
-    endif
+  if mode() == 'i' " gq was not pressed, but tw was set
+    return 1
+  endif
 
-    " This gq is only meant to do code with strings, not comments
-    if s:IsInComment(a:lnum, l:first_char)
-        return 1
-    endif
+  " This gq is only meant to do code with strings, not comments
+  if s:IsInComment(a:lnum, l:first_char)
+    return 1
+  endif
 
-    if len(getline(a:lnum)) < l:tw && l:count == 1 " No need for gq
-        return 1
-    endif
+  if len(getline(a:lnum)) < l:tw && l:count == 1 " No need for gq
+    return 1
+  endif
 
-    " Put all the lines on one line and do normal spliting after that
-    if l:count > 1
-        while l:count > 1
-            let l:count -= 1
-            normal J
-        endwhile
-    endif
+  " Put all the lines on one line and do normal spliting after that
+  if l:count > 1
+    while l:count > 1
+      let l:count -= 1
+      normal J
+    endwhile
+  endif
 
-    let l:winview = winsaveview()
+  let l:winview = winsaveview()
 
+  call cursor(a:lnum, l:tw + 1)
+  let orig_breakpoint = searchpairpos(' ', '', '\.', 'bcW', '', a:lnum)
+  call cursor(a:lnum, l:tw + 1)
+  let breakpoint = searchpairpos(' ', '', '\.', 'bcW', s:skip_expr, a:lnum)
+
+  " No need for special treatment, normal gq handles edgecases better
+  if breakpoint[1] == orig_breakpoint[1]
+    call winrestview(l:winview)
+    return 1
+  endif
+
+  " Try breaking after string
+  if breakpoint[1] <= indent(a:lnum)
     call cursor(a:lnum, l:tw + 1)
-    let orig_breakpoint = searchpairpos(' ', '', '\.', 'bcW', '', a:lnum)
-    call cursor(a:lnum, l:tw + 1)
-    let breakpoint = searchpairpos(' ', '', '\.', 'bcW', s:skip_expr, a:lnum)
-
-    " No need for special treatment, normal gq handles edgecases better
-    if breakpoint[1] == orig_breakpoint[1]
-        call winrestview(l:winview)
-        return 1
-    endif
-
-    " Try breaking after string
-    if breakpoint[1] <= indent(a:lnum)
-        call cursor(a:lnum, l:tw + 1)
-        let breakpoint = searchpairpos('\.', '', ' ', 'cW', s:skip_expr, a:lnum)
-    endif
+    let breakpoint = searchpairpos('\.', '', ' ', 'cW', s:skip_expr, a:lnum)
+  endif
 
 
-    if breakpoint[1] != 0
-        call feedkeys("r\<CR>")
-    else
-        let l:count = l:count - 1
-    endif
+  if breakpoint[1] != 0
+    call feedkeys("r\<CR>")
+  else
+    let l:count = l:count - 1
+  endif
 
-    " run gq on new lines
-    if l:count == 1
-        call feedkeys("gqq")
-    endif
+  " run gq on new lines
+  if l:count == 1
+    call feedkeys("gqq")
+  endif
 
-    return 0
+  return 0
 endfunction
 "}}}
 " vim: foldmethod=marker:foldlevel=1
