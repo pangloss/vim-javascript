@@ -459,7 +459,6 @@ function GetJavascriptIndent()
       endwhile
       let cur = line('.')
       if cur < lnum && !s:InMultiVarStatement(cur,0,0)
-        call cursor(v:lnum,1)
         return indent(s:GetMSL(cur, 0))
       end
     elseif counts =~ '1' || s:Onescope(lnum)
