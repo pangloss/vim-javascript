@@ -312,6 +312,7 @@ function GetJavascriptIndent()
   " 3.1. Setup {{{1
   " ----------
   " Set up variables for restoring position in file.  Could use v:lnum here.
+  " Avoid use of line('.')/col('.') type functions as the curpos can change
   let vcol = col('.')
 
   " 3.2. Work on the current line {{{1
@@ -453,7 +454,7 @@ function GetJavascriptIndent()
   if s:Match(lnum, '[[({})\]]')
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts =~ '2'
-      call cursor(lnum,matchend(s:RemoveTrailingComments(line), '.\+\zs[])}]'))
+      call cursor(lnum,matchend(s:RemoveTrailingComments(line), '.*\zs[])}]'))
       while s:lookForParens('(\|{\|\[', ')\|}\|\]', 'bW', 0) == lnum
         call cursor(lnum, matchend(s:RemoveTrailingComments(strpart(line,0,col('.'))), '.*\zs[])}]'))
       endwhile
