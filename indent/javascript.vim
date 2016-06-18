@@ -17,7 +17,7 @@ setlocal nosmartindent
 setlocal indentexpr=GetJavascriptIndent()
 setlocal formatexpr=Fixedgq(v:lnum,v:count)
 setlocal indentkeys=0{,0},0),0],0\,*<Return>,:,!^F,o,O,e
-setlocal cinoptions+=j1,J1
+setlocal cinoptions+=j1,J1,c1
 
 " Only define the function once.
 if exists("*GetJavascriptIndent")
@@ -413,7 +413,7 @@ function GetJavascriptIndent()
   " If the line is empty and the previous nonblank line was a multi-line
   " comment, use that comment's indent. Deduct one char to account for the
   " space in ' */'.
-  if line =~ '^\s*$' && getline(prevline) !~ '\%(\%(^\s*\/\/\|\/\*\).*\)\@<!\*\/' &&
+  if line =~ '^\s*$' && getline(prevline) =~ '\%(\%(^\s*\/\/\|\/\*\).*\)\@<!\*\/' &&
         \ s:IsInComment(prevline, 1)
     return indent(prevline) - 1
   endif
