@@ -193,15 +193,15 @@ syntax region  jsEnvComment     start="\%^#!" end="$" display
 syntax region  jsCvsTag         contained start="\$\cid:" end="\$" oneline
 
 if !exists("javascript_ignore_javaScriptdoc")
-  syntax include extras/jsdocs.vim
+  runtime extras/jsdocs.vim
 endif
 
 if exists("javascript_plugin_flow")
-  syntax include extras/flow.vim
+  runtime extras/flow.vim
 endif
 
 if exists("javascript_plugin_ngdocs")
-  syntax include extras/ngdocs.vim
+  runtime extras/ngdocs.vim
 endif
 
 syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper
