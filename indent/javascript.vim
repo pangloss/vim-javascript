@@ -140,7 +140,7 @@ function s:GetMSL(lnum, in_one_line_scope)
   " Start on the line we're at and use its indent.
   let msl = a:lnum
   let lnum = s:PrevNonBlankNonString(a:lnum - 1)
-  while lnum > 0
+  while lnum > 0 && !s:Match(msl,s:line_pre . '[])}]')
     " If we have a continuation line, or we're in a string, use line as MSL.
     " Otherwise, terminate search as we have found our MSL already.
     let line = getline(lnum)
@@ -360,8 +360,8 @@ function GetJavascriptIndent()
         continue
       end
       if parlnum > 0
-        let ind = s:InMultiVarStatement(parlnum, 0, 0)|| s:LineHasOpeningBrackets(parlnum) !~ '2'
-              \ ? indent(parlnum) : indent(s:GetMSL(parlnum, 0))
+        let ind = s:InMultiVarStatement(parlnum, 0, 0)|| s:LineHasOpeningBrackets(parlnum) !~ '2' ?
+              \ indent(parlnum) : indent(s:GetMSL(parlnum, 0))
       endif
     endwhile
     return ind
