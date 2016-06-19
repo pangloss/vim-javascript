@@ -11,6 +11,7 @@ syntax match   jsFlowClassProperty  contained /\<[0-9a-zA-Z_$]*\>:\@=/ skipwhite
 syntax match   jsFlowNoise          contained /[:;,<>]/
 syntax cluster jsFlowCluster        contains=jsFlowType,jsFlowArray,jsFlowObject,jsFlowNoise
 syntax keyword jsFlowStorageClass   contained const var let
+syntax region  jsFlowParenRegion    contained start=/:\s*(/ end=/)\%(\s*:\)\@=/ oneline contains=@jsFlowCluster skipwhite skipempty nextgroup=jsObjectValue
 
 if version >= 508 || !exists("did_javascript_syn_inits")
   if version < 508
@@ -24,6 +25,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFlowArray              PreProc
   HiLink jsFlowDeclareBlock       PreProc
   HiLink jsFlowObject             PreProc
+  HiLink jsFlowParenRegion        PreProc
   HiLink jsFlowType               Type
   HiLink jsFlowDeclareKeyword     Type
   HiLink jsFlowNoise              Noise
