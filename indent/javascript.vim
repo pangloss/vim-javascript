@@ -344,7 +344,11 @@ function GetJavascriptIndent()
 
   " cindent each line which has a switch label
   if (line =~ s:expr_case)
-    return cindent(v:lnum)
+    let s:cpo_switch = &cpo
+    set cpo+=%
+    let ind = cindent(v:lnum)
+    let &cpo = s:cpo_switch
+    return ind
   endif
 
   " If we got a closing bracket on an empty line, find its match and indent
