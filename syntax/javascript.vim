@@ -45,7 +45,7 @@ syntax match   jsModuleAsterisk  contained /*/
 syntax keyword jsModuleDefault   contained default skipwhite kipempty nextgroup=@jsExpression
 syntax region  jsImportContainer start=/\<import\> / end="\%(;\|$\)" contains=jsModuleKeywords,jsModuleOperators,jsComment,jsString,jsTemplateString,jsNoise,jsModuleGroup,jsModuleAsterisk
 syntax region  jsExportContainer start=/\<export\> / end="\%(;\|$\)" contains=jsModuleKeywords,jsModuleOperators,jsStorageClass,jsModuleDefault,@jsExpression
-syntax region jsExportBlock      contained matchgroup=jsBraces start=/{/ end=/}/ contains=jsModuleOperators,jsNoise
+syntax region  jsExportBlock     contained matchgroup=jsBraces start=/{/ end=/}/ contains=jsModuleOperators,jsNoise
 
 " Strings, Templates, Numbers
 syntax region  jsString           start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@Spell extend
