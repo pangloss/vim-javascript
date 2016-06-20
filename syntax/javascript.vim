@@ -192,11 +192,11 @@ syntax region  jsComment        start="/\*"  end="\*/" contains=jsCommentTodo,js
 syntax region  jsEnvComment     start="\%^#!" end="$" display
 syntax region  jsCvsTag         contained start="\$\cid:" end="\$" oneline
 
-if exists("javascript_plugin_jsdocs")
-  runtime extras/jsdocs.vim
+if exists("javascript_plugin_jsdoc")
+  runtime extras/jsdoc.vim
   " NGDoc requires JSDoc
-  if exists("javascript_plugin_ngdocs")
-    runtime extras/ngdocs.vim
+  if exists("javascript_plugin_ngdoc")
+    runtime extras/ngdoc.vim
   endif
 endif
 

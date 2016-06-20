@@ -41,7 +41,7 @@ add them to your `.vimrc` to enable their features.
 -----------------
 
 ```
-let g:javascript_plugin_jsdocs = 1
+let g:javascript_plugin_jsdoc = 1
 ```
 
 Enables syntax highlighting for [JSDocs](http://usejsdoc.org/).
@@ -51,7 +51,7 @@ Default Value: 0
 -----------------
 
 ```
-let g:javascript_plugin_ngdocs = 1
+let g:javascript_plugin_ngdoc = 1
 ```
 
 Enables some additional syntax highlighting for NGDocs. Requires JSDoc plugin
