@@ -73,7 +73,7 @@ else
 endif
 syntax cluster jsRegexpSpecial    contains=jsSpecial,jsRegexpBoundary,jsRegexpBackRef,jsRegexpQuantifier,jsRegexpOr,jsRegexpMod
 
-syntax match   jsObjectKey         contained /\<[0-9a-zA-Z_$]*\>\(\s*:\)\@=/ contains=jsFunctionKey skipwhite skipempty nextgroup=jsObjectValue
+syntax match   jsObjectKey         contained /\<[0-9a-zA-Z_$]*\>\(\s*:\)\@=/ contains=jsFunctionKey skipwhite skipempty nextgroup=jsObjectValue,jsFlowParenRegion
 syntax region  jsObjectKeyString   contained start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@Spell skipwhite skipempty nextgroup=jsObjectValue
 syntax region  jsObjectKeyString   contained start=+'+  skip=+\\\('\|$\)+  end=+'\|$+  contains=jsSpecial,@Spell skipwhite skipempty nextgroup=jsObjectValue
 syntax region  jsObjectKeyComputed contained matchgroup=jsBrackets start=/\[/ end=/]/ contains=@jsExpression skipwhite skipempty nextgroup=jsObjectValue,jsFuncArgs extend
@@ -134,8 +134,8 @@ syntax region  jsParenIfElse        contained matchgroup=jsParens              s
 syntax region  jsParenRepeat        contained matchgroup=jsParens              start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsBlock extend fold
 syntax region  jsParenSwitch        contained matchgroup=jsParens              start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsSwitchBlock extend fold
 syntax region  jsParenCatch         contained matchgroup=jsParens              start=/(/  end=/)/  skipwhite skipempty nextgroup=jsTryCatchBlock extend fold
-syntax region  jsFuncArgs           contained matchgroup=jsFuncParens          start=/(/  end=/)/  contains=jsFuncArgCommas,jsComment,jsFuncArgExpression,jsDestructuringBlock,jsRestExpression skipwhite skipempty nextgroup=jsFuncBlock extend fold
-syntax region  jsClassBlock         contained matchgroup=jsClassBraces         start=/{/  end=/}/  contains=jsClassFuncName,jsClassMethodDefinitions,jsOperator,jsArrowFunction,jsArrowFuncArgs,jsComment,jsGenerator,jsDecorator,jsClassProperty,jsClassPropertyComputed,jsClassStringKey,jsNoise extend fold
+syntax region  jsFuncArgs           contained matchgroup=jsFuncParens          start=/(/  end=/)/  contains=jsFuncArgCommas,jsComment,jsFuncArgExpression,jsDestructuringBlock,jsRestExpression,jsFlow skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturn extend fold
+syntax region  jsClassBlock         contained matchgroup=jsClassBraces         start=/{/  end=/}/  contains=jsClassFuncName,jsClassMethodDefinitions,jsOperator,jsArrowFunction,jsArrowFuncArgs,jsComment,jsGenerator,jsDecorator,jsClassProperty,jsClassPropertyComputed,jsClassStringKey,jsNoise,jsFlowClassProperty extend fold
 syntax region  jsFuncBlock          contained matchgroup=jsFuncBraces          start=/{/  end=/}/  contains=@jsAll extend fold
 syntax region  jsBlock              contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll extend fold
 syntax region  jsTryCatchBlock      contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll skipwhite skipempty nextgroup=jsCatch,jsFinally extend fold
@@ -146,6 +146,7 @@ syntax region  jsObject                       matchgroup=jsObjectBraces        s
 syntax region  jsTernaryIf                    matchgroup=jsTernaryIfOperator   start=/?/  end=/\%(:\|[\}]\@=\)/  contains=@jsExpression
 syntax region  jsSpreadExpression   contained matchgroup=jsSpreadOperator      start=/\.\.\./ end=/[,}\]]\@=/ contains=@jsExpression
 syntax region  jsRestExpression     contained matchgroup=jsRestOperator        start=/\.\.\./ end=/[,)]\@=/
+syntax region  jsTernaryIf                    matchgroup=jsTernaryIfOperator   start=/?/  end=/\%(:\|[\}]\@=\)/  contains=@jsExpression
 
 syntax match   jsGenerator            contained /\*/ skipwhite skipempty nextgroup=jsFuncName,jsFuncArgs
 syntax match   jsFuncName             contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>/ skipwhite skipempty nextgroup=jsFuncArgs
@@ -191,31 +192,17 @@ syntax region  jsComment        start="/\*"  end="\*/" contains=jsCommentTodo,js
 syntax region  jsEnvComment     start="\%^#!" end="$" display
 syntax region  jsCvsTag         contained start="\$\cid:" end="\$" oneline
 
-"" JSDoc / JSDoc Toolkit
-if !exists("javascript_ignore_javaScriptdoc")
-  "" syntax coloring for javadoc comments (HTML)
-  syntax region jsComment    matchgroup=jsComment start="/\*\s*"  end="\*/" contains=jsDocTags,jsCommentTodo,jsCvsTag,@jsHtml,@Spell fold
+if exists("javascript_plugin_jsdoc")
+  runtime extras/jsdoc.vim
+  " NGDoc requires JSDoc
+  if exists("javascript_plugin_ngdoc")
+    runtime extras/ngdoc.vim
+  endif
+endif
 
-  " tags containing a param
-  syntax match  jsDocTags         contained "@\(alias\|api\|augments\|borrows\|class\|constructs\|default\|defaultvalue\|emits\|exception\|exports\|extends\|fires\|kind\|link\|listens\|member\|member[oO]f\|mixes\|module\|name\|namespace\|requires\|template\|throws\|var\|variation\|version\)\>" skipwhite nextgroup=jsDocParam
-  " tags containing type and param
-  syntax match  jsDocTags         contained "@\(arg\|argument\|cfg\|param\|property\|prop\)\>" skipwhite nextgroup=jsDocType
-  " tags containing type but no param
-  syntax match  jsDocTags         contained "@\(callback\|define\|enum\|external\|implements\|this\|type\|typedef\|return\|returns\)\>" skipwhite nextgroup=jsDocTypeNoParam
-  " tags containing references
-  syntax match  jsDocTags         contained "@\(lends\|see\|tutorial\)\>" skipwhite nextgroup=jsDocSeeTag
-  " other tags (no extra syntax)
-  syntax match  jsDocTags         contained "@\(abstract\|access\|accessor\|author\|classdesc\|constant\|const\|constructor\|copyright\|deprecated\|desc\|description\|dict\|event\|example\|file\|file[oO]verview\|final\|function\|global\|ignore\|inheritDoc\|inner\|instance\|interface\|license\|localdoc\|method\|mixin\|nosideeffects\|override\|overview\|preserve\|private\|protected\|public\|readonly\|since\|static\|struct\|todo\|summary\|undocumented\|virtual\)\>"
-
-  syntax region jsDocType         contained matchgroup=jsDocTypeBrackets start="{" end="}" contains=jsDocTypeRecord oneline skipwhite nextgroup=jsDocParam
-  syntax match  jsDocType         contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+" skipwhite nextgroup=jsDocParam
-  syntax region jsDocTypeRecord   contained start=/{/ end=/}/ contains=jsDocTypeRecord extend
-  syntax region jsDocTypeRecord   contained start=/\[/ end=/\]/ contains=jsDocTypeRecord extend
-  syntax region jsDocTypeNoParam  contained start="{" end="}" oneline
-  syntax match  jsDocTypeNoParam  contained "\%(#\|\"\|\w\|\.\|:\|\/\)\+"
-  syntax match  jsDocParam        contained "\%(#\|\$\|-\|'\|\"\|{.\{-}}\|\w\|\.\|:\|\/\|\[.{-}]\|=\)\+"
-  syntax region jsDocSeeTag       contained matchgroup=jsDocSeeTag start="{" end="}" contains=jsDocTags
-endif   "" JSDoc end
+if exists("javascript_plugin_flow")
+  runtime extras/flow.vim
+endif
 
 syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper
 syntax cluster jsAll         contains=@jsExpression,jsExportContainer,jsImportContainer,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsStatement,jsException,jsTry,jsAsyncKeyword
@@ -234,13 +221,6 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsEnvComment           PreProc
   HiLink jsCommentTodo          Todo
   HiLink jsCvsTag               Function
-  HiLink jsDocTags              Special
-  HiLink jsDocSeeTag            Function
-  HiLink jsDocType              Type
-  HiLink jsDocTypeBrackets      jsDocType
-  HiLink jsDocTypeRecord        jsDocType
-  HiLink jsDocTypeNoParam       Type
-  HiLink jsDocParam             Label
   HiLink jsString               String
   HiLink jsObjectKeyString      String
   HiLink jsTemplateString       String

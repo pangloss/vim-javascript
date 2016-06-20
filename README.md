@@ -35,24 +35,37 @@ And install it:
 
 ## Configuration Variables
 
-The following variables control certain syntax highlighting features. You can
-add them to your `.vimrc` to enable/disable their features.
+The following variables control certain syntax highlighting plugins. You can
+add them to your `.vimrc` to enable their features.
+
+-----------------
 
 ```
-let g:javascript_enable_domhtmlcss = 1
+let g:javascript_plugin_jsdoc = 1
 ```
 
-Enables HTML/CSS syntax highlighting in your JavaScript file.
+Enables syntax highlighting for [JSDocs](http://usejsdoc.org/).
 
 Default Value: 0
 
 -----------------
 
 ```
-let g:javascript_ignore_javaScriptdoc = 1
+let g:javascript_plugin_ngdoc = 1
 ```
 
-Disables JSDoc syntax highlighting
+Enables some additional syntax highlighting for NGDocs. Requires JSDoc plugin
+to be enabled as well.
+
+Default Value: 0
+
+-----------------
+
+```
+let g:javascript_plugin_flow = 1
+```
+
+Enables syntax highlighting for [Flow](https://flowtype.org/).
 
 Default Value: 0
 
