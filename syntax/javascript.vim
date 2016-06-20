@@ -37,14 +37,14 @@ syntax keyword jsBooleanFalse   false
 
 " Modules
 syntax keyword jsModuleKeywords  contained import
-syntax keyword jsModuleKeywords  contained export skipwhite skipempty nextgroup=@jsExpression
+syntax keyword jsModuleKeywords  contained export skipwhite skipempty nextgroup=jsExportBlock,jsModuleDefault
 syntax keyword jsModuleOperators contained from
 syntax keyword jsModuleOperators contained as
 syntax region  jsModuleGroup     contained matchgroup=jsBraces start=/{/ end=/}/ contains=jsModuleOperators,jsNoise
 syntax match   jsModuleAsterisk  contained /*/
-syntax keyword jsModuleDefault   contained default skipwhite skipempty nextgroup=@jsExpression
-syntax region jsImportContainer  start=/\<import\> / end="\%(;\|$\)" contains=jsModuleKeywords,jsModuleOperators,jsComment,jsString,jsTemplateString,jsNoise,jsModuleGroup,jsModuleAsterisk
-syntax match  jsExportContainer  /\<export\> / contains=jsModuleKeywords skipwhite skipempty nextgroup=jsExportBlock,jsModuleDefault
+syntax keyword jsModuleDefault   contained default skipwhite kipempty nextgroup=@jsExpression
+syntax region  jsImportContainer start=/\<import\> / end="\%(;\|$\)" contains=jsModuleKeywords,jsModuleOperators,jsComment,jsString,jsTemplateString,jsNoise,jsModuleGroup,jsModuleAsterisk
+syntax region  jsExportContainer start=/\<export\> / end="\%(;\|$\)" contains=jsModuleKeywords,jsModuleOperators,jsStorageClass,jsModuleDefault,@jsExpression
 syntax region jsExportBlock      contained matchgroup=jsBraces start=/{/ end=/}/ contains=jsModuleOperators,jsNoise
 
 " Strings, Templates, Numbers
