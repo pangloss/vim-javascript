@@ -192,16 +192,16 @@ syntax region  jsComment        start="/\*"  end="\*/" contains=jsCommentTodo,js
 syntax region  jsEnvComment     start="\%^#!" end="$" display
 syntax region  jsCvsTag         contained start="\$\cid:" end="\$" oneline
 
-if !exists("javascript_ignore_javaScriptdoc")
+if exists("javascript_plugin_jsdocs")
   runtime extras/jsdocs.vim
+  " NGDoc requires JSDoc
+  if exists("javascript_plugin_ngdocs")
+    runtime extras/ngdocs.vim
+  endif
 endif
 
 if exists("javascript_plugin_flow")
   runtime extras/flow.vim
-endif
-
-if exists("javascript_plugin_ngdocs")
-  runtime extras/ngdocs.vim
 endif
 
 syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper
