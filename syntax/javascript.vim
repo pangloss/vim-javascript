@@ -186,11 +186,9 @@ syntax region  jsDestructuringPropertyComputed  contained matchgroup=jsBrackets 
 
 " Comments
 syntax keyword jsCommentTodo    contained TODO FIXME XXX TBD
-syntax region  jsComment        start=+\/\/+ end=+$+ contains=jsCommentTodo,@Spell extend keepend
-syntax region  jsComment        start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ contains=jsCommentTodo,@Spell fold extend keepend
-syntax region  jsComment        start="/\*"  end="\*/" contains=jsCommentTodo,jsCvsTag,@Spell fold extend keepend
-syntax region  jsEnvComment     start="\%^#!" end="$" display
-syntax region  jsCvsTag         contained start="\$\cid:" end="\$" oneline
+syntax region  jsComment        start=/\/\// end=/$/ contains=jsCommentTodo,@Spell extend keepend
+syntax region  jsComment        start=/\/\*/  end=/\*\// contains=jsCommentTodo,@Spell fold extend keepend
+syntax region  jsEnvComment     start=/\%^#!/ end=/$/ display
 
 if exists("javascript_plugin_jsdoc")
   runtime extras/jsdoc.vim
@@ -220,7 +218,6 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsComment              Comment
   HiLink jsEnvComment           PreProc
   HiLink jsCommentTodo          Todo
-  HiLink jsCvsTag               Function
   HiLink jsString               String
   HiLink jsObjectKeyString      String
   HiLink jsTemplateString       String
