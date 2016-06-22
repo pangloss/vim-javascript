@@ -1,7 +1,7 @@
 syntax region  jsFlowTypeStatement            start=/type/    end=/=/     oneline skipwhite skipempty nextgroup=jsFlowTypeObject
 syntax region  jsFlowDeclareBlock             start=/declare/ end=/[;\n]/ oneline contains=jsFlow,jsFlowDeclareKeyword,jsFlowStorageClass
 syntax region  jsFlow                         start=/:/       end=/\%(\%([),=;\n]\|{\%(.*}\)\@!\|\%({.*}\)\@<=\s*{\)\@=\|void\)/ contains=@jsFlowCluster oneline skipwhite skipempty nextgroup=jsFuncBlock
-syntax region  jsFlowReturn         contained start=/:/       end=/\%(\S\s*\%({\)\@=\|\n\)/ contains=@jsFlowCluster oneline skipwhite skipempty nextgroup=jsFuncBlock keepend
+syntax region  jsFlowReturn         contained start=/:/       end=/\%(\S\s*\%({\%(.*}\)\@!\)\@=\|\n\)/ contains=@jsFlowCluster oneline skipwhite skipempty nextgroup=jsFuncBlock keepend
 syntax region  jsFlowTypeObject     contained start=/{/       end=/}/     skipwhite skipempty nextgroup=jsFunctionBlock extend
 syntax region  jsFlowObject         contained matchgroup=jsFlowNoise start=/{/       end=/}/     oneline contains=@jsFlowCluster
 syntax region  jsFlowArray          contained matchgroup=jsFlowNoise start=/\[/      end=/\]/    oneline contains=@jsFlowCluster
