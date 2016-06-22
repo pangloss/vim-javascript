@@ -105,6 +105,7 @@ syntax keyword jsFinally      contained finally      skipwhite skipempty nextgro
 syntax keyword jsCatch        contained catch        skipwhite skipempty nextgroup=jsParenCatch
 syntax keyword jsException              throw
 syntax keyword jsAsyncKeyword           async await
+syntax match   jsSwitchColon  contained /:/          skipwhite skipempty nextgroup=jsBlock
 
 " Keywords
 syntax keyword jsGlobalObjects  Array Boolean Date Function Iterator Number Object Symbol Map WeakMap Set RegExp String Proxy Promise Buffer ParallelArray ArrayBuffer DataView Float32Array Float64Array Int16Array Int32Array Int8Array Uint16Array Uint32Array Uint8Array Uint8ClampedArray JSON Math console document window Intl Collator DateTimeFormat NumberFormat
@@ -139,7 +140,7 @@ syntax region  jsClassBlock         contained matchgroup=jsClassBraces         s
 syntax region  jsFuncBlock          contained matchgroup=jsFuncBraces          start=/{/  end=/}/  contains=@jsAll extend fold
 syntax region  jsBlock              contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll extend fold
 syntax region  jsTryCatchBlock      contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll skipwhite skipempty nextgroup=jsCatch,jsFinally extend fold
-syntax region  jsSwitchBlock        contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll,jsLabel extend fold
+syntax region  jsSwitchBlock        contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll,jsLabel,jsSwitchColon extend fold
 syntax region  jsDestructuringBlock contained matchgroup=jsDestructuringBraces start=/{/  end=/}/  contains=jsDestructuringProperty,jsDestructuringAssignment,jsDestructuringNoise,jsDestructuringPropertyComputed,jsSpreadExpression extend fold
 syntax region  jsDestructuringArray contained matchgroup=jsDestructuringBraces start=/\[/ end=/\]/ contains=jsDestructuringPropertyValue,jsNoise,jsDestructuringProperty,jsSpreadExpression extend fold
 syntax region  jsObject                       matchgroup=jsObjectBraces        start=/{/  end=/}/  contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectGetSet,jsGenerator,jsComment,jsObjectStringKey,jsSpreadExpression extend fold
@@ -296,6 +297,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsSpreadOperator       Operator
   HiLink jsRestOperator         Operator
   HiLink jsRestExpression       jsFuncArgs
+  HiLink jsSwitchColon          Noise
 
   HiLink jsDestructuringBraces     Noise
   HiLink jsDestructuringProperty   jsFuncArgs
