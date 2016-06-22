@@ -164,7 +164,7 @@ exe 'syntax match jsArrowFunction /=>/      skipwhite skipempty nextgroup=jsFunc
 
 syntax keyword jsClassKeywords          contained extends class
 syntax match   jsClassNoise             contained /\./
-syntax match   jsClassMethodDefinitions contained /\%(get\|set\|static\)\%( \k\+\)\@=/ skipwhite skipempty nextgroup=jsFuncName,jsClassProperty
+syntax match   jsClassMethodDefinitions contained /\%(get\|set\|static\|async\)\%( \k\+\)\@=/ skipwhite skipempty nextgroup=jsFuncName,jsClassProperty
 syntax match   jsClassDefinition        /\<class\>\%( [a-zA-Z_$][0-9a-zA-Z_$ \n.]*\)*/ contains=jsClassKeywords,jsClassNoise skipwhite skipempty nextgroup=jsClassBlock,jsFlowClass
 syntax match   jsDecorator              contained "@" nextgroup=jsDecoratorFunction
 syntax match   jsDecoratorFunction      contained "[a-zA-Z_][a-zA-Z0-9_.]*"
