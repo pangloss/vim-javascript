@@ -395,12 +395,12 @@ function GetJavascriptIndent()
     end
 
     " If previous line starts with an operator...
-  elseif (s:Match(lnum, s:operator_first) && !s:Match(lnum,s:continuation_regex))||getline(lnum) =~ ');\=' . s:line_term
+  elseif (s:Match(lnum, s:operator_first) && !s:Match(lnum,s:continuation_regex))||getline(lnum) =~ '[]})];\=' . s:line_term
     let counts = s:LineHasOpeningBrackets(lnum)
-    if counts[0] == '2' && !s:Match(lnum, s:operator_first)
+    if counts =~ '2' && !s:Match(lnum, s:operator_first)
       call cursor(lnum, 1)
       " Search for the opening tag
-      let mnum = s:lookForParens('(', ')', 'nbW', 0)
+      let mnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
       if mnum > 0 && s:Match(mnum, s:operator_first)
         return indent(mnum) - s:sw()
       end
