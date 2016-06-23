@@ -463,7 +463,8 @@ function GetJavascriptIndent()
         call cursor(lnum, matchend(s:RemoveTrailingComments(strpart(line,0,col('.'))), '.*\zs[])}]'))
       endwhile
       let cur = line('.')
-      if cur < lnum && !s:InMultiVarStatement(cur,0,0)
+      if cur < lnum && !s:InMultiVarStatement(cur,0,0) &&
+            \ !s:Onescope(s:PrevNonBlankNonString(cur - 1))
         return indent(s:GetMSL(cur, 0))
       end
     elseif counts =~ '1' || s:Onescope(lnum)
