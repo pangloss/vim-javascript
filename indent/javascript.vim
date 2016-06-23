@@ -434,16 +434,6 @@ function GetJavascriptIndent()
     return 0
   endif
 
-  " foo('foo',
-  "   bar('bar', function() {
-  "     hi();
-  "   })
-  " );
-
-  " function (a, b, c, d,
-  "     e, f, g) {
-  "       console.log('inner');
-  " }
   " If the previous line ended with a block opening, add a level of indent.
   if s:Match(lnum, s:block_regex)
     return s:InMultiVarStatement(lnum, 0, 0) || s:LineHasOpeningBrackets(lnum) !~ '2' ?
