@@ -403,7 +403,7 @@ function GetJavascriptIndent()
       " Search for the opening tag
       let mnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
       if mnum > 0 && (s:Match(mnum, s:operator_first) ||
-            \ s:Onescope(s:PrevNonBlankNonString(mnum - 1)))
+            \ (s:Onescope(s:PrevNonBlankNonString(mnum - 1))) && !s:Match(mnum, s:line_pre . '{'))
         return indent(mnum) - s:sw()
       end
     elseif s:Match(lnum, s:operator_first)
