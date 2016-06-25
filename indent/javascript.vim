@@ -337,7 +337,7 @@ function GetJavascriptIndent()
   endif
 
   " single opening bracket will assume you want a c style of indenting
-  if line =~ s:line_pre . '{' . s:line_term && !s:Match(lnum,s:block_regex) &&
+  if line =~ s:line_pre . '{' && !s:Match(lnum,s:block_regex) &&
         \ !s:Match(lnum,s:comma_last)
     return cindent(v:lnum)
   endif
