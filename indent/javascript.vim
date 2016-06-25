@@ -77,7 +77,7 @@ function s:Onescope(lnum)
   end
   let mypos = col('.')
   call cursor(a:lnum, 1)
-  if search('\<\%(while\|for\|if\)\>\s*(\C', 'ce', a:lnum) > 0 &&
+  if search('.*\zs\<\%(while\|for\|if\)\>\s*(\C', 'ce', a:lnum) > 0 &&
         \ s:lookForParens('(', ')', 'W', a:lnum) > 0 &&
         \ col('.') == strlen(s:RemoveTrailingComments(getline(a:lnum)))
     call cursor(a:lnum, mypos)
@@ -337,7 +337,7 @@ function GetJavascriptIndent()
   endif
 
   " single opening bracket will assume you want a c style of indenting
-  if line =~ s:line_pre . '{' . s:line_term && !s:Match(lnum,s:block_regex) &&
+  if line =~ s:line_pre . '{' && !s:Match(lnum,s:block_regex) &&
         \ !s:Match(lnum,s:comma_last)
     return cindent(v:lnum)
   endif
@@ -395,13 +395,15 @@ function GetJavascriptIndent()
     end
 
     " If previous line starts with an operator...
-  elseif (s:Match(lnum, s:operator_first) && !s:Match(lnum,s:continuation_regex))||getline(lnum) =~ '[]})];\=' . s:line_term
+  elseif (s:Match(lnum, s:operator_first) && !s:Match(lnum,s:continuation_regex)) ||
+        \ getline(lnum) =~ '[]})];\=' . s:line_term
     let counts = s:LineHasOpeningBrackets(lnum)
     if counts =~ '2' && !s:Match(lnum, s:operator_first)
       call cursor(lnum, 1)
       " Search for the opening tag
       let mnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
-      if mnum > 0 && s:Match(mnum, s:operator_first)
+      if mnum > 0 && (s:Match(mnum, s:operator_first) ||
+            \ (s:Onescope(s:PrevNonBlankNonString(mnum - 1))) && !s:Match(mnum, s:line_pre . '{'))
         return indent(mnum) - s:sw()
       end
     elseif s:Match(lnum, s:operator_first)
@@ -453,8 +455,7 @@ function GetJavascriptIndent()
         call cursor(lnum, matchend(s:RemoveTrailingComments(strpart(line,0,col('.'))), '.*\zs[])}]'))
       endwhile
       let cur = line('.')
-      if cur < lnum && !s:InMultiVarStatement(cur,0,0) &&
-            \ !s:Onescope(s:PrevNonBlankNonString(cur - 1))
+      if cur < lnum && !s:InMultiVarStatement(cur,0,0)
         return indent(s:GetMSL(cur, 0))
       end
     elseif counts =~ '1' || s:Onescope(lnum)
