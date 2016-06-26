@@ -43,7 +43,7 @@ endif
 
 let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
 let s:js_keywords = s:line_pre . '\%(break\|import\|export\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)\>\C'
-let s:expr_case = s:line_pre . '\%(case\s\+[^\:]*\|default\)\s*:\s*\C'
+let s:expr_case = s:line_pre . '\%(\%(case\>.*\)\|default\)\s*:\C'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)\c'
 
@@ -77,7 +77,7 @@ function s:Onescope(lnum)
   end
   let mypos = col('.')
   call cursor(a:lnum, 1)
-  if search('\<\%(while\|for\|if\)\>\s*(\C', 'ce', a:lnum) > 0 &&
+  if search('.*\zs\<\%(while\|for\|if\)\>\s*(\C', 'ce', a:lnum) > 0 &&
         \ s:lookForParens('(', ')', 'W', a:lnum) > 0 &&
         \ col('.') == strlen(s:RemoveTrailingComments(getline(a:lnum)))
     call cursor(a:lnum, mypos)
@@ -337,7 +337,7 @@ function GetJavascriptIndent()
   endif
 
   " single opening bracket will assume you want a c style of indenting
-  if s:Match(v:lnum, s:line_pre . '{' . s:line_term) && !s:Match(lnum,s:block_regex) &&
+  if line =~ s:line_pre . '{' && !s:Match(lnum,s:block_regex) &&
         \ !s:Match(lnum,s:comma_last)
     return cindent(v:lnum)
   endif
@@ -353,7 +353,7 @@ function GetJavascriptIndent()
 
   " If we got a closing bracket on an empty line, find its match and indent
   " according to it.
-  let col = s:Match(v:lnum,  s:line_pre . '[]})]')
+  let col = line =~ s:line_pre . '[]})]'
   if col > 0
     let parlnum = v:lnum
     while col
@@ -395,13 +395,15 @@ function GetJavascriptIndent()
     end
 
     " If previous line starts with an operator...
-  elseif (s:Match(lnum, s:operator_first) && !s:Match(lnum,s:continuation_regex))||getline(lnum) =~ ');\=' . s:line_term
+  elseif (s:Match(lnum, s:operator_first) && !s:Match(lnum,s:continuation_regex)) ||
+        \ getline(lnum) =~ '[]})];\=' . s:line_term
     let counts = s:LineHasOpeningBrackets(lnum)
-    if counts[0] == '2' && !s:Match(lnum, s:operator_first)
+    if counts =~ '2' && !s:Match(lnum, s:operator_first)
       call cursor(lnum, 1)
       " Search for the opening tag
-      let mnum = s:lookForParens('(', ')', 'nbW', 0)
-      if mnum > 0 && s:Match(mnum, s:operator_first)
+      let mnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
+      if mnum > 0 && (s:Match(mnum, s:operator_first) ||
+            \ (s:Onescope(s:PrevNonBlankNonString(mnum - 1))) && !s:Match(mnum, s:line_pre . '{'))
         return indent(mnum) - s:sw()
       end
     elseif s:Match(lnum, s:operator_first)
@@ -434,16 +436,6 @@ function GetJavascriptIndent()
     return 0
   endif
 
-  " foo('foo',
-  "   bar('bar', function() {
-  "     hi();
-  "   })
-  " );
-
-  " function (a, b, c, d,
-  "     e, f, g) {
-  "       console.log('inner');
-  " }
   " If the previous line ended with a block opening, add a level of indent.
   if s:Match(lnum, s:block_regex)
     return s:InMultiVarStatement(lnum, 0, 0) || s:LineHasOpeningBrackets(lnum) !~ '2' ?
