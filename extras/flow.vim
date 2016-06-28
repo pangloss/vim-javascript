@@ -1,6 +1,6 @@
 syntax region  jsFlowTypeStatement            start=/type/    end=/=/     oneline skipwhite skipempty nextgroup=jsFlowTypeObject
 syntax region  jsFlowDeclareBlock             start=/declare/ end=/[;\n]/ oneline contains=jsFlow,jsFlowDeclareKeyword,jsFlowStorageClass
-syntax region  jsFlow                         start=/:/       end=/\%(\%([),=;\n]\|{\%(.*}\)\@!\|\%({.*}\)\@<=\s*{\)\@=\|void\)/ contains=@jsFlowCluster oneline skipwhite skipempty nextgroup=jsFuncBlock
+syntax region  jsFlow                         start=/:/       end=/\%(\%([),=;\n]\|{\%(.*}\)\@!\|\%({.*}\)\@<=\s*{\)\@=\|void\)/ contains=@jsFlowCluster containedin=jsBlock,jsClassBlock,jsFuncBlock,jsBlock,jsTryCatchBlock,jsSwitchBlock,jsParen oneline skipwhite skipempty nextgroup=jsFuncBlock
 syntax region  jsFlowReturn         contained start=/:/       end=/\%(\S\s*\%({\%(.*}\)\@!\)\@=\|\n\)/ contains=@jsFlowCluster oneline skipwhite skipempty nextgroup=jsFuncBlock keepend
 syntax region  jsFlowTypeObject     contained matchgroup=jsFlowNoise start=/{/       end=/}/ contains=jsFlowTypeKey,jsFlowNoise skipwhite skipempty nextgroup=jsFunctionBlock extend
 syntax match   jsFlowTypeKey        contained /\<[0-9a-zA-Z_$?]*\>\(\s*:\)\@=/ skipwhite skipempty nextgroup=jsFlowTypeValue
