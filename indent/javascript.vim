@@ -42,7 +42,6 @@ endif
 " ============
 
 let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
-let s:js_keywords = s:line_pre . '\%(break\|import\|export\|catch\|const\|continue\|debugger\|delete\|do\|else\|finally\|for\|function\|if\|in\|instanceof\|let\|new\|return\|switch\|this\|throw\|try\|typeof\|var\|void\|while\|with\)\>\C'
 let s:expr_case = s:line_pre . '\%(\%(case\>.*\)\|default\)\s*:\C'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)\c'
@@ -67,7 +66,7 @@ endfunc
 let s:line_term = '\s*\%(\%(\/\/.*\)\=\|\%(\/\*.*\*\/\s*\)*\)$'
 
 " Regex that defines continuation lines, not including (, {, or [.
-let s:continuation_regex = '\%([*.?:]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\|||\|&&\)' . s:line_term
+let s:continuation_regex = '\%([*,.?:]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\|||\|&&\)' . s:line_term
 
 let s:one_line_scope_regex = '\%(\<else\>\|=>\)\C' . s:line_term
 
@@ -94,8 +93,6 @@ let s:block_regex = '[{([]' . s:line_term
 let s:operator_first = s:line_pre . '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||\|&&\)'
 
 let s:var_stmt = s:line_pre . '\%(const\|let\|var\)\s\+\C'
-
-let s:comma_last = ',' . s:line_term
 
 " 2. Auxiliary Functions {{{1
 " ======================
@@ -145,7 +142,7 @@ function s:GetMSL(lnum, in_one_line_scope)
     " Otherwise, terminate search as we have found our MSL already.
     let line = getline(lnum)
     let line2 = getline(msl)
-    if ((s:Match(lnum,s:continuation_regex) || s:Match(lnum, s:comma_last)) &&
+    if (s:Match(lnum,s:continuation_regex) &&
           \ !s:Match(lnum, s:expr_case)) || s:IsInString(lnum, strlen(line))
       let msl = lnum
       if s:Match(lnum, s:line_pre . '[]})]') && !a:in_one_line_scope
@@ -236,15 +233,6 @@ endfunction
 " =========================
 
 function GetJavascriptIndent()
-  " 3.1. Setup {{{1
-  " ----------
-  " Set up variables for restoring position in file.  Could use v:lnum here.
-  " Avoid use of line('.')/col('.') type functions as the curpos can change
-  let vcol = col('.')
-
-  " 3.2. Work on the current line {{{1
-  " -----------------------------
-
   " Get the current line.
   let line = getline(v:lnum)
   " previous nonblank line number
@@ -252,37 +240,22 @@ function GetJavascriptIndent()
   " previous line of code
   let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
-  " to not change multiline string values 
   if line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template'
     return -1
   endif
-
-  " If we are in a multi-line comment, cindent does the right thing.
   if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)
     return cindent(v:lnum)
   endif
-
-  " If the line is empty and the previous nonblank line was a multi-line
-  " comment, use that comment's indent. Deduct one char to account for the
-  " space in ' */'.
   if line =~ '^\s*$' && getline(prevline) =~ '\%(\%(^\s*\/\/\|\/\*\).*\)\@<!\*\/' &&
         \ s:IsInComment(prevline, 1)
     return indent(prevline) - 1
   endif
-
-"   " Find a non-blank, non-multi-line string line above the current line.
-
-  " If the line is empty and inside a string, use the previous line.
   if line =~ '^\s*$' && lnum != prevline
     return indent(prevnonblank(v:lnum))
   endif
-
-  " At the start of the file use zero indent.
   if lnum == 0
     return 0
   endif
-
-  " cindent each line which has a switch label
   if (line =~ s:expr_case)
     let s:cpo_switch = &cpo
     set cpo+=%
@@ -291,42 +264,21 @@ function GetJavascriptIndent()
     return ind
   endif
 
-  let ind = indent(lnum)
-  let indt = ind
-  call cursor(lnum,1)
-  let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
   call cursor(v:lnum,1)
+  " the containing paren, bracket, curly
   let num = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
+
   if getline(v:lnum) =~ '^\s*[])}]'
     return indent(num)
-  elseif parlnum == num  && num > 0
+  end
 
-    if s:Onescope(lnum) 
-      return indent(lnum) + s:sw()
-    end
-
-
-    let ols = s:InOneLineScope(lnum)
-    if ols > 0
-      let ind = ind + s:sw()
-    else
-      let ols = s:ExitingOneLineScope(lnum)
-      while ols > 0 && ind > 0
-        let ind = ind - s:sw()
-        let ols = s:InOneLineScope(ols - 1)
-      endwhile
-    endif
-    if ind != indt
-      return ind
-    end
-
-    return
-          \ getline(lnum) =~ s:operator_first ?
-          \ line =~ s:operator_first ? indent(lnum) : indent(lnum) - s:sw()
-          \ :
-          \ (getline(lnum) =~ s:continuation_regex || getline(lnum) =~ s:comma_last) ?
-          \ s:PrevNonBlankNonString(lnum - 1) == num ? indent(lnum) + s:sw() : indent(lnum)
-          \ : indent(lnum)
+  if (line =~ s:operator_first ||
+        \ getline(lnum) =~ s:continuation_regex ||
+        \ s:Onescope(lnum)) &&
+        \ (num != lnum &&
+        \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsbracket\|jsparen\|jsobject')
+    " TODO: remove those syntax checks
+    return indent(num) + (s:sw() * 2)
   elseif num > 0
     return indent(num) + s:sw()
   end
