@@ -132,101 +132,15 @@ function s:PrevNonBlankNonString(lnum)
   return lnum
 endfunction
 
-" Find line above 'lnum' that started the continuation 'lnum' may be part of.
-function s:GetMSL(lnum, in_one_line_scope)
-  " Start on the line we're at and use its indent.
-  let msl = a:lnum
-  let lnum = s:PrevNonBlankNonString(a:lnum - 1)
-  while lnum > 0 && !s:Match(msl,s:line_pre . '[])}]')
-    " If we have a continuation line, or we're in a string, use line as MSL.
-    " Otherwise, terminate search as we have found our MSL already.
-    let line = getline(lnum)
-    let line2 = getline(msl)
-    if (s:Match(lnum,s:continuation_regex) &&
-          \ !s:Match(lnum, s:expr_case)) || s:IsInString(lnum, strlen(line))
-      let msl = lnum
-      if s:Match(lnum, s:line_pre . '[]})]') && !a:in_one_line_scope
-        call cursor(lnum,1)
-        let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
-        if parlnum > 0
-          let lnum = parlnum
-          continue
-        end
-      end
-
-    else
-
-      " Don't use lines that are part of a one line scope as msl unless the
-      " flag in_one_line_scope is set to 1
-      "
-      if a:in_one_line_scope
-        break
-      end
-      let msl_one_line = s:Onescope(lnum)
-      if msl_one_line == 0
-        break
-      endif
-    end
-    let lnum = s:PrevNonBlankNonString(lnum - 1)
-  endwhile
-  return msl
-endfunction
-
 function s:RemoveTrailingComments(content)
   let single = '\/\/\%(.*\)\s*$'
   let multi = '\/\*\%(.*\)\*\/\s*$'
   return substitute(substitute(substitute(a:content, single, '', ''), multi, '', ''), '\s\+$', '', '')
 endfunction
 
-" Check if line 'lnum' has more opening brackets than closing ones.
-function s:LineHasOpeningBrackets(lnum)
-  let open_0 = 0
-  let open_2 = 0
-  let open_4 = 0
-  let line = getline(a:lnum)
-  let pos = match(line, '[][(){}]', 0)
-  while pos != -1
-    if !s:IsInStringOrComment(a:lnum, pos + 1)
-      let idx = stridx('(){}[]', line[pos])
-      if idx % 2 == 0
-        let open_{idx} = open_{idx} + 1
-      else
-        let open_{idx - 1} = open_{idx - 1} - 1
-      endif
-    endif
-    let pos = match(line, '[][(){}]', pos + 1)
-  endwhile
-  return (open_0 > 0 ? 1 : (open_0 == 0 ? 0 : 2)) . (open_2 > 0 ? 1 : (open_2 == 0 ? 0 : 2)) . (open_4 > 0 ? 1 : (open_4 == 0 ? 0 : 2))
-endfunction
-
 function s:Match(lnum, regex)
   let col = match(getline(a:lnum), a:regex) + 1
   return col > 0 && !s:IsInStringOrComment(a:lnum, col) ? col : 0
-endfunction
-
-
-function s:InOneLineScope(lnum)
-  let msl = s:GetMSL(a:lnum, 1)
-  if msl > 0 && s:Onescope(msl)
-    return msl
-  endif
-  return 0
-endfunction
-
-function s:ExitingOneLineScope(lnum)
-  let msl = s:GetMSL(a:lnum, 1)
-  if msl > 0
-    " if the current line is in a one line scope ..
-    if s:Onescope(msl)
-      return 0
-    else
-      let prev_msl = s:GetMSL(msl - 1, 1)
-      if s:Onescope(prev_msl)
-        return prev_msl
-      endif
-    endif
-  endif
-  return 0
 endfunction
 
 " 3. GetJavascriptIndent Function {{{1
@@ -268,7 +182,7 @@ function GetJavascriptIndent()
   " the containing paren, bracket, curly
   let num = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
 
-  if getline(v:lnum) =~ '^\s*[])}]'
+  if line =~ '^\s*[])}]'
     return indent(num)
   end
 
