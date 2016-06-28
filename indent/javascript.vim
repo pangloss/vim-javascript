@@ -185,7 +185,9 @@ function GetJavascriptIndent()
   if line =~ '^\s*[])}]'
     return indent(num)
   end
-
+  if synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'switch'
+    return indent(search(s:expr_case,'bnW')) + s:sw()
+  endif
   if (line =~ s:operator_first ||
         \ getline(lnum) =~ s:continuation_regex ||
         \ s:Onescope(lnum)) &&
