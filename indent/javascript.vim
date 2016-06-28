@@ -192,7 +192,7 @@ function GetJavascriptIndent()
         \ getline(lnum) =~ s:continuation_regex ||
         \ s:Onescope(lnum)) &&
         \ (num != lnum &&
-        \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsbracket\|jsparen\|jsobject')
+        \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'args\|jsbracket\|jsparen\|jsobject')
     " TODO: remove those syntax checks
     return indent(num) + (s:sw() * 2)
   elseif num > 0
