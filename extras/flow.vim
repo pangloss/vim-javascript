@@ -9,7 +9,7 @@ syntax region  jsFlowObject         contained matchgroup=jsFlowNoise start=/{/  
 syntax region  jsFlowArray          contained matchgroup=jsFlowNoise start=/\[/      end=/\]/    oneline contains=@jsFlowCluster
 syntax region  jsFlowArrow          contained matchgroup=jsFlowNoise start=/(/       end=/)\s*=>/     oneline contains=@jsFlowCluster
 syntax keyword jsFlowDeclareKeyword contained declare
-syntax keyword jsFlowType           contained boolean number string null void any mixed JSON array function object Array
+syntax keyword jsFlowType           contained boolean number string null void any mixed JSON array function object Array bool
 syntax match   jsFlowClassProperty  contained /\<[0-9a-zA-Z_$]*\>:\@=/ skipwhite skipempty nextgroup=jsFlow
 syntax match   jsFlowNoise          contained /[:;,<>]/
 syntax cluster jsFlowCluster        contains=jsFlowType,jsFlowArray,jsFlowObject,jsFlowNoise,jsFlowArrow
