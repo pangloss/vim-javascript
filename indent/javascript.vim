@@ -194,7 +194,7 @@ function GetJavascriptIndent()
         \ (num != lnum &&
         \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'args\|jsbracket\|jsparen\|jsobject')
     " TODO: remove those syntax checks
-    return indent(num) + (s:sw() * 2)
+    return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2)
   elseif num > 0
     return indent(num) + s:sw()
   end
