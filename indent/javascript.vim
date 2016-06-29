@@ -2,9 +2,6 @@
 " Language: Javascript
 " Acknowledgement: Based off of vim-ruby maintained by Nikolai Weibull http://vim-ruby.rubyforge.org
 
-" 0. Initialization {{{1
-" =================
-
 " Only load this indent file when no other was loaded.
 if exists("b:did_indent")
   finish
@@ -38,9 +35,6 @@ else
   endfunc
 endif
 
-" 1. Variables {{{1
-" ============
-
 let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
 let s:expr_case = s:line_pre . '\%(\%(case\>.*\)\|default\)\s*:\C'
 " Regex of syntax group names that are or delimit string or are comments.
@@ -57,7 +51,7 @@ let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_st
 
 func s:lookForParens(start,end,flags,stop)
   try 
-    return searchpair(a:start,'',a:end,a:flags,s:skip_expr,a:stop,300)
+    return searchpair(a:start,'',a:end,a:flags,s:skip_expr,a:stop,0)
   catch /E118/
     return searchpair(a:start,'',a:end,a:flags,0,a:stop)
   endtry
@@ -74,25 +68,17 @@ function s:Onescope(lnum)
   if getline(a:lnum) =~ s:one_line_scope_regex
     return 1
   end
-  let mypos = col('.')
   call cursor(a:lnum, 1)
   if search('.*\zs\<\%(while\|for\|if\)\>\s*(\C', 'ce', a:lnum) > 0 &&
         \ s:lookForParens('(', ')', 'W', a:lnum) > 0 &&
         \ col('.') == strlen(s:RemoveTrailingComments(getline(a:lnum)))
-    call cursor(a:lnum, mypos)
     return 1
   else
-    call cursor(a:lnum, mypos)
     return 0
   end
 endfunction
 
-" Regex that defines blocks.
-let s:block_regex = '[{([]' . s:line_term
-
 let s:operator_first = s:line_pre . '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||\|&&\)'
-
-let s:var_stmt = s:line_pre . '\%(const\|let\|var\)\s\+\C'
 
 " 2. Auxiliary Functions {{{1
 " ======================
@@ -182,7 +168,7 @@ function GetJavascriptIndent()
   " the containing paren, bracket, curly
   let num = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
 
-  if line =~ '^\s*[])}]'
+  if line =~ s:line_pre . '[])}]'
     return indent(num)
   end
   if synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'switch'
@@ -201,7 +187,6 @@ function GetJavascriptIndent()
 
 endfunction
 
-" }}}1
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
