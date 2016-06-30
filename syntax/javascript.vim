@@ -300,6 +300,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsSwitchColon          Noise
   HiLink jsClassMethodType      Type
   HiLink jsObjectMethodType     Type
+  HiLink jsClassDefinition      jsFuncName
 
   HiLink jsDestructuringBraces     Noise
   HiLink jsDestructuringProperty   jsFuncArgs
