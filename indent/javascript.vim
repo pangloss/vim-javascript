@@ -52,7 +52,7 @@ let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_st
 func s:lookForParens(start,end,flags,stop)
   try 
     return searchpair(a:start,'',a:end,a:flags,
-	  \ "line('.') < " . (prevnonblank(v:lnum) - 100000) . " ? dummy :"
+	  \ "line('.') < " . (prevnonblank(v:lnum) - 100) . " ? dummy :"
 	  \ . " synIDattr(synID(line('.'), col('.'), 1), 'name')"
 	  \ . " =~? '\\(Comment\\|regex\\|String\\|doc\\|special\\|template\\)'"
           \ ,a:stop,0)
@@ -165,9 +165,10 @@ function GetJavascriptIndent()
 
   call cursor(v:lnum,1)
   " the containing paren, bracket, curly
-  let num = s:lookForParens('\%(\%(^.*:\@<!\/\/.*\)\|\%(^[^"]*["]\%([^"]*["][^"]*["]\)*[^"]*\)\|\%(^[^'']*['']\%([^'']*[''][^'']*['']\)*[^'']*\)\)\@<!\%((\|{\|\[\)', 
-                          \ '\%(\%(^.*:\@<!\/\/.*\)\|\%(^[^"]*["]\%([^"]*["][^"]*["]\)*[^"]*\)\|\%(^[^'']*['']\%([^'']*[''][^'']*['']\)*[^'']*\)\)\@<!\%()\|}\|\]\)',
-                          \ 'nbW', 0)
+  let num = s:lookForParens(
+    \ '\%(^.*:\@<!\/\/.*\)\@<!\%((\|{\|\[\)\ze\%(\%(\%([^"]*"\%([^"]*"[^"]*"\)*\)\)\@!\|\%(\%([^'']*['']\%([^'']*[''][^'']*['']\)\)\@!\)\)',
+    \ '\%(^.*:\@<!\/\/.*\)\@<!\%()\|}\|\]\)\ze\%(\%(\%([^"]*"\%([^"]*"[^"]*"\)*\)\)\@!\|\%(\%([^'']*['']\%([^'']*[''][^'']*['']\)\)\@!\)\)',
+    \ 'nbW', 0)
 
   if line =~ s:line_pre . '[])}]'
     return indent(num)
