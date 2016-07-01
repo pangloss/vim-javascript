@@ -13,7 +13,7 @@ setlocal nosmartindent
 " Now, set up our indentation expression and keys that trigger it.
 setlocal indentexpr=GetJavascriptIndent()
 setlocal formatexpr=Fixedgq(v:lnum,v:count)
-setlocal indentkeys=0{,0},0),0],0\,*<Return>,:,!^F,o,O,e
+setlocal indentkeys=0{,0},0),0],0\,:,!^F,o,O,e
 setlocal cinoptions+=j1,J1,c1
 
 " Only define the function once.
@@ -51,7 +51,11 @@ let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_st
 
 func s:lookForParens(start,end,flags,stop)
   try 
-    return searchpair(a:start,'',a:end,a:flags,s:skip_expr,a:stop,300)
+    return searchpair(a:start,'',a:end,a:flags,
+	  \ "line('.') < " . (prevnonblank(v:lnum) - 100) . " ? dummy :"
+	  \ . " synIDattr(synID(line('.'), col('.'), 1), 'name')"
+	  \ . " =~? '\\(Comment\\|regex\\|String\\|doc\\|special\\|template\\)$'"
+          \ ,a:stop,0)
   catch /E118/
     return searchpair(a:start,'',a:end,a:flags,0,a:stop)
   endtry
@@ -86,11 +90,6 @@ let s:operator_first = s:line_pre . '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||
 " Check if the character at lnum:col is inside a string, comment, or is ascii.
 function s:IsInStringOrComment(lnum, col)
   return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_strcom
-endfunction
-
-" Check if the character at lnum:col is inside a string.
-function s:IsInString(lnum, col)
-  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_string
 endfunction
 
 " Check if the character at lnum:col is inside a multi-line comment.
@@ -166,7 +165,9 @@ function GetJavascriptIndent()
 
   call cursor(v:lnum,1)
   " the containing paren, bracket, curly
-  let num = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
+  let num = s:lookForParens('\%(\%(^.*:\@<!\/\/.*\)\|\%(^[^''"]*[''"]\%([^''"]*[''"][^''"]*[''"]\)*[^''"]*\)\)\@<!\%((\|{\|\[\)', 
+                          \ '\%(\%(^.*:\@<!\/\/.*\)\|\%(^[^''"]*[''"]\%([^''"]*[''"][^''"]*[''"]\)*[^''"]*\)\)\@<!\%()\|}\|\]\)',
+                          \ 'nbW', 0)
 
   if line =~ s:line_pre . '[])}]'
     return indent(num)
@@ -176,7 +177,7 @@ function GetJavascriptIndent()
   endif
   if (line =~ s:operator_first ||
         \ getline(lnum) =~ s:continuation_regex ||
-        \ s:Onescope(lnum)) &&
+        \ (s:Onescope(lnum) && line !~ s:line_pre . '{')) &&
         \ (num != lnum &&
         \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'args\|jsbracket\|jsparen\|jsobject')
     " TODO: remove those syntax checks
