@@ -40,9 +40,6 @@ let s:expr_case = s:line_pre . '\%(\%(case\>.*\)\|default\)\s*:\C'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)\c'
 
-" Regex of syntax group names that are strings.
-let s:syng_string = 'regex\c'
-
 " Regex of syntax group names that are strings or documentation.
 let s:syng_comment = '\%(comment\|doc\)\c'
 
@@ -81,7 +78,7 @@ endfunction
 
 let s:operator_first = s:line_pre . '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||\|&&\)'
 
-" 2. Auxiliary Functions {{{2
+" Auxiliary Functions {{{2
 " ======================
 
 " Check if the character at lnum:col is inside a string, comment, or is ascii.
@@ -140,14 +137,9 @@ function s:LineHasOpeningBrackets(lnum)
   endwhile
   return (open_0 > 0 ? 1 : (open_0 == 0 ? 0 : 2)) . (open_2 > 0 ? 1 : (open_2 == 0 ? 0 : 2)) . (open_4 > 0 ? 1 : (open_4 == 0 ? 0 : 2))
 endfunction
-
-function s:Match(lnum, regex)
-  let col = match(getline(a:lnum), a:regex) + 1
-  return col > 0 && !s:IsInStringOrComment(a:lnum, col) ? col : 0
-endfunction
 " }}}
 
-" 3. GetJavascriptIndent Function {{{1
+" GetJavascriptIndent Function
 " =========================
 let s:preref = [0,0]
 function GetJavascriptIndent()
