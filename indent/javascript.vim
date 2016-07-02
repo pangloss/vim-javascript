@@ -46,9 +46,6 @@ let s:syng_string = 'regex\c'
 " Regex of syntax group names that are strings or documentation.
 let s:syng_comment = '\%(comment\|doc\)\c'
 
-" Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
-
 func s:lookForParens(start,end,flags,stop)
   try 
     return searchpair(a:start,'',a:end,a:flags,
@@ -84,7 +81,7 @@ endfunction
 
 let s:operator_first = s:line_pre . '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||\|&&\)'
 
-" 2. Auxiliary Functions {{{1
+" 2. Auxiliary Functions {{{2
 " ======================
 
 " Check if the character at lnum:col is inside a string, comment, or is ascii.
@@ -148,6 +145,7 @@ function s:Match(lnum, regex)
   let col = match(getline(a:lnum), a:regex) + 1
   return col > 0 && !s:IsInStringOrComment(a:lnum, col) ? col : 0
 endfunction
+" }}}
 
 " 3. GetJavascriptIndent Function {{{1
 " =========================
