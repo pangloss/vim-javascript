@@ -43,6 +43,9 @@ let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)\c'
 " Regex of syntax group names that are strings or documentation.
 let s:syng_comment = '\%(comment\|doc\)\c'
 
+" Expression used to check whether we should skip a match with searchpair().
+let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
+
 func s:lookForParens(start,end,flags,stop)
   try 
     return searchpair(a:start,'',a:end,a:flags,
@@ -197,7 +200,7 @@ function GetJavascriptIndent()
         \ getline(lnum) =~ s:continuation_regex ||
         \ (s:Onescope(lnum) && line !~ s:line_pre . '{')) &&
         \ (num != lnum &&
-        \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'args\|jsbracket\|jsparen\|jsobject')
+        \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsdestructuringblock\|args\|jsbracket\|jsparen\|jsobject')
     " TODO: remove those syntax checks
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2)
   elseif num > 0
