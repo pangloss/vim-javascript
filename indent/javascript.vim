@@ -52,10 +52,10 @@ let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_st
 func s:lookForParens(start,end,flags,stop)
   try 
     return searchpair(a:start,'',a:end,a:flags,
-	  \ "line('.') < " . (prevnonblank(v:lnum) - 100) . " ? dummy :"
+	  \ "line('.') < " . (prevnonblank(v:lnum) - 2000) . " ? dummy :"
 	  \ . " synIDattr(synID(line('.'), col('.'), 1), 'name')"
 	  \ . " =~? '\\(Comment\\|regex\\|String\\|doc\\|special\\|template\\)'"
-          \ ,a:stop,0)
+          \ ,a:stop,2000)
   catch /E118/
     return searchpair(a:start,'',a:end,a:flags,0,a:stop)
   endtry
@@ -123,6 +123,27 @@ function s:RemoveTrailingComments(content)
   return substitute(substitute(substitute(a:content, single, '', ''), multi, '', ''), '\s\+$', '', '')
 endfunction
 
+" Check if line 'lnum' has more opening brackets than closing ones.
+function s:LineHasOpeningBrackets(lnum)
+  let open_0 = 0
+  let open_2 = 0
+  let open_4 = 0
+  let line = getline(a:lnum)
+  let pos = match(line, '[][(){}]', 0)
+  while pos != -1
+    if !s:IsInStringOrComment(a:lnum, pos + 1)
+      let idx = stridx('(){}[]', line[pos])
+      if idx % 2 == 0
+        let open_{idx} = open_{idx} + 1
+      else
+        let open_{idx - 1} = open_{idx - 1} - 1
+      endif
+    endif
+    let pos = match(line, '[][(){}]', pos + 1)
+  endwhile
+  return (open_0 > 0 ? 1 : (open_0 == 0 ? 0 : 2)) . (open_2 > 0 ? 1 : (open_2 == 0 ? 0 : 2)) . (open_4 > 0 ? 1 : (open_4 == 0 ? 0 : 2))
+endfunction
+
 function s:Match(lnum, regex)
   let col = match(getline(a:lnum), a:regex) + 1
   return col > 0 && !s:IsInStringOrComment(a:lnum, col) ? col : 0
@@ -130,7 +151,7 @@ endfunction
 
 " 3. GetJavascriptIndent Function {{{1
 " =========================
-
+let s:preref = [0,0]
 function GetJavascriptIndent()
   " Get the current line.
   let line = getline(v:lnum)
@@ -165,10 +186,16 @@ function GetJavascriptIndent()
 
   call cursor(v:lnum,1)
   " the containing paren, bracket, curly
-  let num = s:lookForParens(
-    \ '\%(^.*:\@<!\/\/.*\)\@<!\%((\|{\|\[\)',
-    \ '\%(^.*:\@<!\/\/.*\)\@<!\%()\|}\|\]\)',
-    \ 'nbW', 0)
+  if s:preref[0] >= lnum  && s:preref[0] < v:lnum && s:preref[0] && s:LineHasOpeningBrackets(lnum) !~ '2\|1'
+    let num = s:preref[1]
+    let s:preref[0] = v:lnum
+  else
+    let num = s:lookForParens(
+          \ '\%(^.*:\@<!\/\/.*\)\@<!\%((\|{\|\[\)',
+          \ '\%(^.*:\@<!\/\/.*\)\@<!\%()\|}\|\]\)',
+          \ 'nbW', 0)
+    let s:preref = [v:lnum, num]
+  end
 
   if line =~ s:line_pre . '[])}]'
     return indent(num)
