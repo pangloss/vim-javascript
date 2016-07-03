@@ -50,7 +50,7 @@ func s:lookForParens(start,end,flags,stop)
   try 
     return searchpair(a:start,'',a:end,a:flags,
 	  \ "line('.') < " . (prevnonblank(v:lnum) - 2000) . " ? dummy :"
-	  \ . " synIDattr(synID(line('.'), col('.'), 0), 'name')"
+	  \ . " synIDattr(synID(line('.'), col('.'), 1), 'name')"
 	  \ . " =~? '\\(Comment\\|regex\\|String\\|doc\\|special\\|template\\)'"
           \ ,a:stop,2000)
   catch /E118/
@@ -154,19 +154,24 @@ function GetJavascriptIndent()
   let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
   if line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template'
+    let s:preref[0] = v:lnum
     return -1
   endif
   if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)
+    let s:preref[0] = v:lnum
     return cindent(v:lnum)
   endif
   if line =~ '^\s*$' && getline(prevline) =~ '\%(\%(^\s*\/\/\|\/\*\).*\)\@<!\*\/' &&
         \ s:IsInComment(prevline, 1)
+    let s:preref[0] = v:lnum
     return indent(prevline) - 1
   endif
   if line =~ '^\s*$' && lnum != prevline
+    let s:preref[0] = v:lnum
     return indent(prevnonblank(v:lnum))
   endif
   if lnum == 0
+    let s:preref[0] = v:lnum
     return 0
   endif
   if (line =~ s:expr_case)
