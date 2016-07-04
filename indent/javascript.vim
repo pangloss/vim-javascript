@@ -98,7 +98,7 @@ endfunction
 function s:PrevNonBlankNonString(lnum)
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
-    if !s:IsInStringOrComment(lnum, matchend(getline(lnum), '\S'))
+    if !s:IsInStringOrComment(lnum, matchend(getline(lnum), '^\s*[^''"]'))
       break
     endif
     let lnum = prevnonblank(lnum - 1)
