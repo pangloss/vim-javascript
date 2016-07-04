@@ -98,15 +98,7 @@ endfunction
 function s:PrevNonBlankNonString(lnum)
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
-    let line = getline(lnum)
-    let com = match(line, '\%(\/\*.*\)\@<!\*\/') + 1
-    if s:IsInComment(lnum, com)
-      call cursor(lnum, com)
-      let parlnum = search('\%(\/\/.*\)\@<!\/\*', 'nbW')
-      if parlnum > 0
-        let lnum = parlnum
-      end
-    elseif line !~ '^' . s:line_term && !s:IsInStringOrComment(lnum,1)
+    if !s:IsInStringOrComment(lnum, matchend(getline(lnum), '\S'))
       break
     endif
     let lnum = prevnonblank(lnum - 1)
