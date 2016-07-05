@@ -178,7 +178,7 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   " the containing paren, bracket, curly
   let counts = s:LineHasOpeningBrackets(lnum)
-  if (s:preref[0] > lnum  && s:preref[0] < v:lnum && s:preref[0]) && counts !~ '2'
+  if (s:preref[0] > lnum  && s:preref[0] < v:lnum && s:preref[0]) && (counts !~ '2' || v:lnum - 1  > lnum)
     let num = counts =~ '1' ? lnum : s:preref[1]
     let s:preref = [v:lnum, num]
   else
