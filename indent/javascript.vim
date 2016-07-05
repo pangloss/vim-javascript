@@ -178,15 +178,26 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   " the containing paren, bracket, curly
   let counts = s:LineHasOpeningBrackets(lnum)
-  if (s:preref[0] > lnum  && s:preref[0] < v:lnum && s:preref[1]) || (counts !~ '2' && s:preref[0])
+  if (s:preref[0] > lnum  && s:preref[0] < v:lnum && s:preref[0]) && counts !~ '2'
     let num = counts =~ '1' ? lnum : s:preref[1]
     let s:preref = [v:lnum, num]
   else
-    let num = s:lookForParens(
-          \ '\%(^.*:\@<!\/\/.*\)\@<!\%((\|{\|\[\)',
-          \ '\%(^.*:\@<!\/\/.*\)\@<!\%()\|}\|\]\)',
-          \ 'nbW', 0)
-    let s:preref = [v:lnum, num]
+    let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
+    if getline(v:lnum)[1] =~ '\s' && syns != ''
+      let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsarray'? ['\[','\]'] : ['\%(^.*:\@<!\/\/.*\)\@<!\%((\|{\|\[\)','\%(^.*:\@<!\/\/.*\)\@<!\%()\|}\|\]\)']
+      let num = s:lookForParens(pattern[0],pattern[1],'nbw',0)
+      let s:preref = [v:lnum, num]
+    elseif syns = ''&& getline(v:lnum)[1] =~ '\s'
+      let num = 0
+      let s:preref = [v:lnum, num]
+
+    else
+      let num = s:lookForParens(
+            \ '\%(^.*:\@<!\/\/.*\)\@<!\%((\|{\|\[\)',
+            \ '\%(^.*:\@<!\/\/.*\)\@<!\%()\|}\|\]\)',
+            \ 'nbW', 0)
+      let s:preref = [v:lnum, num]
+    end
   end
 
   if line =~ s:line_pre . '[])}]'
