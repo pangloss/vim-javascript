@@ -184,10 +184,10 @@ function GetJavascriptIndent()
   else
     let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
     if getline(v:lnum)[1] =~ '\s' && syns != ''
-      let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsarray'? ['\[','\]'] : ['\%(^.*:\@<!\/\/.*\)\@<!\%((\|{\|\[\)','\%(^.*:\@<!\/\/.*\)\@<!\%()\|}\|\]\)']
+      let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] : ['\%(^.*:\@<!\/\/.*\)\@<!\%((\|{\|\[\)','\%(^.*:\@<!\/\/.*\)\@<!\%()\|}\|\]\)']
       let num = s:lookForParens(pattern[0],pattern[1],'nbw',0)
       let s:preref = [v:lnum, num]
-    elseif syns = ''&& getline(v:lnum)[1] =~ '\s'
+    elseif syns == ''&& getline(v:lnum)[1] =~ '\s'
       let num = 0
       let s:preref = [v:lnum, num]
 
