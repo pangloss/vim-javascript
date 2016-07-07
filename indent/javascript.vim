@@ -178,19 +178,18 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   " the containing paren, bracket, curly
   let counts = s:LineHasOpeningBrackets(lnum)
-  if (s:preref[0] > lnum  && s:preref[0] < v:lnum && s:preref[0]) && (counts !~ '2' || v:lnum - 1  > lnum)
+if s:preref[0] >= lnum  && s:preref[0] < v:lnum && s:preref[0] && (counts !~ '2' || s:preref[0] > lnum)
     let num = counts =~ '1' ? lnum : s:preref[1]
     let s:preref = [v:lnum, num]
   else
     let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
-    if getline(v:lnum)[1] =~ '\s' && syns != ''
+    if line[1] =~ '\s' && syns != ''
       let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] : ['\%(^.*:\@<!\/\/.*\)\@<!\%((\|{\|\[\)','\%(^.*:\@<!\/\/.*\)\@<!\%()\|}\|\]\)']
       let num = s:lookForParens(pattern[0],pattern[1],'nbw',0)
       let s:preref = [v:lnum, num]
-    elseif syns == ''&& getline(v:lnum)[1] =~ '\s'
+    elseif syns == '' && line[1] =~ '\s'
       let num = 0
       let s:preref = [v:lnum, num]
-
     else
       let num = s:lookForParens(
             \ '\%(^.*:\@<!\/\/.*\)\@<!\%((\|{\|\[\)',
@@ -203,18 +202,23 @@ function GetJavascriptIndent()
   if line =~ s:line_pre . '[])}]'
     return indent(num)
   end
+  let switch_offset = 0
   if synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'switch'
-    return indent(search(s:expr_case,'bnW')) + s:sw()
+
+    let num = search('\<switch\s*(','nbw')
+    let switch_offset = &cino !~ ':' ?  s:sw() :
+          \ (strlen(matchstr(getline(search(s:expr_case,'nbw')),'^\s*')) - strlen(matchstr(getline(num),'^\s*')))
+    let s:preref[1] = num
   endif
   if (line =~ s:operator_first ||
-        \ getline(lnum) =~ s:continuation_regex ||
+        \ (getline(lnum) =~ s:continuation_regex && getline(lnum) !~ s:expr_case) ||
         \ (s:Onescope(lnum) && line !~ s:line_pre . '{')) &&
         \ (num != lnum &&
         \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsdestructuringblock\|args\|jsbracket\|jsparen\|jsobject')
     " TODO: remove those syntax checks
-    return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2)
+    return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
-    return indent(num) + s:sw()
+    return indent(num) + s:sw() + switch_offset
   end
 
 endfunction
