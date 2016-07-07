@@ -46,13 +46,13 @@ let s:syng_comment = '\%(comment\|doc\)\c'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
 
-func s:lookForParens(start,end,flags,stop)
+func s:lookForParens(start,end,flags,time)
   try 
     return searchpair(a:start,'',a:end,a:flags,
 	  \ "line('.') < " . (prevnonblank(v:lnum) - 2000) . " ? dummy :" . s:skip_expr
-          \ ,a:stop,2000)
+          \ ,0,a:time)
   catch /E118/
-    return searchpair(a:start,'',a:end,a:flags,0,a:stop)
+    return searchpair(a:start,'',a:end,a:flags,0,0)
   endtry
 endfunc
 
@@ -64,17 +64,15 @@ let s:continuation_regex = '\%([*,.?:]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\|||\|&&\)' .
 let s:one_line_scope_regex = '\%(\<else\>\|=>\)\C' . s:line_term
 
 function s:Onescope(lnum)
-  if getline(a:lnum) =~ s:one_line_scope_regex
+  call cursor(a:lnum, match(getline(a:lnum),')' . s:line_term))
+  if getline(a:lnum) =~ s:one_line_scope_regex ||
+        \ (getline(a:lnum) =~ ')' . s:line_term &&
+        \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
+        \ strpart(getline(line('.')),0,col('.') - 1) =~
+        \ '\<\%(catch\|do\|else\|finally\|for\|if\|try\|while\|with\)\C' . s:line_term)
     return 1
   end
-  call cursor(a:lnum, 1)
-  if search('.*\zs\<\%(while\|for\|if\)\>\s*(\C', 'ce', a:lnum) > 0 &&
-        \ s:lookForParens('(', ')', 'W', a:lnum) > 0 &&
-        \ col('.') == strlen(s:RemoveTrailingComments(getline(a:lnum)))
-    return 1
-  else
-    return 0
-  end
+  return 0
 endfunction
 
 let s:operator_first = s:line_pre . '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||\|&&\)'
@@ -102,12 +100,6 @@ function s:PrevNonBlankNonString(lnum)
     let lnum = prevnonblank(lnum - 1)
   endwhile
   return lnum
-endfunction
-
-function s:RemoveTrailingComments(content)
-  let single = '\/\/\%(.*\)\s*$'
-  let multi = '\/\*\%(.*\)\*\/\s*$'
-  return substitute(substitute(substitute(a:content, single, '', ''), multi, '', ''), '\s\+$', '', '')
 endfunction
 
 " Check if line 'lnum' has more opening brackets than closing ones.
@@ -176,33 +168,31 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   " the containing paren, bracket, curly
   let counts = s:LineHasOpeningBrackets(lnum)
-if s:preref[0] >= lnum  && s:preref[0] < v:lnum && s:preref[0] && (counts !~ '2' || s:preref[0] > lnum)
+  if s:preref[0] >= lnum  && s:preref[0] < v:lnum && s:preref[0] && (counts !~ '2' || s:preref[0] > lnum)
     let num = counts =~ '1' ? lnum : s:preref[1]
-    let s:preref = [v:lnum, num]
   else
     let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
-    if line[1] =~ '\s' && syns != ''
-      let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] : ['\%(^.*:\@<!\/\/.*\)\@<!\%((\|{\|\[\)','\%(^.*:\@<!\/\/.*\)\@<!\%()\|}\|\]\)']
-      let num = s:lookForParens(pattern[0],pattern[1],'nbw',0)
-      let s:preref = [v:lnum, num]
-    elseif syns == '' && line[1] =~ '\s'
-      let num = 0
-      let s:preref = [v:lnum, num]
+    if line[1] =~ '\s'
+      if syns != ''
+        let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] : ['\%(^.*:\@<!\/\/.*\)\@<!\%((\|{\|\[\)','\%(^.*:\@<!\/\/.*\)\@<!\%()\|}\|\]\)']
+        let num = s:lookForParens(pattern[0],pattern[1],'nbw',2000)
+      else
+        let num = 0
+      end
     else
       let num = s:lookForParens(
             \ '\%(^.*:\@<!\/\/.*\)\@<!\%((\|{\|\[\)',
             \ '\%(^.*:\@<!\/\/.*\)\@<!\%()\|}\|\]\)',
-            \ 'nbW', 0)
-      let s:preref = [v:lnum, num]
+            \ 'nbW', 2000)
     end
   end
+  let s:preref = [v:lnum, num]
 
   if line =~ s:line_pre . '[])}]'
     return indent(num)
   end
   let switch_offset = 0
   if synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'switch'
-
     let num = search('\<switch\s*(','nbw')
     let switch_offset = &cino !~ ':' ?  s:sw() :
           \ (strlen(matchstr(getline(search(s:expr_case,'nbw')),'^\s*')) - strlen(matchstr(getline(num),'^\s*')))
@@ -213,7 +203,6 @@ if s:preref[0] >= lnum  && s:preref[0] < v:lnum && s:preref[0] && (counts !~ '2'
         \ (s:Onescope(lnum) && line !~ s:line_pre . '{')) &&
         \ (num != lnum &&
         \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsdestructuringblock\|args\|jsbracket\|jsparen\|jsobject')
-    " TODO: remove those syntax checks
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
     return indent(num) + s:sw() + switch_offset
