@@ -49,9 +49,7 @@ let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_st
 func s:lookForParens(start,end,flags,stop)
   try 
     return searchpair(a:start,'',a:end,a:flags,
-	  \ "line('.') < " . (prevnonblank(v:lnum) - 2000) . " ? dummy :"
-	  \ . " synIDattr(synID(line('.'), col('.'), 1), 'name')"
-	  \ . " =~? '\\(Comment\\|regex\\|String\\|doc\\|special\\|template\\)'"
+	  \ "line('.') < " . (prevnonblank(v:lnum) - 2000) . " ? dummy :" . s:skip_expr
           \ ,a:stop,2000)
   catch /E118/
     return searchpair(a:start,'',a:end,a:flags,0,a:stop)
