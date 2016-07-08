@@ -98,7 +98,7 @@ syntax keyword jsStatement    contained break continue with yield debugger
 syntax keyword jsConditional            if else      skipwhite skipempty nextgroup=jsParenIfElse,jsBlock
 syntax keyword jsConditional            switch       skipwhite skipempty nextgroup=jsParenSwitch
 syntax keyword jsRepeat                 while for    skipwhite skipempty nextgroup=jsParenRepeat
-syntax keyword jsRepeat                 do           skipwhite skipempty nextgroup=jsBlock
+syntax keyword jsDo                     do           skipwhite skipempty nextgroup=jsBlock
 syntax keyword jsLabel        contained case default
 syntax keyword jsTry                    try          skipwhite skipempty nextgroup=jsTryCatchBlock
 syntax keyword jsFinally      contained finally      skipwhite skipempty nextgroup=jsBlock
@@ -203,7 +203,7 @@ if exists("javascript_plugin_flow")
   runtime extras/flow.vim
 endif
 
-syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper
+syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsDo
 syntax cluster jsAll         contains=@jsExpression,jsExportContainer,jsImportContainer,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsStatement,jsException,jsTry,jsAsyncKeyword
 
 " Define the default highlighting.
@@ -241,6 +241,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsLabel                Label
   HiLink jsReturn               Statement
   HiLink jsRepeat               Repeat
+  HiLink jsDo                   Repeat
   HiLink jsStatement            Statement
   HiLink jsException            Exception
   HiLink jsTry                  Exception
