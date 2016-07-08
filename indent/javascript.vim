@@ -136,6 +136,7 @@ function GetJavascriptIndent()
   " previous line of code
   let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
+  " start with strings,comments,etc.{{{2
   if line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template'
     let b:preref[0] = v:lnum
     return -1
@@ -165,30 +166,32 @@ function GetJavascriptIndent()
     let b:preref = [v:lnum, search('\<switch\s*(','nbw')]
     return ind
   endif
+  "}}}
 
-  call cursor(v:lnum,1)
   " the containing paren, bracket, curly
   let counts = s:LineHasOpeningBrackets(lnum)
   if b:preref[0] >= lnum  && b:preref[0] < v:lnum && b:preref[0] && (counts !~ '2' || b:preref[0] > lnum)
     let num = counts =~ '1' ? lnum : b:preref[1]
   else
+    call cursor(v:lnum,1)
     let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
     if line[1] =~ '\s'
       if syns != ''
-        let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] : ['\%((\|{\|\[\)','\%()\|}\|\]\)']
+        let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] : ['(\|{\|\[',')\|}\|\]']
         let num = s:lookForParens(pattern[0],pattern[1],'nbw',2000)
       else
         let num = 0
       end
     else
       let num = s:lookForParens(
-            \ '\%((\|{\|\[\)',
-            \ '\%()\|}\|\]\)',
+            \ '(\|{\|\[',
+            \ ')\|}\|\]',
             \ 'nbW', 2000)
     end
   end
   let b:preref = [v:lnum, num]
 
+  " most significant part
   if line =~ s:line_pre . '[])}]'
     return indent(num)
   end
