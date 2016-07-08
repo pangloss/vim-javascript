@@ -64,9 +64,8 @@ let s:continuation_regex = '\%([*,.?:]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\|||\|&&\)' .
 let s:one_line_scope_regex = '\%(\<else\>\|=>\)\C' . s:line_term
 
 function s:Onescope(lnum)
-  call cursor(a:lnum, match(getline(a:lnum),')' . s:line_term))
   if getline(a:lnum) =~ s:one_line_scope_regex ||
-        \ (getline(a:lnum) =~ ')' . s:line_term &&
+        \ (cursor(a:lnum, match(getline(a:lnum),')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ strpart(getline(line('.')),0,col('.') - 1) =~
         \ '\<\%(catch\|do\|else\|finally\|for\|if\|try\|while\|with\)\C' . s:line_term)
@@ -126,8 +125,10 @@ endfunction
 
 " GetJavascriptIndent Function
 " =========================
-let s:preref = [0,0]
 function GetJavascriptIndent()
+  if !exists('b:preref')
+    let b:preref = [0,0]
+  end
   " Get the current line.
   let line = getline(v:lnum)
   " previous nonblank line number
@@ -136,24 +137,24 @@ function GetJavascriptIndent()
   let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
   if line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template'
-    let s:preref[0] = v:lnum
+    let b:preref[0] = v:lnum
     return -1
   endif
   if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)
-    let s:preref[0] = v:lnum
+    let b:preref[0] = v:lnum
     return cindent(v:lnum)
   endif
   if line =~ '^\s*$' && getline(prevline) =~ '\%(\%(^\s*\/\/\|\/\*\).*\)\@<!\*\/' &&
         \ s:IsInComment(prevline, 1)
-    let s:preref[0] = v:lnum
+    let b:preref[0] = v:lnum
     return indent(prevline) - 1
   endif
   if line =~ '^\s*$' && lnum != prevline
-    let s:preref[0] = v:lnum
+    let b:preref[0] = v:lnum
     return indent(prevnonblank(v:lnum))
   endif
   if lnum == 0
-    let s:preref[0] = v:lnum
+    let b:preref[0] = v:lnum
     return 0
   endif
   if (line =~ s:expr_case)
@@ -161,15 +162,15 @@ function GetJavascriptIndent()
     set cpo+=%
     let ind = cindent(v:lnum)
     let &cpo = s:cpo_switch
-    let s:preref = [v:lnum, search('\<switch\s*(','nbw')]
+    let b:preref = [v:lnum, search('\<switch\s*(','nbw')]
     return ind
   endif
 
   call cursor(v:lnum,1)
   " the containing paren, bracket, curly
   let counts = s:LineHasOpeningBrackets(lnum)
-  if s:preref[0] >= lnum  && s:preref[0] < v:lnum && s:preref[0] && (counts !~ '2' || s:preref[0] > lnum)
-    let num = counts =~ '1' ? lnum : s:preref[1]
+  if b:preref[0] >= lnum  && b:preref[0] < v:lnum && b:preref[0] && (counts !~ '2' || b:preref[0] > lnum)
+    let num = counts =~ '1' ? lnum : b:preref[1]
   else
     let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
     if line[1] =~ '\s'
@@ -186,7 +187,7 @@ function GetJavascriptIndent()
             \ 'nbW', 2000)
     end
   end
-  let s:preref = [v:lnum, num]
+  let b:preref = [v:lnum, num]
 
   if line =~ s:line_pre . '[])}]'
     return indent(num)
@@ -196,7 +197,7 @@ function GetJavascriptIndent()
     let num = search('\<switch\s*(','nbw')
     let switch_offset = &cino !~ ':' ?  s:sw() :
           \ (strlen(matchstr(getline(search(s:expr_case,'nbw')),'^\s*')) - strlen(matchstr(getline(num),'^\s*')))
-    let s:preref[1] = num
+    let b:preref[1] = num
   endif
   if (line =~ s:operator_first ||
         \ (getline(lnum) =~ s:continuation_regex && getline(lnum) !~ s:expr_case) ||
