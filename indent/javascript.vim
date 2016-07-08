@@ -67,8 +67,8 @@ function s:Onescope(lnum)
   if getline(a:lnum) =~ s:one_line_scope_regex ||
         \ (cursor(a:lnum, match(getline(a:lnum),')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
-        \ strpart(getline(line('.')),0,col('.') - 1) =~
-        \ '\<\%(catch\|do\|else\|finally\|for\|if\|try\|while\|with\)\C' . s:line_term)
+        \ strpart(getline(line('.')),0,col('.') - 1) =~#
+        \ '\<\%(catch\|do\|each\|else\|finally\|for\|if\|try\|while\|with\)' . s:line_term)
     return 1
   end
   return 0
