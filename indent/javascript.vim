@@ -138,24 +138,19 @@ function GetJavascriptIndent()
 
   " start with strings,comments,etc.{{{2
   if line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template'
-    let b:js_cache[0] = v:lnum
     return -1
   endif
   if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)
-    let b:js_cache[0] = v:lnum
     return cindent(v:lnum)
   endif
   if line =~ '^\s*$' && getline(prevline) =~ '\%(\%(^\s*\/\/\|\/\*\).*\)\@<!\*\/' &&
         \ s:IsInComment(prevline, 1)
-    let b:js_cache[0] = v:lnum
     return indent(prevline) - 1
   endif
   if line =~ '^\s*$' && lnum != prevline
-    let b:js_cache[0] = v:lnum
     return indent(prevnonblank(v:lnum))
   endif
   if lnum == 0
-    let b:js_cache[0] = v:lnum
     return 0
   endif
   if (line =~ s:expr_case)
