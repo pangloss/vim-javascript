@@ -61,17 +61,15 @@ let s:line_term = '\s*\%(\%(:\@<!\/\/.*\)\=\|\%(\/\*.*\*\/\s*\)*\)$'
 " Regex that defines continuation lines, not including (, {, or [.
 let s:continuation_regex = '\%([*,.?:]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\|||\|&&\)' . s:line_term
 
-let s:one_line_scope_regex = '\%(\<else\>\|=>\)\C' . s:line_term
+let s:one_line_scope_regex = '\%(\<else\|\<do\|=>\)\C' . s:line_term
 
 function s:Onescope(lnum)
-  if getline(a:lnum) =~ s:one_line_scope_regex ||
+  return getline(a:lnum) =~ s:one_line_scope_regex ||
         \ (cursor(a:lnum, match(getline(a:lnum),')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
-        \ strpart(getline(line('.')),0,col('.') - 1) =~#
-        \ '\<\%(catch\|do\|else\|finally\|for\%(\s+each\)\=\|if\|try\|while\|with\)' . s:line_term)
-    return 1
-  end
-  return 0
+        \ cursor(line('.'),match(strpart(getline(line('.')),0,col('.') - 1),
+        \ '\<\%(catch\|else\|finally\|for\%(\s+each\)\=\|if\|let\|try\|while\|with\)' . s:line_term)) > -1) && 
+        \ (expand("<cword>") =~# 'while' ? !s:lookForParens('\<do\>', '\<while\>','bw',100) : 1)
 endfunction
 
 let s:operator_first = s:line_pre . '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||\|&&\)'
