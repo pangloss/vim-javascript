@@ -68,7 +68,7 @@ function s:Onescope(lnum)
         \ (cursor(a:lnum, match(getline(a:lnum),')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ cursor(line('.'),match(strpart(getline(line('.')),0,col('.') - 1),
-        \ '\<\%(catch\|else\|finally\|for\%(\s+each\)\=\|if\|let\|try\|while\|with\)' . s:line_term)) > -1) && 
+        \ '\<\%(catch\|else\|finally\|for\%(\s+each\)\=\|if\|let\|try\|while\|with\)' . s:line_term) + 1) > -1) && 
         \ (expand("<cword>") =~# 'while' ? !s:lookForParens('\<do\>', '\<while\>','bw',100) : 1)
 endfunction
 
