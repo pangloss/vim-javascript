@@ -136,7 +136,7 @@ syntax region  jsParenRepeat        contained matchgroup=jsParens              s
 syntax region  jsParenSwitch        contained matchgroup=jsParens              start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsSwitchBlock extend fold
 syntax region  jsParenCatch         contained matchgroup=jsParens              start=/(/  end=/)/  skipwhite skipempty nextgroup=jsTryCatchBlock extend fold
 syntax region  jsFuncArgs           contained matchgroup=jsFuncParens          start=/(/  end=/)/  contains=jsFuncArgCommas,jsComment,jsFuncArgExpression,jsDestructuringBlock,jsRestExpression,jsFlow skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturn extend fold
-syntax region  jsClassBlock         contained matchgroup=jsClassBraces         start=/{/  end=/}/  contains=jsClassFuncName,jsClassMethodType,jsOperator,jsArrowFunction,jsArrowFuncArgs,jsComment,jsGenerator,jsDecorator,jsClassProperty,jsClassPropertyComputed,jsClassStringKey,jsNoise,jsFlowClassProperty extend fold
+syntax region  jsClassBlock         contained matchgroup=jsClassBraces         start=/{/  end=/}/  contains=jsClassFuncName,jsClassMethodType,jsArrowFunction,jsArrowFuncArgs,jsComment,jsGenerator,jsDecorator,jsClassProperty,jsClassPropertyComputed,jsClassStringKey,jsNoise,jsFlowClassProperty extend fold
 syntax region  jsFuncBlock          contained matchgroup=jsFuncBraces          start=/{/  end=/}/  contains=@jsAll extend fold
 syntax region  jsBlock              contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll extend fold
 syntax region  jsTryCatchBlock      contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll skipwhite skipempty nextgroup=jsCatch,jsFinally extend fold
