@@ -19,6 +19,8 @@ setlocal formatexpr=Fixedgq(v:lnum,v:count)
 setlocal indentkeys=0{,0},0),0],0\,*<Return>,:,!^F,o,O,e
 setlocal cinoptions+=j1,J1,c1
 
+let b:undo_indent = 'setlocal smartindent< indentexpr< formatexpr< indentkeys< cinoptions<'
+
 " Only define the function once.
 if exists("*GetJavascriptIndent")
   finish
