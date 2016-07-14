@@ -16,8 +16,12 @@ if !exists('g:javascript_conceal')
   let g:javascript_conceal = 0
 endif
 
-" Dollar sign is permittd anywhere in an identifier
-setlocal iskeyword+=$
+" Dollar sign is permitted anywhere in an identifier
+if v:version > 704 || v:version == 704 && has('patch1142')
+  syntax iskeyword @,48-57,_,192-255,$
+else
+  setlocal iskeyword+=$
+endif
 
 syntax sync fromstart
 " TODO: Figure out what type of casing I need
