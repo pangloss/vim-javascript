@@ -136,7 +136,7 @@ function GetJavascriptIndent()
 
   " start with strings,comments,etc.{{{2
   if (line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template') ||
-        \ (line !~ '^\s*\%(\/\/\|[*/]\)' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'comment')
+        \ (line !~ '^\s*[/*]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'comment')
     return -1
   endif
   if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)
