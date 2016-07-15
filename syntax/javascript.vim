@@ -114,6 +114,8 @@ syntax match   jsSwitchColon  contained /:/          skipwhite skipempty nextgro
 
 " Keywords
 syntax keyword jsGlobalObjects  Array Boolean Date Function Iterator Number Object Symbol Map WeakMap Set RegExp String Proxy Promise Buffer ParallelArray ArrayBuffer DataView Float32Array Float64Array Int16Array Int32Array Int8Array Uint16Array Uint32Array Uint8Array Uint8ClampedArray JSON Math console document window Intl Collator DateTimeFormat NumberFormat
+syntax keyword jsGlobalNodeObjects module exports global process
+syntax match   jsGlobalNodeObjects /require/ contains=jsFuncCall
 syntax keyword jsExceptions     Error EvalError InternalError RangeError ReferenceError StopIteration SyntaxError TypeError URIError
 syntax keyword jsBuiltins       decodeURI decodeURIComponent encodeURI encodeURIComponent eval isFinite isNaN parseFloat parseInt uneval
 " DISCUSS: How imporant is this, really? Perhaps it should be linked to an error because I assume the keywords are reserved?
@@ -278,7 +280,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsStorageClass         StorageClass
   HiLink jsClassKeywords        Structure
   HiLink jsThis                 Special
-  HiLink jsSuper                Special
+  HiLink jsSuper                Constant
   HiLink jsNan                  Number
   HiLink jsNull                 Type
   HiLink jsUndefined            Type
@@ -299,9 +301,10 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsSpecial              Special
   HiLink jsTemplateVar          Special
   HiLink jsTemplateBraces       jsBraces
-  HiLink jsGlobalObjects        Special
-  HiLink jsExceptions           Special
-  HiLink jsBuiltins             Special
+  HiLink jsGlobalObjects        Constant
+  HiLink jsGlobalNodeObjects    Constant
+  HiLink jsExceptions           Constant
+  HiLink jsBuiltins             Constant
   HiLink jsModuleKeywords       Include
   HiLink jsModuleOperators      Include
   HiLink jsModuleDefault        Include
