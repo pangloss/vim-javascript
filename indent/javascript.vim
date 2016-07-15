@@ -13,7 +13,7 @@ setlocal nosmartindent
 " Now, set up our indentation expression and keys that trigger it.
 setlocal indentexpr=GetJavascriptIndent()
 setlocal formatexpr=Fixedgq(v:lnum,v:count)
-setlocal indentkeys=0{,0},0),0],0\,:,!^F,o,O,e
+setlocal indentkeys=0{,0},0),0],:,!^F,o,O,e
 setlocal cinoptions+=j1,J1,c1
 
 " Only define the function once.
@@ -61,15 +61,13 @@ let s:line_term = '\s*\%(\%(:\@<!\/\/.*\)\=\|\%(\/\*.*\*\/\s*\)*\)$'
 " Regex that defines continuation lines, not including (, {, or [.
 let s:continuation_regex = '\%([*,.?:]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\|||\|&&\)' . s:line_term
 
-let s:one_line_scope_regex = '\%(\<else\|\<do\|=>\)\C' . s:line_term
-
 function s:Onescope(lnum)
-  return getline(a:lnum) =~ s:one_line_scope_regex ||
+  return getline(a:lnum) =~ '\%(\<else\|\<do\|=>\)\C' . s:line_term ||
         \ (cursor(a:lnum, match(getline(a:lnum),')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ cursor(line('.'),match(strpart(getline(line('.')),0,col('.') - 1),
-        \ '\<\%(catch\|else\|finally\|for\%(\s+each\)\=\|if\|let\|try\|while\|with\)' . s:line_term) + 1) > -1) && 
-        \ (expand("<cword>") =~# 'while' ? !s:lookForParens('\<do\>', '\<while\>','bw',100) : 1)
+        \ '\<\%(catch\|else\|finally\|for\%(\s+each\)\=\|if\|let\|try\|while\|with\)\C' . s:line_term) + 1) > -1) && 
+        \ (expand("<cword>") =~ 'while\C' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bw',100) : 1)
 endfunction
 
 let s:operator_first = s:line_pre . '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||\|&&\)'
