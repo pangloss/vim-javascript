@@ -3,4 +3,6 @@
 " Maintainer:   vim-javascript community
 " URL:          https://github.com/pangloss/vim-javascript
 
-setlocal suffixesadd+=.js
+setlocal iskeyword+=$ suffixesadd+=.js
+
+let b:undo_ftplugin .= ' | setlocal iskeyword< suffixesadd<'
