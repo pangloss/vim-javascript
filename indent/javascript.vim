@@ -157,7 +157,7 @@ function GetJavascriptIndent()
     set cpo+=%
     let ind = cindent(v:lnum)
     let &cpo = s:cpo_switch
-    let b:js_cache[1] =  search('\<switch\s*(','nbw')
+    let b:js_cache = [v:lnum, search('\<switch\s*(','nbw')]
     return ind
   endif
   "}}}
