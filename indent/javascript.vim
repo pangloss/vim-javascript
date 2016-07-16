@@ -157,7 +157,7 @@ function GetJavascriptIndent()
     set cpo+=%
     let ind = cindent(v:lnum)
     let &cpo = s:cpo_switch
-    let b:js_cache = [v:lnum, search('\<switch\s*(','nbw')]
+    let b:js_cache[1] =  search('\<switch\s*(','nbw')
     return ind
   endif
   "}}}
@@ -193,6 +193,7 @@ function GetJavascriptIndent()
     let bnum = search('\<switch\s*(','nbw')
     let switch_offset = bnum < num ? 0 : &cino !~ ':' ?  s:sw() :
           \ (strlen(matchstr(getline(search(s:expr_case,'nbw')),'^\s*')) - strlen(matchstr(getline(bnum),'^\s*')))
+    let num = max([num,bnum])
     let b:js_cache[1] = num
   endif
   if (line =~ s:operator_first ||
