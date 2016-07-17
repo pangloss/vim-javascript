@@ -11,13 +11,13 @@ if exists("b:did_indent")
 endif
 let b:did_indent = 1
 
-setlocal nosmartindent
-
 " Now, set up our indentation expression and keys that trigger it.
 setlocal indentexpr=GetJavascriptIndent()
 setlocal formatexpr=Fixedgq(v:lnum,v:count)
 setlocal indentkeys=0{,0},0),0],0\,*<Return>,:,!^F,o,O,e
 setlocal cinoptions+=j1,J1,c1
+
+let b:undo_indent = 'setlocal indentexpr< formatexpr< indentkeys< cinoptions<'
 
 " Only define the function once.
 if exists("*GetJavascriptIndent")
@@ -327,7 +327,8 @@ function GetJavascriptIndent()
   let lnum = s:PrevNonBlankNonString(v:lnum - 1)
 
   " to not change multiline string values 
-  if line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template'
+  if (line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template') ||
+        \ (line !~ '^\s*[/*]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'comment')
     return -1
   endif
 

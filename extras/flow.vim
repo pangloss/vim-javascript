@@ -1,15 +1,15 @@
 syntax region  jsFlowTypeStatement            start=/type/    end=/=/     oneline skipwhite skipempty nextgroup=jsFlowTypeObject
 syntax region  jsFlowDeclareBlock             start=/declare/ end=/[;\n]/ oneline contains=jsFlow,jsFlowDeclareKeyword,jsFlowStorageClass
-syntax region  jsFlow                         start=/:/       end=/\%(\%([),=;\n]\|{\%(.*}\)\@!\|\%({.*}\)\@<=\s*{\)\@=\|void\)/ contains=@jsFlowCluster oneline skipwhite skipempty nextgroup=jsFuncBlock
+syntax region  jsFlow                         start=/:/       end=/\%(\%([),=;\n]\|{\%(.*}\)\@!\|\%({.*}\)\@<=\s*{\)\@=\|void\)/ contains=@jsFlowCluster containedin=jsBlock,jsClassBlock,jsFuncBlock,jsBlock,jsTryCatchBlock,jsSwitchBlock,jsParen oneline skipwhite skipempty nextgroup=jsFuncBlock
 syntax region  jsFlowReturn         contained start=/:/       end=/\%(\S\s*\%({\%(.*}\)\@!\)\@=\|\n\)/ contains=@jsFlowCluster oneline skipwhite skipempty nextgroup=jsFuncBlock keepend
-syntax region  jsFlowTypeObject     contained start=/{/       end=/}/ contains=jsFlowTypeKey skipwhite skipempty nextgroup=jsFunctionBlock extend
+syntax region  jsFlowTypeObject     contained matchgroup=jsFlowNoise start=/{/       end=/}/ contains=jsFlowTypeKey,jsFlowNoise skipwhite skipempty nextgroup=jsFunctionBlock extend
 syntax match   jsFlowTypeKey        contained /\<[0-9a-zA-Z_$?]*\>\(\s*:\)\@=/ skipwhite skipempty nextgroup=jsFlowTypeValue
-syntax region  jsFlowTypeValue      contained matchgroup=jsFlowNoise start=/:/       end=/[,}]/ contains=@jsFlowCluster
+syntax region  jsFlowTypeValue      contained matchgroup=jsFlowNoise start=/:/       end=/[,};]\@=/ contains=@jsFlowCluster
 syntax region  jsFlowObject         contained matchgroup=jsFlowNoise start=/{/       end=/}/     oneline contains=@jsFlowCluster
 syntax region  jsFlowArray          contained matchgroup=jsFlowNoise start=/\[/      end=/\]/    oneline contains=@jsFlowCluster
 syntax region  jsFlowArrow          contained matchgroup=jsFlowNoise start=/(/       end=/)\s*=>/     oneline contains=@jsFlowCluster
 syntax keyword jsFlowDeclareKeyword contained declare
-syntax keyword jsFlowType           contained boolean number string null void any mixed JSON array function object Array
+syntax keyword jsFlowType           contained boolean number string null void any mixed JSON array function object Array bool
 syntax match   jsFlowClassProperty  contained /\<[0-9a-zA-Z_$]*\>:\@=/ skipwhite skipempty nextgroup=jsFlow
 syntax match   jsFlowNoise          contained /[:;,<>]/
 syntax cluster jsFlowCluster        contains=jsFlowType,jsFlowArray,jsFlowObject,jsFlowNoise,jsFlowArrow
