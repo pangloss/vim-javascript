@@ -64,10 +64,10 @@ let s:continuation_regex = '\%([*,.?:]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\|||\|&&\)' .
 function s:Onescope(lnum)
   return getline(a:lnum) =~ '\%(\<else\|\<do\|=>\)\C' . s:line_term ||
         \ (cursor(a:lnum, match(getline(a:lnum),')' . s:line_term)) > -1 &&
-        \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
-        \ cursor(line('.'),match(strpart(getline(line('.')),0,col('.') - 1),
-        \ '\<\%(else\|for\%(\s+each\)\=\|if\|let\|while\|with\)\C' . s:line_term) + 1) > -1) &&
-        \ (expand("<cword>") =~ 'while\C' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bw',100) : 1)
+        \ s:lookForParens('(', ')', 'cbW', 0) > 0 &&
+        \ cursor(line('.'),match( ' ' . strpart(getline(line('.')),0,col('.') - 1),
+        \ '\<\%(catch\|else\|finally\|for\%(\s+each\)\=\|if\|let\|try\|while\|with\)\C' . s:line_term)) > -1) && 
+        \ (expand("<cword>") =~ 'while\C' ? !s:lookForParens('\<do\>', '\<while\>','bw',0) : 1)
 endfunction
 
 let s:operator_first = s:line_pre . '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||\|&&\)'
