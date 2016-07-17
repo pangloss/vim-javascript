@@ -192,7 +192,7 @@ function s:InMultiVarStatement(lnum, cont, prev)
   "  let type = synIDattr(synID(lnum, indent(lnum) + 1, 0), 'name')
 
   " loop through previous expressions to find a var statement
-  while lnum > 0 && (s:Match(lnum, s:comma_last) ||(cont && getline(lnum) =~ s:line_pre . '[]})]') ||
+  while lnum > 0 && (s:Match(lnum, s:comma_last) ||
         \ s:Match(lnum,s:continuation_regex)) || (prev && (s:Match(prev, s:comma_last) ||
         \ s:Match(prev,s:continuation_regex)))
     " if the line is a js keyword
@@ -458,7 +458,7 @@ function GetJavascriptIndent()
         call cursor(lnum, matchend(s:RemoveTrailingComments(strpart(line,0,col('.'))), '.*\zs[])}]'))
       endwhile
       let cur = line('.')
-      if cur < lnum && !s:InMultiVarStatement(cur,0,0)
+      if cur < lnum && !s:InMultiVarStatement(v:lnum,1,0)
         return indent(s:GetMSL(cur, 0))
       end
     elseif counts =~ '1' || s:Onescope(lnum)
