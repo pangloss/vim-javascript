@@ -69,21 +69,19 @@ let s:line_term = '\s*\%(\%(\/\/.*\)\=\|\%(\/\*.*\*\/\s*\)*\)$'
 " Regex that defines continuation lines, not including (, {, or [.
 let s:continuation_regex = '\%([*.?:]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\|||\|&&\)' . s:line_term
 
-let s:one_line_scope_regex = '\%(\<else\>\|=>\)\C' . s:line_term
-
 function s:Onescope(lnum)
-  if getline(a:lnum) =~ s:one_line_scope_regex
-    return 1
-  end
   let mypos = col('.')
-  call cursor(a:lnum, 1)
-  if search('.*\zs\<\%(while\|for\|if\)\>\s*(\C', 'ce', a:lnum) > 0 &&
-        \ s:lookForParens('(', ')', 'W', a:lnum) > 0 &&
-        \ col('.') == strlen(s:RemoveTrailingComments(getline(a:lnum)))
-    call cursor(a:lnum, mypos)
+  if getline(a:lnum) =~ '\%(\<else\|\<do\|=>\)\C' . s:line_term ||
+        \ (cursor(a:lnum, match(getline(a:lnum),')' . s:line_term)) > -1 &&
+        \ s:lookForParens('(', ')', 'cbW', 0) > 0 &&
+        \ cursor(line('.'),match( ' ' . strpart(getline(line('.')),0,col('.') - 1),
+        \ '\<\%(catch\|else\|finally\|for\%(\s+each\)\=\|if\|let\|try\|while\|with\)\C' . s:line_term)) > -1) && 
+        \ (expand("<cword>") =~ 'while\C' ? !s:lookForParens('\<do\>', '\<while\>','bw',0) : 1)
+    call cursor(v:lnum, mypos)
+    echom a:lnum
     return 1
   else
-    call cursor(a:lnum, mypos)
+    call cursor(v:lnum, mypos)
     return 0
   end
 endfunction
@@ -136,7 +134,7 @@ function s:PrevNonBlankNonString(lnum)
 endfunction
 
 " Find line above 'lnum' that started the continuation 'lnum' may be part of.
-function s:GetMSL(lnum, in_one_line_scope)
+function s:GetMSL(lnum)
   " Start on the line we're at and use its indent.
   let msl = a:lnum
   let lnum = s:PrevNonBlankNonString(a:lnum - 1)
@@ -148,7 +146,7 @@ function s:GetMSL(lnum, in_one_line_scope)
     if ((s:Match(lnum,s:continuation_regex) || s:Match(lnum, s:comma_last)) &&
           \ !s:Match(lnum, s:expr_case)) || s:IsInString(lnum, strlen(line))
       let msl = lnum
-      if s:Match(lnum, s:line_pre . '[]})]') && !a:in_one_line_scope
+      if s:Match(lnum, s:line_pre . '[]})]')
         call cursor(lnum,1)
         let parlnum = s:lookForParens('(\|{\|\[', ')\|}\|\]', 'nbW', 0)
         if parlnum > 0
@@ -156,19 +154,8 @@ function s:GetMSL(lnum, in_one_line_scope)
           continue
         end
       end
-
     else
-
-      " Don't use lines that are part of a one line scope as msl unless the
-      " flag in_one_line_scope is set to 1
-      "
-      if a:in_one_line_scope
-        break
-      end
-      let msl_one_line = s:Onescope(lnum)
-      if msl_one_line == 0
-        break
-      endif
+      break
     end
     let lnum = s:PrevNonBlankNonString(lnum - 1)
   endwhile
@@ -187,11 +174,10 @@ function s:InMultiVarStatement(lnum, cont, prev)
   let cont = a:cont
   let prev = a:prev
 
-  "  let type = synIDattr(synID(lnum, indent(lnum) + 1, 0), 'name')
-
   " loop through previous expressions to find a var statement
-  while lnum > 0 && (s:Match(lnum, s:comma_last) ||(cont && getline(lnum) =~ s:line_pre . '[]})]') ||
-        \ s:Match(lnum,s:continuation_regex)) || (prev && (s:Match(prev, s:comma_last) ||
+  while lnum > 0 && (s:Match(lnum, s:comma_last) ||
+        \ s:Match(lnum,s:continuation_regex)) ||
+        \ (prev && (s:Match(prev, s:comma_last) ||
         \ s:Match(prev,s:continuation_regex)))
     " if the line is a js keyword
     if cont
@@ -252,7 +238,7 @@ endfunction
 function s:IndentWithContinuation(lnum, ind, width)
   " Set up variables to use and search for MSL to the previous line.
   let p_lnum = a:lnum
-  let lnum = s:GetMSL(a:lnum, 1)
+  let lnum = s:GetMSL(a:lnum)
   let line = getline(lnum)
 
   " If the previous line wasn't a MSL and is continuation return its indent.
@@ -282,7 +268,7 @@ function s:IndentWithContinuation(lnum, ind, width)
 endfunction
 
 function s:InOneLineScope(lnum)
-  let msl = s:GetMSL(a:lnum, 1)
+  let msl = s:GetMSL(a:lnum)
   if msl > 0 && s:Onescope(msl)
     return msl
   endif
@@ -290,13 +276,13 @@ function s:InOneLineScope(lnum)
 endfunction
 
 function s:ExitingOneLineScope(lnum)
-  let msl = s:GetMSL(a:lnum, 1)
+  let msl = s:GetMSL(a:lnum)
   if msl > 0
     " if the current line is in a one line scope ..
     if s:Onescope(msl)
       return 0
     else
-      let prev_msl = s:GetMSL(msl - 1, 1)
+      let prev_msl = s:GetMSL(msl - 1)
       if s:Onescope(prev_msl)
         return prev_msl
       endif
@@ -317,7 +303,6 @@ function GetJavascriptIndent()
 
   " 3.2. Work on the current line {{{1
   " -----------------------------
-
   let ind = -1
   " Get the current line.
   let line = getline(v:lnum)
@@ -366,7 +351,7 @@ function GetJavascriptIndent()
       end
       if parlnum > 0
         let ind = s:InMultiVarStatement(parlnum, 0, 0)|| s:LineHasOpeningBrackets(parlnum) !~ '2' ?
-              \ indent(parlnum) : indent(s:GetMSL(parlnum, 0))
+              \ indent(parlnum) : indent(s:GetMSL(parlnum))
       endif
     endwhile
     return ind
@@ -440,7 +425,7 @@ function GetJavascriptIndent()
   " If the previous line ended with a block opening, add a level of indent.
   if s:Match(lnum, s:block_regex)
     return s:InMultiVarStatement(lnum, 0, 0) || s:LineHasOpeningBrackets(lnum) !~ '2' ?
-          \ indent(lnum) + s:sw() : indent(s:GetMSL(lnum, 0)) + s:sw()
+          \ indent(lnum) + s:sw() : indent(s:GetMSL(lnum)) + s:sw()
   endif
 
   " Set up variables for current line.
@@ -456,8 +441,8 @@ function GetJavascriptIndent()
         call cursor(lnum, matchend(s:RemoveTrailingComments(strpart(line,0,col('.'))), '.*\zs[])}]'))
       endwhile
       let cur = line('.')
-      if cur < lnum && !s:InMultiVarStatement(cur,0,0)
-        return indent(s:GetMSL(cur, 0))
+      if cur < lnum && !s:InMultiVarStatement(v:lnum,1,0)
+        return indent(s:GetMSL(cur))
       end
     elseif counts =~ '1' || s:Onescope(lnum)
       return ind + s:sw()
@@ -466,7 +451,7 @@ function GetJavascriptIndent()
 
   " 3.4. Work on the MSL line. {{{1
   " --------------------------
-  if s:Match(lnum, s:comma_last) && !s:Match(lnum,  s:continuation_regex)
+  if s:Match(lnum, s:comma_last)
     return s:Match(lnum, s:var_stmt) ? indent(lnum) + s:sw() : indent(lnum)
 
   elseif s:Match(s:PrevNonBlankNonString(lnum - 1), s:comma_last)
