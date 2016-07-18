@@ -15,6 +15,7 @@ syntax region  jsFlowReturnObject   contained matchgroup=jsFlowNoise start=/{/  
 syntax region  jsFlowReturnArray    contained matchgroup=jsFlowNoise start=/\[/   end=/\]/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncBlock
 syntax region  jsFlowReturnParens   contained matchgroup=jsFlowNoise start=/(/   end=/)/   contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncBlock
 syntax match   jsFlowReturnKeyword  contained /\k\+/ contains=jsFlowType,jsFlowTypeCustom skipwhite skipempty nextgroup=jsFlowReturnGroup,jsFuncBlock
+syntax match   jsFlowReturnMaybe    contained /?/ skipwhite skipempty nextgroup=jsFlowReturnKeyword
 syntax region  jsFlowReturnGroup    contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncBlock
 
 syntax region  jsFlowFunctionGroup  contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncArgs
@@ -34,7 +35,7 @@ syntax region  jsFlowDeclareBlock   contained matchgroup=jsFlowNoise start=/{/ e
 
 syntax region jsFlowInterfaceBlock  contained matchgroup=jsFlowNoise start=/{/ end=/}/ contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectMethodType,jsGenerator,jsComment,jsObjectStringKey,jsSpreadExpression,jsFlowNoise keepend
 
-syntax cluster jsFlowReturnCluster            contains=jsFlowNoise,jsFlowReturnObject,jsFlowReturnArray,jsFlowReturnKeyword,jsFlowReturnGroup
+syntax cluster jsFlowReturnCluster            contains=jsFlowNoise,jsFlowReturnObject,jsFlowReturnArray,jsFlowReturnKeyword,jsFlowReturnGroup,jsFlowReturnMaybe
 syntax cluster jsFlowCluster                  contains=jsFlowArray,jsFlowObject,jsFlowNoise,jsFlowTypeof,jsFlowType,jsFlowGroup,jsFlowArrow,jsFlowMaybe,jsFlowParens
 
 if version >= 508 || !exists("did_javascript_syn_inits")
@@ -64,6 +65,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFlowTypeKeyword        PreProc
   HiLink jsFlowTypeOperator       PreProc
   HiLink jsFlowMaybe              PreProc
+  HiLink jsFlowReturnMaybe        PreProc
   HiLink jsFlowClassProperty      jsClassProperty
   HiLink jsFlowDeclare            PreProc
   HiLink jsFlowModule             PreProc
