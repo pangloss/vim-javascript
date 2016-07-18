@@ -203,7 +203,7 @@ function GetJavascriptIndent()
         \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsdestructuringblock\|args\|jsbracket\|jsparen\|jsobject')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
-    return indent(num) + s:sw() + switch_offset
+    return indent(num) + s:sw() + (num == lnum ? 0 : switch_offset)
   end
 
 endfunction
