@@ -191,7 +191,7 @@ function GetJavascriptIndent()
   let switch_offset = 0
   if index(map(synstack(v:lnum, 1), 'synIDattr( v:val, "name")'),'jsSwitchBlock') > -1
     let bnum = search('\<switch\s*(','nbw')
-    let switch_offset = bnum < num ? 0 : &cino !~ ':' ?  s:sw() :
+    let switch_offset = bnum < num || bnum == lnum ? 0 : &cino !~ ':' ?  s:sw() :
           \ (strlen(matchstr(getline(search(s:expr_case,'nbw')),'^\s*')) - strlen(matchstr(getline(bnum),'^\s*')))
     let num = max([num,bnum])
     let b:js_cache[1] = num
@@ -203,7 +203,7 @@ function GetJavascriptIndent()
         \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsdestructuringblock\|args\|jsbracket\|jsparen\|jsobject')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
-    return indent(num) + s:sw() + (num == lnum ? 0 : switch_offset)
+    return indent(num) + s:sw() + switch_offset
   end
 
 endfunction
