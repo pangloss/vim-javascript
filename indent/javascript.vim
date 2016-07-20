@@ -206,9 +206,6 @@ function GetJavascriptIndent()
 
 endfunction
 
-
-let &cpo = s:cpo_save
-unlet s:cpo_save
 " gq{{{2
 function! Fixedgq(lnum, count)
   let l:tw = &tw ? &tw : 80;
@@ -271,4 +268,8 @@ function! Fixedgq(lnum, count)
   return 0
 endfunction
 "}}}
+
+let &cpo = s:cpo_save
+unlet s:cpo_save
+
 " vim: foldmethod=marker:foldlevel=1
