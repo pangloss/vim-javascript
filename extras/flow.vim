@@ -27,7 +27,8 @@ syntax match   jsFlowTypeOperator   contained /=/
 syntax keyword jsFlowTypeKeyword    contained type
 
 syntax keyword jsFlowDeclare                  declare skipwhite skipempty nextgroup=jsFlowTypeStatement,jsClassDefinition,jsStorageClass,jsFlowModule,jsFlowInterface
-syntax match   jsFlowClassProperty  contained /\<[0-9a-zA-Z_$]*\>:\@=/ skipwhite skipempty nextgroup=jsFlowDefinition containedin=jsClassBlock
+syntax match   jsFlowClassProperty  contained /\<[0-9a-zA-Z_$]*\>:\@=/ skipwhite skipempty nextgroup=jsFlowClassDef containedin=jsClassBlock
+syntax region  jsFlowClassDef       contained start=/:/    end=/\%(\s*[,=;)\n]\)\@=/ contains=@jsFlowCluster containedin=jsParen skipwhite skipempty nextgroup=jsClassValue
 
 syntax region  jsFlowModule         contained start=/module/ end=/{\@=/ skipempty skipempty nextgroup=jsFlowDeclareBlock contains=jsString
 syntax region  jsFlowInterface      contained start=/interface/ end=/{\@=/ skipempty skipempty nextgroup=jsFlowInterfaceBlock contains=@jsFlowCluster
@@ -46,6 +47,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
     command -nargs=+ HiLink hi def link <args>
   endif
   HiLink jsFlowDefinition         PreProc
+  HiLink jsFlowClassDef           jsFlowDefinition
   HiLink jsFlowType               Type
   HiLink jsFlowTypeCustom         PreProc
   HiLink jsFlowTypeof             PreProc
