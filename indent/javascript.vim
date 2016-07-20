@@ -10,7 +10,7 @@ let b:did_indent = 1
 
 " Now, set up our indentation expression and keys that trigger it.
 setlocal indentexpr=GetJavascriptIndent()
-setlocal formatexpr=Fixedgq(v:lnum,v:count)
+setlocal formatexpr=GetJavascriptFormat(v:lnum,v:count)
 setlocal indentkeys=0{,0},0),0],:,!^F,o,O,e
 setlocal cinoptions+=j1,J1,c1
 
@@ -207,7 +207,7 @@ function GetJavascriptIndent()
 endfunction
 
 " gq{{{2
-function! Fixedgq(lnum, count)
+function! GetJavascriptFormat(lnum, count)
   let l:tw = &tw ? &tw : 80;
 
   let l:count = a:count
