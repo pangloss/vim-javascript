@@ -47,9 +47,9 @@ let s:syng_comment = '\%(comment\|doc\)\c'
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
 
 func s:lookForParens(start,end,flags,time)
-  try 
+  try
     return searchpair(a:start,'',a:end,a:flags,
-	  \ "line('.') < " . (prevnonblank(v:lnum) - 2000) . " ? dummy :" . s:skip_expr
+          \ "line('.') < " . (prevnonblank(v:lnum) - 2000) . " ? dummy :" . s:skip_expr
           \ ,0,a:time)
   catch /E118/
     return searchpair(a:start,'',a:end,a:flags,0,0)
@@ -66,11 +66,17 @@ function s:Onescope(lnum)
         \ (cursor(a:lnum, match(getline(a:lnum),')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ cursor(line('.'),match( ' ' . strpart(getline(line('.')),0,col('.') - 1),
-        \ '\<\%(else\|for\%(\s+each\)\=\|if\|let\|while\|with\)\C' . s:line_term)) > -1) && 
+        \ '\<\%(else\|for\%(\s+each\)\=\|if\|let\|while\|with\)\C' . s:line_term)) > -1) &&
         \ (expand("<cword>") =~ 'while\C' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bw',100) : 1)
 endfunction
 
 let s:operator_first = s:line_pre . '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||\|&&\)'
+let s:dot_first = s:line_pre . '\.'
+
+" Indent chained method calls as default
+if !exists('g:javascript_plugin_chain_indent')
+  let g:javascript_plugin_chain_indent = 1
+endif
 
 " Auxiliary Functions {{{2
 " ======================
@@ -199,7 +205,11 @@ function GetJavascriptIndent()
         \ (s:Onescope(lnum) && line !~ s:line_pre . '{')) &&
         \ (num != lnum &&
         \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsdestructuringblock\|args\|jsbracket\|jsparen\|jsobject')
-    return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
+    let extra_indent = 0
+    if g:javascript_plugin_chain_indent || getline(v:lnum) !~ s:dot_first
+      let extra_indent = 1
+    end
+    return (num > 0 ? indent(num) : -s:sw()) + s:sw() * (1 + extra_indent) + switch_offset
   elseif num > 0
     return indent(num) + s:sw() + switch_offset
   end

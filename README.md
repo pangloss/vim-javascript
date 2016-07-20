@@ -72,6 +72,16 @@ Default Value: 0
 -----------------
 
 ```
+let g:javascript_plugin_chain_indent = 0
+```
+
+Disables extra indent for chained methods.
+
+Default Value: 1
+
+-----------------
+
+```
 set foldmethod=syntax
 ```
 
