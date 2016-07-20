@@ -192,7 +192,7 @@ function GetJavascriptIndent()
   if index(map(synstack(v:lnum, 1), 'synIDattr( v:val, "name")'),'jsSwitchBlock') > -1
     let bnum = search('\<switch\s*(','nbw')
     let switch_offset = bnum < num || bnum == lnum ? 0 : &cino !~ ':' ?  s:sw() :
-          \ (strlen(matchstr(getline(search(s:expr_case,'nbw')),'^\s*')) - strlen(matchstr(getline(bnum),'^\s*')))
+          \ indent(search(s:expr_case,'nbw')) - indent(bnum)
     let num = max([num,bnum])
     let b:js_cache[1] = num
   endif
