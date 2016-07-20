@@ -12,10 +12,6 @@ if !exists("main_syntax")
   let main_syntax = 'javascript'
 endif
 
-if !exists('g:javascript_conceal')
-  let g:javascript_conceal = 0
-endif
-
 " Dollar sign is permitted anywhere in an identifier
 if v:version > 704 || v:version == 704 && has('patch1142')
   syntax iskeyword @,48-57,_,192-255,$
