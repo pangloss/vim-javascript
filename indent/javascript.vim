@@ -58,8 +58,16 @@ endfunc
 
 let s:line_term = '\s*\%(\%(:\@<!\/\/.*\)\=\|\%(\/\*.*\*\/\s*\)*\)$'
 
-" Regex that defines continuation lines, not including (, {, or [.
-let s:continuation_regex = '\%([*,.?:]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\|||\|&&\)' . s:line_term
+" configurable regexes that define continuation lines, not including (, {, or [.
+if !exists('g:js_opfirst')
+  let g:js_opfirst = '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||\|&&\)'
+endif
+let g:js_opfirst = s:line_pre . g:js_opfirst
+
+if !exists('g:js_continuation')
+  let g:js_continuation = '\%([*,.?:]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\|||\|&&\)'
+endif
+let g:js_continuation .= s:line_term
 
 function s:Onescope(lnum)
   return getline(a:lnum) =~ '\%(\<else\|\<do\|=>\)\C' . s:line_term ||
@@ -69,8 +77,6 @@ function s:Onescope(lnum)
         \ '\<\%(else\|for\%(\s+each\)\=\|if\|let\|while\|with\)\C' . s:line_term)) > -1) && 
         \ (expand("<cword>") =~ 'while\C' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bw',100) : 1)
 endfunction
-
-let s:operator_first = s:line_pre . '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||\|&&\)'
 
 " Auxiliary Functions {{{2
 " ======================
@@ -194,8 +200,8 @@ function GetJavascriptIndent()
     let num = max([num,bnum])
     let b:js_cache[1] = num
   endif
-  if (line =~ s:operator_first ||
-        \ (getline(lnum) =~ s:continuation_regex && getline(lnum) !~ s:expr_case) ||
+  if (line =~ g:js_opfirst ||
+        \ (getline(lnum) =~ g:js_continuation && getline(lnum) !~ s:expr_case) ||
         \ (s:Onescope(lnum) && line !~ s:line_pre . '{')) &&
         \ (num != lnum &&
         \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsdestructuringblock\|args\|jsbracket\|jsparen\|jsobject')
