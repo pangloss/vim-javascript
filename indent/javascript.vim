@@ -161,7 +161,6 @@ function GetJavascriptIndent()
     set cpo+=%
     let ind = cindent(v:lnum)
     let &cpo = s:cpo_switch
-    let b:js_cache = [v:lnum, search('\<switch\s*(','nbw')]
     return ind
   endif
   "}}}
@@ -196,9 +195,7 @@ function GetJavascriptIndent()
   if index(map(synstack(v:lnum, 1), 'synIDattr( v:val, "name")'),'jsSwitchBlock') > -1
     let bnum = search('\<switch\s*(','nbw')
     let switch_offset = bnum < num || bnum == lnum ? 0 : &cino !~ ':' ?  s:sw() :
-          \ indent(search(s:expr_case,'nbw')) - indent(bnum)
-    let num = max([num,bnum])
-    let b:js_cache[1] = num
+          \ matchstr(&cino,'.*\zs:\@<=[0-9.]*\ze') * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1)
   endif
   if (line =~ g:javascript_opfirst ||
         \ (getline(lnum) =~ g:javascript_continuation && getline(lnum) !~ s:expr_case) ||
