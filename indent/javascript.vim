@@ -12,7 +12,7 @@ let b:did_indent = 1
 setlocal indentexpr=GetJavascriptIndent()
 setlocal nolisp
 setlocal indentkeys=0{,0},0),0],:,!^F,o,O,e
-setlocal cinoptions+=j1,J1,c1
+setlocal cinoptions+=j1,J1
 
 let b:undo_indent = 'setlocal indentexpr< formatexpr< indentkeys< cinoptions<'
 
@@ -146,21 +146,14 @@ function GetJavascriptIndent()
   if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)
     return cindent(v:lnum)
   endif
-  if line =~ '^\s*$' && getline(prevline) =~ '\%(\%(^\s*\/\/\|\/\*\).*\)\@<!\*\/' &&
-        \ s:IsInComment(prevline, 1)
-    return indent(prevline) - 1
-  endif
-  if line =~ '^\s*$' && lnum != prevline
-    return indent(prevnonblank(v:lnum))
-  endif
   if lnum == 0
     return 0
   endif
   if (line =~ s:expr_case)
-    let s:cpo_switch = &cpo
+    let cpo_switch = &cpo
     set cpo+=%
     let ind = cindent(v:lnum)
-    let &cpo = s:cpo_switch
+    let &cpo = cpo_switch
     return ind
   endif
   "}}}
@@ -194,7 +187,7 @@ function GetJavascriptIndent()
   let switch_offset = 0
   if index(map(synstack(v:lnum, 1), 'synIDattr( v:val, "name")'),'jsSwitchBlock') > -1
     let bnum = search('\<switch\s*(','nbw')
-    let switch_offset = bnum < num || bnum == lnum ? 0 : &cino !~ ':' ?  s:sw() :
+    let switch_offset = bnum < num || bnum == lnum ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
           \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1))
   endif
   if (line =~ g:javascript_opfirst ||
