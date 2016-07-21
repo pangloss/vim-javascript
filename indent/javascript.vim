@@ -47,7 +47,7 @@ let s:syng_comment = '\%(comment\|doc\)\c'
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
 
 func s:lookForParens(start,end,flags,time)
-  try 
+  try
     return searchpair(a:start,'',a:end,a:flags,
 	  \ "line('.') < " . (prevnonblank(v:lnum) - 2000) . " ? dummy :" . s:skip_expr
           \ ,0,a:time)
@@ -74,7 +74,7 @@ function s:Onescope(lnum)
         \ (cursor(a:lnum, match(getline(a:lnum),')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ cursor(line('.'),match( ' ' . strpart(getline(line('.')),0,col('.') - 1),
-        \ '\<\%(else\|for\%(\s+each\)\=\|if\|let\|while\|with\)\C' . s:line_term)) > -1) && 
+        \ '\<\%(else\|for\%(\s+each\)\=\|if\|let\|while\|with\)\C' . s:line_term)) > -1) &&
         \ (expand("<cword>") =~ 'while\C' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bw',100) : 1)
 endfunction
 
@@ -195,7 +195,7 @@ function GetJavascriptIndent()
   if index(map(synstack(v:lnum, 1), 'synIDattr( v:val, "name")'),'jsSwitchBlock') > -1
     let bnum = search('\<switch\s*(','nbw')
     let switch_offset = bnum < num || bnum == lnum ? 0 : &cino !~ ':' ?  s:sw() :
-          \ matchstr(&cino,'.*:\zs[0-9.]*\ze') * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1)
+          \ matchstr(&cino,'.*:\zs[0-9.]*') * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1)
   endif
   if (line =~ g:javascript_opfirst ||
         \ (getline(lnum) =~ g:javascript_continuation && getline(lnum) !~ s:expr_case) ||
