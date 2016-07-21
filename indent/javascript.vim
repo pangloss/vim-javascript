@@ -59,15 +59,15 @@ endfunc
 let s:line_term = '\s*\%(\%(:\@<!\/\/.*\)\=\|\%(\/\*.*\*\/\s*\)*\)$'
 
 " configurable regexes that define continuation lines, not including (, {, or [.
-if !exists('g:js_opfirst')
-  let g:js_opfirst = '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||\|&&\)'
+if !exists('g:javascript_opfirst')
+  let g:javascript_opfirst = '\%([,:?]\|\([-/.+*]\)\%(\1\|\*\|\/\)\@!\|||\|&&\)'
 endif
-let g:js_opfirst = s:line_pre . g:js_opfirst
+let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
 
-if !exists('g:js_continuation')
-  let g:js_continuation = '\%([*,.?:]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\|||\|&&\)'
+if !exists('g:javascript_continuation')
+  let g:javascript_continuation = '\%([*,.?:]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\|||\|&&\)'
 endif
-let g:js_continuation .= s:line_term
+let g:javascript_continuation .= s:line_term
 
 function s:Onescope(lnum)
   return getline(a:lnum) =~ '\%(\<else\|\<do\|=>\)\C' . s:line_term ||
@@ -200,8 +200,8 @@ function GetJavascriptIndent()
     let num = max([num,bnum])
     let b:js_cache[1] = num
   endif
-  if (line =~ g:js_opfirst ||
-        \ (getline(lnum) =~ g:js_continuation && getline(lnum) !~ s:expr_case) ||
+  if (line =~ g:javascript_opfirst ||
+        \ (getline(lnum) =~ g:javascript_continuation && getline(lnum) !~ s:expr_case) ||
         \ (s:Onescope(lnum) && line !~ s:line_pre . '{')) &&
         \ (num != lnum &&
         \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsdestructuringblock\|args\|jsbracket\|jsparen\|jsobject')
