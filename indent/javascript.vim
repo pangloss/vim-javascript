@@ -14,7 +14,7 @@ setlocal nolisp
 setlocal indentkeys=0{,0},0),0],:,!^F,o,O,e
 setlocal cinoptions+=j1,J1
 
-let b:undo_indent = 'setlocal indentexpr< formatexpr< indentkeys< cinoptions<'
+let b:undo_indent = 'setlocal indentexpr< indentkeys< cinoptions<'
 
 " Only define the function once.
 if exists("*GetJavascriptIndent")
@@ -137,6 +137,9 @@ function GetJavascriptIndent()
   let prevline = prevnonblank(v:lnum - 1)
   " previous line of code
   let lnum = s:PrevNonBlankNonString(v:lnum - 1)
+  if lnum == 0
+    return 0
+  endif
 
   " start with strings,comments,etc.{{{2
   if (line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template') ||
@@ -146,9 +149,7 @@ function GetJavascriptIndent()
   if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)
     return cindent(v:lnum)
   endif
-  if lnum == 0
-    return 0
-  endif
+
   if (line =~ s:expr_case)
     let cpo_switch = &cpo
     set cpo+=%
