@@ -193,7 +193,7 @@ function GetJavascriptIndent()
         \ (getline(lnum) =~ g:javascript_continuation && getline(lnum) !~ s:expr_case) ||
         \ (s:Onescope(lnum) && line !~ s:line_pre . '{')) &&
         \ (num != lnum &&
-        \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsfunccall\|jsdestructuringblock\|args\|jsbracket\|jsparen\|jsobject')
+        \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsdestructuringblock\|args\|jsbracket\|jsparen\|jsobject')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
     return indent(num) + s:sw() + switch_offset
