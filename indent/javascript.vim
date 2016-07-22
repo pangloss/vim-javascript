@@ -69,13 +69,13 @@ if !exists('g:javascript_continuation')
 endif
 let g:javascript_continuation .= s:line_term
 
-function s:Onescope(lnum)
-  return getline(a:lnum) =~ '\%(\<else\|\<do\|=>\)\C' . s:line_term ||
-        \ (cursor(a:lnum, match(getline(a:lnum),')' . s:line_term)) > -1 &&
+function s:Onescope(lnum,text)
+  return a:text =~ '\%(\<else\|\<do\|=>\)\C' . s:line_term ||
+        \ (cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ cursor(line('.'),match( ' ' . strpart(getline(line('.')),0,col('.') - 1),
-        \ '\<\%(else\|for\%(\s+each\)\=\|if\|let\|while\|with\)\C' . s:line_term)) > -1) &&
-        \ (expand("<cword>") =~ 'while\C' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bw',100) : 1)
+        \ '\<\%(else\|for\%(\s+each\)\=\|function\|if\|let\|while\|with\)\C' . s:line_term)) > -1) &&
+        \ (expand("<cword>") =~ 'while\C' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1)
 endfunction
 
 " Auxiliary Functions {{{2
@@ -128,9 +128,9 @@ endfunction
 " GetJavascriptIndent Function
 " =========================
 function GetJavascriptIndent()
-  if !exists('b:js_cache')
-    let b:js_cache = [0,0]
-  end
+  " if !exists('b:js_cache')
+  "   let b:js_cache = [0,0]
+  " end
   " Get the current line.
   let line = getline(v:lnum)
   " previous nonblank line number
@@ -160,24 +160,26 @@ function GetJavascriptIndent()
   "}}}
 
   " the containing paren, bracket, curly
-  let pcounts = [0]
-  if b:js_cache[0] >= lnum  && b:js_cache[0] < v:lnum && b:js_cache[0] &&
-        \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '2')
-    let num = pcounts[0] =~ '1' ? lnum : b:js_cache[1]
+  " let pcounts = [0]
+  " if b:js_cache[0] >= lnum  && b:js_cache[0] < v:lnum && b:js_cache[0] &&
+  "       \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '2')
+  "   let num = pcounts[0] =~ '1' ? lnum : b:js_cache[1]
+  " else
+  call cursor(v:lnum,1)
+  let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
+  if line[0] =~ '\s' && syns != ''
+    let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] :
+          \ ['(\|{\|\[',')\|}\|\]']
+    let num = s:lookForParens(pattern[0],pattern[1],'bW',2000)
+  elseif syns != ''
+    let num = s:lookForParens('(\|{\|\[',')\|}\|\]','bW',2000)
   else
-    call cursor(v:lnum,1)
-    let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
-    if line[0] =~ '\s' && syns != ''
-      let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] :
-            \ ['(\|{\|\[',')\|}\|\]']
-      let num = s:lookForParens(pattern[0],pattern[1],'nbw',2000)
-    elseif syns != ''
-      let num = s:lookForParens('(\|{\|\[',')\|}\|\]','nbW',2000)
-    else
-      let num = 0
-    end
+    let num = 0
   end
-  let b:js_cache = [v:lnum, num]
+  " end
+  " let b:js_cache = [v:lnum, num]
+  let indpos = col('.')
+  " call cursor(v:lnum,1)
 
   " most significant part
   if line =~ s:line_pre . '[])}]'
@@ -185,15 +187,14 @@ function GetJavascriptIndent()
   end
   let switch_offset = 0
   if index(map(synstack(v:lnum, 1), 'synIDattr( v:val, "name")'),'jsSwitchBlock') > -1
-    let bnum = search('\<switch\s*(','nbw')
+    let bnum = search('\<switch\s*(','nbW')
     let switch_offset = bnum < num || bnum == lnum ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
           \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1))
   endif
-  if (line =~ g:javascript_opfirst ||
-        \ (getline(lnum) =~ g:javascript_continuation && getline(lnum) !~ s:expr_case) ||
-        \ (s:Onescope(lnum) && line !~ s:line_pre . '{')) &&
-        \ (num != lnum &&
-        \ synIDattr(synID(v:lnum, 1, 1), 'name') !~? 'jsdestructuringblock\|args\|jsbracket\|jsparen\|jsobject')
+  if ((line =~ g:javascript_opfirst ||
+        \ (getline(lnum) =~ g:javascript_continuation && getline(lnum) !~ s:expr_case)) &&
+        \ (num == 0 || s:Onescope(num, strpart(getline(num),0,indpos - 1)))) ||
+        \ (s:Onescope(lnum,getline(lnum)) && line !~ s:line_pre . '{')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
     return indent(num) + s:sw() + switch_offset
