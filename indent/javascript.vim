@@ -176,7 +176,7 @@ function GetJavascriptIndent()
         let num = 0
       end
     else
-      let num = 0
+      let num = s:lookForParens('(\|{\|\[',')\|}\|\]','nbW',2000)
     end
   end
   let b:js_cache = [v:lnum, num]
