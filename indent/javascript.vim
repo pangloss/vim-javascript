@@ -126,11 +126,12 @@ function s:LineHasOpeningBrackets(lnum)
 endfunction
 " }}}
 
-let s:js_cache = [0,0,0,0]
-
 " GetJavascriptIndent Function
 " =========================
 function GetJavascriptIndent()
+  if !exists('b:js_cache')
+    let b:js_cache = [0,0,0]
+  end
   " Get the current line.
   let line = getline(v:lnum)
   " previous nonblank line number
@@ -161,25 +162,29 @@ function GetJavascriptIndent()
 
   " the containing paren, bracket, curly
   let pcounts = [0]
-  if s:js_cache[0] == bufnr('%') && s:js_cache[1] >= lnum  && s:js_cache[1] < v:lnum && s:js_cache[1] &&
-        \ (s:js_cache[1] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '2')
-    let num = pcounts[0] =~ '1' ? lnum : s:js_cache[2]
+  if b:js_cache[0] >= lnum  && b:js_cache[0] < v:lnum && b:js_cache[0] &&
+        \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '2')
+    let num = pcounts[0] =~ '1' ? lnum : b:js_cache[1]
+    if pcounts[0] =~'1'
+      let b:js_cache[2] = match(getline(lnum),'.*\zs[[({]' . s:line_term)
+    end
   else
-  call cursor(v:lnum,1)
-  let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
-  if line[0] =~ '\s' && syns != ''
-    let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] :
-          \ ['(\|{\|\[',')\|}\|\]']
-    let num = s:lookForParens(pattern[0],pattern[1],'bW',2000)
-  elseif syns != ''
-    let num = s:lookForParens('(\|{\|\[',')\|}\|\]','bW',2000)
-  else
-    let num = 0
+    call cursor(v:lnum,1)
+    let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
+    if line[0] =~ '\s' && syns != ''
+      let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] :
+            \ ['(\|{\|\[',')\|}\|\]']
+      let num = s:lookForParens(pattern[0],pattern[1],'bW',2000)
+      let b:js_cache[2] = col('.')
+    elseif syns != ''
+      let num = s:lookForParens('(\|{\|\[',')\|}\|\]','bW',2000)
+      let b:js_cache[2] = col('.')
+    else
+      let num = 0
+    end
   end
-  end
-  let s:js_cache = getpos()
-  let indpos = col('.')
-  call cursor(v:lnum,1)
+  let b:js_cache[0:1] = [v:lnum,num]
+  let indpos = b:js_cache[2]
 
   " most significant part
   if line =~ s:line_pre . '[])}]'
