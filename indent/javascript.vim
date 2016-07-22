@@ -69,12 +69,13 @@ if !exists('g:javascript_continuation')
 endif
 let g:javascript_continuation .= s:line_term
 
-function s:Onescope(lnum,text)
-  return a:text =~ '\%(\<else\|\<do\|=>\)\C' . s:line_term ||
+function s:Onescope(lnum,text,add)
+  return a:text =~ '\%(\<else\|\<do\|=>' . (a:add ? '\|try\|finally' : '' ) . '\)\C' . s:line_term ||
         \ (cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ cursor(line('.'),match( ' ' . strpart(getline(line('.')),0,col('.') - 1),
-        \ '\<\%(else\|for\%(\s+each\)\=\|function\%(\s\+\k\+\)\=\|if\|let\|while\|with\)\C' . s:line_term)) > -1) &&
+        \ '\<\%(' . (a:add ? 'catch\|' : '') .
+        \ 'else\|for\%(\s+each\)\=\|function\%(\*\=\s\+\k\+\)\=\|if\|let\|switch\|while\|with\)\C' . s:line_term)) > -1) &&
         \ (expand("<cword>") =~ 'while\C' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1)
 endfunction
 
@@ -192,8 +193,8 @@ function GetJavascriptIndent()
   endif
   if ((line =~ g:javascript_opfirst ||
         \ (getline(lnum) =~ g:javascript_continuation && getline(lnum) !~ s:expr_case)) &&
-        \ (num == 0 || s:Onescope(num, strpart(getline(num),0,indpos - 1)))) ||
-        \ (s:Onescope(lnum,getline(lnum)) && line !~ s:line_pre . '{')
+        \ (num == 0 || s:Onescope(num, strpart(getline(num),0,indpos - 1),1))) ||
+        \ (s:Onescope(lnum,getline(lnum),0) && line !~ s:line_pre . '{')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
     return indent(num) + s:sw() + switch_offset
