@@ -166,17 +166,17 @@ function GetJavascriptIndent()
     let num = pcounts[0] =~ '1' ? lnum : b:js_cache[1]
   else
     call cursor(v:lnum,1)
-    let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
-    if line[1] =~ '\s'
+    if line[0] =~ '\s'
+      let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
       if syns != ''
         let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] :
               \ ['(\|{\|\[',')\|}\|\]']
         let num = s:lookForParens(pattern[0],pattern[1],'nbw',2000)
       else
-        let num = 0
+        let num = s:lookForParens('(\|{\|\[',')\|}\|\]','nbW',2000)
       end
     else
-      let num = s:lookForParens('(\|{\|\[',')\|}\|\]','nbW',2000)
+      let num = 0
     end
   end
   let b:js_cache = [v:lnum, num]
