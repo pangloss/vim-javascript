@@ -173,7 +173,7 @@ function GetJavascriptIndent()
               \ ['(\|{\|\[',')\|}\|\]']
         let num = s:lookForParens(pattern[0],pattern[1],'nbw',2000)
       else
-        let num = s:lookForParens('(\|{\|\[',')\|}\|\]','nbW',2000)
+        let num = 0
       end
     else
       let num = 0
