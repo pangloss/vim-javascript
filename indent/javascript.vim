@@ -128,9 +128,9 @@ endfunction
 " GetJavascriptIndent Function
 " =========================
 function GetJavascriptIndent()
-  " if !exists('b:js_cache')
-  "   let b:js_cache = [0,0]
-  " end
+  if !exists('b:js_cache')
+    let b:js_cache = [0,0,0,0]
+  end
   " Get the current line.
   let line = getline(v:lnum)
   " previous nonblank line number
@@ -160,11 +160,11 @@ function GetJavascriptIndent()
   "}}}
 
   " the containing paren, bracket, curly
-  " let pcounts = [0]
-  " if b:js_cache[0] >= lnum  && b:js_cache[0] < v:lnum && b:js_cache[0] &&
-  "       \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '2')
-  "   let num = pcounts[0] =~ '1' ? lnum : b:js_cache[1]
-  " else
+  let pcounts = [0]
+  if b:js_cache[0] == bufnr('%') && b:js_cache[1] >= lnum  && b:js_cache[1] < v:lnum && b:js_cache[1] &&
+        \ (b:js_cache[1] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '2')
+    let num = pcounts[0] =~ '1' ? lnum : b:js_cache[2]
+  else
   call cursor(v:lnum,1)
   let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
   if line[0] =~ '\s' && syns != ''
@@ -176,10 +176,10 @@ function GetJavascriptIndent()
   else
     let num = 0
   end
-  " end
-  " let b:js_cache = [v:lnum, num]
+  end
+  let b:js_cache = getpos()
   let indpos = col('.')
-  " call cursor(v:lnum,1)
+  call cursor(v:lnum,1)
 
   " most significant part
   if line =~ s:line_pre . '[])}]'
