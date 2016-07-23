@@ -180,7 +180,7 @@ function GetJavascriptIndent()
       let num = s:lookForParens('(\|{\|\[',')\|}\|\]','bW',2000)
       let b:js_cache[2] = col('.')
     else
-      let num = s:LineHasOpeningBrackets(lnum) =~ '1' ? lnum : 0
+      return indent(lnum)
     end
   end
   let b:js_cache[0:1] = [v:lnum,num]
