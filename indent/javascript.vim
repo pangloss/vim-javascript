@@ -87,11 +87,6 @@ function s:IsInStringOrComment(lnum, col)
   return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_strcom
 endfunction
 
-" Check if the character at lnum:col is inside a multi-line comment.
-function s:IsInComment(lnum, col)
-  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_comment
-endfunction
-
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
 function s:PrevNonBlankNonString(lnum)
   let lnum = prevnonblank(a:lnum)
@@ -144,10 +139,10 @@ function GetJavascriptIndent()
 
   " start with strings,comments,etc.{{{2
   if (line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template') ||
-        \ (line !~ '^\s*[/*]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'comment')
+        \ (line !~ '^\s*[/*]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? s:syng_comment)
     return -1
   endif
-  if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsInComment(v:lnum, 1)
+  if line !~ '^\%(\/\*\|\s*\/\/\)' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? s:syng_comment)
     return cindent(v:lnum)
   endif
 
