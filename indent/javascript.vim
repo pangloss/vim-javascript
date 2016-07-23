@@ -44,7 +44,7 @@ let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)\c'
 let s:syng_comment = '\%(comment\|doc\)\c'
 
 " Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "synIDattr(synID(line('.'),col('.'),1),'name') =~ '".s:syng_strcom."'"
+let s:skip_expr = "s:IsInStringOrComment(line('.'),col('.'))"
 
 func s:lookForParens(start,end,flags,time)
   try
@@ -120,7 +120,7 @@ function s:LineHasOpeningBrackets(lnum)
     let pos = match(line, '[][(){}]', pos + 1)
   endwhile
   return [(open_0 > 0 ? 1 : (open_0 == 0 ? 0 : 2)) . (open_2 > 0 ? 1 : (open_2 == 0 ? 0 : 2)) .
-        \ (open_4 > 0 ? 1 : (open_4 == 0 ? 0 : 2)),last]
+        \ (open_4 > 0 ? 1 : (open_4 == 0 ? 0 : 2)), last]
 endfunction
 " }}}
 
