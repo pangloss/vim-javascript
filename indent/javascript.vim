@@ -106,18 +106,21 @@ function s:LineHasOpeningBrackets(lnum)
   let open_4 = 0
   let line = getline(a:lnum)
   let pos = match(line, '[][(){}]', 0)
+  let last = 0
   while pos != -1
     if !s:IsInStringOrComment(a:lnum, pos + 1)
       let idx = stridx('(){}[]', line[pos])
       if idx % 2 == 0
         let open_{idx} = open_{idx} + 1
+        let last = pos
       else
         let open_{idx - 1} = open_{idx - 1} - 1
       endif
     endif
     let pos = match(line, '[][(){}]', pos + 1)
   endwhile
-  return (open_0 > 0 ? 1 : (open_0 == 0 ? 0 : 2)) . (open_2 > 0 ? 1 : (open_2 == 0 ? 0 : 2)) . (open_4 > 0 ? 1 : (open_4 == 0 ? 0 : 2))
+  return [(open_0 > 0 ? 1 : (open_0 == 0 ? 0 : 2)) . (open_2 > 0 ? 1 : (open_2 == 0 ? 0 : 2)) .
+        \ (open_4 > 0 ? 1 : (open_4 == 0 ? 0 : 2)),last]
 endfunction
 " }}}
 
@@ -158,10 +161,10 @@ function GetJavascriptIndent()
   " the containing paren, bracket, curly
   let pcounts = [0]
   if b:js_cache[0] >= lnum  && b:js_cache[0] <= v:lnum && b:js_cache[0] &&
-        \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '2')
-    let num = pcounts[0] =~ '1' ? lnum : b:js_cache[1]
-    if pcounts[0] =~'1'
-      call cursor(lnum,match(getline(lnum),'.*\zs[[({].*' . s:line_term))
+        \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0][0] !~ '2')
+    let num = pcounts[0][0] =~ '1' ? lnum : b:js_cache[1]
+    if pcounts[0][0] =~'1'
+      call cursor(lnum,pcounts[0][1])
     end
   else
     call cursor(v:lnum,1)
