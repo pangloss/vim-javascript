@@ -74,9 +74,9 @@ function s:Onescope(lnum,text,add)
         \ (cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ cursor(line('.'),match( ' ' . strpart(getline(line('.')),0,col('.') - 1),
-        \ '\<\%(' . (a:add ? 'catch\|' : '') .
-        \ 'else\|for\%(\s+each\)\=\|function\%(\*\=\s\+\k\+\)\=\|if\|let\|switch\|while\|with\)\C' . s:line_term)) > -1) &&
-        \ (expand("<cword>") =~ 'while\C' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1)
+        \ (a:add ? '\K\k*' :
+        \ '\<\%(else\|for\%(\s+each\)\=\|function\%(\*\=\s\+\k\+\)\=\|if\|let\|switch\|while\|with\)\C') . s:line_term)) > -1) &&
+        \ (a:add || (expand("<cword>") =~ 'while\C' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1))
 endfunction
 
 " Auxiliary Functions {{{2
@@ -166,7 +166,7 @@ function GetJavascriptIndent()
         \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '2')
     let num = pcounts[0] =~ '1' ? lnum : b:js_cache[1]
     if pcounts[0] =~'1'
-      let b:js_cache[2] = match(getline(lnum),'.*\zs[[({]' . s:line_term)
+      let b:js_cache[2] = match(getline(lnum),'.*\zs[[({].*' . s:line_term)
     end
   else
     call cursor(v:lnum,1)
@@ -184,7 +184,6 @@ function GetJavascriptIndent()
     end
   end
   let b:js_cache[0:1] = [v:lnum,num]
-  let indpos = b:js_cache[2]
 
   " most significant part
   if line =~ s:line_pre . '[])}]'
@@ -198,7 +197,7 @@ function GetJavascriptIndent()
   endif
   if ((line =~ g:javascript_opfirst ||
         \ (getline(lnum) =~ g:javascript_continuation && getline(lnum) !~ s:expr_case)) &&
-        \ (num == 0 || s:Onescope(num, strpart(getline(num),0,indpos - 1),1))) ||
+        \ (num == 0 || s:Onescope(num, strpart(getline(num),0,b:js_cache[2] - 1),1))) ||
         \ (s:Onescope(lnum,getline(lnum),0) && line !~ s:line_pre . '{')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
