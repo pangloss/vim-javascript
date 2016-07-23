@@ -176,11 +176,9 @@ function GetJavascriptIndent()
             \ ['(\|{\|\[',')\|}\|\]']
       let num = s:lookForParens(pattern[0],pattern[1],'bW',2000)
       let b:js_cache[2] = col('.')
-    elseif syns != ''
+    else
       let num = s:lookForParens('(\|{\|\[',')\|}\|\]','bW',2000)
       let b:js_cache[2] = col('.')
-    else
-      return indent(lnum)
     end
   end
   let b:js_cache[0:1] = [v:lnum,num]
