@@ -162,11 +162,11 @@ function GetJavascriptIndent()
 
   " the containing paren, bracket, curly
   let pcounts = [0]
-  if b:js_cache[0] >= lnum  && b:js_cache[0] < v:lnum && b:js_cache[0] &&
+  if b:js_cache[0] >= lnum  && b:js_cache[0] <= v:lnum && b:js_cache[0] &&
         \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '2')
     let num = pcounts[0] =~ '1' ? lnum : b:js_cache[1]
     if pcounts[0] =~'1'
-      let b:js_cache[2] = match(getline(lnum),'.*\zs[[({].*' . s:line_term)
+      call cursor(lnum,match(getline(lnum),'.*\zs[[({].*' . s:line_term))
     end
   else
     call cursor(v:lnum,1)
@@ -175,13 +175,11 @@ function GetJavascriptIndent()
       let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] :
             \ ['(\|{\|\[',')\|}\|\]']
       let num = s:lookForParens(pattern[0],pattern[1],'bW',2000)
-      let b:js_cache[2] = col('.')
     else
       let num = s:lookForParens('(\|{\|\[',')\|}\|\]','bW',2000)
-      let b:js_cache[2] = col('.')
     end
   end
-  let b:js_cache[0:1] = [v:lnum,num]
+  let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
   " most significant part
   if line =~ s:line_pre . '[])}]'
