@@ -44,7 +44,7 @@ let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)\c'
 let s:syng_comment = '\%(comment\|doc\)\c'
 
 " Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "s:IsInStringOrComment(line('.'),col('.'))"
+let s:skip_expr = "s:IsSyn(line('.'),col('.'),0)"
 
 func s:lookForParens(start,end,flags,time)
   try
@@ -83,15 +83,15 @@ endfunction
 " ======================
 
 " Check if the character at lnum:col is inside a string, comment, or is ascii.
-function s:IsInStringOrComment(lnum, col)
-  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~ s:syng_strcom
+function s:IsSyn(lnum, col, reg)
+  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~? (a:reg ? a:reg : s:syng_strcom)
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
 function s:PrevNonBlankNonString(lnum)
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
-    if !s:IsInStringOrComment(lnum, matchend(getline(lnum), '^\s*[^''"]'))
+    if !s:IsSyn(lnum, matchend(getline(lnum), '^\s*[^''"]'),0)
       break
     endif
     let lnum = prevnonblank(lnum - 1)
@@ -108,7 +108,7 @@ function s:LineHasOpeningBrackets(lnum)
   let pos = match(line, '[][(){}]', 0)
   let last = 0
   while pos != -1
-    if !s:IsInStringOrComment(a:lnum, pos + 1)
+    if !s:IsSyn(a:lnum, pos + 1, 0)
       let idx = stridx('(){}[]', line[pos])
       if idx % 2 == 0
         let open_{idx} = open_{idx} + 1
@@ -141,8 +141,8 @@ function GetJavascriptIndent()
   endif
 
   " start with strings,comments,etc.{{{2
-  if (line !~ '^[''"`]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? 'string\|template') ||
-        \ (line !~ '^\s*[/*]' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? s:syng_comment)
+  if (line !~ '^[''"`]' && s:IsSyn(v:lnum,1,'string\|template')) ||
+        \ (line !~ '^\s*[/*]' && s:IsSyn(v:lnum,1,s:syng_comment))
     return -1
   endif
   if line !~ '^\%(\/\*\|\s*\/\/\)' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? s:syng_comment)
