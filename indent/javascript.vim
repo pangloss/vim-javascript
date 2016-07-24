@@ -145,7 +145,7 @@ function GetJavascriptIndent()
         \ (line !~ '^\s*[/*]' && s:IsSyn(v:lnum,1,s:syng_comment))
     return -1
   endif
-  if line !~ '^\%(\/\*\|\s*\/\/\)' && synIDattr(synID(v:lnum, 1, 1), 'name') =~? s:syng_comment)
+  if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsSyn(v:lnum,1,s:syng_comment)
     return cindent(v:lnum)
   endif
 
