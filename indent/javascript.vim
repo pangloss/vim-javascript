@@ -183,16 +183,12 @@ function GetJavascriptIndent()
   if line =~ s:line_pre . '[])}]'
     return indent(num)
   end
-  let switch_offset = 0
-  if index(map(synstack(v:lnum, 1), 'synIDattr( v:val, "name")'),'jsSwitchBlock') > -1
-    let bnum = search('\<switch\s*(','nbW')
-    let switch_offset = bnum < num || bnum == lnum ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
-          \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1))
-  endif
+  let iu = num == 0 ? 1 : s:Onescope(num, strpart(getline(num),0,b:js_cache[2] - 1),1) 
+  let switch_offset = (!iu || num == 0) || expand("<cword>") != 'switch' ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
+        \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1))
   if ((line =~ g:javascript_opfirst ||
         \ (getline(lnum) =~ g:javascript_continuation && getline(lnum) !~ s:expr_case)) &&
-        \ (num == 0 || s:Onescope(num, strpart(getline(num),0,b:js_cache[2] - 1),1))) ||
-        \ (s:Onescope(lnum,getline(lnum),0) && line !~ s:line_pre . '{')
+        \ iu) || (s:Onescope(lnum,getline(lnum),0) && line !~ s:line_pre . '{')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
     return indent(num) + s:sw() + switch_offset
