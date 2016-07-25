@@ -44,7 +44,7 @@ let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)\c'
 let s:syng_comment = '\%(comment\|doc\)\c'
 
 " Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "line('.') < (prevnonblank(v:lnum) - 2000) ? dummy : s:IsSyn(line('.'),col('.'),0)"
+let s:skip_expr = "line('.') < (prevnonblank(v:lnum) - 2000) ? dummy : s:IsSyn(line('.'),col('.'),'')"
 
 func s:lookForParens(start,end,flags,time)
   try
@@ -82,14 +82,14 @@ endfunction
 
 " Check if the character at lnum:col is inside a string, comment, or is ascii.
 function s:IsSyn(lnum, col, reg)
-  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~? (a:reg ? a:reg : s:syng_strcom)
+  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~? (a:reg != '' ? a:reg : s:syng_strcom)
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
 function s:PrevNonBlankNonString(lnum)
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
-    if !s:IsSyn(lnum, matchend(getline(lnum), '^\s*[^''"]'),0)
+    if !s:IsSyn(lnum, matchend(getline(lnum), '^\s*[^''"]'),'')
       break
     endif
     let lnum = prevnonblank(lnum - 1)
@@ -106,7 +106,7 @@ function s:LineHasOpeningBrackets(lnum)
   let pos = match(line, '[][(){}]', 0)
   let last = 0
   while pos != -1
-    if !s:IsSyn(a:lnum, pos + 1, 0)
+    if !s:IsSyn(a:lnum, pos + 1, '')
       let idx = stridx('(){}[]', line[pos])
       if idx % 2 == 0
         let open_{idx} = open_{idx} + 1
