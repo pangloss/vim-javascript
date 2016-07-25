@@ -124,8 +124,6 @@ function s:LineHasOpeningBrackets(lnum)
 endfunction
 " }}}
 
-" GetJavascriptIndent Function
-" =========================
 function GetJavascriptIndent()
   if !exists('b:js_cache')
     let b:js_cache = [0,0,0]
