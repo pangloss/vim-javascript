@@ -44,13 +44,11 @@ let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)\c'
 let s:syng_comment = '\%(comment\|doc\)\c'
 
 " Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "s:IsSyn(line('.'),col('.'),0)"
+let s:skip_expr = "line('.') < (prevnonblank(v:lnum) - 2000) ? dummy : s:IsSyn(line('.'),col('.'),0)"
 
 func s:lookForParens(start,end,flags,time)
   try
-    return searchpair(a:start,'',a:end,a:flags,
-	  \ "line('.') < " . (prevnonblank(v:lnum) - 2000) . " ? dummy :" . s:skip_expr
-          \ ,0,a:time)
+    return searchpair(a:start,'',a:end,a:flags,s:skip_expr,0,a:time)
   catch /E118/
     return searchpair(a:start,'',a:end,a:flags,0,0)
   endtry
