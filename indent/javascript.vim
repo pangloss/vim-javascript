@@ -1,5 +1,7 @@
 " Vim indent file
 " Language: Javascript
+" Maintainer:   vim-javascript community
+" URL:          https://github.com/pangloss/vim-javascript
 " Acknowledgement: Based off of vim-ruby maintained by Nikolai Weibull http://vim-ruby.rubyforge.org
 
 " Only load this indent file when no other was loaded.
@@ -179,7 +181,7 @@ function GetJavascriptIndent()
   if line =~ s:line_pre . '[])}]'
     return indent(num)
   end
-  let inb = num == 0 ? 1 : s:Onescope(num, strpart(getline(num),0,b:js_cache[2] - 1),1) 
+  let inb = num == 0 ? 1 : s:Onescope(num, strpart(getline(num),0,b:js_cache[2] - 1),1)
   let switch_offset = (!inb || num == 0) || expand("<cword>") != 'switch' ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1))
   if ((line =~ g:javascript_opfirst ||
