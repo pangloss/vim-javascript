@@ -71,6 +71,7 @@ let g:javascript_continuation .= s:line_term
 
 function s:Onescope(lnum,text,add)
   return a:text =~ '\%(\<else\|\<do\|=>' . (a:add ? '\|\<try\|\<finally' : '' ) . '\)\C' . s:line_term ||
+        \ a:add && a:text =~ s:line_pre . s:line_term && getline(s:PrevNonBlankNonString(a:lnum - 1)) =~ ')' . s:line_term ||
         \ (cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ search((a:add ? '\K\k*' :
@@ -80,7 +81,6 @@ function s:Onescope(lnum,text,add)
 endfunction
 
 " Auxiliary Functions {{{2
-" ======================
 
 " Check if the character at lnum:col is inside a string, comment, or is ascii.
 function s:IsSyn(lnum, col, reg)
