@@ -71,12 +71,11 @@ let g:javascript_continuation .= s:line_term
 
 function s:Onescope(lnum,text,add)
   return a:text =~ '\%(\<else\|\<do\|=>' . (a:add ? '\|\<try\|\<finally' : '' ) . '\)\C' . s:line_term ||
-        \ a:add && a:text =~ s:line_pre . s:line_term && getline(s:PrevNonBlankNonString(a:lnum - 1)) =~ ')' . s:line_term ||
+        \ (a:add && a:text =~ s:line_pre . s:line_term && getline(s:PrevCodeLine(a:lnum - 1)) =~ ')' . s:line_term) ||
         \ (cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
-        \ search((a:add ? '\K\k*' :
-        \ '\<\%(for\%(\s+each\)\=\|function\*\=\%(\s\+\K\k*\)\=\|if\|let\|switch\|while\|with\)\C') .
-        \ '\_s*\%#','bW')) &&
+        \ search((a:add ? '\%(function\*\|[A-Za-z_$][0-9A-Za-z_$]*\)\C' :
+        \ '\<\%(for\%(\s+each\)\=\|if\|let\|switch\|while\|with\)\C') . '\_s*\%#','bW')) &&
         \ (a:add || (expand("<cword>") == 'while' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1))
 endfunction
 
@@ -88,7 +87,7 @@ function s:IsSyn(lnum, col, reg)
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
-function s:PrevNonBlankNonString(lnum)
+function s:PrevCodeLine(lnum)
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
     if !s:IsSyn(lnum, matchend(getline(lnum), '^\s*[^''"]'),'')
@@ -133,7 +132,7 @@ function GetJavascriptIndent()
   " previous nonblank line number
   let prevline = prevnonblank(v:lnum - 1)
   " previous line of code
-  let lnum = s:PrevNonBlankNonString(v:lnum - 1)
+  let lnum = s:PrevCodeLine(v:lnum - 1)
   if lnum == 0
     return 0
   endif
