@@ -74,7 +74,7 @@ function s:Onescope(lnum,text,add)
         \ (cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ search((a:add ? '\K\k*' :
-        \ '\<\%(else\|for\%(\s+each\)\=\|function\*\=\%(\s\+\K\k*\)\=\|if\|let\|switch\|while\|with\)\C') .
+        \ '\<\%(for\%(\s+each\)\=\|function\*\=\%(\s\+\K\k*\)\=\|if\|let\|switch\|while\|with\)\C') .
         \ '\_s*\%#','bW')) &&
         \ (a:add || (expand("<cword>") == 'while' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1))
 endfunction
