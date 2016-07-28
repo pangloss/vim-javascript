@@ -70,7 +70,7 @@ endif
 let g:javascript_continuation .= s:line_term
 
 function s:Onescope(lnum,text,add)
-  return a:text =~ '\%(\<else\|\<do\|=>' . (a:add ? '\|try\|finally' : '' ) . '\)\C' . s:line_term ||
+  return a:text =~ '\%(\<else\|\<do\|=>' . (a:add ? '\|\<try\|\<finally' : '' ) . '\)\C' . s:line_term ||
         \ (cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1 &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ search((a:add ? '\K\k*' :
