@@ -71,11 +71,11 @@ let g:javascript_continuation .= s:line_term
 
 function s:Onescope(lnum,text,add)
   return a:text =~ '\%(\<else\|\<do\|=>' . (a:add ? '\|\<try\|\<finally' : '' ) . '\)\C' . s:line_term ||
-        \ (a:add && a:text =~ s:line_pre . s:line_term && getline(s:PrevCodeLine(a:lnum - 1)) =~ ')' . s:line_term) ||
-        \ (cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1 &&
+        \ ((a:add && a:text =~ s:line_pre . s:line_term && search('\%' . s:PrevCodeLine(a:lnum - 1) . 'l.)' . s:line_term)) ||
+        \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ search((a:add ? '\%(function\*\|[A-Za-z_$][0-9A-Za-z_$]*\)\C' :
-        \ '\<\%(for\%(\s+each\)\=\|if\|let\|switch\|while\|with\)\C') . '\_s*\%#','bW')) &&
+        \ '\<\%(for\%(\s+each\)\=\|if\|let\|while\|with\)\C') . '\_s*\%#','bW') &&
         \ (a:add || (expand("<cword>") == 'while' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1))
 endfunction
 
@@ -132,10 +132,6 @@ function GetJavascriptIndent()
   " previous nonblank line number
   let prevline = prevnonblank(v:lnum - 1)
   " previous line of code
-  let lnum = s:PrevCodeLine(v:lnum - 1)
-  if lnum == 0
-    return 0
-  endif
 
   " start with strings,comments,etc.{{{2
   if (line !~ '^[''"`]' && s:IsSyn(v:lnum,1,'string\|template')) ||
@@ -144,6 +140,10 @@ function GetJavascriptIndent()
   endif
   if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsSyn(v:lnum,1,s:syng_comment)
     return cindent(v:lnum)
+  endif
+  let lnum = s:PrevCodeLine(v:lnum - 1)
+  if lnum == 0
+    return 0
   endif
 
   if (line =~ s:expr_case)
