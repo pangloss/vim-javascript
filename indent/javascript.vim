@@ -61,12 +61,12 @@ let s:line_term = '\s*\%(\/\*.*\*\/\s*\)*\%(:\@<!\/\/.*\)\=$'
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 if !exists('g:javascript_opfirst')
-  let g:javascript_opfirst = '\%([,:?^%]\|\([-/.+]\)\%(\1\|\*\|\/\)\@!\|\*\/\@!\|=>\@!\||\|&\|in\%(stanceof\)\=\>\)\C'
+  let g:javascript_opfirst = '\%([<>,:?^%]\|\([-/.+]\)\%(\1\|\*\|\/\)\@!\|\*\/\@!\|=>\@!\||\|&\|in\%(stanceof\)\=\>\)\C'
 endif
 let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
 
 if !exists('g:javascript_continuation')
-  let g:javascript_continuation = '\%([*,.?:^%]\|+\@<!+\|-\@<!-\|\*\@<!\/\|=\||\|&\|\<in\%(stanceof\)\=\)\C'
+  let g:javascript_continuation = '\%([<*,.?:^%]\|+\@<!+\|-\@<!-\|=\@<!>\|\*\@<!\/\|=\||\|&\|\<in\%(stanceof\)\=\)\C'
 endif
 let g:javascript_continuation .= s:line_term
 
@@ -155,7 +155,8 @@ function GetJavascriptIndent()
   endif
   "}}}
 
-  " the containing paren, bracket, curly
+  " the containing paren, bracket, curly. Memoize, last lineNr either has the
+  " same scope or starts a new one, unless if it closed a scope.
   let pcounts = [0]
   if b:js_cache[0] >= lnum  && b:js_cache[0] <= v:lnum && b:js_cache[0] &&
         \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0][0] !~ '2')
