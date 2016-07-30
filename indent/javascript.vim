@@ -3,6 +3,7 @@
 " Maintainer:   vim-javascript community
 " URL:          https://github.com/pangloss/vim-javascript
 " Acknowledgement: Based off of vim-ruby maintained by Nikolai Weibull http://vim-ruby.rubyforge.org
+" Last Change: July 29, 2016
 
 " Only load this indent file when no other was loaded.
 if exists("b:did_indent")
@@ -56,7 +57,7 @@ func s:lookForParens(start,end,flags,time)
   endtry
 endfunc
 
-let s:line_term = '\s*\%(\%(:\@<!\/\/.*\)\=\|\%(\/\*.*\*\/\s*\)*\)$'
+let s:line_term = '\s*\%(\/\*.*\*\/\s*\)*\%(:\@<!\/\/.*\)\=$'
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 if !exists('g:javascript_opfirst')
@@ -131,7 +132,6 @@ function GetJavascriptIndent()
   let line = getline(v:lnum)
   " previous nonblank line number
   let prevline = prevnonblank(v:lnum - 1)
-  " previous line of code
 
   " start with strings,comments,etc.{{{2
   if (line !~ '^[''"`]' && s:IsSyn(v:lnum,1,'string\|template')) ||
