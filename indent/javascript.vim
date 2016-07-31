@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: vim-javascript community
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: July 30, 2016
+" Last Change: July 31, 2016
 
 " Only load this indent file when no other was loaded.
 if exists("b:did_indent")
