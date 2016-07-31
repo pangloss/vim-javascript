@@ -2,7 +2,6 @@
 " Language: Javascript
 " Maintainer: vim-javascript community
 " URL: https://github.com/pangloss/vim-javascript
-" Acknowledgement: Based off of vim-ruby maintained by Nikolai Weibull http://vim-ruby.rubyforge.org
 " Last Change: July 30, 2016
 
 " Only load this indent file when no other was loaded.
@@ -147,11 +146,10 @@ function GetJavascriptIndent()
     return cindent(v:lnum)
   endif
   let lnum = s:PrevCodeLine(v:lnum - 1)
-  let pline = s:StripLine(getline(lnum))
-  let line = s:StripLine(line)
   if lnum <= 0
     return 0
   endif
+  let line = s:StripLine(line)
 
   if (line =~ s:expr_case)
     let cpo_switch = &cpo
@@ -191,6 +189,7 @@ function GetJavascriptIndent()
   let inb = num == 0 ? 1 : s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1)
   let switch_offset = (!inb || num == 0) || expand("<cword>") != 'switch' ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1))
+  let pline = s:StripLine(getline(lnum))
   if ((line =~ g:javascript_opfirst ||
         \ (pline =~ g:javascript_continuation && pline !~ s:expr_case)) &&
         \ inb) || (s:Onescope(lnum,pline,0) && line !~ s:line_pre . '{')
