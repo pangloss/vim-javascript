@@ -8,7 +8,7 @@
 " Only load this indent file when no other was loaded.
 if exists("b:did_indent")
   finish
-end
+endif
 let b:did_indent = 1
 
 " Now, set up our indentation expression and keys that trigger it.
@@ -22,7 +22,7 @@ let b:undo_indent = 'setlocal indentexpr< indentkeys< cinoptions<'
 " Only define the function once.
 if exists("*GetJavascriptIndent")
   finish
-end
+endif
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -31,12 +31,12 @@ set cpo&vim
 if exists('*shiftwidth')
   func s:sw()
     return shiftwidth()
-  endfunc
+  endfunction
 else
   func s:sw()
     return &sw
-  endfunc
-end
+  endfunction
+endif
 
 let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
 let s:expr_case = s:line_pre . '\%(\%(case\>.*\)\|default\)\s*:\C'
@@ -55,19 +55,19 @@ func s:lookForParens(start,end,flags,time)
   catch /E118/
     return searchpair(a:start,'',a:end,a:flags,0,0)
   endtry
-endfunc
+endfunction
 
 let s:line_term = '\s*\%(\/\*.*\*\/\s*\)*$'
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 if !exists('g:javascript_opfirst')
   let g:javascript_opfirst = '\%([<>,:?^%]\|\([-/.+]\)\%(\1\|\*\|\/\)\@!\|\*\/\@!\|=>\@!\||\|&\|in\%(stanceof\)\=\>\)\C'
-end
+endif
 let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
 
 if !exists('g:javascript_continuation')
   let g:javascript_continuation = '\%([<*,.?:^%]\|+\@<!+\|-\@<!-\|=\@<!>\|\*\@<!\/\|=\||\|&\|\<in\%(stanceof\)\=\)\C'
-end
+endif
 let g:javascript_continuation .= s:line_term
 
 func s:Onescope(lnum,text,add)
@@ -79,19 +79,19 @@ func s:Onescope(lnum,text,add)
         \ search((a:add ? '\%(function\*\|[A-Za-z_$][0-9A-Za-z_$]*\)\C' :
         \ '\<\%(for\%(\s+each\)\=\|if\|let\|while\|with\)\C') . '\_s*\%#','bW') &&
         \ (a:add || (expand("<cword>") == 'while' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1))
-endfunc
+endfunction
 
 " Auxiliary Functions {{{2
 
 " strip line of comment
 func s:StripLine(c)
   return substitute(a:c, '\%(:\@<!\/\/.*\)$', '','')
-endfunc
+endfunction
 
 " Check if the character at lnum:col is inside a string, comment, or is ascii.
 func s:IsSyn(lnum, col, reg)
   return synIDattr(synID(a:lnum, a:col, 1), 'name') =~? (a:reg != '' ? a:reg : s:syng_strcom)
-endfunc
+endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
 func s:PrevCodeLine(lnum)
@@ -99,11 +99,11 @@ func s:PrevCodeLine(lnum)
   while lnum > 0
     if !s:IsSyn(lnum, matchend(getline(lnum), '^\s*[^''"]'),'')
       break
-    end
+    endif
     let lnum = prevnonblank(lnum - 1)
   endwhile
   return lnum > 0 ? lnum : -1
-endfunc
+endfunction
 
 " Check if line 'lnum' has more opening brackets than closing ones.
 func s:LineHasOpeningBrackets(lnum)
@@ -121,19 +121,19 @@ func s:LineHasOpeningBrackets(lnum)
         let last = pos
       else
         let open_{idx - 1} = open_{idx - 1} - 1
-      end
-    end
+      endif
+    endif
     let pos = match(line, '[][(){}]', pos + 1)
   endwhile
   return [(open_0 > 0 ? 1 : (open_0 == 0 ? 0 : 2)) . (open_2 > 0 ? 1 : (open_2 == 0 ? 0 : 2)) .
         \ (open_4 > 0 ? 1 : (open_4 == 0 ? 0 : 2)), last]
-endfunc
+endfunction
 " }}}
 
 func GetJavascriptIndent()
   if !exists('b:js_cache')
     let b:js_cache = [0,0,0]
-  end
+  endif
   " Get the current line.
   let line = getline(v:lnum)
   " previous nonblank line number
@@ -143,16 +143,16 @@ func GetJavascriptIndent()
   if (line !~ '^[''"`]' && s:IsSyn(v:lnum,1,'string\|template')) ||
         \ (line !~ '^\s*[/*]' && s:IsSyn(v:lnum,1,s:syng_comment))
     return -1
-  end
+  endif
   if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsSyn(v:lnum,1,s:syng_comment)
     return cindent(v:lnum)
-  end
+  endif
   let lnum = s:PrevCodeLine(v:lnum - 1)
   let pline = s:StripLine(getline(lnum))
   let line = s:StripLine(line)
   if lnum <= 0
     return 0
-  end
+  endif
 
   if (line =~ s:expr_case)
     let cpo_switch = &cpo
@@ -160,7 +160,7 @@ func GetJavascriptIndent()
     let ind = cindent(v:lnum)
     let &cpo = cpo_switch
     return ind
-  end
+  endif
   "}}}
 
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
@@ -171,7 +171,7 @@ func GetJavascriptIndent()
     let num = pcounts[0][0] =~ '1' ? lnum : b:js_cache[1]
     if pcounts[0][0] =~'1'
       call cursor(lnum,pcounts[0][1])
-    end
+    endif
   else
     call cursor(v:lnum,1)
     let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
@@ -181,14 +181,14 @@ func GetJavascriptIndent()
       let num = s:lookForParens(pattern[0],pattern[1],'bW',2000)
     else
       let num = s:lookForParens('(\|{\|\[',')\|}\|\]','bW',2000)
-    end
-  end
+    endif
+  endif
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
   " most significant part
   if line =~ s:line_pre . '[])}]'
     return indent(num)
-  end
+  endif
   let inb = num == 0 ? 1 : s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1)
   let switch_offset = (!inb || num == 0) || expand("<cword>") != 'switch' ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1))
@@ -198,9 +198,9 @@ func GetJavascriptIndent()
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
     return indent(num) + s:sw() + switch_offset
-  end
+  endif
 
-endfunc
+endfunction
 
 
 let &cpo = s:cpo_save
