@@ -72,8 +72,7 @@ let g:javascript_continuation .= s:line_term
 
 function s:Onescope(lnum,text,add)
   return a:text =~ '\%(\<else\|\<do\|=>' . (a:add ? '\|\<try\|\<finally' : '' ) . '\)\C' . s:line_term ||
-        \ ((a:add && a:text =~ s:line_pre . s:line_term && cursor(s:PrevCodeLine(a:lnum - 1),1) > -1 &&
-        \ cursor(line('.'),match(s:Stripline(getline(line('.'))), ')' . s:line_term))>-1) ||
+        \ ((a:add && a:text =~ s:line_pre . s:line_term && search('\%' . s:PrevCodeLine(a:lnum - 1) . 'l.)' . s:line_term)) ||
         \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ search((a:add ? '\%(function\*\|[A-Za-z_$][0-9A-Za-z_$]*\)\C' :
