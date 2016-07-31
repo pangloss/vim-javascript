@@ -100,7 +100,7 @@ function s:PrevCodeLine(lnum)
     endif
     let lnum = prevnonblank(lnum - 1)
   endwhile
-  return lnum > 0 ? lnum : -1
+  return lnum
 endfunction
 
 " Check if line 'lnum' has more opening brackets than closing ones.
@@ -146,7 +146,7 @@ function GetJavascriptIndent()
     return cindent(v:lnum)
   endif
   let lnum = s:PrevCodeLine(v:lnum - 1)
-  if lnum <= 0
+  if lnum == 0
     return 0
   endif
   let line = s:StripLine(line)
