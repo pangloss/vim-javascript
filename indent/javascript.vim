@@ -38,7 +38,7 @@ else
 endif
 
 let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
-let s:expr_case = s:line_pre . '\%(\%(case\>.*\)\|default\)\s*:\C'
+let s:expr_case = s:line_pre . '\%(\%(case\>.*\)\|default\)\s*:'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)\c'
 
@@ -60,23 +60,23 @@ let s:line_term = '\s*\%(\/\*.*\*\/\s*\)*$'
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 if !exists('g:javascript_opfirst')
-  let g:javascript_opfirst = '\%([<>,:?^%]\|\([-/.+]\)\%(\1\|\*\|\/\)\@!\|\*\/\@!\|=>\@!\||\|&\|in\%(stanceof\)\=\>\)\C'
+  let g:javascript_opfirst = '\%([<>,:?^%]\|\([-/.+]\)\%(\1\|\*\|\/\)\@!\|\*\/\@!\|=>\@!\||\|&\|in\%(stanceof\)\=\>\)'
 endif
 let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
 
 if !exists('g:javascript_continuation')
-  let g:javascript_continuation = '\%([<*,.?:^%]\|+\@<!+\|-\@<!-\|=\@<!>\|\*\@<!\/\|=\||\|&\|\<in\%(stanceof\)\=\)\C'
+  let g:javascript_continuation = '\%([<*,.?:^%]\|+\@<!+\|-\@<!-\|=\@<!>\|\*\@<!\/\|=\||\|&\|\<in\%(stanceof\)\=\)'
 endif
 let g:javascript_continuation .= s:line_term
 
 function s:Onescope(lnum,text,add)
-  return a:text =~ '\%(\<else\|\<do\|=>' . (a:add ? '\|\<try\|\<finally' : '' ) . '\)\C' . s:line_term ||
+  return a:text =~# '\%(\<else\|\<do\|=>' . (a:add ? '\|\<try\|\<finally' : '' ) . '\)' . s:line_term ||
         \ ((a:add && a:text =~ s:line_pre . s:line_term && search('\%' . s:PrevCodeLine(a:lnum - 1) . 'l.)' . s:line_term)) ||
         \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
-        \ search((a:add ? '\%(function\*\|[A-Za-z_$][0-9A-Za-z_$]*\)\C' :
-        \ '\<\%(for\%(\s+each\)\=\|if\|let\|while\|with\)\C') . '\_s*\%#','bW') &&
-        \ (a:add || (expand("<cword>") == 'while' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1))
+        \ search((a:add ? '\%(function\*\|[A-Za-z_$][0-9A-Za-z_$]*\)' :
+        \ '\<\%(for\%(\s+each\)\=\|if\|let\|while\|with\)') . '\_s*\%#\C','bW') &&
+        \ (a:add || (expand("<cword>") ==# 'while' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1))
 endfunction
 
 " Auxiliary Functions {{{2
@@ -151,7 +151,7 @@ function GetJavascriptIndent()
   endif
   let line = s:StripLine(line)
 
-  if (line =~ s:expr_case)
+  if (line =~# s:expr_case)
     let cpo_switch = &cpo
     set cpo+=%
     let ind = cindent(v:lnum)
@@ -187,11 +187,11 @@ function GetJavascriptIndent()
     return indent(num)
   endif
   let inb = num == 0 ? 1 : s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1)
-  let switch_offset = (!inb || num == 0) || expand("<cword>") != 'switch' ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
+  let switch_offset = (!inb || num == 0) || expand("<cword>") !=# 'switch' ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1))
   let pline = s:StripLine(getline(lnum))
-  if ((line =~ g:javascript_opfirst ||
-        \ (pline =~ g:javascript_continuation && pline !~ s:expr_case &&
+  if ((line =~# g:javascript_opfirst ||
+        \ (pline =~# g:javascript_continuation && pline !~# s:expr_case &&
         \ (pline !~ ':' . s:line_term || line !~# s:line_pre .
         \ '\%(debugger\|do\|else\|finally\|for\|if\|let\|switch\|throw\|try\|while\|with\)'))) &&
         \ inb) || (s:Onescope(lnum,pline,0) && line !~ s:line_pre . '{')
