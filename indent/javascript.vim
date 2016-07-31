@@ -29,11 +29,11 @@ set cpo&vim
 
 " Get shiftwidth value
 if exists('*shiftwidth')
-  func s:sw()
+  function s:sw()
     return shiftwidth()
   endfunction
 else
-  func s:sw()
+  function s:sw()
     return &sw
   endfunction
 endif
@@ -49,7 +49,7 @@ let s:syng_comment = '\%(comment\|doc\)\c'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "line('.') < (prevnonblank(v:lnum) - 2000) ? dummy : s:IsSyn(line('.'),col('.'),'')"
 
-func s:lookForParens(start,end,flags,time)
+function s:lookForParens(start,end,flags,time)
   try
     return searchpair(a:start,'',a:end,a:flags,s:skip_expr,0,a:time)
   catch /E118/
@@ -70,7 +70,7 @@ if !exists('g:javascript_continuation')
 endif
 let g:javascript_continuation .= s:line_term
 
-func s:Onescope(lnum,text,add)
+function s:Onescope(lnum,text,add)
   return a:text =~ '\%(\<else\|\<do\|=>' . (a:add ? '\|\<try\|\<finally' : '' ) . '\)\C' . s:line_term ||
         \ ((a:add && a:text =~ s:line_pre . s:line_term && cursor(s:PrevCodeLine(a:lnum - 1),1) > -1 &&
         \ cursor(line('.'),match(s:Stripline(getline(line('.'))), ')' . s:line_term))>-1) ||
@@ -84,17 +84,17 @@ endfunction
 " Auxiliary Functions {{{2
 
 " strip line of comment
-func s:StripLine(c)
+function s:StripLine(c)
   return substitute(a:c, '\%(:\@<!\/\/.*\)$', '','')
 endfunction
 
 " Check if the character at lnum:col is inside a string, comment, or is ascii.
-func s:IsSyn(lnum, col, reg)
+function s:IsSyn(lnum, col, reg)
   return synIDattr(synID(a:lnum, a:col, 1), 'name') =~? (a:reg != '' ? a:reg : s:syng_strcom)
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
-func s:PrevCodeLine(lnum)
+function s:PrevCodeLine(lnum)
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
     if !s:IsSyn(lnum, matchend(getline(lnum), '^\s*[^''"]'),'')
@@ -106,7 +106,7 @@ func s:PrevCodeLine(lnum)
 endfunction
 
 " Check if line 'lnum' has more opening brackets than closing ones.
-func s:LineHasOpeningBrackets(lnum)
+function s:LineHasOpeningBrackets(lnum)
   let open_0 = 0
   let open_2 = 0
   let open_4 = 0
@@ -130,7 +130,7 @@ func s:LineHasOpeningBrackets(lnum)
 endfunction
 " }}}
 
-func GetJavascriptIndent()
+function GetJavascriptIndent()
   if !exists('b:js_cache')
     let b:js_cache = [0,0,0]
   endif
