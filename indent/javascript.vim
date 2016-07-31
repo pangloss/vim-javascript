@@ -193,7 +193,7 @@ function GetJavascriptIndent()
   if ((line =~# g:javascript_opfirst ||
         \ (pline =~# g:javascript_continuation && pline !~# s:expr_case &&
         \ (pline !~ ':' . s:line_term || line !~# s:line_pre .
-        \ '\%(debugger\|do\|else\|finally\|for\|if\|let\|switch\|throw\|try\|while\|with\)'))) &&
+        \ '\%(debugger\|do\|else\|finally\|for\|if\|let\|switch\|throw\|try\|while\|with\)\>'))) &&
         \ inb) || (s:Onescope(lnum,pline,0) && line !~ s:line_pre . '{')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
