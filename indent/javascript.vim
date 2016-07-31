@@ -40,10 +40,10 @@ endif
 let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
 let s:expr_case = s:line_pre . '\%(\%(case\>.*\)\|default\)\s*:'
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)\c'
+let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)'
 
 " Regex of syntax group names that are strings or documentation.
-let s:syng_comment = '\%(comment\|doc\)\c'
+let s:syng_comment = '\%(comment\|doc\)'
 
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "line('.') < (prevnonblank(v:lnum) - 2000) ? dummy : s:IsSyn(line('.'),col('.'),'')"
