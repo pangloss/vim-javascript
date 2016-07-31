@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: vim-javascript community
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: July 30, 2016
+" Last Change: July 31, 2016
 
 " Only load this indent file when no other was loaded.
 if exists("b:did_indent")
@@ -191,7 +191,9 @@ function GetJavascriptIndent()
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1))
   let pline = s:StripLine(getline(lnum))
   if ((line =~ g:javascript_opfirst ||
-        \ (pline =~ g:javascript_continuation && pline !~ s:expr_case)) &&
+        \ (pline =~ g:javascript_continuation && pline !~ s:expr_case &&
+        \ (pline !~ ':' . s:line_term || line !~# s:line_pre .
+        \ '\%(debugger\|do\|else\|finally\|for\|if\|let\|switch\|throw\|try\|while\|with\)'))) &&
         \ inb) || (s:Onescope(lnum,pline,0) && line !~ s:line_pre . '{')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
