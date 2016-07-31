@@ -1,9 +1,9 @@
 " Vim indent file
 " Language: Javascript
-" Maintainer:   vim-javascript community
-" URL:          https://github.com/pangloss/vim-javascript
+" Maintainer: vim-javascript community
+" URL: https://github.com/pangloss/vim-javascript
 " Acknowledgement: Based off of vim-ruby maintained by Nikolai Weibull http://vim-ruby.rubyforge.org
-" Last Change: July 29, 2016
+" Last Change: July 30, 2016
 
 " Only load this indent file when no other was loaded.
 if exists("b:did_indent")
@@ -29,13 +29,13 @@ set cpo&vim
 
 " Get shiftwidth value
 if exists('*shiftwidth')
-  func s:sw()
+  function s:sw()
     return shiftwidth()
-  endfunc
+  endfunction
 else
-  func s:sw()
+  function s:sw()
     return &sw
-  endfunc
+  endfunction
 endif
 
 let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
@@ -49,15 +49,15 @@ let s:syng_comment = '\%(comment\|doc\)\c'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "line('.') < (prevnonblank(v:lnum) - 2000) ? dummy : s:IsSyn(line('.'),col('.'),'')"
 
-func s:lookForParens(start,end,flags,time)
+function s:lookForParens(start,end,flags,time)
   try
     return searchpair(a:start,'',a:end,a:flags,s:skip_expr,0,a:time)
   catch /E118/
     return searchpair(a:start,'',a:end,a:flags,0,0)
   endtry
-endfunc
+endfunction
 
-let s:line_term = '\s*\%(\/\*.*\*\/\s*\)*\%(:\@<!\/\/.*\)\=$'
+let s:line_term = '\s*\%(\/\*.*\*\/\s*\)*$'
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 if !exists('g:javascript_opfirst')
@@ -72,7 +72,8 @@ let g:javascript_continuation .= s:line_term
 
 function s:Onescope(lnum,text,add)
   return a:text =~ '\%(\<else\|\<do\|=>' . (a:add ? '\|\<try\|\<finally' : '' ) . '\)\C' . s:line_term ||
-        \ ((a:add && a:text =~ s:line_pre . s:line_term && search('\%' . s:PrevCodeLine(a:lnum - 1) . 'l.)' . s:line_term)) ||
+        \ ((a:add && a:text =~ s:line_pre . s:line_term && cursor(s:PrevCodeLine(a:lnum - 1),1) > -1 &&
+        \ cursor(line('.'),match(s:Stripline(getline(line('.'))), ')' . s:line_term))>-1) ||
         \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 &&
         \ search((a:add ? '\%(function\*\|[A-Za-z_$][0-9A-Za-z_$]*\)\C' :
@@ -81,6 +82,11 @@ function s:Onescope(lnum,text,add)
 endfunction
 
 " Auxiliary Functions {{{2
+
+" strip line of comment
+function s:StripLine(c)
+  return substitute(a:c, '\%(:\@<!\/\/.*\)$', '','')
+endfunction
 
 " Check if the character at lnum:col is inside a string, comment, or is ascii.
 function s:IsSyn(lnum, col, reg)
@@ -96,7 +102,7 @@ function s:PrevCodeLine(lnum)
     endif
     let lnum = prevnonblank(lnum - 1)
   endwhile
-  return lnum
+  return lnum > 0 ? lnum : -1
 endfunction
 
 " Check if line 'lnum' has more opening brackets than closing ones.
@@ -127,7 +133,7 @@ endfunction
 function GetJavascriptIndent()
   if !exists('b:js_cache')
     let b:js_cache = [0,0,0]
-  end
+  endif
   " Get the current line.
   let line = getline(v:lnum)
   " previous nonblank line number
@@ -142,7 +148,9 @@ function GetJavascriptIndent()
     return cindent(v:lnum)
   endif
   let lnum = s:PrevCodeLine(v:lnum - 1)
-  if lnum == 0
+  let pline = s:StripLine(getline(lnum))
+  let line = s:StripLine(line)
+  if lnum <= 0
     return 0
   endif
 
@@ -163,7 +171,7 @@ function GetJavascriptIndent()
     let num = pcounts[0][0] =~ '1' ? lnum : b:js_cache[1]
     if pcounts[0][0] =~'1'
       call cursor(lnum,pcounts[0][1])
-    end
+    endif
   else
     call cursor(v:lnum,1)
     let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
@@ -173,24 +181,24 @@ function GetJavascriptIndent()
       let num = s:lookForParens(pattern[0],pattern[1],'bW',2000)
     else
       let num = s:lookForParens('(\|{\|\[',')\|}\|\]','bW',2000)
-    end
-  end
+    endif
+  endif
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
   " most significant part
   if line =~ s:line_pre . '[])}]'
     return indent(num)
-  end
-  let inb = num == 0 ? 1 : s:Onescope(num, strpart(getline(num),0,b:js_cache[2] - 1),1)
+  endif
+  let inb = num == 0 ? 1 : s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1)
   let switch_offset = (!inb || num == 0) || expand("<cword>") != 'switch' ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1))
   if ((line =~ g:javascript_opfirst ||
-        \ (getline(lnum) =~ g:javascript_continuation && getline(lnum) !~ s:expr_case)) &&
-        \ inb) || (s:Onescope(lnum,getline(lnum),0) && line !~ s:line_pre . '{')
+        \ (pline =~ g:javascript_continuation && pline !~ s:expr_case)) &&
+        \ inb) || (s:Onescope(lnum,pline,0) && line !~ s:line_pre . '{')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
     return indent(num) + s:sw() + switch_offset
-  end
+  endif
 
 endfunction
 
