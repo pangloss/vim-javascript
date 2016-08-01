@@ -74,7 +74,7 @@ function s:Onescope(lnum,text,add)
         \ ((a:add && a:text =~ s:line_pre . s:line_term && search('\%' . s:PrevCodeLine(a:lnum - 1) . 'l.)' . s:line_term)) ||
         \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 && search((a:add ?
-        \ '\%(function\*\|[A-Za-z_$][0-9A-Za-z_$]*\)' : '\<\%(for\%(\s+each\)\=\|if\|let\|while\|with\)') . '\_s*\%#\C','bW') &&
+        \ '\%(function\*\|\%(\h\|\$\)\%(\w\|\$\)*\)' : '\<\%(for\%(\s+each\)\=\|if\|let\|while\|with\)') . '\_s*\%#\C','bW') &&
         \ (a:add || (expand("<cword>") ==# 'while' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1))
 endfunction
 
