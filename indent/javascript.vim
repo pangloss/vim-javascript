@@ -40,7 +40,7 @@ endif
 let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
 let s:expr_case = s:line_pre . '\%(\%(case\>.*\)\|default\)\s*:'
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = '\%(string\|regex\|special\|doc\|comment\|template\)'
+let s:syng_strcom = '\%(s\%(tring\|pecial\)\|regex\|doc\|comment\|template\)'
 
 " Regex of syntax group names that are strings or documentation.
 let s:syng_comment = '\%(comment\|doc\)'
@@ -74,7 +74,7 @@ function s:Onescope(lnum,text,add)
         \ ((a:add && a:text =~ s:line_pre . s:line_term && search('\%' . s:PrevCodeLine(a:lnum - 1) . 'l.)' . s:line_term)) ||
         \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 && search((a:add ?
-        \ '\%(function\*\|\%(\h\|\$\)\%(\w\|\$\)*\)' : '\<\%(for\%(\s+each\)\=\|if\|let\|while\|with\)') . '\_s*\%#\C','bW') &&
+        \ '\%(function\*\|\%(\h\|\$\)\%(\w\|\$\)*\)' : '\<\%(for\%(\s+each\)\=\|if\|let\|w\%(hile\|ith\)\)') . '\_s*\%#\C','bW') &&
         \ (a:add || (expand("<cword>") ==# 'while' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1))
 endfunction
 
@@ -192,7 +192,7 @@ function GetJavascriptIndent()
   if ((line =~# g:javascript_opfirst ||
         \ (pline =~# g:javascript_continuation && pline !~# s:expr_case &&
         \ (pline !~ ':' . s:line_term || line !~#
-        \ s:line_pre . '\%(debugger\|do\|else\|finally\|for\|if\|let\|switch\|throw\|try\|while\|with\)\>'))) &&
+        \ s:line_pre . '\%(d\%(ebugger\|o\)\|else\|f\%(inally\|or\)\|if\|let\|switch\|t\%(hrow\|ry\)\|w\%(hile\|ith\)\)\>'))) &&
         \ inb) || (s:Onescope(lnum,pline,0) && line !~ s:line_pre . '{')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
