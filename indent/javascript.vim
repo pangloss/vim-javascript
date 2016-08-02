@@ -37,10 +37,10 @@ else
   endfunction
 endif
 
-let s:line_pre = '^\s*\%(\/\*.*\*\/\s*\)*'
+let s:line_pre = '^\s*\%(\/\*.\{-}\*\/\s*\)*'
 let s:expr_case = s:line_pre . '\%(\%(case\>.*\)\|default\)\s*:'
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = '\%(s\%(tring\|pecial\)\|regex\|doc\|comment\|template\)'
+let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
 
 " Regex of syntax group names that are strings or documentation.
 let s:syng_comment = '\%(comment\|doc\)'
@@ -56,7 +56,7 @@ function s:lookForParens(start,end,flags,time)
   endtry
 endfunction
 
-let s:line_term = '\s*\%(\/\*.*\*\/\s*\)*$'
+let s:line_term = '\s*\%(\/\*.\{-}\*\/\s*\)*$'
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 if !exists('g:javascript_opfirst')
@@ -74,7 +74,8 @@ function s:Onescope(lnum,text,add)
         \ ((a:add && a:text =~ s:line_pre . s:line_term && search('\%' . s:PrevCodeLine(a:lnum - 1) . 'l.)' . s:line_term)) ||
         \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 && search((a:add ?
-        \ '\%(function\*\|[[:lower:][:upper:]_$][[:digit:][:lower:][:upper:]_$]*\)' : '\<\%(for\%(\s+each\)\=\|if\|let\|w\%(hile\|ith\)\)') . '\_s*\%#\C','bW') &&
+        \ '\%(function\*\|[[:lower:][:upper:]_$][[:digit:][:lower:][:upper:]_$]*\)' :
+        \ '\<\%(for\%(\s+each\)\=\|if\|let\|w\%(hile\|ith\)\)') . '\_s*\%#\C','bW') &&
         \ (a:add || (expand("<cword>") ==# 'while' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1))
 endfunction
 
@@ -192,7 +193,7 @@ function GetJavascriptIndent()
   if ((line =~# g:javascript_opfirst ||
         \ (pline =~# g:javascript_continuation && pline !~# s:expr_case &&
         \ (pline !~ ':' . s:line_term || line !~#
-        \ s:line_pre . '\%(d\%(ebugger\|o\)\|else\|f\%(inally\|or\)\|if\|let\|switch\|t\%(hrow\|ry\)\|w\%(hile\|ith\)\)\>'))) &&
+        \ s:line_pre . '\%(d\%(o\|ebugger\)\|else\|f\%(or\|inally\)\|if\|let\|switch\|t\%(hrow\|ry\)\|w\%(hile\|ith\)\)\>'))) &&
         \ inb) || (s:Onescope(lnum,pline,0) && line !~ s:line_pre . '{')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
