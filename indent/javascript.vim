@@ -1,4 +1,3 @@
-
 " Vim indent file
 " Language: Javascript
 " Maintainer: vim-javascript community
@@ -187,16 +186,17 @@ function GetJavascriptIndent()
   if line =~ s:line_pre . '[])}]'
     return indent(num)
   endif
+
   let pline = s:StripLine(getline(lnum))
-  let inb = num == 0 ? 1 : (line !~ s:line_pre . ',' && pline !~ ',' . s:line_term) ||
-        \ s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1)
+  let inb = num == 0 ? 1 : s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1) ||
+        \ (num < lnum && (line !~ s:line_pre . ',' && pline !~ ',' . s:line_term))
   let switch_offset = (!inb || num == 0) || expand("<cword>") !=# 'switch' ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1))
-  if ((line =~# g:javascript_opfirst ||
-        \ (pline =~# g:javascript_continuation && pline !~# s:expr_case &&
-        \ (pline !~ ':' . s:line_term || line !~#
-        \ s:line_pre . '\%(d\%(o\|ebugger\)\|else\|f\%(or\|inally\)\|if\|let\|switch\|t\%(hrow\|ry\)\|w\%(hile\|ith\)\)\>'))) &&
-        \ inb) || (num < lnum && s:Onescope(lnum,pline,0) && line !~ s:line_pre . '{')
+
+  if (inb && (line =~# g:javascript_opfirst ||
+        \ (pline =~# g:javascript_continuation && pline !~# s:expr_case && (pline !~ ':' . s:line_term || line !~#
+        \ s:line_pre . '\%(d\%(o\|ebugger\)\|else\|f\%(or\|inally\)\|if\|let\|switch\|t\%(hrow\|ry\)\|w\%(hile\|ith\)\)\>')))) ||
+        \ (num < lnum && s:Onescope(lnum,pline,0) && line !~ s:line_pre . '{')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
     return indent(num) + s:sw() + switch_offset
