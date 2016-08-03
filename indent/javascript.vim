@@ -116,7 +116,7 @@ function s:LineHasOpeningBrackets(lnum)
       let idx = stridx('(){}[]', line[pos])
       if idx % 2 == 0
         let open_{idx} = open_{idx} + 1
-        let last = pos
+        let last = pos + 1
       else
         let open_{idx - 1} = open_{idx - 1} - 1
       endif
