@@ -164,10 +164,7 @@ function GetJavascriptIndent()
   let pcounts = [0]
   if b:js_cache[0] >= lnum  && b:js_cache[0] <= v:lnum && b:js_cache[0] &&
         \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '2')
-    let num = pcounts[0] =~ '1' ? lnum : b:js_cache[1]
-    if pcounts[0] =~'1'
-      call s:lookForParens('(\|{\|\[',')\|}\|\]','bW',2000)
-    endif
+    let num = pcounts[0] =~ '1' ? s:lookForParens('(\|{\|\[',')\|}\|\]','bW',2000) : b:js_cache[1]
   else
     let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
     if line[0] =~ '\s' && syns != ''
