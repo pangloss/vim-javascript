@@ -187,8 +187,8 @@ function GetJavascriptIndent()
   endif
 
   let pline = s:StripLine(getline(lnum))
-  let inb = num == 0 ? 1 : s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1) ||
-        \ (num < lnum && (line !~ s:line_pre . ',' && pline !~ ',' . s:line_term))
+  let inb = num == 0 ? 1 : (s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1) ||
+        \ (line !~ s:line_pre . ',' && pline !~ ',' . s:line_term)) && num < lnum
   let switch_offset = (!inb || num == 0) || expand("<cword>") !=# 'switch' ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (match(&cino,'.*:\zs[^,]*s') ? s:sw() : 1))
 
