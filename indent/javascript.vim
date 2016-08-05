@@ -83,7 +83,7 @@ endfunction
 
 " strip line of comment
 function s:StripLine(c)
-  return a:c !~ s:expr_case ? substitute(a:c, '\%(:\@<!\/\/.*\)$', '','') : a:c
+  return a:c !~# s:expr_case ? substitute(a:c, '\%(:\@<!\/\/.*\)$', '','') : a:c
 endfunction
 
 " Check if the character at lnum:col is inside a string, comment, or is ascii.
