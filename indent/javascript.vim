@@ -83,7 +83,7 @@ endfunction
 
 " strip line of comment
 function s:StripLine(c)
-  return substitute(a:c, '\%(:\@<!\/\/.*\)$', '','')
+  return a:c !~ s:expr_case ? substitute(a:c, '\%(:\@<!\/\/.*\)$', '','') : a:c
 endfunction
 
 " Check if the character at lnum:col is inside a string, comment, or is ascii.
@@ -147,7 +147,6 @@ function GetJavascriptIndent()
   if lnum == 0
     return 0
   endif
-  let line = s:StripLine(line)
 
   if (line =~# s:expr_case)
     let cpo_switch = &cpo
@@ -164,15 +163,15 @@ function GetJavascriptIndent()
   let pcounts = [0]
   if b:js_cache[0] >= lnum  && b:js_cache[0] <= v:lnum && b:js_cache[0] &&
         \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '2')
-    let num = pcounts[0] =~ '1' ? s:lookForParens('(\|{\|\[',')\|}\|\]','bW',2000) : b:js_cache[1]
+    let num = pcounts[0] =~ '1' ? s:lookForParens('[({[]','[])}]','bW',2000) : b:js_cache[1]
   else
     let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
     if line[0] =~ '\s' && syns != ''
       let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] :
-            \ ['(\|{\|\[',')\|}\|\]']
+            \ ['[({[]','[])}]']
       let num = s:lookForParens(pattern[0],pattern[1],'bW',2000)
     else
-      let num = s:lookForParens('(\|{\|\[',')\|}\|\]','bW',2000)
+      let num = s:lookForParens('[({[]','[])}]','bW',2000)
     endif
   endif
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
