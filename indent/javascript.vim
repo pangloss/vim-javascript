@@ -129,6 +129,7 @@ endfunction
 function GetJavascriptIndent()
   if !exists('b:js_cache')
     let b:js_cache = [0,0,0]
+    let s:full_repo = exists("g:javascript_plugin_flow")
   endif
   " Get the current line.
   let line = getline(v:lnum)
@@ -162,17 +163,15 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   let pcounts = [0]
   if b:js_cache[0] >= lnum  && b:js_cache[0] <= v:lnum && b:js_cache[0] &&
-        \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '2')
-    let num = pcounts[0] =~ '1' ? s:lookForParens('[({[]','[])}]','bW',2000) : b:js_cache[1]
-  else
+        \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '[12]')
+    let num = b:js_cache[1]
+  elseif s:full_repo && line[0] =~ '\s'
     let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
-    if line[0] =~ '\s' && syns != ''
-      let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] : syns =~? 'jsbracket'? ['\[','\]'] :
-            \ ['[({[]','[])}]']
-      let num = s:lookForParens(pattern[0],pattern[1],'bW',2000)
-    else
-      let num = s:lookForParens('[({[]','[])}]','bW',2000)
-    endif
+    let pattern = syns =~? 'funcblock' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
+          \ syns =~? 'jsbracket'? ['\[','\]'] : ['[({[]','[])}]']
+    let num = s:lookForParens(pattern[0],pattern[1],'bW',2000)
+  else
+    let num = s:lookForParens('[({[]','[])}]','bW',2000)
   endif
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
