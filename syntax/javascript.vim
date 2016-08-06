@@ -205,15 +205,25 @@ syntax region  jsCommentClass       contained start=/\/\*/ end=/\*\// contains=j
 syntax region  jsCommentMisc        contained start=/\/\// end=/$/    contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsBlock extend keepend
 syntax region  jsCommentMisc        contained start=/\/\*/ end=/\*\// contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsBlock fold extend keepend
 
-if exists("javascript_plugin_jsdoc")
+if !exists("g:javascript_plugin_jsdoc")
+  let g:javascript_plugin_jsdoc = 0
+end
+if !exists("g:javascript_plugin_ngdoc")
+  let g:javascript_plugin_ngdoc = 0
+end
+if !exists("g:javascript_plugin_flow")
+  let g:javascript_plugin_flow = 0
+end
+
+if g:javascript_plugin_jsdoc
   runtime extras/jsdoc.vim
   " NGDoc requires JSDoc
-  if exists("javascript_plugin_ngdoc")
+  if g:javascript_plugin_ngdoc
     runtime extras/ngdoc.vim
   endif
 endif
 
-if exists("javascript_plugin_flow")
+if g:javascript_plugin_flow
   runtime extras/flow.vim
 endif
 
