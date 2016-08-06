@@ -88,7 +88,7 @@ endfunction
 
 " Check if the character at lnum:col is inside a string, comment, or is ascii.
 function s:IsSyn(lnum, col, reg)
-  return synIDattr(synID(a:lnum, a:col, 1), 'name') =~? (a:reg != '' ? a:reg : s:syng_strcom)
+  return synIDattr(synID(a:lnum, a:col, 0), 'name') =~? (a:reg != '' ? a:reg : s:syng_strcom)
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
