@@ -104,7 +104,7 @@ function s:PrevCodeLine(lnum)
 endfunction
 
 " Check if line 'lnum' has more opening brackets than closing ones.
-function s:LineHasOpeningBrackets(lnum)
+function s:Balanced(lnum)
   let open_0 = 0
   let open_2 = 0
   let open_4 = 0
@@ -121,8 +121,7 @@ function s:LineHasOpeningBrackets(lnum)
     endif
     let pos = match(line, '[][(){}]', pos + 1)
   endwhile
-  return (open_0 > 0 ? 1 : (open_0 == 0 ? 0 : 2)) . (open_2 > 0 ? 1 : (open_2 == 0 ? 0 : 2)) .
-        \ (open_4 > 0 ? 1 : (open_4 == 0 ? 0 : 2))
+  return (!open_4 + !open_2 + !open_0) - 2
 endfunction
 " }}}
 
@@ -161,7 +160,7 @@ function GetJavascriptIndent()
   " same scope or starts a new one, unless if it closed a scope.
   call cursor(v:lnum,1)
   if b:js_cache[0] >= lnum  && b:js_cache[0] <= v:lnum && b:js_cache[0] &&
-        \ (b:js_cache[0] > lnum || s:LineHasOpeningBrackets(lnum) !~ '[12]')
+        \ (b:js_cache[0] > lnum || s:Balanced(lnum) > 0)
     let num = b:js_cache[1]
   elseif line[0] =~ '\s'
     let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
