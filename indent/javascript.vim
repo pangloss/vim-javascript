@@ -161,9 +161,8 @@ function GetJavascriptIndent()
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
   call cursor(v:lnum,1)
-  let pcounts = [0]
   if b:js_cache[0] >= lnum  && b:js_cache[0] <= v:lnum && b:js_cache[0] &&
-        \ (b:js_cache[0] > lnum || map(pcounts,'s:LineHasOpeningBrackets(lnum)')[0] !~ '[12]')
+        \ (b:js_cache[0] > lnum || s:LineHasOpeningBrackets(lnum) !~ '[12]')
     let num = b:js_cache[1]
   elseif s:full_repo && line[0] =~ '\s'
     let syns = synIDattr(synID(v:lnum, 1, 1), 'name')
