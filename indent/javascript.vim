@@ -132,14 +132,14 @@ function GetJavascriptIndent()
   " Get the current line.
   let line = getline(v:lnum)
   " previous nonblank line number
-  let prevline = prevnonblank(v:lnum - 1)
+  let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
 
   " start with strings,comments,etc.{{{2
-  if (line !~ '^[''"`]' && s:IsSyn(v:lnum,1,'string\|template')) ||
-        \ (line !~ '^\s*[/*]' && s:IsSyn(v:lnum,1,s:syng_comment))
+  if (line !~ '^[''"`]' && syns =~? 'string\|template') ||
+        \ (line !~ '^\s*[/*]' && syns =~? s:syng_comment)
     return -1
   endif
-  if line !~ '^\%(\/\*\|\s*\/\/\)' && s:IsSyn(v:lnum,1,s:syng_comment)
+  if line !~ '^\%(\/\*\|\s*\/\/\)' && syns =~? s:syng_comment
     return cindent(v:lnum)
   endif
   let lnum = s:PrevCodeLine(v:lnum - 1)
@@ -162,8 +162,7 @@ function GetJavascriptIndent()
   if b:js_cache[0] >= lnum  && b:js_cache[0] <= v:lnum && b:js_cache[0] &&
         \ (b:js_cache[0] > lnum || s:Balanced(lnum) > 0)
     let num = b:js_cache[1]
-  elseif line[0] =~ '\s'
-    let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
+  elseif syns != '' && line[0] =~ '\s'
     let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
           \ syns =~? 'jsbracket'? ['\[','\]'] : ['[({[]','[])}]']
     let num = s:lookForParens(pattern[0],pattern[1],'bW',2000)
