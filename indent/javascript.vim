@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: vim-javascript community
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: August 6, 2016
+" Last Change: August 7, 2016
 
 " Only load this indent file when no other was loaded.
 if exists("b:did_indent")
@@ -103,7 +103,7 @@ function s:PrevCodeLine(lnum)
   return lnum
 endfunction
 
-" Check if line 'lnum' has more opening brackets than closing ones.
+" Check if line 'lnum' has a balanced amount of parentheses.
 function s:Balanced(lnum)
   let open_0 = 0
   let open_2 = 0
@@ -131,7 +131,6 @@ function GetJavascriptIndent()
   endif
   " Get the current line.
   let line = getline(v:lnum)
-  " previous nonblank line number
   let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
 
   " start with strings,comments,etc.{{{2
