@@ -46,14 +46,14 @@ let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
 let s:syng_comment = '\%(comment\|doc\)'
 
 " Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "line('.') < (prevnonblank(v:lnum) - 2000) ? dummy : s:IsSyn(line('.'),col('.'),'')"
+let s:skip_expr = "line('.') < (prevnonblank(v:lnum) - 2000) ? dummy : synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
 function s:lookForParens(start,end,flags,time)
-  try
+  if has('reltime')
     return searchpair(a:start,'',a:end,a:flags,s:skip_expr,0,a:time)
-  catch /E118/
+  else
     return searchpair(a:start,'',a:end,a:flags,0,0)
-  endtry
+  endif
 endfunction
 
 let s:line_term = '\%(\s*\%(\/\*.\{-}\*\/\s*\)\=\)\@>$'
@@ -86,16 +86,11 @@ function s:StripLine(c)
   return a:c !~# s:expr_case ? substitute(a:c, '\%(:\@<!\/\/.*\)$', '','') : a:c
 endfunction
 
-" Check if the character at lnum:col is inside a string, comment, or is ascii.
-function s:IsSyn(lnum, col, reg)
-  return synIDattr(synID(a:lnum, a:col, 0), 'name') =~? (a:reg != '' ? a:reg : s:syng_strcom)
-endfunction
-
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
 function s:PrevCodeLine(lnum)
   let lnum = prevnonblank(a:lnum)
   while lnum > 0
-    if !s:IsSyn(lnum, matchend(getline(lnum), '^\s*[^''"]'),'')
+    if synIDattr(synID(lnum,matchend(getline(lnum), '^\s*[^''"]'),0),'name') !~? s:syng_strcom
       break
     endif
     let lnum = prevnonblank(lnum - 1)
@@ -111,7 +106,7 @@ function s:Balanced(lnum)
   let line = getline(a:lnum)
   let pos = match(line, '[][(){}]', 0)
   while pos != -1
-    if !s:IsSyn(a:lnum, pos + 1, '')
+    if synIDattr(synID(a:lnum,pos + 1,0),'name') !~? s:syng_strcom
       let idx = stridx('(){}[]', line[pos])
       if idx % 2 == 0
         let open_{idx} = open_{idx} + 1
