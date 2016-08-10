@@ -46,7 +46,7 @@ let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
 let s:syng_comment = '\%(comment\|doc\)'
 
 " Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "line('.') < (prevnonblank(v:lnum) - 2000) ? dummy : synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
+let s:skip_expr = "line('.') < (prevnonblank(v:lnum) - 2000) ? dummy : s:TrimLine(getline(line('.')),line('.'))[col('.')-1] == '_' || synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
 function s:lookForParens(start,end,flags,time)
   if has('reltime')
@@ -80,6 +80,19 @@ function s:Onescope(lnum,text,add)
 endfunction
 
 " Auxiliary Functions {{{2
+
+function s:TrimLine(pline,ln)
+  let line = substitute(a:pline, '\\\\', '__','g')
+  let line = substitute(line, '\(/\*.\{-}\*/\)', '\=repeat("_",strlen(submatch(0)))', 'g')
+  if line =~ '\\$' || getline(a:ln - 1) =~ '\\$'
+    return line
+  endif
+  let line = substitute(line, '\(\([''"]\).\{-}\\\@<!\2\)','\=repeat("_",strlen(submatch(0)))','g')
+  let line = substitute(line, '\(:\@<!//.*$\)', '\=repeat("_",strlen(submatch(0)))', 'g')
+  let line = substitute(line, '\(/\*[^/]*$\)','\=repeat("_",strlen(submatch(0)))','')
+  let line = substitute(line, '\(^[^/]\{-}\*/\)','\=repeat("_",strlen(submatch(0)))','')
+  return line
+endfunction
 
 " strip line of comment
 function s:StripLine(c)
@@ -127,6 +140,8 @@ function GetJavascriptIndent()
   " Get the current line.
   let line = getline(v:lnum)
   let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
+
+  " echom s:TrimLine(line,v:lnum)
 
   " start with strings,comments,etc.{{{2
   if (line !~ '^[''"`]' && syns =~? 'string\|template') ||
