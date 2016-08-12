@@ -79,6 +79,12 @@ function s:Onescope(lnum,text,add)
         \ (a:add || (expand("<cword>") ==# 'while' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1))
 endfunction
 
+" function s:isBlock(lnum,text,add)
+  " TODO:
+  " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
+  " https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/block
+" endfunction
+
 " Auxiliary Functions {{{2
 
 " strip line of comment
@@ -172,6 +178,7 @@ function GetJavascriptIndent()
   let pline = s:StripLine(getline(lnum))
   let inb = num == 0 ? 1 : (s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1) ||
         \ (line !~ s:line_pre . ',' && pline !~ ',' . s:line_term)) && num < lnum
+  " TODO: || isBlock()
   let switch_offset = (!inb || num == 0) || expand("<cword>") !=# 'switch' ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
 
