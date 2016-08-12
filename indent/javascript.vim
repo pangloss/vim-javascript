@@ -38,7 +38,7 @@ else
 endif
 
 let s:line_pre = '^\s*\%(\/\*.\{-}\*\/\s*\)*'
-let s:expr_case = s:line_pre . '\%(\%(case\>.*\)\|default\)\s*:'
+let s:expr_case = s:line_pre . '\%(\%(case\>.\+\)\|default\)\s*:'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
 
@@ -75,7 +75,7 @@ function s:Onescope(lnum,text,add)
         \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 && search((a:add ?
         \ '\%(function\*\|[[:lower:][:upper:]_$][[:digit:][:lower:][:upper:]_$]*\)' :
-        \ '\<\%(for\%(\s+each\)\=\|if\|let\|w\%(hile\|ith\)\)') . '\_s*\%#\C','bW') &&
+        \ '\<\%(for\%(\s\+each\)\=\|if\|let\|w\%(hile\|ith\)\)') . '\_s*\%#\C','bW') &&
         \ (a:add || (expand("<cword>") ==# 'while' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1))
 endfunction
 
