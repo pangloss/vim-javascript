@@ -31,7 +31,10 @@ And install it:
 ### Install with [pathogen](https://github.com/tpope/vim-pathogen)
 
       git clone https://github.com/pangloss/vim-javascript.git ~/.vim/bundle/vim-javascript
-
+      
+### Indent file included with Vim 7.4.2205
+The version included may lag behind the version provided here, though
+it is considered stable.
 
 ## Configuration Variables
 
@@ -97,6 +100,11 @@ variables:
     let g:javascript_conceal_super          = "Ω"
     let g:javascript_conceal_arrow_function = "⇒"
 
+## Indentation Specific
+
+1. `:h cino-:`
+2. End-of-line continuations : `g:javascript_continuation` ( slightly complicated, look at the source code )
+3. Start-of-line continuations : `g:javascript_opfirst` ( same as above )
 
 ## Contributing
 
