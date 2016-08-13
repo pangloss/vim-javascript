@@ -32,7 +32,7 @@ And install it:
 
       git clone https://github.com/pangloss/vim-javascript.git ~/.vim/bundle/vim-javascript
       
-### Indent file included with Vim 7.4.2205
+### Indent file included with current version of Vim
 The version included may lag behind the version provided here, though
 it is considered stable.
 
