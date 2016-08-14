@@ -31,10 +31,6 @@ And install it:
 ### Install with [pathogen](https://github.com/tpope/vim-pathogen)
 
       git clone https://github.com/pangloss/vim-javascript.git ~/.vim/bundle/vim-javascript
-      
-### Indent file in current versions of Vim
-The version included may lag behind the version provided here, though
-it is considered stable.
 
 ## Configuration Variables
 
