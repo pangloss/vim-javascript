@@ -60,12 +60,12 @@ let s:line_term = '\%(\s*\%(\/\*.\{-}\*\/\s*\)\=\)\@>$'
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 if !exists('g:javascript_opfirst')
-  let g:javascript_opfirst = '\%([<>,:?^%]\|\([-/.+]\)\%(\1\|\*\|\/\)\@!\|\*\/\@!\|=>\@!\||\|&\|in\%(stanceof\)\=\>\)'
+  let g:javascript_opfirst = '\%([<>,:?^%|&]\|\([-/.+]\)\%(\1\|\*\|\/\)\@!\|\*\/\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
 endif
 let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
 
 if !exists('g:javascript_continuation')
-  let g:javascript_continuation = '\%([<*,.?:^%]\|+\@<!+\|-\@<!-\|=\@<!>\|\*\@<!\/\|=\||\|&\|\<in\%(stanceof\)\=\)'
+  let g:javascript_continuation = '\%([<=*,.|&?:^%]\|+\@<!+\|-\@<!-\|=\@<!>\|\*\@<!\/\|\<in\%(stanceof\)\=\)'
 endif
 let g:javascript_continuation .= s:line_term
 
@@ -73,19 +73,16 @@ function s:Onescope(lnum,text,add)
   return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ? 'no b' :
         \ ((a:add && a:text =~ s:line_pre . '$' && search('\%' . s:PrevCodeLine(a:lnum - 1) . 'l.)' . s:line_term)) ||
         \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
-        \ s:lookForParens('(', ')', 'cbW', 100) > 0 && search('\l\+\_s*\%#\C','bW') &&
-        \ (a:add || (expand('<cword>') ==# 'while' ? !s:lookForParens('\<do\>\C', '\<while\>\C','nbW',100) : 1)) ?
-        \ expand('cword') ==# 'each' ? search('\<for\_s\+\%#','nW') ? 'for each' : '' : expand('<cword>') : ''
+        \ s:lookForParens('(', ')', 'cbW', 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
+        \ (a:add || (expand('<cword>') ==# 'while' ? !s:lookForParens('\C\<do\>', '\C\<while\>','nbW',100) : 1)) ?
+        \ expand('cword') ==# 'each' ? search('\C\<for\_s\+\%#','nW') ? 'for each' : '' : expand('<cword>') : ''
 endfunction
 
 function s:isBlock()
   " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
-  call cursor(b:js_cache[1:])
-  if getline(line('.'))[col('.')-1] == '{'
-    if !search('\C\%(\%([-=~!<*+,.?^%|&\[(]\|\<\%(yield\|delete\|void\|typeof\|throw\|new\|=\@<!>\|\*\@<!\/\|\<in\%(stanceof\)\=\)\)\_s*\|\<return\s*\)\%#','n')
-      return !search(':\_s*\%#') || (!s:lookForParens('[({[]','[])}]','bW',200) || s:isBlock())
-    endif
-  endif
+  return cursor(b:js_cache[1:]) > -1 && getline(line('.'))[col('.')-1] == '{' && !search(
+        \ '\C\%(\%([-=~!<*+,.?^%|&\[(]\|\<\%(yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|=\@<!>\|\*\@<!\/\|\<in\%(stanceof\)\=\)\)\_s*\|\<return\s*\)\%#','n') &&
+        \ (!search(':\_s*\%#') || (!s:lookForParens('[({[]','[])}]','bW',200) || s:isBlock()))
 endfunction
 
 " Auxiliary Functions {{{2
@@ -179,7 +176,7 @@ function GetJavascriptIndent()
   endif
 
   let pline = s:StripLine(getline(l:lnum))
-  let inb = num == 0 || (s:isBlock() || (l:line !~ s:line_pre . ',' && pline !~ ',' . s:line_term)) && num < l:lnum
+  let inb = num == 0 || num < l:lnum && ((l:line !~ s:line_pre . ',' && pline !~ ',' . s:line_term) || s:isBlock())
   let switch_offset = num == 0 || s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1) !=# 'switch' ? 0 :
         \ &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
