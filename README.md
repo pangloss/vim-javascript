@@ -32,6 +32,7 @@ And install it:
 
       git clone https://github.com/pangloss/vim-javascript.git ~/.vim/bundle/vim-javascript
 
+
 ## Configuration Variables
 
 The following variables control certain syntax highlighting plugins. You can
