@@ -74,8 +74,8 @@ function s:Onescope(lnum,text,add)
         \ ((a:add && a:text =~ s:line_pre . '$' && search('\%' . s:PrevCodeLine(a:lnum - 1) . 'l.)' . s:line_term)) ||
         \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
-        \ (a:add || (expand('<cword>') ==# 'while' ? !s:lookForParens('\C\<do\>', '\C\<while\>','nbW',100) : 1)) ?
-        \ expand('cword') ==# 'each' ? search('\C\<for\_s\+\%#','nW') ? 'for each' : '' : expand('<cword>') : ''
+        \ (a:add || ((expand('<cword>') !=# 'while' || !s:lookForParens('\C\<do\>', '\C\<while\>','nbW',100)) &&
+        \ expand('cword') !=# 'each' || search('\C\<for\_s\+\%#','nW'))) ? expand('<cword>') : ''
 endfunction
 
 function s:isBlock()
@@ -184,7 +184,7 @@ function GetJavascriptIndent()
   " most significant, find the indent amount
   if (inb && (l:line =~# g:javascript_opfirst ||
         \ (pline =~# g:javascript_continuation && pline !~# s:expr_case))) ||
-        \ (num < l:lnum && s:Onescope(l:lnum,pline,0) =~# '\%(for\%(\seach\)\=\|if\|let\|no\sb\|w\%(hile\|ith\)\)' &&
+        \ (num < l:lnum && s:Onescope(l:lnum,pline,0) =~# '\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)' &&
         \ l:line !~ s:line_pre . '{')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
