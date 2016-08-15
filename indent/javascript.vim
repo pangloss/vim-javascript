@@ -80,7 +80,7 @@ endfunction
 
 function s:isBlock()
   " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
-  return cursor(b:js_cache[1:]) > -1 && getline(line('.'))[col('.')-1] == '{' && !search(
+  return getline(line('.'))[col('.')-1] == '{' && !search(
         \ '\C\%(\%([-=~!<*+,.?^%|&\[(]\|\<\%(yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|=\@<!>\|\*\@<!\/\|\<in\%(stanceof\)\=\)\)\_s*\|\<return\s*\)\%#','n') &&
         \ (!search(':\_s*\%#') || (!s:lookForParens('[({[]','[])}]','bW',200) || s:isBlock()))
 endfunction
@@ -176,6 +176,7 @@ function GetJavascriptIndent()
   endif
 
   let pline = s:StripLine(getline(l:lnum))
+  call cursor(b:js_cache[1:])
   let inb = num == 0 || num < l:lnum && ((l:line !~ s:line_pre . ',' && pline !~ ',' . s:line_term) || s:isBlock())
   let switch_offset = num == 0 || s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1) !=# 'switch' ? 0 :
         \ &cino !~ ':' || !has('float') ?  s:sw() :
