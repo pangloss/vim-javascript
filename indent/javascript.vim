@@ -78,8 +78,8 @@ function s:Onescope(lnum,text,add)
         \ expand('cword') !=# 'each' || search('\C\<for\_s\+\%#','nbW'))) ? expand('<cword>') : ''
 endfunction
 
+" https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:isBlock()
-  " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
   return getline(line('.'))[col('.')-1] == '{' && !search(
         \ '\C\%(\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|\<in\%(stanceof\)\=\)\)\_s*\|\<return\s*\)\%#','bnW') &&
         \ (!search(':\_s*\%#','bW') || (!s:lookForParens('[({[]','[])}]','bW',200) || s:isBlock()))
