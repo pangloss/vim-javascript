@@ -75,14 +75,14 @@ function s:Onescope(lnum,text,add)
         \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
         \ s:lookForParens('(', ')', 'cbW', 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
         \ (a:add || ((expand('<cword>') !=# 'while' || !s:lookForParens('\C\<do\>', '\C\<while\>','nbW',100)) &&
-        \ expand('cword') !=# 'each' || search('\C\<for\_s\+\%#','nW'))) ? expand('<cword>') : ''
+        \ expand('cword') !=# 'each' || search('\C\<for\_s\+\%#','nbW'))) ? expand('<cword>') : ''
 endfunction
 
 function s:isBlock()
   " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
   return getline(line('.'))[col('.')-1] == '{' && !search(
-        \ '\C\%(\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|\<in\%(stanceof\)\=\)\)\_s*\|\<return\s*\)\%#','n') &&
-        \ (!search(':\_s*\%#') || (!s:lookForParens('[({[]','[])}]','bW',200) || s:isBlock()))
+        \ '\C\%(\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|\<in\%(stanceof\)\=\)\)\_s*\|\<return\s*\)\%#','bnW') &&
+        \ (!search(':\_s*\%#','bW') || (!s:lookForParens('[({[]','[])}]','bW',200) || s:isBlock()))
 endfunction
 
 " Auxiliary Functions {{{2
