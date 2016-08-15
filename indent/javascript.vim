@@ -81,7 +81,7 @@ endfunction
 function s:isBlock()
   " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
   return getline(line('.'))[col('.')-1] == '{' && !search(
-        \ '\C\%(\%([-=~!<*+,.?^%|&\[(]\|\<\%(yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|=\@<!>\|\*\@<!\/\|\<in\%(stanceof\)\=\)\)\_s*\|\<return\s*\)\%#','n') &&
+        \ '\C\%(\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|\<in\%(stanceof\)\=\)\)\_s*\|\<return\s*\)\%#','n') &&
         \ (!search(':\_s*\%#') || (!s:lookForParens('[({[]','[])}]','bW',200) || s:isBlock()))
 endfunction
 
