@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: vim-javascript community
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: August 7, 2016
+" Last Change: August 15, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -70,13 +70,19 @@ endif
 let g:javascript_continuation .= s:line_term
 
 function s:Onescope(lnum,text,add)
-  return a:text =~# '\%(\<else\|\<do\|=>' . (a:add ? '\|\<try\|\<finally' : '' ) . '\)' . s:line_term ||
+  return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ? 'no b' :
         \ ((a:add && a:text =~ s:line_pre . '$' && search('\%' . s:PrevCodeLine(a:lnum - 1) . 'l.)' . s:line_term)) ||
         \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
-        \ s:lookForParens('(', ')', 'cbW', 100) > 0 && search((a:add ?
-        \ '\%(function\*\|[[:lower:][:upper:]_$][[:digit:][:lower:][:upper:]_$]*\)' :
-        \ '\<\%(for\%(\s\+each\)\=\|if\|let\|w\%(hile\|ith\)\)') . '\_s*\%#\C','bW') &&
-        \ (a:add || (expand('<cword>') ==# 'while' ? !s:lookForParens('\<do\>\C', '\<while\>\C','bW',100) : 1))
+        \ s:lookForParens('(', ')', 'cbW', 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
+        \ (a:add || ((expand('<cword>') !=# 'while' || !s:lookForParens('\C\<do\>', '\C\<while\>','nbW',100)) &&
+        \ expand('cword') !=# 'each' || search('\C\<for\_s\+\%#','nbW'))) ? expand('<cword>') : ''
+endfunction
+
+" https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
+function s:isBlock()
+  return getline(line('.'))[col('.')-1] == '{' && !search(
+        \ '\C\%(\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|\<in\%(stanceof\)\=\)\)\_s*\|\<return\s*\)\%#','bnW') &&
+        \ (!search(':\_s*\%#','bW') || (!s:lookForParens('[({[]','[])}]','bW',200) || s:isBlock()))
 endfunction
 
 " Auxiliary Functions {{{2
@@ -170,16 +176,17 @@ function GetJavascriptIndent()
   endif
 
   let pline = s:StripLine(getline(l:lnum))
-  let inb = num == 0 ? 1 : (s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1) ||
-        \ (l:line !~ s:line_pre . ',' && pline !~ ',' . s:line_term)) && num < l:lnum
-  let switch_offset = (!inb || num == 0) || expand("<cword>") !=# 'switch' ? 0 : &cino !~ ':' || !has('float') ?  s:sw() :
+  call cursor(b:js_cache[1:])
+  let inb = num == 0 || num < l:lnum && ((l:line !~ s:line_pre . ',' && pline !~ ',' . s:line_term) || s:isBlock())
+  let switch_offset = num == 0 || s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1) !=# 'switch' ? 0 :
+        \ &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
 
   " most significant, find the indent amount
   if (inb && (l:line =~# g:javascript_opfirst ||
-        \ (pline =~# g:javascript_continuation && pline !~# s:expr_case && (pline !~ ':' . s:line_term || l:line !~#
-        \ s:line_pre . '\%(d\%(o\|ebugger\)\|else\|f\%(or\|inally\)\|if\|let\|switch\|t\%(hrow\|ry\)\|w\%(hile\|ith\)\)\>')))) ||
-        \ (num < l:lnum && s:Onescope(l:lnum,pline,0) && l:line !~ s:line_pre . '{')
+        \ (pline =~# g:javascript_continuation && pline !~# s:expr_case))) ||
+        \ (num < l:lnum && s:Onescope(l:lnum,pline,0) =~# '\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)' &&
+        \ l:line !~ s:line_pre . '{')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
     return indent(num) + s:sw() + switch_offset
