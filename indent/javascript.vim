@@ -48,13 +48,15 @@ let s:syng_comment = '\%(comment\|doc\)'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "line('.') < (prevnonblank(v:lnum) - 2000) ? dummy : synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
-function s:lookForParens(start,end,flags,time)
-  if has('reltime')
+if has('reltime')
+  function s:lookForParens(start,end,flags,time)
     return searchpair(a:start,'',a:end,a:flags,s:skip_expr,0,a:time)
-  else
+  endfunction
+else
+  function s:lookForParens(start,end,flags,n)
     return searchpair(a:start,'',a:end,a:flags,0,0)
-  endif
-endfunction
+  endfunction
+endif
 
 let s:line_term = '\%(\s*\%(\/\*.\{-}\*\/\s*\)\=\)\@>$'
 
