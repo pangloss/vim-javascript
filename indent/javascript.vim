@@ -95,10 +95,12 @@ endfunction
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
 function s:PrevCodeLine(lnum)
   let l:lnum = prevnonblank(a:lnum)
-  while synIDattr(synID(l:lnum,matchend(getline(l:lnum), '^\s*[^''"]'),0),'name') =~? s:syng_strcom 
+  while l:lnum
+    if synIDattr(synID(l:lnum,matchend(getline(l:lnum), '^\s*[^''"]'),0),'name') !~? s:syng_strcom
+      return l:lnum
+    endif
     let l:lnum = prevnonblank(l:lnum - 1)
   endwhile
-  return l:lnum
 endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
