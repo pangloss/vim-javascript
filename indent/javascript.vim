@@ -64,11 +64,11 @@ let s:line_term = '\%(\s*\%(\/\*.\{-}\*\/\s*\)\=\)\@>$'
 if !exists('g:javascript_opfirst')
   let g:javascript_opfirst = '\%([<>,:?^%|&]\|\([-/.+]\)\%(\1\|\*\|\/\)\@!\|\*\/\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
 endif
-let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
-
 if !exists('g:javascript_continuation')
   let g:javascript_continuation = '\%([<=*,.?:^%|&]\|+\@<!+\|-\@<!-\|=\@<!>\|\*\@<!\/\|\<in\%(stanceof\)\=\)'
 endif
+
+let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
 let g:javascript_continuation .= s:line_term
 
 function s:Onescope(lnum,text,add)
