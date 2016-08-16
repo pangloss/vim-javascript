@@ -95,10 +95,7 @@ endfunction
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
 function s:PrevCodeLine(lnum)
   let l:lnum = prevnonblank(a:lnum)
-  while l:lnum > 0
-    if synIDattr(synID(l:lnum,matchend(getline(l:lnum), '^\s*[^''"]'),0),'name') !~? s:syng_strcom
-      break
-    endif
+  while synIDattr(synID(l:lnum,matchend(getline(l:lnum), '^\s*[^''"]'),0),'name') =~? s:syng_strcom 
     let l:lnum = prevnonblank(l:lnum - 1)
   endwhile
   return l:lnum
