@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: vim-javascript community
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: August 15, 2016
+" Last Change: August 16, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -46,15 +46,17 @@ let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
 let s:syng_comment = '\%(comment\|doc\)'
 
 " Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "line('.') < (prevnonblank(v:lnum) - 2000) ? dummy : synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
+let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
-function s:lookForParens(start,end,flags,time)
-  if has('reltime')
-    return searchpair(a:start,'',a:end,a:flags,s:skip_expr,0,a:time)
-  else
-    return searchpair(a:start,'',a:end,a:flags,0,0)
-  endif
-endfunction
+if has('reltime')
+  function s:lookForParens(start,end,flags,time)
+    return searchpair(a:start,'',a:end,a:flags,s:skip_expr,max([prevnonblank(v:lnum) - 2000,0]),a:time)
+  endfunction
+else
+  function s:lookForParens(start,end,flags,n)
+    return searchpair(a:start,'',a:end,a:flags,0,max([prevnonblank(v:lnum) - 2000,0]))
+  endfunction
+endif
 
 let s:line_term = '\%(\s*\%(\/\*.\{-}\*\/\s*\)\=\)\@>$'
 
@@ -62,11 +64,11 @@ let s:line_term = '\%(\s*\%(\/\*.\{-}\*\/\s*\)\=\)\@>$'
 if !exists('g:javascript_opfirst')
   let g:javascript_opfirst = '\%([<>,:?^%|&]\|\([-/.+]\)\%(\1\|\*\|\/\)\@!\|\*\/\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
 endif
-let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
-
 if !exists('g:javascript_continuation')
   let g:javascript_continuation = '\%([<=*,.?:^%|&]\|+\@<!+\|-\@<!-\|=\@<!>\|\*\@<!\/\|\<in\%(stanceof\)\=\)'
 endif
+
+let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
 let g:javascript_continuation .= s:line_term
 
 function s:Onescope(lnum,text,add)
@@ -95,13 +97,12 @@ endfunction
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
 function s:PrevCodeLine(lnum)
   let l:lnum = prevnonblank(a:lnum)
-  while l:lnum > 0
+  while l:lnum
     if synIDattr(synID(l:lnum,matchend(getline(l:lnum), '^\s*[^''"]'),0),'name') !~? s:syng_strcom
-      break
+      return l:lnum
     endif
     let l:lnum = prevnonblank(l:lnum - 1)
   endwhile
-  return l:lnum
 endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
@@ -176,7 +177,7 @@ function GetJavascriptIndent()
   endif
 
   let pline = s:StripLine(getline(l:lnum))
-  call cursor(b:js_cache[1:])
+  call cursor(b:js_cache[1],b:js_cache[2])
   let inb = num == 0 || num < l:lnum && ((l:line !~ s:line_pre . ',' && pline !~ ',' . s:line_term) || s:isBlock())
   let switch_offset = num == 0 || s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1) !=# 'switch' ? 0 :
         \ &cino !~ ':' || !has('float') ?  s:sw() :
