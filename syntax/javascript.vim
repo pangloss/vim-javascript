@@ -80,9 +80,9 @@ syntax region  jsObjectKeyString   contained start=+'+  skip=+\\\('\|$\)+  end=+
 syntax region  jsObjectKeyComputed contained matchgroup=jsBrackets start=/\[/ end=/]/ contains=@jsExpression skipwhite skipempty nextgroup=jsObjectValue,jsFuncArgs extend
 syntax match   jsObjectSeparator   contained /,/
 syntax region  jsObjectValue       contained start=/:/ end=/\%(,\|}\)\@=/ contains=@jsExpression extend
-syntax match   jsObjectFuncName    contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>[\r\n\t ]*(\@=/ skipwhite skipempty nextgroup=jsFuncArgs
+syntax match   jsObjectFuncName    contained /\(async\s\+\)\?\<[a-zA-Z_$][0-9a-zA-Z_$]*\>[\r\n\t ]*(\@=/ skipwhite skipempty contains=jsAsyncKeyword nextgroup=jsFuncArgs
 syntax match   jsFunctionKey       contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\s*function\s*\)\@=/
-syntax match   jsObjectMethodType  contained /\%(get\|set\|static\|async\)\%( \k\+\)\@=/ skipwhite skipempty nextgroup=jsObjectFuncName
+syntax match   jsObjectMethodType  contained /\%(get\|set\|static\)\%( \k\+\)\@=/ skipwhite skipempty nextgroup=jsObjectFuncName
 syntax region  jsObjectStringKey   contained start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs,jsObjectValue
 syntax region  jsObjectStringKey   contained start=+'+  skip=+\\\('\|$\)+  end=+'\|$+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs,jsObjectValue
 
@@ -145,8 +145,8 @@ syntax region  jsFuncBlock          contained matchgroup=jsFuncBraces          s
 syntax region  jsBlock              contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll extend fold
 syntax region  jsTryCatchBlock      contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll skipwhite skipempty nextgroup=jsCatch,jsFinally extend fold
 syntax region  jsSwitchBlock        contained matchgroup=jsBraces              start=/{/  end=/}/  contains=@jsAll,jsLabel,jsSwitchColon extend fold
-syntax region  jsDestructuringBlock contained matchgroup=jsDestructuringBraces start=/{/  end=/}/  contains=jsDestructuringProperty,jsDestructuringAssignment,jsDestructuringNoise,jsDestructuringPropertyComputed,jsSpreadExpression extend fold
-syntax region  jsDestructuringArray contained matchgroup=jsDestructuringBraces start=/\[/ end=/\]/ contains=jsDestructuringPropertyValue,jsNoise,jsDestructuringProperty,jsSpreadExpression extend fold
+syntax region  jsDestructuringBlock contained matchgroup=jsDestructuringBraces start=/{/  end=/}/  contains=jsDestructuringProperty,jsDestructuringAssignment,jsDestructuringNoise,jsDestructuringPropertyComputed,jsSpreadExpression,jsComment extend fold
+syntax region  jsDestructuringArray contained matchgroup=jsDestructuringBraces start=/\[/ end=/\]/ contains=jsDestructuringPropertyValue,jsNoise,jsDestructuringProperty,jsSpreadExpression,jsComment extend fold
 syntax region  jsObject                       matchgroup=jsObjectBraces        start=/{/  end=/}/  contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectMethodType,jsGenerator,jsComment,jsObjectStringKey,jsSpreadExpression extend fold
 syntax region  jsTernaryIf                    matchgroup=jsTernaryIfOperator   start=/?/  end=/\%(:\|[\}]\@=\)/  contains=@jsExpression
 syntax region  jsSpreadExpression   contained matchgroup=jsSpreadOperator      start=/\.\.\./ end=/[,}\]]\@=/ contains=@jsExpression
@@ -160,23 +160,23 @@ syntax match   jsFuncArgCommas        contained ','
 syntax keyword jsArguments            contained arguments
 
 " Matches a single keyword argument with no parens
-syntax match   jsArrowFuncArgs  /\k\+\s*\%(=>\)\@=/ skipwhite contains=jsFuncArgs skipwhite skipempty nextgroup=jsArrowFunction extend
+syntax match   jsArrowFuncArgs  /\(async\s\+\)\?\k\+\s*\%(=>\)\@=/ skipwhite contains=jsFuncArgs skipwhite skipempty nextgroup=jsArrowFunction extend
 " Matches a series of arguments surrounded in parens
-syntax match   jsArrowFuncArgs  /([^()]*)\s*\(=>\)\@=/ contains=jsFuncArgs skipempty skipwhite nextgroup=jsArrowFunction extend
+syntax match   jsArrowFuncArgs  /\(async\s\+\)\?([^()]*)\s*\(=>\)\@=/ contains=jsAsyncKeyword,jsFuncArgs skipempty skipwhite nextgroup=jsArrowFunction extend
 
-exe 'syntax match jsFunction /\<function\>/ skipwhite skipempty nextgroup=jsGenerator,jsFuncName,jsFuncArgs skipwhite '.(exists('g:javascript_conceal_function')       ? 'conceal cchar='.g:javascript_conceal_function : '')
+exe 'syntax match jsFunction /\(async\s\+\)\?\<function\>/ skipwhite skipempty nextgroup=jsGenerator,jsFuncName,jsFuncArgs skipwhite '.(exists('g:javascript_conceal_function')       ? 'conceal cchar='.g:javascript_conceal_function : '')
 exe 'syntax match jsArrowFunction /=>/      skipwhite skipempty nextgroup=jsFuncBlock contains=jsFuncBraces           '.(exists('g:javascript_conceal_arrow_function') ? 'conceal cchar='.g:javascript_conceal_arrow_function : '')
 
 syntax keyword jsClassKeywords          contained extends class
 syntax match   jsClassNoise             contained /\./
-syntax match   jsClassMethodType        contained /\%(get\|set\|static\|async\)\%( \k\+\)\@=/ skipwhite skipempty nextgroup=jsFuncName,jsClassProperty
+syntax match   jsClassMethodType        contained /\%(get\|set\|static\)\%( \k\+\)\@=/ skipwhite skipempty nextgroup=jsFuncName,jsClassProperty
 syntax match   jsClassDefinition        /\<class\>\%( [a-zA-Z_$][0-9a-zA-Z_$ \n.]*\)*/ contains=jsClassKeywords,jsClassNoise skipwhite skipempty nextgroup=jsCommentClass,jsClassBlock,jsFlowClassGroup
 syntax match   jsDecorator              contained "@" nextgroup=jsDecoratorFunction
 syntax match   jsDecoratorFunction      contained "[a-zA-Z_][a-zA-Z0-9_.]*"
 syntax match   jsClassProperty          contained /\<[0-9a-zA-Z_$]*\>\(\s*=\)\@=/ skipwhite skipempty nextgroup=jsClassValue
 syntax region  jsClassValue             contained start=/=/ end=/\%(;\|}\|\n\)\@=/ contains=@jsExpression
 syntax region  jsClassPropertyComputed  contained matchgroup=jsBrackets start=/\[/ end=/]/ contains=@jsExpression skipwhite skipempty nextgroup=jsFuncArgs,jsClassValue extend
-syntax match   jsClassFuncName          contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\%(\s*(\)\@=/ skipwhite skipempty nextgroup=jsFuncArgs
+syntax match   jsClassFuncName          contained /\(async\s\+\)\?\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\%(\s*(\)\@=/ skipwhite skipempty contains=jsAsyncKeyword nextgroup=jsFuncArgs
 syntax region  jsClassStringKey         contained start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs
 syntax region  jsClassStringKey         contained start=+'+  skip=+\\\('\|$\)+  end=+'\|$+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs
 
