@@ -177,7 +177,7 @@ function GetJavascriptIndent()
   endif
 
   let pline = s:StripLine(getline(l:lnum))
-  call cursor(b:js_cache[1:])
+  call cursor(b:js_cache[1],b:js_cache[2])
   let inb = num == 0 || num < l:lnum && ((l:line !~ s:line_pre . ',' && pline !~ ',' . s:line_term) || s:isBlock())
   let switch_offset = num == 0 || s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1) !=# 'switch' ? 0 :
         \ &cino !~ ':' || !has('float') ?  s:sw() :
