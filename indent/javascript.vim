@@ -12,11 +12,11 @@ let b:did_indent = 1
 
 " Now, set up our indentation expression and keys that trigger it.
 setlocal indentexpr=GetJavascriptIndent()
-setlocal nolisp
+setlocal nolisp noautoindent nosmartindent
 setlocal indentkeys=0{,0},0),0],:,!^F,o,O,e
 setlocal cinoptions+=j1,J1
 
-let b:undo_indent = 'setlocal indentexpr< indentkeys< cinoptions<'
+let b:undo_indent = 'setlocal indentexpr< smartindent< autoindent< indentkeys< cinoptions<'
 
 " Only define the function once.
 if exists('*GetJavascriptIndent')
