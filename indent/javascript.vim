@@ -37,7 +37,7 @@ else
   endfunction
 endif
 
-let s:line_pre = '^\s*\%(\/\*.\{-}\*\/\s*\)*'
+let s:line_pre = '^\s*\%(\%(\/\*.\{-}\)\=\*\+\/\s*\)*'
 let s:expr_case = s:line_pre . '\%(\%(case\>.\+\)\|default\)\s*:'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
@@ -58,14 +58,14 @@ else
   endfunction
 endif
 
-let s:line_term = '\%(\s*\%(\/\*.\{-}\*\/\s*\)\=\)\@>$'
+let s:line_term = '\%(\s*\%(\/\*\+\%(.\{-}\*\/\)\=\s*\)\=\)\@>$'
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 if !exists('g:javascript_opfirst')
-  let g:javascript_opfirst = '\%([<>,:?^%|&]\|\([-/.+]\)\%(\1\|\*\|\/\)\@!\|\*\/\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
+  let g:javascript_opfirst = '\%([<>,:?^%|*&]\|\([-/.+]\)\%(\1\|\/\)\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
 endif
 if !exists('g:javascript_continuation')
-  let g:javascript_continuation = '\%([<=*,.?:^%|&]\|+\@<!+\|-\@<!-\|=\@<!>\|\*\@<!\/\|\<in\%(stanceof\)\=\)'
+  let g:javascript_continuation = '\%([<=,.?/*:^%|&]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)'
 endif
 
 let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
