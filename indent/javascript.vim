@@ -62,7 +62,7 @@ let s:line_term = '\%(\s*\%(\/\*\+\%(.\{-}\*\/\)\=\s*\)\=\)\@>$'
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 if !exists('g:javascript_opfirst')
-  let g:javascript_opfirst = '\%([<>,:?^%|*&]\|\([-/.+]\)\%(\1\|\/\)\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
+  let g:javascript_opfirst = '\%([<>,:?^%|*&]\|\([-/.+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
 endif
 if !exists('g:javascript_continuation')
   let g:javascript_continuation = '\%([<=,.?/*:^%|&]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)'
