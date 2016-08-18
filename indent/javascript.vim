@@ -49,11 +49,11 @@ let s:syng_comment = '\%(comment\|doc\)'
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
 if has('reltime')
-  function s:lookForParens(start,end,flags,time)
+  function s:GetPair(start,end,flags,time)
     return searchpair(a:start,'',a:end,a:flags,s:skip_expr,max([prevnonblank(v:lnum) - 2000,0]),a:time)
   endfunction
 else
-  function s:lookForParens(start,end,flags,n)
+  function s:GetPair(start,end,flags,n)
     return searchpair(a:start,'',a:end,a:flags,0,max([prevnonblank(v:lnum) - 2000,0]))
   endfunction
 endif
@@ -75,16 +75,16 @@ function s:Onescope(lnum,text,add)
   return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ? 'no b' :
         \ ((a:add && a:text =~ s:line_pre . '$' && search('\%' . s:PrevCodeLine(a:lnum - 1) . 'l.)' . s:line_term)) ||
         \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
-        \ s:lookForParens('(', ')', 'cbW', 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
-        \ (a:add || ((expand('<cword>') !=# 'while' || !s:lookForParens('\C\<do\>', '\C\<while\>','nbW',100)) &&
+        \ s:GetPair('(', ')', 'cbW', 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
+        \ (a:add || ((expand('<cword>') !=# 'while' || !s:GetPair('\C\<do\>', '\C\<while\>','nbW',100)) &&
         \ expand('cword') !=# 'each' || search('\C\<for\_s\+\%#','nbW'))) ? expand('<cword>') : ''
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
-function s:isBlock()
+function s:IsBlock()
   return getline(line('.'))[col('.')-1] == '{' && !search(
         \ '\C\%(\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|\<in\%(stanceof\)\=\)\)\_s*\|\<return\s*\)\%#','bnW') &&
-        \ (!search(':\_s*\%#','bW') || (!s:lookForParens('[({[]','[])}]','bW',200) || s:isBlock()))
+        \ (!search(':\_s*\%#','bW') || (!s:GetPair('[({[]','[])}]','bW',200) || s:IsBlock()))
 endfunction
 
 " Auxiliary Functions {{{2
@@ -166,9 +166,9 @@ function GetJavascriptIndent()
   elseif syns != '' && l:line[0] =~ '\s'
     let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
           \ syns =~? 'jsbracket'? ['\[','\]'] : ['[({[]','[])}]']
-    let num = s:lookForParens(pattern[0],pattern[1],'bW',2000)
+    let num = s:GetPair(pattern[0],pattern[1],'bW',2000)
   else
-    let num = s:lookForParens('[({[]','[])}]','bW',2000)
+    let num = s:GetPair('[({[]','[])}]','bW',2000)
   endif
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
@@ -178,7 +178,7 @@ function GetJavascriptIndent()
 
   let pline = s:StripLine(getline(l:lnum))
   call cursor(b:js_cache[1],b:js_cache[2])
-  let inb = num == 0 || num < l:lnum && ((l:line !~ s:line_pre . ',' && pline !~ ',' . s:line_term) || s:isBlock())
+  let inb = num == 0 || num < l:lnum && ((l:line !~ s:line_pre . ',' && pline !~ ',' . s:line_term) || s:IsBlock())
   let switch_offset = num == 0 || s:Onescope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1) !=# 'switch' ? 0 :
         \ &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
