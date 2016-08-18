@@ -58,7 +58,7 @@ else
   endfunction
 endif
 
-let s:line_term = '\%(\s*\%(\%(\%(\/\*.\{-}\*\/\)\|\%(\/\*\+\)\)\s*\)\=\)\@>$'
+let s:line_term = '\s*\%(\%(\%(\/\*.\{-}\*\/\)\|\%(\/\*\+\)\)\s*\)\=$'
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 if !exists('g:javascript_opfirst')
