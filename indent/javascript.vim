@@ -37,7 +37,7 @@ else
   endfunction
 endif
 
-let s:line_pre = '^\s*\%(\%(\/\*.\{-}\)\=\*\+\/\s*\)\='
+let s:line_pre = '^\s*\%(\%(\%(\/\*.\{-}\)\=\*\+\/\s*\)\=\)\@>'
 let s:expr_case = s:line_pre . '\%(\%(case\>.\+\)\|default\)\s*:'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
@@ -83,7 +83,7 @@ endfunction
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
   return getline(line('.'))[col('.')-1] == '{' && !search(
-        \ '\C\%(\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|\<in\%(stanceof\)\=\)\)\_s*\|\<return\s*\)\%#','bnW') &&
+        \ '\C\%(\<return\s*\|\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|\<in\%(stanceof\)\=\)\)\_s*\)\%#','bnW') &&
         \ (!search(':\_s*\%#','bW') || (!s:GetPair('[({[]','[])}]','bW',200) || s:IsBlock()))
 endfunction
 
