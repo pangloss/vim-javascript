@@ -89,11 +89,6 @@ endfunction
 
 " Auxiliary Functions {{{2
 
-" strip line of comment
-function s:StripLine(c)
-  return a:c !~# s:expr_case ? substitute(a:c, '\%(:\@<!\/\/.*\)$', '','') : a:c
-endfunction
-
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
 function s:PrevCodeLine(lnum)
   let l:lnum = prevnonblank(a:lnum)
@@ -176,16 +171,17 @@ function GetJavascriptIndent()
     return indent(num)
   endif
 
-  let pline = s:StripLine(getline(l:lnum))
   call cursor(b:js_cache[1],b:js_cache[2])
+
+  let swcase = getline(l:lnum) =~# s:expr_case
+  let pline = swcase ? getline(l:lnum) : substitute(getline(l:lnum), '\%(:\@<!\/\/.*\)$', '','')
   let inb = num == 0 || num < l:lnum && ((l:line !~ s:line_pre . ',' && pline !~ ',' . s:line_term) || s:IsBlock())
-  let switch_offset = num == 0 || s:OneScope(num, s:StripLine(strpart(getline(num),0,b:js_cache[2] - 1)),1) !=# 'switch' ? 0 :
+  let switch_offset = num == 0 || s:OneScope(num, strpart(getline(num),0,b:js_cache[2] - 1),1) !=# 'switch' ? 0 :
         \ &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
 
   " most significant, find the indent amount
-  if (inb && (l:line =~# g:javascript_opfirst ||
-        \ (pline =~# g:javascript_continuation && pline !~# s:expr_case))) ||
+  if (inb && (l:line =~# g:javascript_opfirst || (!swcase && pline =~# g:javascript_continuation))) ||
         \ (num < l:lnum && s:OneScope(l:lnum,pline,0) =~# '\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)' &&
         \ l:line !~ s:line_pre . '{')
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
