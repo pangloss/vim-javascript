@@ -122,7 +122,7 @@ endfunction
 
 function GetJavascriptIndent()
   if !exists('b:js_cache')
-    let b:js_cache = [0,0,0]
+    let b:js_cache = [0,0,0,0]
   endif
   " Get the current line.
   let l:line = getline(v:lnum)
@@ -152,9 +152,11 @@ function GetJavascriptIndent()
 
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
+  let known = 0
   call cursor(v:lnum,1)
   if b:js_cache[0] >= l:lnum  && b:js_cache[0] < v:lnum && b:js_cache[0] &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum) > 0)
+    let known = 1
     let num = b:js_cache[1]
   elseif syns != '' && l:line[0] =~ '\s'
     let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
@@ -163,7 +165,11 @@ function GetJavascriptIndent()
   else
     let num = s:GetPair('[({[]','[])}]','bW',2000)
   endif
-  let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
+
+  if known && b:js_cache[3]
+    let known = indent(b:js_cache[0]) - b:js_cache[3]
+  endif
+  let b:js_cache[:3] = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
   if l:line =~ s:line_pre . '[])}]'
     return indent(num)
@@ -182,9 +188,13 @@ function GetJavascriptIndent()
   if inb && !swcase && ((l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation) ||
         \ num < l:lnum && s:OneScope(l:lnum,pline,0) =~# '\<\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)\>' &&
         \ l:line !~ s:line_pre . '{')
-    return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
+    let ind = (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
+    let b:js_cache[3] = ind
+    return ind + known
   elseif num > 0
-    return indent(num) + s:sw() + switch_offset
+    let ind = indent(num) + s:sw() + switch_offset
+    let b:js_cache[3] = ind
+    return ind + known
   endif
 
 endfunction
