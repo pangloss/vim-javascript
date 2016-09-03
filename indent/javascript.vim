@@ -112,6 +112,9 @@ function s:Balanced(lnum)
         let open_{idx} = open_{idx} + 1
       else
         let open_{idx - 1} = open_{idx - 1} - 1
+        if open_{idx - 1} < 0
+          return 0
+        end
       endif
     endif
     let pos = match(l:line, '[][(){}]', pos + 1)
@@ -150,15 +153,13 @@ function GetJavascriptIndent()
   endif
   "}}}
 
+  let known = 0
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
-  let known = 0
   call cursor(v:lnum,1)
   if b:js_cache[0] >= l:lnum  && b:js_cache[0] < v:lnum && b:js_cache[0] &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum) > 0)
-    if b:js_cache[1] == num
-      let known = 1
-    end
+    let known = 1
     let num = b:js_cache[1]
   elseif syns != '' && l:line[0] =~ '\s'
     let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
@@ -171,6 +172,7 @@ function GetJavascriptIndent()
   if known && b:js_cache[3]
     let known = indent(b:js_cache[0]) - b:js_cache[3]
   endif
+
   let b:js_cache[:2] = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
   if l:line =~ s:line_pre . '[])}]'
