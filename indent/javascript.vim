@@ -188,7 +188,7 @@ function GetJavascriptIndent()
   " most significant, find the indent amount
   if ((l:line =~# g:javascript_opfirst || pline !~# s:expr_case . s:line_term && pline =~# g:javascript_continuation) ||
         \ s:OneScope(l:lnum,pline,0) =~# '\<\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)\>' &&
-        \ l:line !~ s:line_pre . '{') && cursor(b:js_cache[1],b:js_cache[2]) + 2 && (num == 0 || s:IsBlock())
+        \ l:line !~ s:line_pre . '{') && (num == 0 || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
     let b:js_cache[3] = (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
     return b:js_cache[3] + known
   elseif num > 0
