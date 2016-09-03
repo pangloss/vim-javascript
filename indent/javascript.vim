@@ -182,7 +182,7 @@ function GetJavascriptIndent()
   call cursor(b:js_cache[1],b:js_cache[2])
 
   let pline = getline(l:lnum) =~# s:expr_case ? getline(l:lnum) : substitute(getline(l:lnum), '\%(:\@<!\/\/.*\)$', '','')
-  let inb = num == 0 || ((l:line !~ s:line_pre . ',' && pline !~ ',' . s:line_term) || s:IsBlock())
+  let inb = num == 0 || s:IsBlock()
   let switch_offset = num == 0 || s:OneScope(num, strpart(getline(num),0,b:js_cache[2] - 1),1) !=# 'switch' ? 0 :
         \ &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
