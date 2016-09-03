@@ -156,7 +156,9 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   if b:js_cache[0] >= l:lnum  && b:js_cache[0] < v:lnum && b:js_cache[0] &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum) > 0)
-    let known = 1
+    if b:js_cache[1] == num
+      let known = 1
+    end
     let num = b:js_cache[1]
   elseif syns != '' && l:line[0] =~ '\s'
     let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
@@ -184,7 +186,7 @@ function GetJavascriptIndent()
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
 
   " most significant, find the indent amount
-  if inb && ((l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation) ||
+  if inb && ((l:line =~# g:javascript_opfirst || pline !~# s:expr_case . s:line_term && pline =~# g:javascript_continuation) ||
         \ num < l:lnum && s:OneScope(l:lnum,pline,0) =~# '\<\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)\>' &&
         \ l:line !~ s:line_pre . '{')
     let ind = (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
