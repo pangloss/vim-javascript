@@ -179,25 +179,21 @@ function GetJavascriptIndent()
     return indent(num)
   endif
 
-  call cursor(b:js_cache[1],b:js_cache[2])
 
   let pline = getline(l:lnum) =~# s:expr_case ? getline(l:lnum) : substitute(getline(l:lnum), '\%(:\@<!\/\/.*\)$', '','')
-  let inb = num == 0 || s:IsBlock()
   let switch_offset = num == 0 || s:OneScope(num, strpart(getline(num),0,b:js_cache[2] - 1),1) !=# 'switch' ? 0 :
         \ &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
 
   " most significant, find the indent amount
-  if inb && ((l:line =~# g:javascript_opfirst || pline !~# s:expr_case . s:line_term && pline =~# g:javascript_continuation) ||
-        \ num < l:lnum && s:OneScope(l:lnum,pline,0) =~# '\<\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)\>' &&
-        \ l:line !~ s:line_pre . '{')
-    let ind = (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
-    let b:js_cache[3] = ind
-    return ind + known
+  if ((l:line =~# g:javascript_opfirst || pline !~# s:expr_case . s:line_term && pline =~# g:javascript_continuation) ||
+        \ s:OneScope(l:lnum,pline,0) =~# '\<\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)\>' &&
+        \ l:line !~ s:line_pre . '{') && cursor(b:js_cache[1],b:js_cache[2]) + 2 && (num == 0 || s:IsBlock())
+    let b:js_cache[3] = (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
+    return b:js_cache[3] + known
   elseif num > 0
-    let ind = indent(num) + s:sw() + switch_offset
-    let b:js_cache[3] = ind
-    return ind + known
+    let b:js_cache[3] = indent(num) + s:sw() + switch_offset
+    return b:js_cache[3] + known
   endif
 
 endfunction
