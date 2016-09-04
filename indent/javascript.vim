@@ -143,7 +143,6 @@ function GetJavascriptIndent()
   if l:lnum == 0
     return 0
   endif
-  let pline = getline(l:lnum)
 
   if (l:line =~# s:expr_case)
     let cpo_switch = &cpo
@@ -160,7 +159,7 @@ function GetJavascriptIndent()
   " same scope or starts a new one, unless if it closed a scope.
   call cursor(v:lnum,1)
   if b:js_cache[0] && b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
-        \ (pline !~ s:line_pre . '}' && map(pcounts,'s:Balanced(l:lnum)')[0] > 0 || b:js_cache[0] > l:lnum)
+        \ (map(pcounts,'s:Balanced(l:lnum)')[0] > 0 || b:js_cache[0] > l:lnum)
     let known = pcounts[0] > 0
     let num = b:js_cache[1]
   elseif syns != '' && l:line[0] =~ '\s'
@@ -181,7 +180,7 @@ function GetJavascriptIndent()
     return indent(num)
   endif
 
-  let pline = pline =~# s:expr_case ? pline : substitute(pline, '\%(:\@<!\/\/.*\)$', '','')
+  let pline = getline(l:lnum) =~# s:expr_case ? getline(l:lnum) : substitute(getline(l:lnum), '\%(:\@<!\/\/.*\)$', '','')
   let switch_offset = num == 0 || s:OneScope(num, strpart(getline(num),0,b:js_cache[2] - 1),1) !=# 'switch' ? 0 :
         \ &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
