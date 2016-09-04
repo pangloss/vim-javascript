@@ -160,7 +160,7 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   if b:js_cache[0] && b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
         \ (map(pcounts,'s:Balanced(l:lnum)')[0] > 0 || b:js_cache[0] > l:lnum)
-    let known = pcounts[0] > 0
+    let known = l:lnum == b:js_cache[0] && pcounts[0] > 0
     let num = b:js_cache[1]
   elseif syns != '' && l:line[0] =~ '\s'
     let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
