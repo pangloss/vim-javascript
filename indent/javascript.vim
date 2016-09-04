@@ -170,7 +170,7 @@ function GetJavascriptIndent()
   endif
 
   if known && b:js_cache[3]
-    let known = prevnonblank(b:js_cache[0]) == b:js_cache[0] ? indent(b:js_cache[0]) - b:js_cache[3] : 0
+    let known = indent(lnum) - b:js_cache[3]
   endif
 
   let b:js_cache[:2] = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
