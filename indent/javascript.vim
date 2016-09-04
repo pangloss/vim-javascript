@@ -143,6 +143,7 @@ function GetJavascriptIndent()
   if l:lnum == 0
     return 0
   endif
+  let pline = getline(l:lnum)
 
   if (l:line =~# s:expr_case)
     let cpo_switch = &cpo
@@ -158,7 +159,7 @@ function GetJavascriptIndent()
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
   call cursor(v:lnum,1)
-  if b:js_cache[0] && b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
+  if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum && b:js_cache[0] && pline !~ '}'
         \ (map(pcounts,'s:Balanced(l:lnum)')[0] > 0 || b:js_cache[0] > l:lnum)
     let known = pcounts[0] > 0
     let num = b:js_cache[1]
@@ -177,11 +178,10 @@ function GetJavascriptIndent()
   let b:js_cache[:2] = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
   if l:line =~ s:line_pre . '[])}]'
-    let b:js_cache[0] = 0
     return indent(num)
   endif
 
-  let pline = getline(l:lnum) =~# s:expr_case ? getline(l:lnum) : substitute(getline(l:lnum), '\%(:\@<!\/\/.*\)$', '','')
+  let pline = pline =~# s:expr_case ? pline : substitute(pline, '\%(:\@<!\/\/.*\)$', '','')
   let switch_offset = num == 0 || s:OneScope(num, strpart(getline(num),0,b:js_cache[2] - 1),1) !=# 'switch' ? 0 :
         \ &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
