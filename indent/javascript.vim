@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: vim-javascript community
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: August 20, 2016
+" Last Change: September 4, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -114,7 +114,7 @@ function s:Balanced(lnum)
         let open_{idx - 1} = open_{idx - 1} - 1
         if open_{idx - 1} < 0
           return 0
-        end
+        endif
       endif
     endif
     let pos = match(l:line, '[][(){}]', pos + 1)
@@ -160,9 +160,7 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   if b:js_cache[0] && b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
         \ (map(pcounts,'s:Balanced(l:lnum)')[0] > 0 || b:js_cache[0] > l:lnum)
-    if pcounts[0] > 0
-      let known = 1
-    endif
+    let known = pcounts[0] > 0
     let num = b:js_cache[1]
   elseif syns != '' && l:line[0] =~ '\s'
     let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
@@ -182,7 +180,6 @@ function GetJavascriptIndent()
     let b:js_cache[0] = 0
     return indent(num)
   endif
-
 
   let pline = getline(l:lnum) =~# s:expr_case ? getline(l:lnum) : substitute(getline(l:lnum), '\%(:\@<!\/\/.*\)$', '','')
   let switch_offset = num == 0 || s:OneScope(num, strpart(getline(num),0,b:js_cache[2] - 1),1) !=# 'switch' ? 0 :
