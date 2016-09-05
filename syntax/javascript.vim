@@ -213,7 +213,7 @@ if exists("javascript_plugin_jsdoc")
   endif
 endif
 
-if exists("javascript_plugin_flow")
+if exists("javascript_plugin_flow") || getline(1) =~# '^\s*\/[/*]\s*@flow\>'
   runtime extras/flow.vim
 endif
 
