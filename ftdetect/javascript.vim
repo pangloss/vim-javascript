@@ -7,5 +7,4 @@ fun! s:SelectJavascript()
     set ft=javascript
   endif
 endfun
-au BufNewFile,BufRead * call s:SelectJavascript()
-au filetype javascript if getline(1) =~# '^\s*\/[/*]\s*@flow\>' | runtime extras/flow.vim | endif 
+au BufNewFile,BufRead * call s:SelectJavascript() 
