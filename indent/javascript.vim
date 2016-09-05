@@ -109,9 +109,9 @@ function s:Balanced(lnum)
     if synIDattr(synID(a:lnum,pos + 1,0),'name') !~? s:syng_strcom
       let idx = stridx('(){}[]', l:line[pos])
       if idx % 2 == 0
-        let open_{idx} = open_{idx} + 1
+        let open_{idx} += 1
       else
-        let open_{idx - 1} = open_{idx - 1} - 1
+        let open_{idx - 1} -= 1
         if open_{idx - 1} < 0
           return 0
         endif
