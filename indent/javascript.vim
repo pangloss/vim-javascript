@@ -8,6 +8,10 @@
 if exists('b:did_indent')
   finish
 endif
+if !exists('s:xml')
+  runtime! indent/xml.vim
+  let s:xml = exists('*XmlIndentGet')
+endif
 let b:did_indent = 1
 
 " Now, set up our indentation expression and keys that trigger it.
@@ -175,6 +179,12 @@ function GetJavascriptIndent()
   endif
 
   let b:js_cache[:2] = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
+
+  if s:xml && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && search('^\s*\S\%' . v:lnum .'l') &&
+        \ (l:line =~ '^\s*\%(\/>\|<\/\)' || search('\%'.v:lnum.'l^\s*<\w*\_s*\/>') ||
+        \ s:GetPair('<[^? \t>/]\+\%(\_s*>\|\_s\+[^>]*[^/]>\)','</[^? \t>/]\+>','cbnW',200))
+    return XmlIndentGet(v:lnum, 0)
+  endif
 
   if l:line =~ s:line_pre . '[])}]'
     return indent(num)
