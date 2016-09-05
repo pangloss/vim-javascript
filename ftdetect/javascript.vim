@@ -7,4 +7,4 @@ fun! s:SelectJavascript()
     set ft=javascript
   endif
 endfun
-au BufNewFile,BufRead * call s:SelectJavascript()
+au BufNewFile,BufRead * call s:SelectJavascript() 
