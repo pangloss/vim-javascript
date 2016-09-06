@@ -180,9 +180,7 @@ function GetJavascriptIndent()
 
   let b:js_cache[:2] = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
-  if s:xml && search('^\s*\S\%' . v:lnum .'l') &&
-        \ (l:line =~ '^\s*\%(\/>\|<\/\)' || search('\%'.v:lnum.'l^\s*<\w*\_s*\/>') ||
-        \ s:GetPair('<[^? \t>/]\+\%(\_s*>\|\_s\+\_[^>]*[^/]>\)','</[^? \t>/]\+>','cbnW',200))
+  if s:xml && syns =~? 'xml\|jsx'
     return XmlIndentGet(v:lnum, 0)
   endif
 
