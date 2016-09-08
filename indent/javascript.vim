@@ -186,7 +186,7 @@ function GetJavascriptIndent()
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
 
   " most significant, find the indent amount
-  if ((l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation)) &&
+  if (l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation) &&
         \ (num == 0 || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock()) ||
         \ s:OneScope(l:lnum,pline,0) =~# '\<\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)\>' &&
         \ l:line !~ s:line_pre . '{'
