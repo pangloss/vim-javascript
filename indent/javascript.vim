@@ -191,7 +191,7 @@ function GetJavascriptIndent()
         \ s:OneScope(l:lnum,pline,0) =~# '\<\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)\>' &&
         \ l:line !~ s:line_pre . '{'
     let b:js_cache[3] = (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
-    return b:js_cache[3] + known
+    return b:js_cache[3]
   elseif num > 0
     let b:js_cache[3] = indent(num) + s:sw() + switch_offset
     return b:js_cache[3] + known
