@@ -38,7 +38,7 @@ else
 endif
 
 let s:line_pre = '^\s*\%(\%(\%(\/\*.\{-}\)\=\*\+\/\s*\)\=\)\@>'
-let s:expr_case = s:line_pre . '\%(\%(case\>.\+\)\|default\)\s*:'
+let s:expr_case = s:line_pre . '\%(\%(case\>.\+\)\|default\)\s*:\C'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
 
@@ -180,15 +180,16 @@ function GetJavascriptIndent()
     return indent(num)
   endif
 
-  let pline = getline(l:lnum) =~# s:expr_case ? getline(l:lnum) : substitute(getline(l:lnum), '\%(:\@<!\/\/.*\)$', '','')
+  let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), '\%(:\@<!\/\/.*\)$', '','')
   let switch_offset = num == 0 || s:OneScope(num, strpart(getline(num),0,b:js_cache[2] - 1),1) !=# 'switch' ? 0 :
         \ &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
 
   " most significant, find the indent amount
-  if ((l:line =~# g:javascript_opfirst || pline !~# s:expr_case . s:line_term && pline =~# g:javascript_continuation) ||
+  if (l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation) &&
+        \ (num == 0 || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock()) ||
         \ s:OneScope(l:lnum,pline,0) =~# '\<\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)\>' &&
-        \ l:line !~ s:line_pre . '{') && (num == 0 || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
+        \ l:line !~ s:line_pre . '{'
     let b:js_cache[3] = (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
     return b:js_cache[3] + known
   elseif num > 0
