@@ -157,7 +157,7 @@ function GetJavascriptIndent()
   " same scope or starts a new one, unless if it closed a scope.
   call cursor(v:lnum,1)
   if b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
-        \ (s:Balanced(l:lnum) > 0 || b:js_cache[0] > l:lnum)
+        \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum) > 0)
     let num = b:js_cache[1]
   elseif syns != '' && l:line[0] =~ '\s'
     let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
@@ -174,13 +174,13 @@ function GetJavascriptIndent()
   endif
 
   let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), '\%(:\@<!\/\/.*\)$', '','')
-  let switch_offset = num == 0 || s:OneScope(num, strpart(getline(num),0,b:js_cache[2] - 1),1) !=# 'switch' ? 0 :
+  let switch_offset = num <= 0 || s:OneScope(num, strpart(getline(num),0,b:js_cache[2] - 1),1) !=# 'switch' ? 0 :
         \ &cino !~ ':' || !has('float') ?  s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
 
   " most significant, find the indent amount
   let isOp = l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation
-  if isOp && (num == 0 || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock()) ||
+  if isOp && (num <= 0 || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock()) ||
         \ s:OneScope(l:lnum,pline,0) =~# '\<\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)\>' &&
         \ l:line !~ s:line_pre . '{'
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
