@@ -83,7 +83,7 @@ endfunction
 function s:IsBlock()
   return getline(line('.'))[col('.')-1] == '{' && !search(
         \ '\C\%(\<return\s*\|\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|import\|export\%(\_s\+default\)\=\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\)\_s*\)\%#','bnW') &&
-        \ (search(s:expr_case . '\_s*\%#','nbW') || !search('{\_s*\%#','bW') || s:IsBlock())
+        \ (search(s:expr_case . '\_s*\%#','nbW') || !search('[{:]\_s*\%#','bW') || s:IsBlock())
 endfunction
 
 " Auxiliary Functions {{{2
