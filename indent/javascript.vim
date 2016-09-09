@@ -72,11 +72,10 @@ let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
 let g:javascript_continuation .= s:line_term
 
 function s:OneScope(lnum,text,add)
-  return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ? 'no b' :
-        \ ((a:add && a:text =~ s:line_pre . '$' && search('\%' . s:PrevCodeLine(a:lnum - 1) . 'l.)' . s:line_term)) ||
-        \ cursor(a:lnum, match(a:text, ')' . s:line_term)) > -1) &&
-        \ s:GetPair('(', ')', 'cbW', 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
-        \ (a:add || ((expand('<cword>') !=# 'while' || !s:GetPair('\C\<do\>', '\C\<while\>','nbW',100)) &&
+  return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ? 'no b' : search(
+        \ '\%' . (a:add && a:text =~ s:line_pre . '$' ? s:PrevCodeLine(a:lnum - 1) : a:lnum) . 'l)' . s:line_term) &&
+        \ s:GetPair('(', ')', 'bW', 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
+        \ (a:add || ((expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>','nbW',100) <= 0) &&
         \ (expand('<cword>') !=# 'each' || search('\C\<for\_s\+\%#','nbW')))) ? expand('<cword>') : ''
 endfunction
 
@@ -84,7 +83,7 @@ endfunction
 function s:IsBlock()
   return getline(line('.'))[col('.')-1] == '{' && !search(
         \ '\C\%(\<return\s*\|\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|import\|export\%(\_s\+default\)\=\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\)\_s*\)\%#','bnW') &&
-        \ (!search('\%({\|:\zs\)\_s*\%#','bW') || search(s:expr_case . '\%#' ,'nbW') || s:IsBlock())
+        \ (search(s:expr_case . '\_s*\%#','nbW') || search('{\_s*\%#','bW') && s:IsBlock())
 endfunction
 
 " Auxiliary Functions {{{2
