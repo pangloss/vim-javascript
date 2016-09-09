@@ -71,12 +71,12 @@ endif
 let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
 let g:javascript_continuation .= s:line_term
 
-function s:OneScope(lnum,text,add)
-  return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ? 'no b' : search(
-        \ '\%' . (a:add && a:text =~ s:line_pre . '$' ? s:PrevCodeLine(a:lnum - 1) : a:lnum) . 'l)' . s:line_term) &&
+function s:OneScope(lnum,text)
+  return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ? 'no b' :
+        \ search('\%' . a:lnum . 'l)' . s:line_term,'bW') &&
         \ s:GetPair('(', ')', 'bW', 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
-        \ (a:add || ((expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>','nbW',100) <= 0) &&
-        \ (expand('<cword>') !=# 'each' || search('\C\<for\_s\+\%#','nbW')))) ? expand('<cword>') : ''
+        \ ((expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>','nbW',100) <= 0) &&
+        \ (expand('<cword>') !=# 'each' || search('\C\<for\_s\+\%#','nbW'))) ? expand('<cword>') : ''
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
@@ -173,14 +173,16 @@ function GetJavascriptIndent()
   endif
 
   let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), '\%(:\@<!\/\/.*\)$', '','')
-  let switch_offset = num <= 0 || s:OneScope(num, strpart(getline(num),0,b:js_cache[2] - 1),1) !=# 'switch' ? 0 :
-        \ &cino !~ ':' || !has('float') ?  s:sw() :
+  call cursor(b:js_cache[1],b:js_cache[2])
+  let switch_offset = num <= 0 || !(search(')\_s*\%#','bW') &&
+        \ s:GetPair('(', ')', 'bW', 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
+        \ &cino !~ ':' || !has('float') ? s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
 
   " most significant, find the indent amount
   let isOp = l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation
   if isOp && (num <= 0 || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock()) ||
-        \ s:OneScope(l:lnum,pline,0) =~# '\<\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)\>' &&
+        \ s:OneScope(l:lnum,pline) =~# '\<\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)\>' &&
         \ l:line !~ s:line_pre . '{'
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
