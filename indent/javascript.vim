@@ -65,7 +65,7 @@ if !exists('g:javascript_opfirst')
   let g:javascript_opfirst = '\%([<>,?^%|*&]\|\/[^/*]\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
 endif
 if !exists('g:javascript_continuation')
-  let g:javascript_continuation = '\%([<=,.?/*^%|&]\|:\@<!:\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)'
+  let g:javascript_continuation = '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)'
 endif
 
 let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
