@@ -73,7 +73,7 @@ let g:javascript_continuation .= s:line_term
 
 function s:OneScope(lnum,text)
   return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ? 'no b' :
-        \ search('\%' . a:lnum . 'l)' . s:line_term,'bW') &&
+        \ cursor(a:lnum, match(' ' . a:text, ')' . s:line_term)) > -1 &&
         \ s:GetPair('(', ')', 'bW', 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
         \ (expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>','nbW',100) <= 0) &&
         \ (expand('<cword>') !=# 'each' || search('\C\<for\_s\+\%#','nbW')) ? expand('<cword>') : ''
