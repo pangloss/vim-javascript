@@ -48,7 +48,6 @@ let s:syng_comment = '\%(comment\|doc\)'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 let s:fast_skip_expr = 's:skip_func(s:looksyn ? s:looksyn : v:lnum) && ' . s:skip_expr
-
 function s:skip_func(lnum)
   if !s:free || getline(line('.')) =~ '[''/"\\]'
     return 1
@@ -178,7 +177,7 @@ function GetJavascriptIndent()
   endif
 
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
- 
+
   if l:line =~ s:line_pre . '[])}]'
     return indent(num)
   endif
