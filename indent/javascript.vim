@@ -47,13 +47,23 @@ let s:syng_comment = '\%(comment\|doc\)'
 
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
+function s:skip_func(lnum)
+  if !s:free || getline(line('.')) =~ '[''/"\\]'
+    return eval(s:skip_expr)
+  endif
+  if search('`','nW',a:lnum) || search('\*\/','nW',a:lnum)
+    let s:free = !eval(s:skip_expr)
+  endif
+  let s:looksyn = s:free ? line('.') : s:looksyn
+  return !s:free
+endfunction
 
 if has('reltime')
-  function s:GetPair(start,end,flags,time)
-    return searchpair(a:start,'',a:end,a:flags,s:skip_expr,max([prevnonblank(v:lnum) - 2000,0]),a:time)
+  function s:GetPair(start,end,flags,skip,time)
+    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0]),a:time)
   endfunction
 else
-  function s:GetPair(start,end,flags,n)
+  function s:GetPair(start,end,flags,...)
     return searchpair(a:start,'',a:end,a:flags,0,max([prevnonblank(v:lnum) - 2000,0]))
   endfunction
 endif
@@ -74,8 +84,8 @@ let g:javascript_continuation .= s:line_term
 function s:OneScope(lnum,text)
   return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ? 'no b' :
         \ cursor(a:lnum, match(' ' . a:text, ')' . s:line_term)) > -1 &&
-        \ s:GetPair('(', ')', 'bW', 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
-        \ (expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>','nbW',100) <= 0) &&
+        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
+        \ (expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>','nbW',s:skip_expr,100) <= 0) &&
         \ (expand('<cword>') !=# 'each' || search('\C\<for\_s\+\%#','nbW')) ? expand('<cword>') : ''
 endfunction
 
@@ -131,7 +141,7 @@ function GetJavascriptIndent()
   let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
 
   " start with strings,comments,etc.{{{2
-  if (l:line !~ '^[''"`]' && syns =~? '\%(string\|template\)') ||
+  if (l:line !~ '^[''"]' && syns =~? '\%(string\|template\)') ||
         \ (l:line !~ '^\s*[/*]' && syns =~? s:syng_comment)
     return -1
   endif
@@ -154,6 +164,7 @@ function GetJavascriptIndent()
 
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
+  let [s:looksyn,s:free] = [v:lnum - 1,1]
   call cursor(v:lnum,1)
   if b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum) > 0)
@@ -161,9 +172,9 @@ function GetJavascriptIndent()
   elseif syns != '' && l:line[0] =~ '\s'
     let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
           \ syns =~? 'jsbracket'? ['\[','\]'] : ['[({[]','[])}]']
-    let num = s:GetPair(pattern[0],pattern[1],'bW',2000)
+    let num = s:GetPair(pattern[0],pattern[1],'bW','s:skip_func(s:looksyn)',2000)
   else
-    let num = s:GetPair('[({[]','[])}]','bW',2000)
+    let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
   endif
 
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
@@ -175,7 +186,7 @@ function GetJavascriptIndent()
   let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), '\%(:\@<!\/\/.*\)$', '','')
   call cursor(b:js_cache[1],b:js_cache[2])
   let switch_offset = num <= 0 || !(search(')\_s*\%#','bW') &&
-        \ s:GetPair('(', ')', 'bW', 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
+        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
         \ &cino !~ ':' || !has('float') ? s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
 
