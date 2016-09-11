@@ -47,12 +47,13 @@ let s:syng_comment = '\%(comment\|doc\)'
 
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
-let s:fast_skip_expr = 's:skip_func(s:looksyn ? s:looksyn : v:lnum - 1) && ' . s:skip_expr
 function s:skip_func(lnum)
   if !s:free || getline(line('.')) =~ '[''/"\\]'
-    return 1
+    return eval(s:skip_expr)
   endif
-  let s:free = !(search('`','nW',a:lnum) || search('\*\/','nW',a:lnum))
+  if search('`','nW',a:lnum) || search('\*\/','nW',a:lnum)
+    let s:free = !eval(s:skip_expr)
+  endif
   let s:looksyn = s:free ? line('.') : 0
   return !s:looksyn
 endfunction
@@ -84,7 +85,7 @@ function s:OneScope(lnum,text)
   return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ? 'no b' :
         \ cursor(a:lnum, match(' ' . a:text, ')' . s:line_term)) > -1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
-        \ (expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>', 'nbW', s:skip_expr, 100) <= 0) &&
+        \ (expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>','nbW',s:skip_expr,100) <= 0) &&
         \ (expand('<cword>') !=# 'each' || search('\C\<for\_s\+\%#','nbW')) ? expand('<cword>') : ''
 endfunction
 
@@ -171,9 +172,9 @@ function GetJavascriptIndent()
   elseif syns != '' && l:line[0] =~ '\s'
     let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
           \ syns =~? 'jsbracket'? ['\[','\]'] : ['[({[]','[])}]']
-    let num = s:GetPair(pattern[0],pattern[1],'bW',s:fast_skip_expr,2000)
+    let num = s:GetPair(pattern[0],pattern[1],'bW','s:skip_func(s:looksyn ? s:looksyn : v:lnum - 1)',2000)
   else
-    let num = s:GetPair('[({[]','[])}]','bW',s:fast_skip_expr,2000)
+    let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn ? s:looksyn : v:lnum - 1)',2000)
   endif
 
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
