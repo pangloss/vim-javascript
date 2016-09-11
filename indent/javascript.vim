@@ -1,4 +1,3 @@
-
 " Vim indent file
 " Language: Javascript
 " Maintainer: vim-javascript community
@@ -86,7 +85,7 @@ function s:OneScope(lnum,text)
   return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ? 'no b' :
         \ cursor(a:lnum, match(' ' . a:text, ')' . s:line_term)) > -1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
-        \ (expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>','nbW',s:skip_expr,100) <= 0) &&
+        \ (expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>', 'nbW', s:skip_expr, 100) <= 0) &&
         \ (expand('<cword>') !=# 'each' || search('\C\<for\_s\+\%#','nbW')) ? expand('<cword>') : ''
 endfunction
 
