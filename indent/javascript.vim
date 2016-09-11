@@ -49,12 +49,12 @@ let s:syng_comment = '\%(comment\|doc\)'
 let s:skip_expr = "s:skip_func(s:looksyn ? s:looksyn : v:lnum) && synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
 function s:skip_func(lnum)
-  if !s:free || getline(line('.')) =~ '[''/"\\`]'
+  if !s:free || getline(line('.')) =~ '[''/"\\]'
     return 1
   endif
   let s:free = !(search('`','nW',a:lnum) || search('\*\/','nW',a:lnum))
   let s:looksyn = s:free ? line('.') : 0
-  return s:looksyn != line('.')
+  return !s:looksyn
 endfunction
 
 if has('reltime')
