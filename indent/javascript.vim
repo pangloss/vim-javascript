@@ -46,7 +46,16 @@ let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
 let s:syng_comment = '\%(comment\|doc\)'
 
 " Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
+let s:skip_expr = "(getline(line('.')) =~ '[''/\"\\`]' || !s:free || s:skip_func(s:looksyn ? s:looksyn : v:lnum) )&& synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
+
+function s:skip_func(lnum)
+  if s:free == 0
+    return 1
+  endif
+  let s:free = !(search('`','nW',a:lnum)|| search('\*\/','nW',a:lnum))
+  let s:looksyn = s:free ? line('.') : 0
+  return s:looksyn != line('.')
+endfunction
 
 if has('reltime')
   function s:GetPair(start,end,flags,time)
@@ -151,7 +160,8 @@ function GetJavascriptIndent()
     return ind
   endif
   "}}}
-
+  let s:free = 1
+  let s:looksyn = 0
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
   call cursor(v:lnum,1)
