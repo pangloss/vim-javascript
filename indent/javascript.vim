@@ -46,10 +46,10 @@ let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
 let s:syng_comment = '\%(comment\|doc\)'
 
 " Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "(getline(line('.')) =~ '[''/\"\\`]' || !s:free || s:skip_func(s:looksyn ? s:looksyn : v:lnum) )&& synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
+let s:skip_expr = "(getline(line('.')) =~ '[''/\"\\`]' || s:skip_func(s:looksyn ? s:looksyn : v:lnum) )&& synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
 function s:skip_func(lnum)
-  if s:free == 0
+  if !s:free
     return 1
   endif
   let s:free = !(search('`','nW',a:lnum)|| search('\*\/','nW',a:lnum))
