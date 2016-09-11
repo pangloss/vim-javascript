@@ -54,8 +54,8 @@ function s:skip_func(lnum)
   if search('`','nW',a:lnum) || search('\*\/','nW',a:lnum)
     let s:free = !eval(s:skip_expr)
   endif
-  let s:looksyn = s:free ? line('.') : 0
-  return !s:looksyn
+  let s:looksyn = s:free ? line('.') : s:looksyn
+  return !s:free
 endfunction
 
 if has('reltime')
@@ -164,7 +164,7 @@ function GetJavascriptIndent()
 
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
-  let [s:looksyn,s:free] = [0,1]
+  let [s:looksyn,s:free] = [v:lnum - 1,1]
   call cursor(v:lnum,1)
   if b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum) > 0)
@@ -172,9 +172,9 @@ function GetJavascriptIndent()
   elseif syns != '' && l:line[0] =~ '\s'
     let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
           \ syns =~? 'jsbracket'? ['\[','\]'] : ['[({[]','[])}]']
-    let num = s:GetPair(pattern[0],pattern[1],'bW','s:skip_func(s:looksyn ? s:looksyn : v:lnum - 1)',2000)
+    let num = s:GetPair(pattern[0],pattern[1],'bW','s:skip_func(s:looksyn)',2000)
   else
-    let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn ? s:looksyn : v:lnum - 1)',2000)
+    let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
   endif
 
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
