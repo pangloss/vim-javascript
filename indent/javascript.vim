@@ -48,10 +48,7 @@ let s:syng_comment = '\%(comment\|doc\)'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 function s:skip_func(lnum)
-  if !s:free || getline(line('.')) =~ '[''/"\\]'
-    return eval(s:skip_expr)
-  endif
-  if search('`','nW',a:lnum) || search('\*\/','nW',a:lnum)
+  if !s:free || getline(line('.')) =~ '[''/"\\]' || search('`','nW',a:lnum) || search('\*\/','nW',a:lnum)
     let s:free = !eval(s:skip_expr)
   endif
   let s:looksyn = s:free ? line('.') : s:looksyn
