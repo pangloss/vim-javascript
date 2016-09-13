@@ -137,6 +137,7 @@ syntax keyword jsHtmlEvents     onblur onclick oncontextmenu ondblclick onfocus 
 " Code blocks
 syntax region  jsBracket                      matchgroup=jsBrackets            start=/\[/ end=/\]/ contains=@jsExpression extend fold
 syntax region  jsParen                        matchgroup=jsParens              start=/(/  end=/)/  contains=@jsAll extend fold
+syntax region  jsParenDecorator     contained matchgroup=jsParensDecorator     start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsCommentMisc extend fold
 syntax region  jsParenIfElse        contained matchgroup=jsParensIfElse        start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsCommentMisc,jsIfElseBlock extend fold
 syntax region  jsParenRepeat        contained matchgroup=jsParensRepeat        start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsCommentMisc,jsRepeatBlock extend fold
 syntax region  jsParenSwitch        contained matchgroup=jsParensSwitch        start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsSwitchBlock extend fold
@@ -152,7 +153,7 @@ syntax region  jsSwitchBlock        contained matchgroup=jsSwitchBraces        s
 syntax region  jsRepeatBlock        contained matchgroup=jsRepeatBraces        start=/{/  end=/}/  contains=@jsAll extend fold
 syntax region  jsDestructuringBlock contained matchgroup=jsDestructuringBraces start=/{/  end=/}/  contains=jsDestructuringProperty,jsDestructuringAssignment,jsDestructuringNoise,jsDestructuringPropertyComputed,jsSpreadExpression extend fold
 syntax region  jsDestructuringArray contained matchgroup=jsDestructuringBraces start=/\[/ end=/\]/ contains=jsDestructuringPropertyValue,jsNoise,jsDestructuringProperty,jsSpreadExpression extend fold
-syntax region  jsObject                       matchgroup=jsObjectBraces        start=/{/  end=/}/  contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectMethodType,jsGenerator,jsComment,jsObjectStringKey,jsSpreadExpression extend fold
+syntax region  jsObject                       matchgroup=jsObjectBraces        start=/{/  end=/}/  contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectMethodType,jsGenerator,jsComment,jsObjectStringKey,jsSpreadExpression,jsDecorator extend fold
 syntax region  jsTernaryIf                    matchgroup=jsTernaryIfOperator   start=/?/  end=/\%(:\|[\}]\@=\)/  contains=@jsExpression
 syntax region  jsSpreadExpression   contained matchgroup=jsSpreadOperator      start=/\.\.\./ end=/[,}\]]\@=/ contains=@jsExpression
 syntax region  jsRestExpression     contained matchgroup=jsRestOperator        start=/\.\.\./ end=/[,)]\@=/
@@ -177,8 +178,6 @@ syntax keyword jsClassKeywords          contained extends class
 syntax match   jsClassNoise             contained /\./
 syntax match   jsClassMethodType        contained /\%(get\|set\|static\|async\)\%( \k\+\)\@=/ skipwhite skipempty nextgroup=jsFuncName,jsClassProperty
 syntax match   jsClassDefinition        /\<class\>\%( [a-zA-Z_$][0-9a-zA-Z_$ \n.]*\)*/ contains=jsClassKeywords,jsClassNoise skipwhite skipempty nextgroup=jsCommentClass,jsClassBlock,jsFlowClassGroup
-syntax match   jsDecorator              contained "@" nextgroup=jsDecoratorFunction
-syntax match   jsDecoratorFunction      contained "[a-zA-Z_][a-zA-Z0-9_.]*"
 syntax match   jsClassProperty          contained /\<[0-9a-zA-Z_$]*\>\(\s*=\)\@=/ skipwhite skipempty nextgroup=jsClassValue
 syntax region  jsClassValue             contained start=/=/ end=/\%(;\|}\|\n\)\@=/ contains=@jsExpression
 syntax region  jsClassPropertyComputed  contained matchgroup=jsBrackets start=/\[/ end=/]/ contains=@jsExpression skipwhite skipempty nextgroup=jsFuncArgs,jsClassValue extend
@@ -210,6 +209,10 @@ syntax region  jsCommentClass       contained start=/\/\// end=/$/    contains=j
 syntax region  jsCommentClass       contained start=/\/\*/ end=/\*\// contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsClassBlock,jsFlowClassGroup fold extend keepend
 syntax region  jsCommentMisc        contained start=/\/\// end=/$/    contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsBlock extend keepend
 syntax region  jsCommentMisc        contained start=/\/\*/ end=/\*\// contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsBlock fold extend keepend
+
+" Decorators
+syntax match   jsDecorator                    /^\s*@/ nextgroup=jsDecoratorFunction
+syntax match   jsDecoratorFunction  contained /[a-zA-Z_][a-zA-Z0-9_.]*/ nextgroup=jsParenDecorator
 
 if exists("javascript_plugin_jsdoc")
   runtime extras/jsdoc.vim
