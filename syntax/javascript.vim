@@ -288,7 +288,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsOperator             Operator
   HiLink jsOf                   Operator
   HiLink jsStorageClass         StorageClass
-  HiLink jsClassKeywords        Structure
+  HiLink jsClassKeywords        Keyword
   HiLink jsThis                 Special
   HiLink jsSuper                Constant
   HiLink jsNan                  Number
