@@ -136,10 +136,10 @@ syntax keyword jsHtmlEvents     onblur onclick oncontextmenu ondblclick onfocus 
 "" Code blocks
 syntax region  jsBracket                      matchgroup=jsBrackets            start=/\[/ end=/\]/ contains=@jsExpression extend fold
 syntax region  jsParen                        matchgroup=jsParens              start=/(/  end=/)/  contains=@jsAll extend fold
-syntax region  jsParenIfElse        contained matchgroup=jsParens              start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsCommentMisc,jsBlock extend fold
-syntax region  jsParenRepeat        contained matchgroup=jsParens              start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsCommentMisc,jsBlock extend fold
-syntax region  jsParenSwitch        contained matchgroup=jsParens              start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsSwitchBlock extend fold
-syntax region  jsParenCatch         contained matchgroup=jsParens              start=/(/  end=/)/  skipwhite skipempty nextgroup=jsTryCatchBlock extend fold
+syntax region  jsParenIfElse        contained matchgroup=jsParensIfElse        start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsCommentMisc,jsBlock extend fold
+syntax region  jsParenRepeat        contained matchgroup=jsParensRepeat        start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsCommentMisc,jsBlock extend fold
+syntax region  jsParenSwitch        contained matchgroup=jsParensSwitch        start=/(/  end=/)/  contains=@jsAll skipwhite skipempty nextgroup=jsSwitchBlock extend fold
+syntax region  jsParenCatch         contained matchgroup=jsParensCatch         start=/(/  end=/)/  skipwhite skipempty nextgroup=jsTryCatchBlock extend fold
 syntax region  jsFuncArgs           contained matchgroup=jsFuncParens          start=/(/  end=/)/  contains=jsFuncArgCommas,jsComment,jsFuncArgExpression,jsDestructuringBlock,jsRestExpression,jsFlowArgumentDef skipwhite skipempty nextgroup=jsCommentFunction,jsFuncBlock,jsFlowReturn extend fold
 syntax region  jsClassBlock         contained matchgroup=jsClassBraces         start=/{/  end=/}/  contains=jsClassFuncName,jsClassMethodType,jsArrowFunction,jsArrowFuncArgs,jsComment,jsGenerator,jsDecorator,jsClassProperty,jsClassPropertyComputed,jsClassStringKey,jsNoise extend fold
 syntax region  jsFuncBlock          contained matchgroup=jsFuncBraces          start=/{/  end=/}/  contains=@jsAll extend fold
@@ -233,6 +233,10 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   endif
   HiLink jsComment              Comment
   HiLink jsEnvComment           PreProc
+  HiLink jsParensIfElse         jsParens
+  HiLink jsParensRepeat         jsParens
+  HiLink jsParensSwitch         jsParens
+  HiLink jsParensCatch          jsParens
   HiLink jsCommentTodo          Todo
   HiLink jsString               String
   HiLink jsObjectKeyString      String
