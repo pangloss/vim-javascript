@@ -164,10 +164,10 @@ function GetJavascriptIndent()
 
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
-  let [s:looksyn,s:free,pcounts] = [v:lnum - 1,1,[0]]
+  let [s:looksyn,s:free] = [v:lnum - 1,1]
   call cursor(v:lnum,1)
   if b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
-        \ (b:js_cache[0] > l:lnum || map(pcounts,'s:Balanced(l:lnum)')[0] > 0)
+        \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum) > 0)
     let num = b:js_cache[1]
   elseif syns != '' && l:line[0] =~ '\s'
     let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
@@ -197,7 +197,7 @@ function GetJavascriptIndent()
         \ l:line !~ s:line_pre . '{'
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
   elseif num > 0
-    return isOp && num < l:lnum && pcounts[0] > 0 ? indent(l:lnum) : indent(num) + s:sw() + switch_offset
+    return indent(num) + s:sw() + switch_offset
   endif
 
 endfunction
