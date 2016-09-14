@@ -326,8 +326,9 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsModuleKeywords       Include
   HiLink jsModuleOperators      Include
   HiLink jsModuleDefault        Include
-  HiLink jsDecorator            Tag
-  HiLink jsDecoratorFunction    Tag
+  HiLink jsDecorator            Special
+  HiLink jsDecoratorFunction    Function
+  HiLink jsParensDecorator      jsParens
   HiLink jsFuncArgOperator      jsFuncArgs
   HiLink jsModuleAsterisk       Noise
   HiLink jsClassProperty        jsObjectKey
