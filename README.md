@@ -100,8 +100,6 @@ variables:
 ## Indentation Specific
 
 * `:h cino-:`
-* End-of-line continuations : `g:javascript_continuation` ( slightly complicated, look at the source code )
-* Start-of-line continuations : `g:javascript_opfirst` ( same as above )
 
 ## Contributing
 
