@@ -110,9 +110,10 @@ function s:iscontOne(i,num,cont)
   let l:i = a:i
   let l:cont = a:cont
   let l:num = a:num > 0 ? a:num : 1
-  let ind = indent(l:i) + (!a:cont ? s:sw() : 0)
+  let pind = indent(l:num) < 0 ? -s:sw() : indent(l:num)
+  let ind = indent(l:i) + (!l:cont ? s:sw() : 0)
   let bL = 0
-  while l:i >= l:num && ind >= indent(l:num) + s:sw()
+  while l:i >= l:num && (!l:cont || ind > pind + s:sw())
     if indent(l:i) < ind
       if s:OneScope(l:i,getline(l:i))
         let bL += 1
