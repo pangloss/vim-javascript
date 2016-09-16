@@ -119,9 +119,6 @@ function s:iscontOne(i,num,cont)
         let bL += 1
         let l:cont = 0
         let l:i = line('.')
-        if !search(s:line_pre . '\%#','bnW')
-          break
-        endif
       elseif !l:cont
         break
       endif
