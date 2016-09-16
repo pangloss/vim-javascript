@@ -79,11 +79,11 @@ let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
 let g:javascript_continuation .= s:line_term
 
 function s:OneScope(lnum,text)
-  return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ? 'no b' :
+  return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ||
         \ cursor(a:lnum, match(' ' . a:text, ')' . s:line_term)) > -1 &&
-        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
+        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<\%(for\|each\|if\|let\|w\%(hile\|ith\)\)\>\_s*\%#','bW') &&
         \ (expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>','nbW',s:skip_expr,100) <= 0) &&
-        \ (expand('<cword>') !=# 'each' || search('\C\<for\_s\+\%#','nbW')) ? expand('<cword>') : ''
+        \ (expand('<cword>') !=# 'each' || search('\C\<for\_s\+\%#','bW'))
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
@@ -104,6 +104,31 @@ function s:PrevCodeLine(lnum)
     endif
     let l:lnum = prevnonblank(l:lnum - 1)
   endwhile
+endfunction
+
+function s:iscontOne(i,num,cont)
+  let l:i = a:i
+  let l:cont = a:cont
+  let l:num = a:num > 0 ? a:num : 1
+  let ind = indent(l:i) + (!a:cont ? s:sw() : 0)
+  let bL = 0
+  while l:i >= l:num && ind >= indent(l:num) + s:sw()
+    if indent(l:i) < ind
+      if s:OneScope(l:i,getline(l:i))
+        let bL += 1
+        let l:cont = 0
+        let l:i = line('.')
+        if !search(s:line_pre . '\%#','bnW')
+          break
+        endif
+      elseif !l:cont
+        break
+      endif
+      let ind = indent(l:i)
+    endif
+    let l:i = s:PrevCodeLine(l:i - 1)
+  endwhile
+  return bL * s:sw()
 endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
@@ -189,12 +214,13 @@ function GetJavascriptIndent()
 
   " most significant, find the indent amount
   let isOp = l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation
-  if isOp && (num <= 0 || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock()) ||
-        \ s:OneScope(l:lnum,pline) =~# '\<\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)\>' &&
-        \ l:line !~ s:line_pre . '{'
-    return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
+  let bL = s:iscontOne(l:lnum,num,isOp)
+  if isOp && (num <= 0 || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
+    return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset + bL
   elseif num > 0
-    return indent(num) + s:sw() + switch_offset
+    return indent(num) + s:sw() + switch_offset + bL
+  else
+    return bL
   endif
 
 endfunction
