@@ -84,7 +84,7 @@ syntax match   jsObjectSeparator   contained /,/
 syntax region  jsObjectValue       contained start=/:/ end=/\%(,\|}\)\@=/ contains=jsObjectColon,@jsExpression extend
 syntax match   jsObjectFuncName    contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>[\r\n\t ]*(\@=/ skipwhite skipempty nextgroup=jsFuncArgs
 syntax match   jsFunctionKey       contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\s*function\s*\)\@=/
-syntax match   jsObjectMethodType  contained /\%(get\|set\|static\|async\)\%( \k\+\)\@=/ skipwhite skipempty nextgroup=jsObjectFuncName
+syntax match   jsObjectMethodType  contained /\%(get\|set\|static\|async\)\%( \k\+\)\@=/ contains=jsAsyncKeyword skipwhite skipempty nextgroup=jsObjectFuncName
 syntax region  jsObjectStringKey   contained start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs,jsObjectValue
 syntax region  jsObjectStringKey   contained start=+'+  skip=+\\\('\|$\)+  end=+'\|$+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs,jsObjectValue
 
@@ -108,7 +108,8 @@ syntax keyword jsTry                    try          skipwhite skipempty nextgro
 syntax keyword jsFinally      contained finally      skipwhite skipempty nextgroup=jsFinallyBlock
 syntax keyword jsCatch        contained catch        skipwhite skipempty nextgroup=jsParenCatch
 syntax keyword jsException              throw
-syntax keyword jsAsyncKeyword           async await
+syntax keyword jsAsyncKeyword           async        skipwhite skipempty nextgroup=jsFunction,jsFuncName
+syntax keyword jsAwaitKeyword           await
 syntax match   jsSwitchColon  contained /:/          skipwhite skipempty nextgroup=jsSwitchBlock
 
 " Keywords
@@ -176,7 +177,7 @@ exe 'syntax match jsArrowFunction /=>/      skipwhite skipempty nextgroup=jsFunc
 " Classes
 syntax keyword jsClassKeywords          contained extends class
 syntax match   jsClassNoise             contained /\./
-syntax match   jsClassMethodType        contained /\%(get\|set\|static\|async\)\%( \k\+\)\@=/ skipwhite skipempty nextgroup=jsFuncName,jsClassProperty
+syntax match   jsClassMethodType        contained /\%(get\|set\|static\|async\)\%( \k\+\)\@=/ contains=jsAsyncKeyword skipwhite skipempty nextgroup=jsFuncName,jsClassProperty
 syntax match   jsClassDefinition        /\<class\>\%( [a-zA-Z_$][0-9a-zA-Z_$ \n.]*\)*/ contains=jsClassKeywords,jsClassNoise skipwhite skipempty nextgroup=jsCommentClass,jsClassBlock,jsFlowClassGroup
 syntax match   jsClassProperty          contained /\<[0-9a-zA-Z_$]*\>\(\s*=\)\@=/ skipwhite skipempty nextgroup=jsClassValue
 syntax region  jsClassValue             contained start=/=/ end=/\%(;\|}\|\n\)\@=/ contains=@jsExpression
@@ -226,8 +227,8 @@ if exists("javascript_plugin_flow")
   runtime extras/flow.vim
 endif
 
-syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsDo
-syntax cluster jsAll         contains=@jsExpression,jsExportContainer,jsImportContainer,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsStatement,jsException,jsTry,jsAsyncKeyword
+syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsBlock,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsDo,jsAsyncKeyword,jsAwaitKeyword
+syntax cluster jsAll         contains=@jsExpression,jsExportContainer,jsImportContainer,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsStatement,jsException,jsTry
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
@@ -275,6 +276,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFinally              Exception
   HiLink jsCatch                Exception
   HiLink jsAsyncKeyword         Keyword
+  HiLink jsAwaitKeyword         Keyword
   HiLink jsArrowFunction        Type
   HiLink jsFunction             Type
   HiLink jsGenerator            jsFunction
