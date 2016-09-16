@@ -220,10 +220,8 @@ function GetJavascriptIndent()
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset + bL
   elseif num > 0
     return indent(num) + s:sw() + switch_offset + bL
-  else
-    return bL
   endif
-
+  return bL
 endfunction
 
 
