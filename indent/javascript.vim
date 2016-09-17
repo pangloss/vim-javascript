@@ -82,7 +82,7 @@ function s:OneScope(lnum,text)
   return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ||
         \ cursor(a:lnum, match(' ' . a:text, ')' . s:line_term)) > -1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 &&
-        \ search('\C\<\%(for\%(\_s\+each\)\=\|if\|let\|w\%(hile\|ith\)\)\>\_s*\%#','bW') &&
+        \ search('\C\<\%(for\%(\_s\+each\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW') &&
         \ (expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>','nbW',s:skip_expr,100) <= 0)
 endfunction
 
