@@ -79,7 +79,7 @@ let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
 let g:javascript_continuation .= s:line_term
 
 function s:OneScope(lnum,text)
-  return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ||
+  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)' . s:line_term)) > -1 ||
         \ cursor(a:lnum, match(' ' . a:text, ')' . s:line_term)) > -1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 &&
         \ search('\C\<\%(for\%(\_s\+each\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW') &&
