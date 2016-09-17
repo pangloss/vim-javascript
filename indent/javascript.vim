@@ -69,13 +69,12 @@ let s:line_term = '\s*\%(\%(\/\%(\%(\*.\{-}\*\/\)\|\%(\*\+\)\)\)\s*\)\=$'
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 if !exists('g:javascript_opfirst')
-  let g:javascript_opfirst = '\%([<>,?^%|*&]\|\/[^/*]\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
+  let g:javascript_opfirst = '^\%([<>,?^%|*&]\|\/[^/*]\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
 endif
 if !exists('g:javascript_continuation')
   let g:javascript_continuation = '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)'
 endif
 
-let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
 let g:javascript_continuation .= s:line_term
 
 function s:OneScope(lnum,text)
@@ -115,7 +114,7 @@ function s:iscontOne(i,num,cont)
   while l:i >= l:num && (!l:cont || ind > pind + s:sw())
     if indent(l:i) < ind
       if s:OneScope(l:i,getline(l:i))
-        if expand('<cword>') ==# 'while' && s:GetPair('\C\<do\>', '\C\<while\>','bW',s:skip_expr,100)
+        if expand('<cword>') ==# 'while' && searchpair(s:line_pre . '\C\<do\>','','\C\<while\>','bW',s:skip_expr,l:num,100)
           return 0
         endif
         let bL += 1
@@ -201,11 +200,12 @@ function GetJavascriptIndent()
 
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
-  if l:line =~ s:line_pre . '[])}]'
+  let l:line = substitute(l:line,s:line_pre,'','')
+  if l:line =~ '^[])}]'
     return indent(num)
   endif
   call cursor(v:lnum,1)
-  if l:line =~# s:line_pre . 'while\>' && s:GetPair(s:line_pre . '\C\<do\>', '\C\<while\>','bW',s:skip_expr,100) > 0
+  if l:line =~# '^while\>' && searchpair(s:line_pre . '\C\<do\>','','\C\<while\>','bW',s:skip_expr,num,100) > 0
     return indent(line('.'))
   endif
 
@@ -219,6 +219,7 @@ function GetJavascriptIndent()
   " most significant, find the indent amount
   let isOp = l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation
   let bL = s:iscontOne(l:lnum,num,isOp)
+  let bL = bL ? bL - (l:line =~ '^{') * s:sw() : bL
   if isOp && (num <= 0 || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
     return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset + bL
   elseif num > 0
