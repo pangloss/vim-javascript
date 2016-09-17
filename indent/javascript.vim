@@ -202,6 +202,10 @@ function GetJavascriptIndent()
   if l:line =~ s:line_pre . '[])}]'
     return indent(num)
   endif
+  call cursor(v:lnum,1)
+  if l:line =~# s:line_pre . 'while\>' && s:GetPair('\C\<do\>', '\C\<while\>','bW',s:skip_expr,100) > 0
+    return indent(line('.'))
+  endif
 
   let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), '\%(:\@<!\/\/.*\)$', '','')
   call cursor(b:js_cache[1],b:js_cache[2])
