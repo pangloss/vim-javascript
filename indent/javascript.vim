@@ -82,8 +82,7 @@ function s:OneScope(lnum,text)
   return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)' . s:line_term)) > -1 ||
         \ cursor(a:lnum, match(' ' . a:text, ')' . s:line_term)) > -1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 &&
-        \ search('\C\<\%(for\%(\_s\+each\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW') &&
-        \ (expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>','nbW',s:skip_expr,100) <= 0)
+        \ search('\C\<\%(for\%(\_s\+each\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW')
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
@@ -116,6 +115,9 @@ function s:iscontOne(i,num,cont)
   while l:i >= l:num && (!l:cont || ind > pind + s:sw())
     if indent(l:i) < ind
       if s:OneScope(l:i,getline(l:i))
+        if expand('<cword>') ==# 'while' && s:GetPair('\C\<do\>', '\C\<while\>','bW',s:skip_expr,100)
+          return 0
+        endif
         let bL += 1
         let l:cont = 0
         let l:i = line('.')
@@ -203,7 +205,7 @@ function GetJavascriptIndent()
     return indent(num)
   endif
   call cursor(v:lnum,1)
-  if l:line =~# s:line_pre . 'while\>' && s:GetPair('\C\<do\>', '\C\<while\>','bW',s:skip_expr,100) > 0
+  if l:line =~# s:line_pre . 'while\>' && s:GetPair(s:line_pre . '\C\<do\>', '\C\<while\>','bW',s:skip_expr,100) > 0
     return indent(line('.'))
   endif
 
