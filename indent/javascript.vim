@@ -161,8 +161,8 @@ function GetJavascriptIndent()
   let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
 
   " start with strings,comments,etc.{{{2
-  if (l:line !~ '^[''"]' && syns =~? '\%(string\|template\)') ||
-        \ (l:line !~ '^\s*[/*]' && syns =~? s:syng_comment)
+  if l:line !~ '^[''"]' && syns =~? '\%(string\|template\)' ||
+        \ l:line !~ '^\s*[/*]' && syns =~? s:syng_comment
     return -1
   endif
   if l:line !~ '^\%(\/\*\|\s*\/\/\)' && syns =~? s:syng_comment
@@ -173,7 +173,7 @@ function GetJavascriptIndent()
     return 0
   endif
 
-  if (l:line =~# s:expr_case)
+  if l:line =~# s:expr_case
     let cpo_switch = &cpo
     set cpo+=%
     let ind = cindent(v:lnum)
