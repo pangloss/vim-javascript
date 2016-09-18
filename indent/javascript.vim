@@ -156,7 +156,7 @@ function GetJavascriptIndent()
   let l:line = getline(v:lnum)
   let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
 
-  " start with strings,comments,etc.{{{2
+  " start with strings,comments,etc.
   if l:line !~ '^[''"]' && syns =~? '\%(string\|template\)' ||
         \ l:line !~ '^\s*[/*]' && syns =~? s:syng_comment
     return -1
