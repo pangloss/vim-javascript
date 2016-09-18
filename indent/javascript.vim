@@ -86,7 +86,7 @@ function s:OneScope(lnum,text)
 endfunction
 
 function s:iscontOne(i,num,cont)
-  let [l:i, l:cont, l:num] = [a:i, a:cont, a:num > 0 ? a:num : 1]
+  let [l:i, l:cont, l:num] = [a:i, a:cont, a:num ? a:num : 1]
   let pind = a:num > 0 ? indent(l:num) : -s:sw()
   let ind = indent(l:i) + (!l:cont ? s:sw() : 0)
   let bL = 0
