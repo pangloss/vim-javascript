@@ -192,6 +192,7 @@ function GetJavascriptIndent()
     let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
   endif
 
+  let num = num > 0 ? num : 0
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
   let l:line = substitute(l:line,s:line_pre,'','')
@@ -199,13 +200,13 @@ function GetJavascriptIndent()
     return indent(num)
   endif
   call cursor(v:lnum,1)
-  if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>\%>'.num-1.'l','\C\<while\>','bW',s:skip_expr,100) > 0
+  if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>\%>'.(num-!!num).'l','\C\<while\>','bW',s:skip_expr,100) > 0
     return indent(line('.'))
   endif
 
   let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), ':\@<!\/\/.*', '','')
   call cursor(b:js_cache[1],b:js_cache[2])
-  let switch_offset = num <= 0 || !(search(')\_s*\%#','bW') &&
+  let switch_offset = !num || !(search(')\_s*\%#','bW') &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
         \ &cino !~ ':' || !has('float') ? s:sw() :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
@@ -214,9 +215,9 @@ function GetJavascriptIndent()
   let isOp = l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation
   let bL = s:iscontOne(l:lnum,num,isOp)
   let bL = bL ? bL - (l:line =~ '^{') * s:sw() : bL
-  if isOp && (num <= 0 || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
-    return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset + bL
-  elseif num > 0
+  if isOp && (!num || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
+    return (num ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset + bL
+  elseif num
     return indent(num) + s:sw() + switch_offset + bL
   endif
   return bL
