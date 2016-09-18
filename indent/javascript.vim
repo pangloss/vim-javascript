@@ -97,8 +97,7 @@ function s:iscontOne(i,num,cont)
           return 0
         endif
         let bL += 1
-        let l:cont = 0
-        let l:i = line('.')
+        let [l:cont, l:i] = [0, line('.')]
       elseif !l:cont
         break
       endif
@@ -148,7 +147,6 @@ function s:Balanced(lnum)
   endwhile
   return (!open_4 + !open_2 + !open_0) - 2
 endfunction
-" }}}
 
 function GetJavascriptIndent()
   if !exists('b:js_cache')
