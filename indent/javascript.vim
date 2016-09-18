@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: vim-javascript community
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: September 4, 2016
+" Last Change: September 18, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -112,11 +112,9 @@ endfunction
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
   return getline(line('.'))[col('.')-1] == '{' && !search(
-        \ '\C\%(\<return\s*\|\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|import\|export\%(\_s\+default\)\=\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\)\_s*\)\%#','bnW') &&
-        \ (search(s:expr_case . '\_s*\%#','nbW') || !search('[{:]\_s*\%#','bW') || s:IsBlock())
+        \ '\C\%(\<return\s*\|\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|import\|export\%(\_s\+default\)\=\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\)\_s*\)\%#'
+        \ ,'bnW') && (search(s:expr_case . '\_s*\%#','nbW') || !search('[{:]\_s*\%#','bW') || s:IsBlock())
 endfunction
-
-" Auxiliary Functions {{{2
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
 function s:PrevCodeLine(lnum)
@@ -180,7 +178,6 @@ function GetJavascriptIndent()
     let &cpo = cpo_switch
     return ind
   endif
-  "}}}
 
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
