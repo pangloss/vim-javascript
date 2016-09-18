@@ -75,15 +75,38 @@ if !exists('g:javascript_continuation')
   let g:javascript_continuation = '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)'
 endif
 
-let g:javascript_opfirst = s:line_pre . g:javascript_opfirst
+let g:javascript_opfirst = '^' . g:javascript_opfirst
 let g:javascript_continuation .= s:line_term
 
 function s:OneScope(lnum,text)
-  return a:text =~# '\%(\<else\|\<do\|=>\)' . s:line_term ? 'no b' :
+  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)' . s:line_term)) > -1 ||
         \ cursor(a:lnum, match(' ' . a:text, ')' . s:line_term)) > -1 &&
-        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\l\+\_s*\%#','bW') &&
-        \ (expand('<cword>') !=# 'while' || s:GetPair('\C\<do\>', '\C\<while\>','nbW',s:skip_expr,100) <= 0) &&
-        \ (expand('<cword>') !=# 'each' || search('\C\<for\_s\+\%#','nbW')) ? expand('<cword>') : ''
+        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 &&
+        \ search('\C\<\%(for\%(\_s\+each\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW')
+endfunction
+
+function s:iscontOne(i,num,cont)
+  let [l:i, l:cont, l:num] = [a:i, a:cont, a:num > 0 ? a:num : 1]
+  let pind = a:num > 0 ? indent(l:num) : -s:sw()
+  let ind = indent(l:i) + (!l:cont ? s:sw() : 0)
+  let bL = 0
+  while l:i >= l:num && (!l:cont || ind > pind + s:sw())
+    if indent(l:i) < ind " first line always true for !cont, false for !!cont
+      if s:OneScope(l:i,substitute(getline(l:i),':\@<!\/\/.*','',''))
+        if expand('<cword>') ==# 'while' && searchpair(s:line_pre . '\C\<do\>','','\C\<while\>','bW',s:skip_expr,l:num,100) > 0
+          return 0
+        endif
+        let bL += 1
+        let l:cont = 0
+        let l:i = line('.')
+      elseif !l:cont
+        break
+      endif
+      let ind = indent(l:i)
+    endif
+    let l:i = s:PrevCodeLine(l:i - 1)
+  endwhile
+  return bL * s:sw()
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
@@ -138,8 +161,8 @@ function GetJavascriptIndent()
   let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
 
   " start with strings,comments,etc.{{{2
-  if (l:line !~ '^[''"]' && syns =~? '\%(string\|template\)') ||
-        \ (l:line !~ '^\s*[/*]' && syns =~? s:syng_comment)
+  if l:line !~ '^[''"]' && syns =~? '\%(string\|template\)' ||
+        \ l:line !~ '^\s*[/*]' && syns =~? s:syng_comment
     return -1
   endif
   if l:line !~ '^\%(\/\*\|\s*\/\/\)' && syns =~? s:syng_comment
@@ -150,7 +173,7 @@ function GetJavascriptIndent()
     return 0
   endif
 
-  if (l:line =~# s:expr_case)
+  if l:line =~# s:expr_case
     let cpo_switch = &cpo
     set cpo+=%
     let ind = cindent(v:lnum)
@@ -176,11 +199,16 @@ function GetJavascriptIndent()
 
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
-  if l:line =~ s:line_pre . '[])}]'
+  let l:line = substitute(l:line,s:line_pre,'','')
+  if l:line =~ '^[])}]'
     return indent(num)
   endif
+  call cursor(v:lnum,1)
+  if l:line =~# '^while\>' && searchpair(s:line_pre . '\C\<do\>','','\C\<while\>','bW',s:skip_expr,num,100) > 0
+    return indent(line('.'))
+  endif
 
-  let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), '\%(:\@<!\/\/.*\)$', '','')
+  let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), ':\@<!\/\/.*', '','')
   call cursor(b:js_cache[1],b:js_cache[2])
   let switch_offset = num <= 0 || !(search(')\_s*\%#','bW') &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
@@ -189,14 +217,14 @@ function GetJavascriptIndent()
 
   " most significant, find the indent amount
   let isOp = l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation
-  if isOp && (num <= 0 || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock()) ||
-        \ s:OneScope(l:lnum,pline) =~# '\<\%(for\|each\|if\|let\|no\sb\|w\%(hile\|ith\)\)\>' &&
-        \ l:line !~ s:line_pre . '{'
-    return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset
+  let bL = s:iscontOne(l:lnum,num,isOp)
+  let bL = bL ? bL - (l:line =~ '^{') * s:sw() : bL
+  if isOp && (num <= 0 || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
+    return (num > 0 ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset + bL
   elseif num > 0
-    return indent(num) + s:sw() + switch_offset
+    return indent(num) + s:sw() + switch_offset + bL
   endif
-
+  return bL
 endfunction
 
 
