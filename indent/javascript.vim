@@ -85,26 +85,6 @@ function s:OneScope(lnum,text)
         \ search('\C\<\%(for\%(\_s\+each\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW')
 endfunction
 
-" https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
-function s:IsBlock()
-  return getline(line('.'))[col('.')-1] == '{' && !search(
-        \ '\C\%(\<return\s*\|\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|import\|export\%(\_s\+default\)\=\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\)\_s*\)\%#','bnW') &&
-        \ (search(s:expr_case . '\_s*\%#','nbW') || !search('[{:]\_s*\%#','bW') || s:IsBlock())
-endfunction
-
-" Auxiliary Functions {{{2
-
-" Find line above 'lnum' that isn't empty, in a comment, or in a string.
-function s:PrevCodeLine(lnum)
-  let l:lnum = prevnonblank(a:lnum)
-  while l:lnum
-    if synIDattr(synID(l:lnum,matchend(getline(l:lnum), '^\s*[^''"]'),0),'name') !~? s:syng_strcom
-      return l:lnum
-    endif
-    let l:lnum = prevnonblank(l:lnum - 1)
-  endwhile
-endfunction
-
 function s:iscontOne(i,num,cont)
   let [l:i, l:cont, l:num] = [a:i, a:cont, a:num > 0 ? a:num : 1]
   let pind = a:num > 0 ? indent(l:num) : -s:sw()
@@ -127,6 +107,26 @@ function s:iscontOne(i,num,cont)
     let l:i = s:PrevCodeLine(l:i - 1)
   endwhile
   return bL * s:sw()
+endfunction
+
+" https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
+function s:IsBlock()
+  return getline(line('.'))[col('.')-1] == '{' && !search(
+        \ '\C\%(\<return\s*\|\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|import\|export\%(\_s\+default\)\=\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\)\_s*\)\%#','bnW') &&
+        \ (search(s:expr_case . '\_s*\%#','nbW') || !search('[{:]\_s*\%#','bW') || s:IsBlock())
+endfunction
+
+" Auxiliary Functions {{{2
+
+" Find line above 'lnum' that isn't empty, in a comment, or in a string.
+function s:PrevCodeLine(lnum)
+  let l:lnum = prevnonblank(a:lnum)
+  while l:lnum
+    if synIDattr(synID(l:lnum,matchend(getline(l:lnum), '^\s*[^''"]'),0),'name') !~? s:syng_strcom
+      return l:lnum
+    endif
+    let l:lnum = prevnonblank(l:lnum - 1)
+  endwhile
 endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
