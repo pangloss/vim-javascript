@@ -111,8 +111,8 @@ function s:iscontOne(i,num,cont)
   let ind = indent(l:i) + (!l:cont ? s:sw() : 0)
   let bL = 0
   while l:i >= l:num && (!l:cont || ind > pind + s:sw())
-    if indent(l:i) < ind
-      if s:OneScope(l:i,getline(l:i))
+    if indent(l:i) < ind " first line always true for !cont, false for cont
+      if s:OneScope(l:i,substitute(getline(l:i),':\@<!\/\/.*','',''))
         if expand('<cword>') ==# 'while' && searchpair(s:line_pre . '\C\<do\>','','\C\<while\>','bW',s:skip_expr,l:num,100)
           return 0
         endif
@@ -208,7 +208,7 @@ function GetJavascriptIndent()
     return indent(line('.'))
   endif
 
-  let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), '\%(:\@<!\/\/.*\)$', '','')
+  let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), ':\@<!\/\/.*', '','')
   call cursor(b:js_cache[1],b:js_cache[2])
   let switch_offset = num <= 0 || !(search(')\_s*\%#','bW') &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
