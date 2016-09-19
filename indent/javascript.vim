@@ -93,7 +93,7 @@ function s:iscontOne(i,num,cont)
   while l:i >= l:num && (!l:cont || ind > pind + s:sw())
     if indent(l:i) < ind " first line always true for !cont, false for !!cont
       if s:OneScope(l:i,substitute(getline(l:i),':\@<!\/\/.*','',''))
-        if expand('<cword>') ==# 'while' && s:GetPair(s:line_pre . '\C\<do\>\%>'.l:num-1.'l','\C\<while\>','bW',s:skip_expr,100) > 0
+        if expand('<cword>') ==# 'while' && s:GetPair(s:line_pre . '\C\<do\>\%>'.(l:num-1).'l','\C\<while\>','bW',s:skip_expr,100) > 0
           return 0
         endif
         let bL += 1
