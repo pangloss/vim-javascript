@@ -58,8 +58,8 @@ function s:skip_func(lnum)
 endfunction
 
 if has('reltime')
-  function s:GetPair(start,end,flags,skip,time)
-    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0]),a:time)
+  function s:GetPair(start,end,flags,skip,time,...)
+    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
   endfunction
 else
   function s:GetPair(start,end,flags,...)
@@ -95,7 +95,7 @@ function s:iscontOne(i,num,cont)
   while l:i >= l:num && (!l:cont || ind > pind + s:W)
     if indent(l:i) < ind " first line always true for !cont, false for !!cont
       if s:OneScope(l:i,substitute(getline(l:i),':\@<!\/\/.*','',''))
-        if expand('<cword>') ==# 'while' && s:GetPair(s:line_pre . '\C\<do\>\%>'.(l:num-1).'l','\C\<while\>','bW',s:skip_expr,100) > 0
+        if expand('<cword>') ==# 'while' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,l:num) > 0
           return 0
         endif
         let bL += 1
@@ -195,7 +195,7 @@ function GetJavascriptIndent()
       let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
     endif
   else
-    let num = searchpair('[({[]','','[])}]','bW',s:skip_expr,l:lnum)
+    let num = s:GetPair('[({[]','[])}]','bW',s:skip_expr,200,l:lnum)
   endif
 
   let num = (num > 0) * num
@@ -206,7 +206,7 @@ function GetJavascriptIndent()
     return !!num * indent(num)
   endif
   call cursor(v:lnum,1)
-  if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>\%>'.(num-!!num).'l','\C\<while\>','bW',s:skip_expr,100) > 0
+  if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,num) > 0
     return indent(line('.'))
   endif
 
