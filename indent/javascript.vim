@@ -88,9 +88,9 @@ function s:OneScope(lnum,text)
 endfunction
 
 function s:iscontOne(i,num,cont)
-  let [l:i, l:cont, l:num] = [a:i, a:cont, a:num ? a:num : 1]
+  let [l:i, l:cont, l:num] = [a:i, a:cont, a:num + !a:num]
   let pind = a:num ? indent(l:num) : -s:sw()
-  let ind = indent(l:i) + (!l:cont ? s:sw() : 0)
+  let ind = indent(l:i) + (!l:cont * s:sw())
   let bL = 0
   while l:i >= l:num && (!l:cont || ind > pind + s:sw())
     if indent(l:i) < ind " first line always true for !cont, false for !!cont
