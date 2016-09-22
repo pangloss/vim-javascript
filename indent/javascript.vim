@@ -181,17 +181,21 @@ function GetJavascriptIndent()
 
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
-  let [s:looksyn,s:free] = [v:lnum - 1,1]
-  call cursor(v:lnum,1)
-  if b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
-        \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum) > 0)
-    let num = b:js_cache[1]
-  elseif syns != '' && l:line[0] =~ '\s'
-    let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
-          \ syns =~? 'jsbracket'? ['\[','\]'] : ['[({[]','[])}]']
-    let num = s:GetPair(pattern[0],pattern[1],'bW','s:skip_func(s:looksyn)',2000)
+  if getline(l:lnum) !~ '^\S'
+    let [s:looksyn,s:free] = [v:lnum - 1,1]
+    call cursor(v:lnum,1)
+    if b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
+          \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum) > 0)
+      let num = b:js_cache[1]
+    elseif syns != '' && l:line[0] =~ '\s'
+      let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
+            \ syns =~? 'jsbracket'? ['\[','\]'] : ['[({[]','[])}]']
+      let num = s:GetPair(pattern[0],pattern[1],'bW','s:skip_func(s:looksyn)',2000)
+    else
+      let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
+    endif
   else
-    let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
+    let num = searchpair('[({[]','','[])}]','bW',s:skip_expr,l:lnum)
   endif
 
   let num = num > 0 ? num : 0
