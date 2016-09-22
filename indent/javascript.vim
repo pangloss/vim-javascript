@@ -220,7 +220,7 @@ function GetJavascriptIndent()
   " most significant, find the indent amount
   let isOp = l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation
   let bL = s:iscontOne(l:lnum,num,isOp)
-  let bL = bL ? bL - (l:line =~ '^{') * s:sw() : bL
+  let bL -= (bL && l:line =~ '^{') * s:sw()
   if isOp && (!num || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
     return (num ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset + bL
   elseif num
