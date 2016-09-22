@@ -136,7 +136,7 @@ function s:Balanced(lnum)
   while pos != -1
     if synIDattr(synID(a:lnum,pos + 1,0),'name') !~? s:syng_strcom
       let idx = stridx('(){}[]', l:line[pos])
-      if idx % 2 == 0
+      if !(idx % 2)
         let open_{idx} += 1
       else
         let open_{idx - 1} -= 1
@@ -147,7 +147,7 @@ function s:Balanced(lnum)
     endif
     let pos = match(l:line, '[][(){}]', pos + 1)
   endwhile
-  return (!open_4 + !open_2 + !open_0) - 2
+  return !(open_4 || open_2 || open_0)
 endfunction
 
 function GetJavascriptIndent()
@@ -185,7 +185,7 @@ function GetJavascriptIndent()
     let [s:looksyn,s:free] = [v:lnum - 1,1]
     call cursor(v:lnum,1)
     if b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
-          \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum) > 0)
+          \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
       let num = b:js_cache[1]
     elseif syns != '' && l:line[0] =~ '\s'
       let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
@@ -198,7 +198,7 @@ function GetJavascriptIndent()
     let num = searchpair('[({[]','','[])}]','bW',s:skip_expr,l:lnum)
   endif
 
-  let num = num > 0 ? num : 0
+  let num = (num > 0) * num
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
   let l:line = substitute(l:line,s:line_pre,'','')
