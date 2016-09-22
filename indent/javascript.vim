@@ -203,7 +203,7 @@ function GetJavascriptIndent()
 
   let l:line = substitute(l:line,s:line_pre,'','')
   if l:line =~ '^[])}]'
-    return indent(num)
+    return indent(num + !num)
   endif
   call cursor(v:lnum,1)
   if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>\%>'.(num-!!num).'l','\C\<while\>','bW',s:skip_expr,100) > 0
