@@ -63,7 +63,7 @@ if has('reltime')
   endfunction
 else
   function s:GetPair(start,end,flags,...)
-    return searchpair(a:start,'',a:end,a:flags,0,max([prevnonblank(v:lnum) - 2000,0,a:0 == 3 ? a:3 : 0]))
+    return searchpair(a:start,'',a:end,a:flags)
   endfunction
 endif
 
