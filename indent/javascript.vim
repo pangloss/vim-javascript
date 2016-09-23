@@ -63,7 +63,7 @@ if has('reltime')
   endfunction
 else
   function s:GetPair(start,end,flags,...)
-    return searchpair(a:start,'',a:end,a:flags)
+    return searchpair(a:start,'',a:end,a:flags,"line('.') < prevnonblank(v:lnum) - 2000 ? dummy : 0")
   endfunction
 endif
 
