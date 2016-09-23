@@ -58,12 +58,12 @@ function s:skip_func(lnum)
 endfunction
 
 if has('reltime')
-  function s:GetPair(start,end,flags,skip,time)
-    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0]),a:time)
+  function s:GetPair(start,end,flags,skip,time,...)
+    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
   endfunction
 else
   function s:GetPair(start,end,flags,...)
-    return searchpair(a:start,'',a:end,a:flags,0,max([prevnonblank(v:lnum) - 2000,0]))
+    return searchpair(a:start,'',a:end,a:flags,"line('.') < prevnonblank(v:lnum) - 2000 ? dummy : 0")
   endfunction
 endif
 
@@ -88,14 +88,14 @@ function s:OneScope(lnum,text)
 endfunction
 
 function s:iscontOne(i,num,cont)
-  let [l:i, l:cont, l:num] = [a:i, a:cont, a:num ? a:num : 1]
-  let pind = a:num ? indent(l:num) : -s:sw()
-  let ind = indent(l:i) + (!l:cont ? s:sw() : 0)
+  let [l:i, l:cont, l:num] = [a:i, a:cont, a:num + !a:num]
+  let pind = a:num ? indent(l:num) : -s:W
+  let ind = indent(l:i) + (!l:cont * s:W)
   let bL = 0
-  while l:i >= l:num && (!l:cont || ind > pind + s:sw())
+  while l:i >= l:num && (!l:cont || ind > pind + s:W)
     if indent(l:i) < ind " first line always true for !cont, false for !!cont
       if s:OneScope(l:i,substitute(getline(l:i),':\@<!\/\/.*','',''))
-        if expand('<cword>') ==# 'while' && s:GetPair(s:line_pre . '\C\<do\>\%>'.(l:num-1).'l','\C\<while\>','bW',s:skip_expr,100) > 0
+        if expand('<cword>') ==# 'while' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,l:num) > 0
           return 0
         endif
         let bL += 1
@@ -107,7 +107,7 @@ function s:iscontOne(i,num,cont)
     endif
     let l:i = s:PrevCodeLine(l:i - 1)
   endwhile
-  return bL * s:sw()
+  return bL * s:W
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
@@ -136,7 +136,7 @@ function s:Balanced(lnum)
   while pos != -1
     if synIDattr(synID(a:lnum,pos + 1,0),'name') !~? s:syng_strcom
       let idx = stridx('(){}[]', l:line[pos])
-      if idx % 2 == 0
+      if !(idx % 2)
         let open_{idx} += 1
       else
         let open_{idx - 1} -= 1
@@ -147,7 +147,7 @@ function s:Balanced(lnum)
     endif
     let pos = match(l:line, '[][(){}]', pos + 1)
   endwhile
-  return (!open_4 + !open_2 + !open_0) - 2
+  return !(open_4 || open_2 || open_0)
 endfunction
 
 function GetJavascriptIndent()
@@ -181,46 +181,51 @@ function GetJavascriptIndent()
 
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
-  let [s:looksyn,s:free] = [v:lnum - 1,1]
   call cursor(v:lnum,1)
-  if b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
-        \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum) > 0)
-    let num = b:js_cache[1]
-  elseif syns != '' && l:line[0] =~ '\s'
-    let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
-          \ syns =~? 'jsbracket'? ['\[','\]'] : ['[({[]','[])}]']
-    let num = s:GetPair(pattern[0],pattern[1],'bW','s:skip_func(s:looksyn)',2000)
+  if getline(l:lnum) !~ '^\S'
+    let [s:looksyn,s:free] = [v:lnum - 1,1]
+    if b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
+          \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
+      let num = b:js_cache[1]
+    elseif syns != '' && l:line[0] =~ '\s'
+      let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
+            \ syns =~? 'jsbracket'? ['\[','\]'] : ['[({[]','[])}]']
+      let num = s:GetPair(pattern[0],pattern[1],'bW','s:skip_func(s:looksyn)',2000)
+    else
+      let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
+    endif
   else
-    let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
+    let num = s:GetPair('[({[]','[])}]','bW',s:skip_expr,200,l:lnum)
   endif
 
-  let num = num > 0 ? num : 0
+  let num = (num > 0) * num
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
   let l:line = substitute(l:line,s:line_pre,'','')
   if l:line =~ '^[])}]'
-    return indent(num)
+    return !!num * indent(num)
   endif
   call cursor(v:lnum,1)
-  if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>\%>'.(num-!!num).'l','\C\<while\>','bW',s:skip_expr,100) > 0
+  if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,num) > 0
     return indent(line('.'))
   endif
 
+  let s:W = s:sw()
   let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), ':\@<!\/\/.*', '','')
   call cursor(b:js_cache[1],b:js_cache[2])
   let switch_offset = !num || !(search(')\_s*\%#','bW') &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
-        \ &cino !~ ':' || !has('float') ? s:sw() :
-        \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:sw() : 1))
+        \ &cino !~ ':' || !has('float') ? s:W :
+        \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
 
   " most significant, find the indent amount
   let isOp = l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation
   let bL = s:iscontOne(l:lnum,num,isOp)
-  let bL = bL ? bL - (l:line =~ '^{') * s:sw() : bL
+  let bL -= (bL && l:line =~ '^{') * s:W
   if isOp && (!num || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
-    return (num ? indent(num) : -s:sw()) + (s:sw() * 2) + switch_offset + bL
+    return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
   elseif num
-    return indent(num) + s:sw() + switch_offset + bL
+    return indent(num) + s:W + switch_offset + bL
   endif
   return bL
 endfunction
