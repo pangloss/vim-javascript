@@ -6,7 +6,7 @@ syntax region  jsFlowParens         contained matchgroup=jsFlowNoise start=/(/  
 syntax match   jsFlowNoise          contained /[:;,<>]/
 syntax keyword jsFlowType           contained boolean number string null void any mixed JSON array function object array bool class
 syntax keyword jsFlowTypeof         contained typeof skipempty skipempty nextgroup=jsFlowTypeCustom,jsFlowType
-syntax match   jsFlowTypeCustom     contained /\k*/ skipwhite skipempty nextgroup=jsFlowGroup
+syntax match   jsFlowTypeCustom     contained /[0-9a-zA-Z_.]*/ skipwhite skipempty nextgroup=jsFlowGroup
 syntax region  jsFlowGroup          contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster
 syntax region  jsFlowArrowArguments contained matchgroup=jsFlowNoise start=/(/  end=/)\%(\s*=>\)\@=/ oneline skipwhite skipempty nextgroup=jsFlowArrow contains=@jsFlowCluster
 syntax match   jsFlowArrow          contained /=>/ skipwhite skipempty nextgroup=jsFlowType,jsFlowTypeCustom,jsFlowParens
