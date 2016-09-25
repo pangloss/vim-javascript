@@ -42,9 +42,6 @@ let s:expr_case = s:line_pre . '\%(\%(case\>.\+\)\|default\)\s*:\C'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
 
-" Regex of syntax group names that are strings or documentation.
-let s:syng_comment = '\%(comment\|doc\)'
-
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 function s:skip_func(lnum)
@@ -159,7 +156,7 @@ function GetJavascriptIndent()
   let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
 
   " start with strings,comments,etc.
-  if syns =~? s:syng_comment
+  if syns =~? '\%(comment\|doc\)'
     if l:line =~ '^\s*\*'
       return cindent(v:lnum)
     elseif l:line !~ '^\s*\/'
