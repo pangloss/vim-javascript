@@ -159,12 +159,14 @@ function GetJavascriptIndent()
   let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
 
   " start with strings,comments,etc.
-  if l:line !~ '^[''"]' && syns =~? '\%(string\|template\)' ||
-        \ l:line !~ '^\s*[/*]' && syns =~? s:syng_comment
+  if syns =~? s:syng_comment
+    if l:line =~ '^\s*\*'
+      return cindent(v:lnum)
+    elseif l:line !~ '^\s*\/'
+      return -1
+    endif
+  elseif syns =~? '\%(string\|template\)' && l:line !~ '^[''"]'
     return -1
-  endif
-  if l:line =~ '^\s*\*' && syns =~? s:syng_comment
-    return cindent(v:lnum)
   endif
   let l:lnum = s:PrevCodeLine(v:lnum - 1)
   if l:lnum == 0
