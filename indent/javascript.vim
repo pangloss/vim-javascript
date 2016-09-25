@@ -188,7 +188,7 @@ function GetJavascriptIndent()
     if b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
           \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
       let num = b:js_cache[1]
-    elseif stridx('])}',l:line[0]) > -1
+    elseif l:line =~ '^[])}]'
       let id = stridx('])}',l:line[0])
       let num = s:GetPair(escape('[({'[id],'['), escape('])}'[id],']'),'bW','s:skip_func(s:looksyn)',2000)
     elseif syns != '' && getline(v:lnum)[0] =~ '\s'
