@@ -163,7 +163,7 @@ function GetJavascriptIndent()
         \ l:line !~ '^\s*[/*]' && syns =~? s:syng_comment
     return -1
   endif
-  if l:line !~ '^\%(\/\*\|\s*\/\/\)' && syns =~? s:syng_comment
+  if l:line =~ '^\s*\*' && syns =~? s:syng_comment
     return cindent(v:lnum)
   endif
   let l:lnum = s:PrevCodeLine(v:lnum - 1)
