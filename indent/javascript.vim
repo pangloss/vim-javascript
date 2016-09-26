@@ -38,7 +38,7 @@ else
 endif
 
 let s:line_pre = '^\s*\%(\%(\%(\/\*.\{-}\)\=\*\+\/\s*\)\=\)\@>'
-let s:expr_case = s:line_pre . '\%(\%(case\>.\+\)\|default\)\s*:\C'
+let s:expr_case = '\<\%(\%(case\>.\+\)\|default\)\s*:\C'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
 
@@ -170,15 +170,15 @@ function GetJavascriptIndent()
     return 0
   endif
 
-  if l:line =~# s:expr_case
+  let l:line = substitute(l:line,s:line_pre,'','')
+
+  if l:line =~# '^' . s:expr_case
     let cpo_switch = &cpo
     set cpo+=%
     let ind = cindent(v:lnum)
     let &cpo = cpo_switch
     return ind
   endif
-
-  let l:line = substitute(l:line,s:line_pre,'','')
 
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
