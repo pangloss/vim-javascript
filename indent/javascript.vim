@@ -75,7 +75,7 @@ if !exists('g:javascript_continuation')
 endif
 
 let g:javascript_opfirst = '^' . g:javascript_opfirst
-let g:javascript_continuation .= s:line_term
+let g:javascript_continuation .= '$'
 
 function s:OneScope(lnum,text)
   return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)' . s:line_term)) > -1 ||
@@ -215,7 +215,7 @@ function GetJavascriptIndent()
   endif
 
   let s:W = s:sw()
-  let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), ':\@<!\/\/.*', '','')
+  let pline = substitute(substitute(getline(l:lnum),':\@<!\/\/.*','',''), s:line_term, '','')
   call cursor(b:js_cache[1],b:js_cache[2])
   let switch_offset = !num || !(search(')\_s*\%#','bW') &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
@@ -223,7 +223,7 @@ function GetJavascriptIndent()
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
 
   " most significant, find the indent amount
-  let isOp = l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation
+  let isOp = l:line =~# g:javascript_opfirst || pline !~# s:expr_case . '$' && pline =~# g:javascript_continuation
   let bL = s:iscontOne(l:lnum,num,isOp)
   let bL -= (bL && l:line =~ '^{') * s:W
   if isOp && (!num || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
