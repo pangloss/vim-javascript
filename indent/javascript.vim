@@ -109,9 +109,10 @@ endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
-  return getline(line('.'))[col('.')-1] == '{' && !search(
-        \ '\C\%(\<return\s*\|\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|import\|export\%(\_s\+default\)\=\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\)\_s*\)\%#'
-        \ ,'bnW') && (search(s:expr_case . '\_s*\%#','nbW') || !search('[{:]\_s*\%#','bW') || s:IsBlock())
+  return getline(line('.'))[col('.')-1] == '{' && !search('\<return\s*\%#','nbW') && (search('\l\_s*\%#','bW') ? expand('<cword>') !~#
+        \ '\<\%(var\|const\|let\|import\|export\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\>'
+        \ : !search('\C\%([-=~!<*+,./?^%|&\[(]\|=\@<!>\)\_s*\%#','nbW') &&
+        \ (search(s:expr_case . '\_s*\%#','nbW') || !search('[{:]\_s*\%#','bW') || s:IsBlock()))
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
