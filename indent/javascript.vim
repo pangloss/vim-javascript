@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: September 23, 2016
+" Last Change: September 26, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -109,9 +109,9 @@ endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
-  return getline(line('.'))[col('.')-1] == '{' && !search('\<return\s*\%#','nbW') && (search('\l\_s*\%#','bW') ? expand('<cword>') !~#
+  return getline(line('.'))[col('.')-1] == '{' && !search('\C\<return\s*\%#','nbW') && (search('\l\_s*\%#','bW') ? expand('<cword>') !~#
         \ '\<\%(var\|const\|let\|import\|export\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\>'
-        \ : !search('\C\%([-=~!<*+,./?^%|&\[(]\|=\@<!>\)\_s*\%#','nbW') &&
+        \ : !search('\%([-=~!<*+,./?^%|&\[(]\|=\@<!>\)\_s*\%#','nbW') &&
         \ (search(s:expr_case . '\_s*\%#','nbW') || !search('[{:]\_s*\%#','bW') || s:IsBlock()))
 endfunction
 
