@@ -109,8 +109,9 @@ endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
-  return getline(line('.'))[col('.')-1] == '{' && !search(
-        \ '\C\%(\<return\s*\|\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\|\<\%(var\|const\|let\|import\|export\%(\_s\+default\)\=\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\)\_s*\)\%#'
+  return getline(line('.'))[col('.')-1] == '{' && !search('\<return\s*\%#','nbW') &&
+        \ !search('\C\%([-=~!<*+,.?^%|&\[(]\|=\@<!>\|\*\@<!\/\)\_s*\%#','nbW') && !search(
+        \ '\<\%(var\|const\|let\|import\|export\%(\_s\+default\)\=\|yield\|delete\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\_s*\%#'
         \ ,'bnW') && (search(s:expr_case . '\_s*\%#','nbW') || !search('[{:]\_s*\%#','bW') || s:IsBlock())
 endfunction
 
