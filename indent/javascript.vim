@@ -152,7 +152,14 @@ function s:Balanced(lnum)
   return !(open_4 || open_2 || open_0)
 endfunction
 
+function s:Ret(v)
+  let &magic = s:save_magic
+  return a:v
+endfunction
+
 function GetJavascriptIndent()
+  let s:save_magic = &magic
+  set magic
   if !exists('b:js_cache')
     let b:js_cache = [0,0,0]
   endif
@@ -163,16 +170,16 @@ function GetJavascriptIndent()
   " start with strings,comments,etc.
   if syns =~? '\%(comment\|doc\)'
     if l:line =~ '^\s*\*'
-      return cindent(v:lnum)
+      return s:Ret(cindent(v:lnum))
     elseif l:line !~ '^\s*\/'
-      return -1
+      return s:Ret(-1)
     endif
   elseif syns =~? '\%(string\|template\)' && l:line !~ '^[''"]'
-    return -1
+    return s:Ret(-1)
   endif
   let l:lnum = s:PrevCodeLine(v:lnum - 1)
   if l:lnum == 0
-    return 0
+    return s:Ret(0)
   endif
 
   let l:line = substitute(l:line,s:line_pre,'','')
@@ -182,7 +189,7 @@ function GetJavascriptIndent()
     set cpo+=%
     let ind = cindent(v:lnum)
     let &cpo = cpo_switch
-    return ind
+    return s:Ret(ind)
   endif
 
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
@@ -209,13 +216,13 @@ function GetJavascriptIndent()
 
   let num = (num > 0) * num
   if l:line =~ '^[])}]'
-    return !!num * indent(num)
+    return s:Ret(!!num * indent(num))
   endif
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
   call cursor(v:lnum,1)
   if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,num) > 0
-    return indent(line('.'))
+    return s:Ret(indent(line('.')))
   endif
 
   let s:W = s:sw()
@@ -231,11 +238,11 @@ function GetJavascriptIndent()
   let bL = s:iscontOne(l:lnum,num,isOp)
   let bL -= (bL && l:line =~ '^{') * s:W
   if isOp && (!num || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
-    return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
+    return s:Ret((num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL)
   elseif num
-    return indent(num) + s:W + switch_offset + bL
+    return s:Ret(indent(num) + s:W + switch_offset + bL)
   endif
-  return bL
+  return s:Ret(bL)
 endfunction
 
 
