@@ -78,8 +78,8 @@ let g:javascript_opfirst = '^' . g:javascript_opfirst
 let g:javascript_continuation .= '$'
 
 function s:OneScope(lnum,text)
-  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)' . s:line_term)) > -1 ||
-        \ cursor(a:lnum, match(' ' . a:text, ')' . s:line_term)) > -1 &&
+  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)' . '$')) > -1 ||
+        \ cursor(a:lnum, match(' ' . a:text, ')' . '$')) > -1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 &&
         \ search('\C\<\%(for\%(\_s\+each\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW')
 endfunction
@@ -91,7 +91,7 @@ function s:iscontOne(i,num,cont)
   let bL = 0
   while l:i >= l:num && (!l:cont || ind > pind + s:W)
     if indent(l:i) < ind " first line always true for !cont, false for !!cont
-      if s:OneScope(l:i,substitute(getline(l:i),':\@<!\/\/.*','',''))
+      if s:OneScope(l:i,substitute(substitute(getline(l:i),':\@<!\/\/.*','',''), s:line_term, '',''))
         if expand('<cword>') ==# 'while' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,l:num) > 0
           return 0
         endif
