@@ -190,7 +190,7 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   if getline(l:lnum) !~ '^\S'
     let [s:looksyn,s:free] = [v:lnum - 1,1]
-    if b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
+    if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
           \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
       let num = b:js_cache[1]
     elseif l:line =~ '^[])}]'
