@@ -66,6 +66,10 @@ endif
 
 let s:line_term = '\s*\%(\%(\/\%(\%(\*.\{-}\*\/\)\|\%(\*\+\)\)\)\s*\)\=$'
 
+function s:Trimline(ln)
+  return substitute(substitute(getline(a:ln),':\@<!\/\/.*','',''), s:line_term,'','')
+endfunction
+
 " configurable regexes that define continuation lines, not including (, {, or [.
 if !exists('g:javascript_opfirst')
   let g:javascript_opfirst = '\%([<>,?^%|*&]\|\/[^/*]\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
@@ -91,7 +95,7 @@ function s:iscontOne(i,num,cont)
   let bL = 0
   while l:i >= l:num && (!l:cont || ind > pind + s:W)
     if indent(l:i) < ind " first line always true for !cont, false for !!cont
-      if s:OneScope(l:i,substitute(substitute(getline(l:i),':\@<!\/\/.*','',''), s:line_term, '',''))
+      if s:OneScope(l:i,s:Trimline(l:i))
         if expand('<cword>') ==# 'while' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,l:num) > 0
           return 0
         endif
@@ -215,7 +219,7 @@ function GetJavascriptIndent()
   endif
 
   let s:W = s:sw()
-  let pline = substitute(substitute(getline(l:lnum),':\@<!\/\/.*','',''), s:line_term, '','')
+  let pline = s:Trimline(l:lnum)
   call cursor(b:js_cache[1],b:js_cache[2])
   let switch_offset = !num || !(search(')\_s*\%#','bW') &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
