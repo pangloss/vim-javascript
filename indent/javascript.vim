@@ -152,97 +152,96 @@ function s:Balanced(lnum)
   return !(open_4 || open_2 || open_0)
 endfunction
 
-function s:Ret(v)
-  let &magic = s:save_magic
-  return a:v
-endfunction
-
 function GetJavascriptIndent()
-  let s:save_magic = &magic
+  let save_magic = &magic
   set magic
-  if !exists('b:js_cache')
-    let b:js_cache = [0,0,0]
-  endif
-  " Get the current line.
-  let l:line = getline(v:lnum)
-  let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
-
-  " start with strings,comments,etc.
-  if syns =~? '\%(comment\|doc\)'
-    if l:line =~ '^\s*\*'
-      return s:Ret(cindent(v:lnum))
-    elseif l:line !~ '^\s*\/'
-      return s:Ret(-1)
+  try
+    if !exists('b:js_cache')
+      let b:js_cache = [0,0,0]
     endif
-  elseif syns =~? '\%(string\|template\)' && l:line !~ '^[''"]'
-    return s:Ret(-1)
-  endif
-  let l:lnum = s:PrevCodeLine(v:lnum - 1)
-  if l:lnum == 0
-    return s:Ret(0)
-  endif
+    " Get the current line.
+    let l:line = getline(v:lnum)
+    let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
 
-  let l:line = substitute(l:line,s:line_pre,'','')
+    " start with strings,comments,etc.
+    if syns =~? '\%(comment\|doc\)'
+      if l:line =~ '^\s*\*'
+        return cindent(v:lnum)
+      elseif l:line !~ '^\s*\/'
+        return -1
+      endif
+    elseif syns =~? '\%(string\|template\)' && l:line !~ '^[''"]'
+      return -1
+    endif
+    let l:lnum = s:PrevCodeLine(v:lnum - 1)
+    if l:lnum == 0
+      return 0
+    endif
 
-  if l:line =~# '^' . s:expr_case
-    let cpo_switch = &cpo
-    set cpo+=%
-    let ind = cindent(v:lnum)
-    let &cpo = cpo_switch
-    return s:Ret(ind)
-  endif
+    let l:line = substitute(l:line,s:line_pre,'','')
 
-  " the containing paren, bracket, curly. Memoize, last lineNr either has the
-  " same scope or starts a new one, unless if it closed a scope.
-  call cursor(v:lnum,1)
-  if getline(l:lnum) !~ '^\S'
-    let [s:looksyn,s:free] = [v:lnum - 1,1]
-    if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
-          \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
-      let num = b:js_cache[1]
-    elseif l:line =~ '^[])}]'
-      let id = stridx('])}',l:line[0])
-      let num = s:GetPair(escape('[({'[id],'['), escape('])}'[id],']'),'bW','s:skip_func(s:looksyn)',2000)
-    elseif syns != '' && getline(v:lnum)[0] =~ '\s'
-      let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
-            \ syns =~? 'jsbracket'? ['\[','\]'] : ['[({[]','[])}]']
-      let num = s:GetPair(pattern[0],pattern[1],'bW','s:skip_func(s:looksyn)',2000)
+    if l:line =~# '^' . s:expr_case
+      let cpo_switch = &cpo
+      set cpo+=%
+      let ind = cindent(v:lnum)
+      let &cpo = cpo_switch
+      return ind
+    endif
+
+    " the containing paren, bracket, curly. Memoize, last lineNr either has the
+    " same scope or starts a new one, unless if it closed a scope.
+    call cursor(v:lnum,1)
+    if getline(l:lnum) !~ '^\S'
+      let [s:looksyn,s:free] = [v:lnum - 1,1]
+      if b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
+            \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
+        let num = b:js_cache[1]
+      elseif l:line =~ '^[])}]'
+        let id = stridx('])}',l:line[0])
+        let num = s:GetPair(escape('[({'[id],'['), escape('])}'[id],']'),'bW','s:skip_func(s:looksyn)',2000)
+      elseif syns != '' && getline(v:lnum)[0] =~ '\s'
+        let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
+              \ syns =~? 'jsbracket'? ['\[','\]'] : ['[({[]','[])}]']
+        let num = s:GetPair(pattern[0],pattern[1],'bW','s:skip_func(s:looksyn)',2000)
+      else
+        let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
+      endif
     else
-      let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
+      let num = s:GetPair('[({[]','[])}]','bW',s:skip_expr,200,l:lnum)
     endif
-  else
-    let num = s:GetPair('[({[]','[])}]','bW',s:skip_expr,200,l:lnum)
-  endif
 
-  let num = (num > 0) * num
-  if l:line =~ '^[])}]'
-    return s:Ret(!!num * indent(num))
-  endif
-  let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
+    let num = (num > 0) * num
+    let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
-  call cursor(v:lnum,1)
-  if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,num) > 0
-    return s:Ret(indent(line('.')))
-  endif
+    if l:line =~ '^[])}]'
+      return !!num * indent(num)
+    endif
+    call cursor(v:lnum,1)
+    if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,num) > 0
+      return indent(line('.'))
+    endif
 
-  let s:W = s:sw()
-  let pline = s:Trimline(l:lnum)
-  call cursor(b:js_cache[1],b:js_cache[2])
-  let switch_offset = !num || !(search(')\_s*\%#','bW') &&
-        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
-        \ &cino !~ ':' || !has('float') ? s:W :
-        \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
+    let s:W = s:sw()
+    let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), ':\@<!\/\/.*', '','')
+    call cursor(b:js_cache[1],b:js_cache[2])
+    let switch_offset = !num || !(search(')\_s*\%#','bW') &&
+          \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
+          \ &cino !~ ':' || !has('float') ? s:W :
+          \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
 
-  " most significant, find the indent amount
-  let isOp = l:line =~# g:javascript_opfirst || pline !~# s:expr_case . '$' && pline =~# g:javascript_continuation
-  let bL = s:iscontOne(l:lnum,num,isOp)
-  let bL -= (bL && l:line =~ '^{') * s:W
-  if isOp && (!num || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
-    return s:Ret((num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL)
-  elseif num
-    return s:Ret(indent(num) + s:W + switch_offset + bL)
-  endif
-  return s:Ret(bL)
+    " most significant, find the indent amount
+    let isOp = l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation
+    let bL = s:iscontOne(l:lnum,num,isOp)
+    let bL -= (bL && l:line =~ '^{') * s:W
+    if isOp && (!num || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
+      return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
+    elseif num
+      return indent(num) + s:W + switch_offset + bL
+    endif
+    return bL
+  finally
+    let &magic = save_magic
+  endtry
 endfunction
 
 
