@@ -153,6 +153,9 @@ function s:Balanced(lnum)
 endfunction
 
 function GetJavascriptIndent()
+  try
+  let save_magic = &magic
+  set magic
   if !exists('b:js_cache')
     let b:js_cache = [0,0,0]
   endif
@@ -190,7 +193,7 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   if getline(l:lnum) !~ '^\S'
     let [s:looksyn,s:free] = [v:lnum - 1,1]
-    if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
+    if b:js_cache[0] < v:lnum && b:js_cache[0] >= l:lnum &&
           \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
       let num = b:js_cache[1]
     elseif l:line =~ '^[])}]'
@@ -208,18 +211,18 @@ function GetJavascriptIndent()
   endif
 
   let num = (num > 0) * num
+  let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
+
   if l:line =~ '^[])}]'
     return !!num * indent(num)
   endif
-  let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
-
   call cursor(v:lnum,1)
   if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,num) > 0
     return indent(line('.'))
   endif
 
   let s:W = s:sw()
-  let pline = s:Trimline(l:lnum)
+  let pline = substitute(substitute(getline(l:lnum),s:expr_case,'\=repeat(" ",strlen(submatch(0)))',''), ':\@<!\/\/.*', '','')
   call cursor(b:js_cache[1],b:js_cache[2])
   let switch_offset = !num || !(search(')\_s*\%#','bW') &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
@@ -227,7 +230,7 @@ function GetJavascriptIndent()
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
 
   " most significant, find the indent amount
-  let isOp = l:line =~# g:javascript_opfirst || pline !~# s:expr_case . '$' && pline =~# g:javascript_continuation
+  let isOp = l:line =~# g:javascript_opfirst || pline =~# g:javascript_continuation
   let bL = s:iscontOne(l:lnum,num,isOp)
   let bL -= (bL && l:line =~ '^{') * s:W
   if isOp && (!num || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
@@ -236,6 +239,9 @@ function GetJavascriptIndent()
     return indent(num) + s:W + switch_offset + bL
   endif
   return bL
+  finally
+    let &magic = save_magic
+  endtry
 endfunction
 
 
