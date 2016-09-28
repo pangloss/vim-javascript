@@ -208,11 +208,11 @@ function GetJavascriptIndent()
   endif
 
   let num = (num > 0) * num
-  let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
-
   if l:line =~ '^[])}]'
     return !!num * indent(num)
   endif
+  let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
+
   call cursor(v:lnum,1)
   if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,num) > 0
     return indent(line('.'))
