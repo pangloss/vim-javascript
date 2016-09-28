@@ -82,8 +82,8 @@ let g:javascript_opfirst = '^' . g:javascript_opfirst
 let g:javascript_continuation .= '$'
 
 function s:OneScope(lnum,text)
-  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)' . '$')) > -1 ||
-        \ cursor(a:lnum, match(' ' . a:text, ')' . '$')) > -1 &&
+  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$')) > -1 ||
+        \ cursor(a:lnum, match(' ' . a:text, ')$')) > -1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 &&
         \ search('\C\<\%(for\%(\_s\+each\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW')
 endfunction
@@ -114,7 +114,7 @@ endfunction
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
   return getline(line('.'))[col('.')-1] == '{' && !search('\C\<return\s*\%#','nbW') && (search('\l\_s*\%#','bW') ? expand('<cword>') !~#
-        \ '\<\%(var\|const\|let\|import\|export\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\>'
+        \ '\<\%(var\|const\|let\|\%(im\|ex\)port\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\>'
         \ : !search('\%([-=~!<*+,./?^%|&\[(]\|=\@<!>\)\_s*\%#','nbW') &&
         \ (search(s:expr_case . '\_s*\%#','nbW') || !search('[{:]\_s*\%#','bW') || s:IsBlock()))
 endfunction
