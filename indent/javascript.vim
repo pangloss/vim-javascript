@@ -115,8 +115,8 @@ endfunction
 function s:IsBlock()
   return getline(line('.'))[col('.')-1] == '{' && !search('\C\<return\s*\%#','nbW') && (search('\l\_s*\%#','bW') ? expand('<cword>') !~#
         \ '\<\%(var\|const\|let\|\%(im\|ex\)port\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\>'
-        \ : !search('[-=~!<*+,./?^%|&\[(]\_s*\%#','nbW') && ((!search('>\_s*\%#','bW') || search('=\%#','bW') ||
-        \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'flownoise') &&
+        \ : !search('[-=~!<*+,./?^%|&\[(]\_s*\%#','nbW') && (search('>\_s*\%#','bW') ? search('=\%#','bW') ||
+        \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'flownoise' :
         \ (search(s:expr_case . '\_s*\%#','nbW') || !search('[{:]\_s*\%#','bW') || s:IsBlock())))
 endfunction
 
