@@ -85,7 +85,7 @@ function s:OneScope(lnum,text)
   return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$')) > -1 ||
         \ cursor(a:lnum, match(' ' . a:text, ')$')) > -1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 &&
-        \ search('\C\<\%(for\%(\_s\+each\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW')
+        \ search('\C\<\%(for\%(\_s\+\%(await\|each\)\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW')
 endfunction
 
 function s:iscontOne(i,num,cont)
