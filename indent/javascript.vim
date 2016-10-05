@@ -38,7 +38,7 @@ else
 endif
 
 let s:line_pre = '^\s*\%(\%(\%(\/\*.\{-}\)\=\*\+\/\s*\)\=\)\@>'
-let s:expr_case = '\<\%(\%(case\>\s*\S.\{-}\s*\)\|default\)\s*:\C'
+let s:expr_case = '\<\%(\%(case\>\s*\S.\{-}\)\|default\)\s*:\C'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
 
