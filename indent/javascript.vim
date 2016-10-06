@@ -94,7 +94,7 @@ function s:iscontOne(i,num,cont)
   let ind = indent(l:i) + (!l:cont * s:W)
   let bL = 0
   while l:i >= l:num && (!l:cont || ind > pind + s:W)
-    if indent(l:i) < ind " first line always true for !cont, false for !!cont
+    if indent(l:i) < ind " first line always true for !a:cont, false for !!a:cont
       if s:OneScope(l:i,s:Trimline(l:i))
         if expand('<cword>') ==# 'while' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,l:num) > 0
           return 0
