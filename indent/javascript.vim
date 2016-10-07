@@ -155,8 +155,8 @@ endfunction
 
 function GetJavascriptIndent()
   try
-  let save_magic = &magic
-  set magic
+    let save_magic = &magic
+    set magic
   if !exists('b:js_cache')
     let b:js_cache = [0,0,0]
   endif
