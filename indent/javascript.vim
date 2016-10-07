@@ -67,7 +67,22 @@ endif
 let s:line_term = '\s*\%(\%(\/\%(\%(\*.\{-}\*\/\)\|\%(\*\+\)\)\)\s*\)\=$'
 
 function s:Trimline(ln)
-  return substitute(substitute(getline(a:ln),':\@<!\/\/.*','',''), s:line_term,'','')
+  let pline = getline(a:ln)
+  let pline_len = strlen(pline)
+  if synIDattr(synID(a:ln, pline_len, 0), 'name') =~? '\%(Comment\|Todo\)'
+    let min = match(pline,'\/[/*]') + 1
+    let max = match(pline,'\/[/*].\{-}$') + 2
+    while min < max
+      let col = (min + max) / 2
+      if synIDattr(synID(a:ln, col, 0), 'name') =~? '\%(Comment\|Todo\)'
+        let max = col
+      else
+        let min = match(pline,'\/[/*]',min) + 1
+      endif
+    endwhile
+    let pline = strpart(pline, 0, min - 1)
+  endif
+  return pline
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -170,16 +185,18 @@ function GetJavascriptIndent()
       return cindent(v:lnum)
     elseif l:line !~ '^\s*\/'
       return -1
+    else
+      let l:line = substitute(l:line,s:line_pre,'','')
     endif
   elseif syns =~? '\%(string\|template\)' && l:line !~ '^[''"]'
     return -1
+  else
+    let l:line = substitute(l:line,'^\s*','','')
   endif
   let l:lnum = s:PrevCodeLine(v:lnum - 1)
   if l:lnum == 0
     return 0
   endif
-
-  let l:line = substitute(l:line,s:line_pre,'','')
 
   if l:line =~# '^' . s:expr_case
     let cpo_switch = &cpo
