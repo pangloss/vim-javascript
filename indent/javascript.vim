@@ -72,7 +72,7 @@ endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 if !exists('g:javascript_opfirst')
-  let g:javascript_opfirst = '\%([<>,?^%|*&]\|\/[^/*]\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
+  let g:javascript_opfirst = '\%([<>,?^%|*&]\|\/[/*]\@!\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
 endif
 if !exists('g:javascript_continuation')
   let g:javascript_continuation = '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)'
@@ -94,9 +94,9 @@ function s:iscontOne(i,num,cont)
   let ind = indent(l:i) + (!l:cont * s:W)
   let bL = 0
   while l:i >= l:num && (!l:cont || ind > pind + s:W)
-    if indent(l:i) < ind " first line always true for !cont, false for !!cont
+    if indent(l:i) < ind " first line always true for !a:cont, false for !!a:cont
       if s:OneScope(l:i,s:Trimline(l:i))
-        if expand('<cword>') ==# 'while' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,l:num) > 0
+        if expand('<cword>') ==# 'while' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,l:num + !!a:num) > 0
           return 0
         endif
         let bL += 1
@@ -155,8 +155,8 @@ endfunction
 
 function GetJavascriptIndent()
   try
-  let save_magic = &magic
-  set magic
+    let save_magic = &magic
+    set magic
   if !exists('b:js_cache')
     let b:js_cache = [0,0,0]
   endif
@@ -218,7 +218,7 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
   call cursor(v:lnum,1)
-  if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,num) > 0
+  if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,num + 1) > 0
     return indent(line('.'))
   endif
 
