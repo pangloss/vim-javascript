@@ -185,18 +185,16 @@ function GetJavascriptIndent()
       return cindent(v:lnum)
     elseif l:line !~ '^\s*\/'
       return -1
-    else
-      let l:line = substitute(l:line,s:line_pre,'','')
     endif
   elseif syns =~? '\%(string\|template\)' && l:line !~ '^[''"]'
     return -1
-  else
-    let l:line = substitute(l:line,'^\s*','','')
   endif
   let l:lnum = s:PrevCodeLine(v:lnum - 1)
   if l:lnum == 0
     return 0
   endif
+
+  let l:line = substitute(l:line,s:line_pre,'','')
 
   if l:line =~# '^' . s:expr_case
     let cpo_switch = &cpo
