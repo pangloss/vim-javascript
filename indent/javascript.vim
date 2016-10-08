@@ -82,7 +82,7 @@ function s:Trimline(ln)
     endwhile
     let pline = strpart(pline, 0, min - 1)
   endif
-  return pline
+  return substitute(pline,'\s*$','','')
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
