@@ -69,20 +69,20 @@ let s:line_term = '\s*\%(\%(\/\%(\%(\*.\{-}\*\/\)\|\%(\*\+\)\)\)\s*\)\=$'
 " indent/python.vim
 function s:Trimline(ln)
   let pline = getline(a:ln)
-  let min = match(pline,'\/\/') + 1
+  let min = match(pline,'\/[/*]') + 1
   if min && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? '\%(comment\|doc\)'
-    let max = match(pline,'.*\zs\/\/') + 1
+    let max = match(pline,'.*\zs\/[/*]') + 1
     while min < max
       let col = (min + max) / 2
       if synIDattr(synID(a:ln, col, 0), 'name') =~? '\%(comment\|doc\)'
         let max = col
       else
-        let min = match(pline,'\/\/',col) + 1
+        let min = match(pline,'\/[/*]',col) + 1
       endif
     endwhile
     let pline = strpart(pline, 0, min - 1)
   endif
-  return substitute(pline,s:line_term,'','')
+  return substitute(pline,'\s*$','','')
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
