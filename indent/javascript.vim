@@ -69,10 +69,10 @@ let s:line_term = '\s*\%(\%(\/\%(\%(\*.\{-}\*\/\)\|\%(\*\+\)\)\)\s*\)\=$'
 function s:Trimline(ln)
   let pline = getline(a:ln)
   let pline_len = strlen(pline)
-  if synIDattr(synID(a:ln, pline_len, 0), 'name') =~? '\%(Comment\|Todo\)'
-    let min = match(pline,'\/[/*]') + 1
+  let min = match(pline,'\/[/*]') + 1
+  if min && synIDattr(synID(a:ln, pline_len, 0), 'name') =~? '\%(Comment\|Todo\)'
     let max = match(pline,'\/[/*].\{-}$') + 2
-    while min < max
+    while min < (max - 1)
       let col = (min + max) / 2
       if synIDattr(synID(a:ln, col, 0), 'name') =~? '\%(Comment\|Todo\)'
         let max = col
@@ -194,7 +194,7 @@ function GetJavascriptIndent()
     return 0
   endif
 
-  let l:line = substitute(l:line,s:line_pre,'','')
+  let l:line = substitute(l:line,'^\s*\%(\/\*.\{-}\*\/\s*\)*','','')
 
   if l:line =~# '^' . s:expr_case
     let cpo_switch = &cpo
