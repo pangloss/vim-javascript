@@ -77,7 +77,7 @@ function s:Trimline(ln)
       if synIDattr(synID(a:ln, col, 0), 'name') =~? '\%(comment\|doc\)'
         let max = col
       else
-        let min = match(pline,'\/[/*]',min) + 1
+        let min = match(pline,'\/[/*]',col) + 1
       endif
     endwhile
     let pline = strpart(pline, 0, min - 1)
