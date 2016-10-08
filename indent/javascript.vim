@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: September 26, 2016
+" Last Change: October 8, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -38,6 +38,8 @@ else
 endif
 
 let s:line_pre = '^\s*\%(\%(\%(\/\*.\{-}\)\=\*\+\/\s*\)\=\)\@>'
+let s:line_term = '\s*\%(\%(\/\%(\%(\*.\{-}\*\/\)\|\%(\*\+\)\)\)\s*\)\=$'
+
 let s:expr_case = '\<\%(\%(case\>\s*\S.\{-}\)\|default\)\s*:\C'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
@@ -64,10 +66,23 @@ else
   endfunction
 endif
 
-let s:line_term = '\s*\%(\%(\/\%(\%(\*.\{-}\*\/\)\|\%(\*\+\)\)\)\s*\)\=$'
-
+" indent/python.vim
 function s:Trimline(ln)
-  return substitute(substitute(getline(a:ln),':\@<!\/\/.*','',''), s:line_term,'','')
+  let pline = getline(a:ln)
+  let min = match(pline,'\/[/*]') + 1
+  if min && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? '\%(comment\|doc\)'
+    let max = match(pline,'.*\zs\/[/*]') + 1
+    while min < max
+      let col = (min + max) / 2
+      if synIDattr(synID(a:ln, col, 0), 'name') =~? '\%(comment\|doc\)'
+        let max = col
+      else
+        let min = match(pline,'\/[/*]',col) + 1
+      endif
+    endwhile
+    let pline = strpart(pline, 0, min - 1)
+  endif
+  return substitute(pline,'\s*$','','')
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -179,7 +194,7 @@ function GetJavascriptIndent()
     return 0
   endif
 
-  let l:line = substitute(l:line,s:line_pre,'','')
+  let l:line = substitute(l:line,'^\s*\%(\/\*.\{-}\*\/\s*\)*','','')
 
   if l:line =~# '^' . s:expr_case
     let cpo_switch = &cpo
