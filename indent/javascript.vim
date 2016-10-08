@@ -38,6 +38,8 @@ else
 endif
 
 let s:line_pre = '^\s*\%(\%(\%(\/\*.\{-}\)\=\*\+\/\s*\)\=\)\@>'
+let s:line_term = '\s*\%(\%(\/\%(\%(\*.\{-}\*\/\)\|\%(\*\+\)\)\)\s*\)\=$'
+
 let s:expr_case = '\<\%(\%(case\>\s*\S.\{-}\)\|default\)\s*:\C'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
@@ -63,8 +65,6 @@ else
     return searchpair(a:start,'',a:end,a:flags,"line('.') < prevnonblank(v:lnum) - 2000 ? dummy : 0")
   endfunction
 endif
-
-let s:line_term = '\s*\%(\%(\/\%(\%(\*.\{-}\*\/\)\|\%(\*\+\)\)\)\s*\)\=$'
 
 " indent/python.vim
 function s:Trimline(ln)
