@@ -129,13 +129,19 @@ endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
-  return getline(line('.'))[col('.')-1] == '{' && !search('\C\<return\s*\%#','nbW') &&
-        \ (!search('\*\/\_s*\%#','bW') || synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' &&
-        \ searchpair('\/\*','','\*\/','bW')) && (search('\l\_s*\%#','bW') ? expand('<cword>') !~#
-        \ '\<\%(var\|const\|let\|\%(im\|ex\)port\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\>'
-        \ : !search('[-=~!<*+,./?^%|&\[(]\_s*\%#','nbW') && (search('>\_s*\%#','bW') ? search('=\%#','bW') ||
-        \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'flownoise' :
-        \ search(s:expr_case . '\_s*\%#','nbW') || !search('[{:]\_s*\%#','bW') || s:IsBlock()))
+  if getline(line('.'))[col('.')-1] == '{' && !search('\C\<return\s*\%#','nbW')
+    if search('\*\/\_s*\%#','bW') && synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment'
+      call searchpair('\/\*','','\*\/','bW')
+    endif
+    if search('\l\_s*\%#','bW')
+      return expand('<cword>') !~#
+            \ '\<\%(var\|const\|let\|\%(im\|ex\)port\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\>'
+    else
+      return !search('[-=~!<*+,./?^%|&\[(]\_s*\%#','nbW') && ((!search('>\_s*\%#','bW') || (search('=\%#','bW') ||
+            \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'flownoise') ||
+            \ search(s:expr_case . '\_s*\%#','nbW') || !search('[{:]\_s*\%#','bW') || s:IsBlock()))
+    endif
+  endif
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
