@@ -130,7 +130,7 @@ endfunction
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
   if getline(line('.'))[col('.')-1] == '{'
-    if strpart(getline(line('.')),0,col('.') - 1) =~# 'return\s*$'
+    if search('\C\<return\s*\%#','nbW')
       return 0
     endif
     if search('\*\/\_s*\%#','bW') && synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment'
