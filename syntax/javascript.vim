@@ -101,7 +101,7 @@ syntax keyword jsStatement    contained break continue with yield debugger
 syntax keyword jsConditional            if           skipwhite skipempty nextgroup=jsParenIfElse
 syntax keyword jsConditional            else         skipwhite skipempty nextgroup=jsCommentMisc,jsIfElseBlock
 syntax keyword jsConditional            switch       skipwhite skipempty nextgroup=jsParenSwitch
-syntax keyword jsRepeat                 while for    skipwhite skipempty nextgroup=jsParenRepeat
+syntax keyword jsRepeat                 while for    skipwhite skipempty nextgroup=jsParenRepeat,jsForAwait
 syntax keyword jsDo                     do           skipwhite skipempty nextgroup=jsRepeatBlock
 syntax keyword jsLabel        contained case default
 syntax keyword jsTry                    try          skipwhite skipempty nextgroup=jsTryCatchBlock
@@ -164,6 +164,7 @@ syntax match   jsFuncName             contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>/ s
 syntax region  jsFuncArgExpression    contained matchgroup=jsFuncArgOperator start=/=/ end=/[,)]\@=/ contains=@jsExpression extend
 syntax match   jsFuncArgCommas        contained ','
 syntax keyword jsArguments            contained arguments
+syntax keyword jsForAwait             contained await skipwhite skipempty nextgroup=jsParenRepeat
 
 " Matches a single keyword argument with no parens
 syntax match   jsArrowFuncArgs  /\k\+\s*\%(=>\)\@=/ skipwhite contains=jsFuncArgs skipwhite skipempty nextgroup=jsArrowFunction extend
@@ -275,6 +276,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFinally              Exception
   HiLink jsCatch                Exception
   HiLink jsAsyncKeyword         Keyword
+  HiLink jsForAwait             Keyword
   HiLink jsArrowFunction        Type
   HiLink jsFunction             Type
   HiLink jsGenerator            jsFunction
