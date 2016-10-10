@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: October 8, 2016
+" Last Change: October 9, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -111,7 +111,9 @@ function s:iscontOne(i,num,cont)
   while l:i >= l:num && (!l:cont || ind > pind + s:W)
     if indent(l:i) < ind " first line always true for !a:cont, false for !!a:cont
       if s:OneScope(l:i,s:Trimline(l:i))
-        if expand('<cword>') ==# 'while' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,l:num + !!a:num) > 0
+        if expand('<cword>') ==# 'while' &&
+              \ s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,l:num + !!a:num) > 0
+
           return 0
         endif
         let bL += 1
