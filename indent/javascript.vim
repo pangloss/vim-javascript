@@ -113,7 +113,6 @@ function s:iscontOne(i,num,cont)
       if s:OneScope(l:i,s:Trimline(l:i))
         if expand('<cword>') ==# 'while' &&
               \ s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,l:num + !!a:num) > 0
-
           return 0
         endif
         let bL += 1
