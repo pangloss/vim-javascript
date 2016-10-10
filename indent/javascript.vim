@@ -129,8 +129,8 @@ endfunction
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
   return getline(line('.'))[col('.')-1] == '{' && !search('\C\<return\s*\%#','nbW') &&
-        \ (!search('\*\/\_s*\%#','bW') || searchpair('\/\*','','\*\/','bW')) &&
-        \ (search('\l\_s*\%#','bW') ? expand('<cword>') !~#
+        \ (!search('\*\/\_s*\%#','bW') || synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' &&
+        \ searchpair('\/\*','','\*\/','bW')) && (search('\l\_s*\%#','bW') ? expand('<cword>') !~#
         \ '\<\%(var\|const\|let\|\%(im\|ex\)port\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\>'
         \ : !search('[-=~!<*+,./?^%|&\[(]\_s*\%#','nbW') && (search('>\_s*\%#','bW') ? search('=\%#','bW') ||
         \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'flownoise' :
