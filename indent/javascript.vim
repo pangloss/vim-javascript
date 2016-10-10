@@ -129,21 +129,29 @@ endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
-  if getline(line('.'))[col('.')-1] == '{' && !search('\C\<return\s*\%#','nbW')
+  if getline(line('.'))[col('.')-1] == '{'
+    if strpart(getline(line('.')),0,col('.') - 1) =~# 'return\s*$'
+      return 0
+    endif
     if search('\*\/\_s*\%#','bW') && synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment'
       call searchpair('\/\*','','\*\/','bW')
     endif
-    if search('\l\_s*\%#','bW')
-      return expand('<cword>') !~#
-            \ '\<\%(var\|const\|let\|\%(im\|ex\)port\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\>'
-    elseif search('>\_s*\%#','bW')
-      return search('=\%#','bW') || synIDattr(synID(line('.'),col('.'),0),'name') =~? 'flownoise'
-    elseif search(':\_s*\%#','bW')
-      return search(s:expr_case . '\_s*\%#','nbW')
-    elseif search('{\_s*\%#','bW')
-      return s:IsBlock()
+    if search('\S','bW')
+      let char = getline(line('.'))[col('.')-1]
+      if char =~# '\l'
+        return expand('<cword>') !~#
+              \ '\<\%(var\|const\|let\|\%(im\|ex\)port\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\>'
+      elseif char == '>'
+        return search('=\%#','bW') || synIDattr(synID(line('.'),col('.'),0),'name') =~? 'flownoise'
+      elseif char == ':'
+        return strpart(getline(line('.')),0,col('.')) =~# s:expr_case . '$'
+      elseif char == '{'
+        return s:IsBlock()
+      else
+        return char !~# '[-=~!<*+,./?^%|&\[(]'
+      endif
     else
-      return !search('[-=~!<*+,./?^%|&\[(]\_s*\%#','nbW')
+      return 1
     endif
   endif
 endfunction
