@@ -140,7 +140,7 @@ function s:IsBlock()
       let char = getline(line('.'))[col('.')-1]
       if char =~# '\l'
         return expand('<cword>') !~#
-              \ '\<\%(var\|const\|let\|\%(im\|ex\)port\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)\>'
+              \ '^\%(var\|const\|let\|\%(im\|ex\)port\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)$'
       elseif char == '>'
         return search('=\%#','bW') || synIDattr(synID(line('.'),col('.'),0),'name') =~? 'flownoise'
       elseif char == ':'
