@@ -150,7 +150,7 @@ function s:IsBlock()
           return 0
         endif
         return expand('<cword>') !~#
-              \ '^\%(var\|const\|let\|\%(im\|ex\)port\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)$'
+              \ '^\%(var\|const\|let\|import\|export\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)$'
       elseif char == '>'
         return prechar == '=' || synIDattr(synID(line('.'),col('.'),0),'name') =~? 'flownoise'
       elseif char == ':'
