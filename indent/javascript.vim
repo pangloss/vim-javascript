@@ -130,6 +130,9 @@ endfunction
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
   if getline(line('.'))[col('.')-1] == '{'
+    if synIDattr(synID(line('.'),col('.')-1,0),'name') =~? '\%(xml\|jsx\)'
+      return 1
+    endif
     if search('\C\<return\s*\%#','nbW')
       return 0
     endif
