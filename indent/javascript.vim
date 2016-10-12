@@ -139,8 +139,7 @@ function s:IsBlock()
         return char != '{'
       endif
       if char == '/' && prechar == '*' && syn =~? 'comment'
-        call searchpair('\/\*','','\*\/','bW')
-        if !search('\S','bW')
+        if !(search('\/\*','bW') && search('\S','bW'))
           return 1
         endif
         let char = getline(line('.'))[col('.')-1]
