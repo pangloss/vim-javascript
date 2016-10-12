@@ -156,8 +156,6 @@ function s:IsBlock()
         return prechar == '=' || synIDattr(synID(line('.'),col('.'),0),'name') =~? 'flownoise'
       elseif char == ':'
         return strpart(getline(line('.')),0,col('.')) =~# s:expr_case . '$'
-      elseif char == '{'
-        return s:IsBlock()
       else
         return char !~# '[-=~!<*+,./?^%|&\[(]'
       endif
