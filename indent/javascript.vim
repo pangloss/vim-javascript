@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: October 9, 2016
+" Last Change: October 12, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -38,7 +38,6 @@ else
 endif
 
 let s:line_pre = '^\s*\%(\%(\%(\/\*.\{-}\)\=\*\+\/\s*\)\=\)\@>'
-let s:line_term = '\s*\%(\%(\/\%(\%(\*.\{-}\*\/\)\|\%(\*\+\)\)\)\s*\)\=$'
 
 let s:expr_case = '\<\%(\%(case\>\s*\S.\{-}\)\|default\)\s*:\C'
 " Regex of syntax group names that are or delimit string or are comments.
@@ -130,25 +129,32 @@ endfunction
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
   if getline(line('.'))[col('.')-1] == '{'
-    if search('\C\<return\s*\%#','nbW')
-      return 0
-    endif
-    if search('\*\/\_s*\%#','bW') && synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment'
-      call searchpair('\/\*','','\*\/','bW')
-    endif
+    let l:ln = line('.')
     if search('\S','bW')
       let char = getline(line('.'))[col('.')-1]
-      if char =~# '\l'
+      let prechar = getline(line('.'))[col('.')-2]
+      if char == '/' && prechar == '*' && synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment'
+        if !(search('\/\*','bW') && search('\S','bW'))
+          return 1
+        endif
+        let char = getline(line('.'))[col('.')-1]
+        let prechar = getline(line('.'))[col('.')-2]
+      endif
+      let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
+      if syn =~? '\%(xml\|jsx\)'
+        return char != '{'
+      elseif char =~# '\l'
+        if line('.') == l:ln && expand('<cword>') ==# 'return'
+          return 0
+        endif
         return expand('<cword>') !~#
-              \ '^\%(var\|const\|let\|\%(im\|ex\)port\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)$'
+              \ '^\%(var\|const\|let\|import\|export\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)$'
       elseif char == '>'
-        return search('=\%#','bW') || synIDattr(synID(line('.'),col('.'),0),'name') =~? 'flownoise'
+        return prechar == '=' || syn =~? '^jsflow'
       elseif char == ':'
         return strpart(getline(line('.')),0,col('.')) =~# s:expr_case . '$'
-      elseif char == '{'
-        return s:IsBlock()
       else
-        return char !~# '[-=~!<*+,./?^%|&\[(]'
+        return char !~# '[-=~!<*+,/?^%|&([]'
       endif
     else
       return 1
