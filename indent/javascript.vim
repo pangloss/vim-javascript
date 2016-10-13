@@ -38,7 +38,6 @@ else
 endif
 
 let s:line_pre = '^\s*\%(\%(\%(\/\*.\{-}\)\=\*\+\/\s*\)\=\)\@>'
-let s:line_term = '\s*\%(\%(\/\%(\%(\*.\{-}\*\/\)\|\%(\*\+\)\)\)\s*\)\=$'
 
 let s:expr_case = '\<\%(\%(case\>\s*\S.\{-}\)\|default\)\s*:\C'
 " Regex of syntax group names that are or delimit string or are comments.
@@ -151,7 +150,7 @@ function s:IsBlock()
         return expand('<cword>') !~#
               \ '^\%(var\|const\|let\|import\|export\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)$'
       elseif char == '>'
-        return prechar == '=' || syn ==? 'jsflowclassgroup'
+        return prechar == '=' || syn =~? '^jsflow'
       elseif char == ':'
         return strpart(getline(line('.')),0,col('.')) =~# s:expr_case . '$'
       else
