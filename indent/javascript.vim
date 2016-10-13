@@ -134,8 +134,8 @@ function s:IsBlock()
       let char = getline(line('.'))[col('.')-1]
       let pchar = getline(line('.'))[col('.')-2]
       let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
-      if char == '/' && pchar == '*' && syn =~? 'comment'
-        if !(search('\/\*','bW') && search('\S','bW'))
+      if pchar . char == '*/' && syn =~? 'comment'
+        if !search('\/\*','bW') || !search('\S','bW')
           return 1
         endif
         let char = getline(line('.'))[col('.')-1]
