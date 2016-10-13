@@ -151,7 +151,7 @@ function s:IsBlock()
         return expand('<cword>') !~#
               \ '^\%(var\|const\|let\|import\|export\|yield\|de\%(fault\|lete\)\|void\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)$'
       elseif char == '>'
-        return prechar == '=' || syn =~? 'flow'
+        return prechar == '=' || syn ==? 'jsflowclassgroup'
       elseif char == ':'
         return strpart(getline(line('.')),0,col('.')) =~# s:expr_case . '$'
       else
