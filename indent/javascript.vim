@@ -132,14 +132,14 @@ function s:IsBlock()
     let l:ln = line('.')
     if search('\S','bW')
       let char = getline(line('.'))[col('.')-1]
-      let prechar = getline(line('.'))[col('.')-2]
+      let pchar = getline(line('.'))[col('.')-2]
       let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
-      if char == '/' && prechar == '*' && syn =~? 'comment'
+      if char == '/' && pchar == '*' && syn =~? 'comment'
         if !(search('\/\*','bW') && search('\S','bW'))
           return 1
         endif
         let char = getline(line('.'))[col('.')-1]
-        let prechar = getline(line('.'))[col('.')-2]
+        let pchar = getline(line('.'))[col('.')-2]
         let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
       endif
       if syn =~? '\%(xml\|jsx\)'
@@ -151,7 +151,7 @@ function s:IsBlock()
         return expand('<cword>') !~#
               \ '^\%(const\|let\|import\|export\|yield\|de\%(fault\|lete\)\|v\%(ar\|oid\)\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)$'
       elseif char == '>'
-        return prechar == '=' || syn =~? '^jsflow'
+        return pchar == '=' || syn =~? '^jsflow'
       elseif char == ':'
         return strpart(getline(line('.')),0,col('.')) =~# s:expr_case . '$'
       else
