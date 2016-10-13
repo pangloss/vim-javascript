@@ -131,17 +131,16 @@ function s:IsBlock()
   if getline(line('.'))[col('.')-1] == '{'
     let l:ln = line('.')
     if search('\S','bW')
-      let char = getline(line('.'))[col('.')-1]
-      let prechar = getline(line('.'))[col('.')-2]
-      let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
-      if char == '/' && prechar == '*' && syn =~? 'comment'
-        if !(search('\/\*','bW') && search('\S','bW'))
-          return 1
-        endif
+      while 1
         let char = getline(line('.'))[col('.')-1]
         let prechar = getline(line('.'))[col('.')-2]
         let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
-      endif
+        if char != '/' || prechar != '*' || syn !~? 'comment'
+          break
+        elseif !search('\/\*','bW') || !search('\S','bW')
+          return 1
+        endif
+      endwhile
       if syn =~? '\%(xml\|jsx\)'
         return char != '{'
       elseif char =~# '\l'
