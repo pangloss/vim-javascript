@@ -37,8 +37,6 @@ else
   endfunction
 endif
 
-let s:line_pre = '^\s*\%(\%(\%(\/\*.\{-}\)\=\*\+\/\s*\)\=\)\@>'
-
 let s:expr_case = '\<\%(\%(case\>\s*\S.\{-}\)\|default\)\s*:\C'
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
@@ -111,7 +109,7 @@ function s:iscontOne(i,num,cont)
     if indent(l:i) < ind " first line always true for !a:cont, false for !!a:cont
       if s:OneScope(l:i,s:Trimline(l:i))
         if expand('<cword>') ==# 'while' &&
-              \ s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,l:num + !!a:num) > 0
+              \ s:GetPair('\C\<do\>','\C\<while\>','bW',s:skip_expr . '|| !s:IsBlock()',100,l:num + !!a:num) > 0
           return 0
         endif
         let bL += 1
@@ -128,38 +126,36 @@ endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
-  if getline(line('.'))[col('.')-1] == '{'
-    let l:ln = line('.')
-    if search('\S','bW')
+  let l:ln = line('.')
+  if search('\S','bW')
+    let char = getline(line('.'))[col('.')-1]
+    let pchar = getline(line('.'))[col('.')-2]
+    let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
+    if pchar . char == '*/' && syn =~? 'comment'
+      if !search('\/\*','bW') || !search('\S','bW')
+        return 1
+      endif
       let char = getline(line('.'))[col('.')-1]
       let pchar = getline(line('.'))[col('.')-2]
       let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
-      if pchar . char == '*/' && syn =~? 'comment'
-        if !search('\/\*','bW') || !search('\S','bW')
-          return 1
-        endif
-        let char = getline(line('.'))[col('.')-1]
-        let pchar = getline(line('.'))[col('.')-2]
-        let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
-      endif
-      if syn =~? '\%(xml\|jsx\)'
-        return char != '{'
-      elseif char =~# '\l'
-        if line('.') == l:ln && expand('<cword>') ==# 'return'
-          return 0
-        endif
-        return expand('<cword>') !~#
-              \ '^\%(const\|let\|import\|export\|yield\|de\%(fault\|lete\)\|v\%(ar\|oid\)\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)$'
-      elseif char == '>'
-        return pchar == '=' || syn =~? '^jsflow'
-      elseif char == ':'
-        return strpart(getline(line('.')),0,col('.')) =~# s:expr_case . '$'
-      else
-        return char !~# '[-=~!<*+,/?^%|&([]'
-      endif
-    else
-      return 1
     endif
+    if syn =~? '\%(xml\|jsx\)'
+      return char != '{'
+    elseif char =~# '\l'
+      if line('.') == l:ln && expand('<cword>') ==# 'return'
+        return 0
+      endif
+      return expand('<cword>') !~#
+            \ '^\%(const\|let\|import\|export\|yield\|de\%(fault\|lete\)\|v\%(ar\|oid\)\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)$'
+    elseif char == '>'
+      return pchar == '=' || syn =~? '^jsflow'
+    elseif char == ':'
+      return strpart(getline(line('.')),0,col('.')) =~# s:expr_case . '$'
+    else
+      return char !~# '[-=~!<*+,/?^%|&([]'
+    endif
+  else
+    return 1
   endif
 endfunction
 
@@ -261,7 +257,7 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
 
   call cursor(v:lnum,1)
-  if l:line =~# '^while\>' && s:GetPair(s:line_pre . '\C\<do\>','\C\<while\>','bW',s:skip_expr,100,num + 1) > 0
+  if l:line =~# '^while\>' && s:GetPair('\C\<do\>','\C\<while\>','bW',s:skip_expr . '|| !s:IsBlock()',100,num + 1) > 0
     return indent(line('.'))
   endif
 
@@ -277,7 +273,7 @@ function GetJavascriptIndent()
   let isOp = l:line =~# g:javascript_opfirst || pline !~# s:expr_case . '$' && pline =~# g:javascript_continuation
   let bL = s:iscontOne(l:lnum,num,isOp)
   let bL -= (bL && l:line =~ '^{') * s:W
-  if isOp && (!num || cursor(b:js_cache[1],b:js_cache[2]) || s:IsBlock())
+  if isOp && (!num || cursor(b:js_cache[1],b:js_cache[2]) || (getline(line('.'))[col('.')-1] == '{' && s:IsBlock()))
     return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
   elseif num
     return indent(num) + s:W + switch_offset + bL
