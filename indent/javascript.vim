@@ -145,8 +145,8 @@ function s:IsBlock()
       if line('.') == l:ln && expand('<cword>') ==# 'return'
         return 0
       endif
-      return expand('<cword>') !~#
-            \ '^\%(const\|let\|import\|export\|yield\|de\%(fault\|lete\)\|v\%(ar\|oid\)\|t\%(ypeof\|hrow\)\|new\|in\%(stanceof\)\=\)$'
+      return index(split('const let import export yield default delete var void typeof throw new in instanceof')
+            \ , expand('<cword>')) < 0
     elseif char == '>'
       return pchar == '=' || syn =~? '^jsflow'
     elseif char == ':'
