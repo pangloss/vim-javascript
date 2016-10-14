@@ -110,7 +110,7 @@ function s:iscontOne(i,num,cont)
       if s:OneScope(l:i,s:Trimline(l:i))
         if expand('<cword>') ==# 'while' &&
               \ s:GetPair('\C\<do\>','\C\<while\>','bW','line2byte(line(".")) + col(".") <'
-              \ . (line2byte(b:js_cache[1] + !b:js_cache[1]) + b:js_cache[2]) . '||'
+              \ . (line2byte(l:num) + b:js_cache[2]) . '||'
               \ . s:skip_expr . '|| !s:IsBlock()',100,l:num) > 0
           return 0
         endif
