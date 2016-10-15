@@ -252,7 +252,7 @@ function GetJavascriptIndent()
     let num = s:GetPair('[({[]','[])}]','bW',s:skip_expr,200,l:lnum)
   endif
 
-  let num = (num > 0) * num
+  let num = max([num,0])
   if l:line =~ '^[])}]'
     return !!num * indent(num)
   endif
