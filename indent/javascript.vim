@@ -256,7 +256,7 @@ function GetJavascriptIndent()
   if l:line =~ '^[])}]'
     return !!num * indent(num)
   endif
-  let b:js_cache = [v:lnum,num,line('.') == v:lnum ? b:js_cache[2] : col('.')]
+  let b:js_cache = [v:lnum,num,line('.') == v:lnum && num ? b:js_cache[2] : col('.')]
 
   call cursor(v:lnum,1)
   if l:line =~# '^while\>' && s:GetPair('\C\<do\>','\C\<while\>','bW',s:skip_expr . '|| !s:IsBlock()',100,num + 1) > 0
