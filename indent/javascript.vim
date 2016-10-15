@@ -241,10 +241,8 @@ function GetJavascriptIndent()
     elseif l:line =~ '^[])}]'
       let id = stridx('])}',l:line[0])
       let num = s:GetPair(escape('[({'[id],'['), escape('])}'[id],']'),'bW','s:skip_func(s:looksyn)',2000)
-    elseif syns != '' && getline(v:lnum)[0] =~ '\s'
-      let pattern = syns =~? 'block' ? ['{','}'] : syns =~? 'jsparen' ? ['(',')'] :
-            \ syns =~? 'jsbracket'? ['\[','\]'] : ['[({[]','[])}]']
-      let num = s:GetPair(pattern[0],pattern[1],'bW','s:skip_func(s:looksyn)',2000)
+    elseif getline(v:lnum)[0] =~ '\s' && syns =~? 'block'
+      let num = s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000)
     else
       let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
     endif
