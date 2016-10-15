@@ -233,7 +233,7 @@ function GetJavascriptIndent()
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
   call cursor(v:lnum,1)
-  if getline(l:lnum) !~ '^\S'
+  if indent(l:lnum)
     let [s:looksyn,s:free] = [v:lnum - 1,1]
     if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
           \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
