@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: October 12, 2016
+" Last Change: October 15, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -241,7 +241,7 @@ function GetJavascriptIndent()
     elseif l:line =~ '^[])}]'
       let id = stridx('])}',l:line[0])
       let num = s:GetPair(escape('[({'[id],'['), escape('])}'[id],']'),'bW','s:skip_func(s:looksyn)',2000)
-    elseif getline(v:lnum)[0] =~ '\s' && syns =~? 'block'
+    elseif indent(v:lnum) && syns =~? 'block'
       let num = s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000)
     else
       let num = s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
