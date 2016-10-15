@@ -233,12 +233,13 @@ function GetJavascriptIndent()
   " the containing paren, bracket, curly. Memoize, last lineNr either has the
   " same scope or starts a new one, unless if it closed a scope.
   call cursor(v:lnum,1)
+  let fclose = l:line =~ '^[])}]'
   if indent(l:lnum)
     let [s:looksyn,s:free] = [v:lnum - 1,1]
     if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
           \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
       let num = b:js_cache[1]
-    elseif l:line =~ '^[])}]'
+    elseif fclose
       let id = stridx('])}',l:line[0])
       let num = s:GetPair(escape('[({'[id],'['), escape('])}'[id],']'),'bW','s:skip_func(s:looksyn)',2000)
     elseif indent(v:lnum) && syns =~? 'block'
@@ -251,7 +252,7 @@ function GetJavascriptIndent()
   endif
 
   let num = max([num,0])
-  if l:line =~ '^[])}]'
+  if fclose
     return !!num * indent(num)
   endif
   let b:js_cache = [v:lnum,num,line('.') == v:lnum && num ? b:js_cache[2] : col('.')]
