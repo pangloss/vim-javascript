@@ -265,7 +265,8 @@ function GetJavascriptIndent()
   let s:W = s:sw()
   let pline = s:Trimline(l:lnum)
   call cursor(b:js_cache[1],b:js_cache[2])
-  let switch_offset = !num || !(search(')\_s*\%#','bW') &&
+  let bchar = getline(b:js_cache[1])[b:js_cache[2]-1] == '{'
+  let switch_offset = !num || !bchar || !(search(')\_s*\%#','bW') &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
         \ &cino !~ ':' || !has('float') ? s:W :
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
@@ -274,7 +275,7 @@ function GetJavascriptIndent()
   let isOp = l:line =~# g:javascript_opfirst || pline !~# s:expr_case . '$' && pline =~# g:javascript_continuation
   let bL = s:iscontOne(l:lnum,num,isOp)
   let bL -= (bL && l:line =~ '^{') * s:W
-  if isOp && (!num || cursor(b:js_cache[1],b:js_cache[2]) || (getline(line('.'))[col('.')-1] == '{' && s:IsBlock()))
+  if isOp && (!num || cursor(b:js_cache[1],b:js_cache[2]) || (bchar && s:IsBlock()))
     return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
   elseif num
     return indent(num) + s:W + switch_offset + bL
