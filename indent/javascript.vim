@@ -240,7 +240,7 @@ function GetJavascriptIndent()
       let num = b:js_cache[1]
     elseif fclose
       let id = stridx('])}',l:line[0])
-      let num = s:GetPair(escape('[({'[id],'['), escape('])}'[id],']'),'bW','s:skip_func(s:looksyn)',2000)
+      return indent(s:GetPair(escape('[({'[id],'['), '])}'[id],'bW','s:skip_func(s:looksyn)',2000))
     elseif indent(v:lnum) && syns =~? 'block'
       let num = s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000)
     else
