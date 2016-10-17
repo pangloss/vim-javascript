@@ -252,7 +252,7 @@ function GetJavascriptIndent()
 
   let num = max([num,0])
   if fclose
-    return !!num * indent(num)
+    return indent(num)
   endif
   let b:js_cache = [v:lnum,num,line('.') == v:lnum && num ? b:js_cache[2] : col('.')]
 
