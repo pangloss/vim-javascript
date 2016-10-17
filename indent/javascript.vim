@@ -236,7 +236,7 @@ function GetJavascriptIndent()
   if indent(l:lnum)
     let [s:looksyn,s:free] = [v:lnum - 1,1]
     if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
-          \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
+          \ (b:js_cache[0] > l:lnum || !fclose && s:Balanced(l:lnum))
       let num = b:js_cache[1]
     elseif fclose
       let id = stridx('])}',l:line[0])
