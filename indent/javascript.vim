@@ -250,10 +250,10 @@ function GetJavascriptIndent()
     let num = s:GetPair('[({[]','[])}]','bW',s:skip_expr,200,l:lnum)
   endif
 
-  let num = max([num,0])
   if fclose
     return indent(num)
   endif
+  let num = max([num,0])
   let b:js_cache = [v:lnum,num,line('.') == v:lnum && num ? b:js_cache[2] : col('.')]
 
   call cursor(v:lnum,1)
