@@ -174,24 +174,23 @@ endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
 function s:Balanced(lnum)
-  let [open_0,open_2,open_4] = [0,0,0]
+  let l:open = 0
   let l:line = getline(a:lnum)
   let pos = match(l:line, '[][(){}]', 0)
   while pos != -1
     if synIDattr(synID(a:lnum,pos + 1,0),'name') !~? s:syng_strcom
-      let idx = stridx('(){}[]', l:line[pos])
-      if !(idx % 2)
-        let open_{idx} += 1
+      if l:line[pos] =~ '[{([]'
+        let l:open += 1
       else
-        let open_{idx - 1} -= 1
-        if open_{idx - 1} < 0
+        let l:open -= 1
+        if l:open < 0
           return 0
         endif
       endif
     endif
     let pos = match(l:line, '[][(){}]', pos + 1)
   endwhile
-  return !(open_4 || open_2 || open_0)
+  return !l:open
 endfunction
 
 function GetJavascriptIndent()
@@ -230,18 +229,17 @@ function GetJavascriptIndent()
     return ind
   endif
 
-  " the containing paren, bracket, curly. Memoize, last lineNr either has the
-  " same scope or starts a new one, unless if it closed a scope.
+  " the containing paren, bracket, curly. Many hacks for performance
   call cursor(v:lnum,1)
   let fclose = l:line =~ '^[])}]'
   if indent(l:lnum)
     let [s:looksyn,s:free] = [v:lnum - 1,1]
     if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
-          \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
+          \ (b:js_cache[0] > l:lnum || !fclose && s:Balanced(l:lnum))
       let num = b:js_cache[1]
     elseif fclose
       let id = stridx('])}',l:line[0])
-      let num = s:GetPair(escape('[({'[id],'['), escape('])}'[id],']'),'bW','s:skip_func(s:looksyn)',2000)
+      return indent(s:GetPair(escape('[({'[id],'['), '])}'[id],'bW','s:skip_func(s:looksyn)',2000))
     elseif indent(v:lnum) && syns =~? 'block'
       let num = s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000)
     else
@@ -251,10 +249,10 @@ function GetJavascriptIndent()
     let num = s:GetPair('[({[]','[])}]','bW',s:skip_expr,200,l:lnum)
   endif
 
-  let num = max([num,0])
   if fclose
-    return !!num * indent(num)
+    return indent(num)
   endif
+  let num = max([num,0])
   let b:js_cache = [v:lnum,num,line('.') == v:lnum && num ? b:js_cache[2] : col('.')]
 
   call cursor(v:lnum,1)
@@ -281,11 +279,11 @@ function GetJavascriptIndent()
     return indent(num) + s:W + switch_offset + bL
   endif
   return bL
+  
   finally
     let &magic = save_magic
   endtry
 endfunction
-
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
