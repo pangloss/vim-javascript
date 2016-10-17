@@ -174,24 +174,23 @@ endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
 function s:Balanced(lnum)
-  let [open_0,open_2,open_4] = [0,0,0]
+  let l:open = 0
   let l:line = getline(a:lnum)
   let pos = match(l:line, '[][(){}]', 0)
   while pos != -1
     if synIDattr(synID(a:lnum,pos + 1,0),'name') !~? s:syng_strcom
-      let idx = stridx('(){}[]', l:line[pos])
-      if !(idx % 2)
-        let open_{idx} += 1
+      if l:line[pos] =~ '[{([]'
+        let l:open += 1
       else
-        let open_{idx - 1} -= 1
-        if open_{idx - 1} < 0
+        let l:open -= 1
+        if l:open < 0
           return 0
         endif
       endif
     endif
     let pos = match(l:line, '[][(){}]', pos + 1)
   endwhile
-  return !(open_4 || open_2 || open_0)
+  return !l:open
 endfunction
 
 function GetJavascriptIndent()
