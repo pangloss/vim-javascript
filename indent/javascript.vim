@@ -280,11 +280,11 @@ function GetJavascriptIndent()
     return indent(num) + s:W + switch_offset + bL
   endif
   return bL
+  
   finally
     let &magic = save_magic
   endtry
 endfunction
-
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
