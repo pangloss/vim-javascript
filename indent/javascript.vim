@@ -229,8 +229,7 @@ function GetJavascriptIndent()
     return ind
   endif
 
-  " the containing paren, bracket, curly. Memoize, last lineNr either has the
-  " same scope or starts a new one, unless if it closed a scope.
+  " the containing paren, bracket, curly. Many hacks for performance
   call cursor(v:lnum,1)
   let fclose = l:line =~ '^[])}]'
   if indent(l:lnum)
