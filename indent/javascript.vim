@@ -65,10 +65,10 @@ endif
 
 function s:Trimline(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
-  let max = match(pline,'.*\zs\/[/*]')
+  let max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
   while max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? '\%(comment\|doc\)'
     let pline = substitute(strpart(pline, 0, max),'\s*$','','')
-    let max = match(pline,'.*\zs\/[/*]')
+    let max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
   endwhile
   return pline
 endfunction
