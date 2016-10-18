@@ -63,23 +63,14 @@ else
   endfunction
 endif
 
-" indent/python.vim
 function s:Trimline(ln)
-  let pline = getline(a:ln)
-  let min = match(pline,'\/[/*]') + 1
-  if min && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? '\%(comment\|doc\)'
-    let max = match(pline,'.*\zs\/[/*]') + 1
-    while min < max
-      let col = (min + max) / 2
-      if synIDattr(synID(a:ln, col, 0), 'name') =~? '\%(comment\|doc\)'
-        let max = col
-      else
-        let min = match(pline,'\/[/*]',col) + 1
-      endif
-    endwhile
-    let pline = strpart(pline, 0, min - 1)
-  endif
-  return substitute(pline,'\s*$','','')
+  let pline = substitute(getline(a:ln),'\s*$','','')
+  let max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
+  while max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? '\%(comment\|doc\)'
+    let pline = substitute(strpart(pline, 0, max),'\s*$','','')
+    let max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
+  endwhile
+  return pline
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
