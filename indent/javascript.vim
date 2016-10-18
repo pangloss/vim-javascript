@@ -63,11 +63,13 @@ else
   endfunction
 endif
 
+" Expression used to check whether we should skip a match with searchpair().
+let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 function s:Trimline(ln)
    let l:line = substitute(getline(a:ln), '\\\\', '__','g')
-   let l:line = substitute(l:line, '\(\([''"]\).\{-}\\\@<!\2\)','\=repeat("_",strlen(submatch(0)))','g')
-   let l:line = substitute(l:line, '\/\/.*$', '', '')
-   let l:line = substitute(l:line, '/\*[^/]*$','','')
+   let l:line = substitute(l:line, '\(\([''`"]\).\{-}\\\@<!\2\)','\=repeat("_",strlen(submatch(0)))','g')
+   let l:line = substitute(l:line, '//.*$', '', '')
+   let l:line = substitute(l:line, '/\*[^/]*\%(\*/\)\=$','','')
    return l:line
  endfunction
 
