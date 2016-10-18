@@ -64,13 +64,13 @@ else
 endif
 
 function s:Trimline(ln)
-  let pline = substitute(getline(a:ln),'\/\*.\{-}\*\/\s*$','','')
+  let pline = substitute(getline(a:ln),'\s*$','','')
   let max = match(pline,'.*\zs\/[/*]')
   while max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? '\%(comment\|doc\)'
-    let pline = strpart(pline, 0, max)
+    let pline = substitute(strpart(pline, 0, max),'\s*$','','')
     let max = match(pline,'.*\zs\/[/*]')
   endwhile
-  return substitute(pline,'\s*$','','')
+  return pline
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
