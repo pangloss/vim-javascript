@@ -50,7 +50,7 @@ function s:skip_func(lnum)
     return !s:free
   endif
   let s:looksyn = line('.')
-  return (strridx(getline(s:looksyn),'/',col('.')-1) + 1 || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
+  return (strridx(getline('.'),'/',col('.')-1) + 1 || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
 endfunction
 
 if has('reltime')
@@ -121,15 +121,15 @@ endfunction
 function s:IsBlock()
   let l:ln = line('.')
   if search('\S','bW')
-    let char = getline(line('.'))[col('.')-1]
-    let pchar = getline(line('.'))[col('.')-2]
+    let char = getline('.')[col('.')-1]
+    let pchar = getline('.')[col('.')-2]
     let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
     if pchar . char == '*/' && syn =~? 'comment'
       if !search('\/\*','bW') || !search('\S','bW')
         return 1
       endif
-      let char = getline(line('.'))[col('.')-1]
-      let pchar = getline(line('.'))[col('.')-2]
+      let char = getline('.')[col('.')-1]
+      let pchar = getline('.')[col('.')-2]
       let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
     endif
     if syn =~? '\%(xml\|jsx\)'
@@ -143,7 +143,7 @@ function s:IsBlock()
     elseif char == '>'
       return pchar == '=' || syn =~? '^jsflow'
     elseif char == ':'
-      return strpart(getline(line('.')),0,col('.')) =~# s:expr_case . '$'
+      return strpart(getline('.'),0,col('.')) =~# s:expr_case . '$'
     else
       return char !~# '[-=~!<*+,/?^%|&([]'
     endif
