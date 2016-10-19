@@ -50,7 +50,7 @@ function s:skip_func(lnum)
     return !s:free
   endif
   let s:looksyn = line('.')
-  return (search('\/','nbW',line('.')) || search('[''"\\]','nW',line('.'))) && eval(s:skip_expr)
+  return (strridx(getline(s:looksyn),'/',col('.')-1) + 1 || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
 endfunction
 
 if has('reltime')
@@ -85,8 +85,8 @@ let g:javascript_opfirst = '^' . g:javascript_opfirst
 let g:javascript_continuation .= '$'
 
 function s:OneScope(lnum,text)
-  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$')) > -1 ||
-        \ cursor(a:lnum, match(' ' . a:text, ')$')) > -1 &&
+  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$')) + 1 ||
+        \ cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 &&
         \ search('\C\<\%(for\%(\_s\+\%(await\|each\)\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW')
 endfunction
