@@ -254,7 +254,7 @@ function GetJavascriptIndent()
   let s:W = s:sw()
   let pline = s:Trimline(l:lnum)
   call cursor(b:js_cache[1],b:js_cache[2])
-  let bchar = getline(b:js_cache[1])[b:js_cache[2]-1] == '{'
+  let bchar = getline('.')[col('.')-1] == '{'
   let switch_offset = !num || !bchar || !(search(')\_s*\%#','bW') &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
         \ &cino !~ ':' || !has('float') ? s:W :
