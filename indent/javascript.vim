@@ -74,13 +74,10 @@ function s:Trimline(ln)
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
-let g:javascript_opfirst = get(g:,'javascript_opfirst',
+let g:javascript_opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\%([<>,?^%|*&]\|\/[/*]\@!\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)')
 let g:javascript_continuation = get(g:,'javascript_continuation',
-      \ '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)')
-
-let g:javascript_opfirst = '^' . g:javascript_opfirst
-let g:javascript_continuation .= '$'
+      \ '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)') . '$'
 
 function s:OneScope(lnum,text)
   return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$')) + 1 ||
