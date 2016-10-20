@@ -74,12 +74,10 @@ function s:Trimline(ln)
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
-if !exists('g:javascript_opfirst')
-  let g:javascript_opfirst = '\%([<>,?^%|*&]\|\/[/*]\@!\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
-endif
-if !exists('g:javascript_continuation')
-  let g:javascript_continuation = '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)'
-endif
+let g:javascript_opfirst = get(g:,'javascript_opfirst',
+      \ '\%([<>,?^%|*&]\|\/[/*]\@!\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)')
+let g:javascript_continuation = get(g:,'javascript_continuation',
+      \ '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)')
 
 let g:javascript_opfirst = '^' . g:javascript_opfirst
 let g:javascript_continuation .= '$'
@@ -188,9 +186,7 @@ function GetJavascriptIndent()
   try
     let save_magic = &magic
     set magic
-  if !exists('b:js_cache')
-    let b:js_cache = [0,0,0]
-  endif
+  let b:js_cache = get(b:,'js_cache',[0,0,0])
   " Get the current line.
   let l:line = getline(v:lnum)
   let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
