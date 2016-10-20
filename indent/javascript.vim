@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: October 15, 2016
+" Last Change: October 19, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -50,7 +50,7 @@ function s:skip_func(lnum)
     return !s:free
   endif
   let s:looksyn = line('.')
-  return (search('\/','nbW',line('.')) || search('[''"\\]','nW',line('.'))) && eval(s:skip_expr)
+  return (strridx(getline('.'),'/',col('.')-1) + 1 || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
 endfunction
 
 if has('reltime')
@@ -65,10 +65,10 @@ endif
 
 function s:Trimline(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
-  let max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
-  while max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? '\%(comment\|doc\)'
-    let pline = substitute(strpart(pline, 0, max),'\s*$','','')
-    let max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
+  let l:max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
+  while l:max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? '\%(comment\|doc\)'
+    let pline = substitute(strpart(pline, 0, l:max),'\s*$','','')
+    let l:max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
   endwhile
   return pline
 endfunction
@@ -85,8 +85,8 @@ let g:javascript_opfirst = '^' . g:javascript_opfirst
 let g:javascript_continuation .= '$'
 
 function s:OneScope(lnum,text)
-  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$')) > -1 ||
-        \ cursor(a:lnum, match(' ' . a:text, ')$')) > -1 &&
+  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$')) + 1 ||
+        \ cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 &&
         \ search('\C\<\%(for\%(\_s\+\%(await\|each\)\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW')
 endfunction
@@ -121,15 +121,15 @@ endfunction
 function s:IsBlock()
   let l:ln = line('.')
   if search('\S','bW')
-    let char = getline(line('.'))[col('.')-1]
-    let pchar = getline(line('.'))[col('.')-2]
+    let char = getline('.')[col('.')-1]
+    let pchar = getline('.')[col('.')-2]
     let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
     if pchar . char == '*/' && syn =~? 'comment'
       if !search('\/\*','bW') || !search('\S','bW')
         return 1
       endif
-      let char = getline(line('.'))[col('.')-1]
-      let pchar = getline(line('.'))[col('.')-2]
+      let char = getline('.')[col('.')-1]
+      let pchar = getline('.')[col('.')-2]
       let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
     endif
     if syn =~? '\%(xml\|jsx\)'
@@ -143,7 +143,7 @@ function s:IsBlock()
     elseif char == '>'
       return pchar == '=' || syn =~? '^jsflow'
     elseif char == ':'
-      return strpart(getline(line('.')),0,col('.')) =~# s:expr_case . '$'
+      return strpart(getline('.'),0,col('.')) =~# s:expr_case . '$'
     else
       return char !~# '[-=~!<*+,/?^%|&([]'
     endif
@@ -254,7 +254,7 @@ function GetJavascriptIndent()
   let s:W = s:sw()
   let pline = s:Trimline(l:lnum)
   call cursor(b:js_cache[1],b:js_cache[2])
-  let bchar = getline(b:js_cache[1])[b:js_cache[2]-1] == '{'
+  let bchar = getline('.')[col('.')-1] == '{'
   let switch_offset = !num || !bchar || !(search(')\_s*\%#','bW') &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
         \ &cino !~ ':' || !has('float') ? s:W :
@@ -264,7 +264,7 @@ function GetJavascriptIndent()
   let isOp = l:line =~# g:javascript_opfirst || pline !~# s:expr_case . '$' && pline =~# g:javascript_continuation
   let bL = s:iscontOne(l:lnum,num,isOp)
   let bL -= (bL && l:line =~ '^{') * s:W
-  if isOp && (!num || cursor(b:js_cache[1],b:js_cache[2]) || (bchar && s:IsBlock()))
+  if isOp && (!num || bchar && cursor(b:js_cache[1],b:js_cache[2])+1 && s:IsBlock())
     return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
   elseif num
     return indent(num) + s:W + switch_offset + bL
