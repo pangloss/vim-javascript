@@ -140,7 +140,7 @@ function s:IsBlock()
     elseif char == ':'
       return strpart(getline('.'),0,col('.')) =~# s:expr_case . '$'
     else
-      return char !~# '[-=~!<*+,/?^%|&([]'
+      return stridx('-=~!<*+,/?^%|&([',char) < 0
     endif
   else
     return 1
