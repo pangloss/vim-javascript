@@ -199,7 +199,7 @@ function GetJavascriptIndent()
     return -1
   endif
   let l:lnum = s:PrevCodeLine(v:lnum - 1)
-  if l:lnum == 0
+  if !l:lnum
     return 0
   endif
 
