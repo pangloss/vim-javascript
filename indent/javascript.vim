@@ -74,15 +74,10 @@ function s:Trimline(ln)
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
-if !exists('g:javascript_opfirst')
-  let g:javascript_opfirst = '\%([<>,?^%|*&]\|\/[/*]\@!\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)'
-endif
-if !exists('g:javascript_continuation')
-  let g:javascript_continuation = '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)'
-endif
-
-let g:javascript_opfirst = '^' . g:javascript_opfirst
-let g:javascript_continuation .= '$'
+let s:javascript_opfirst = '^' . get(g:,'javascript_opfirst',
+      \ '\%([<>,?^%|*&]\|\/[/*]\@!\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)')
+let s:javascript_continuation = get(g:,'javascript_continuation',
+      \ '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)') . '$'
 
 function s:OneScope(lnum,text)
   return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$')) + 1 ||
@@ -188,9 +183,7 @@ function GetJavascriptIndent()
   try
     let save_magic = &magic
     set magic
-  if !exists('b:js_cache')
-    let b:js_cache = [0,0,0]
-  endif
+  let b:js_cache = get(b:,'js_cache',[0,0,0])
   " Get the current line.
   let l:line = getline(v:lnum)
   let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
@@ -261,7 +254,7 @@ function GetJavascriptIndent()
         \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
 
   " most significant, find the indent amount
-  let isOp = l:line =~# g:javascript_opfirst || pline !~# s:expr_case . '$' && pline =~# g:javascript_continuation
+  let isOp = l:line =~# s:javascript_opfirst || pline !~# s:expr_case . '$' && pline =~# s:javascript_continuation
   let bL = s:iscontOne(l:lnum,num,isOp)
   let bL -= (bL && l:line =~ '^{') * s:W
   if isOp && (!num || bchar && cursor(b:js_cache[1],b:js_cache[2])+1 && s:IsBlock())
