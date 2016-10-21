@@ -215,15 +215,14 @@ function GetJavascriptIndent()
 
   " the containing paren, bracket, curly. Many hacks for performance
   call cursor(v:lnum,1)
-  let fclose = l:line =~ '^[])}]'
+  let idx = stridx('])}',l:line[0])
   if indent(l:lnum)
     let [s:looksyn,s:free] = [v:lnum - 1,1]
     if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
-          \ (b:js_cache[0] > l:lnum || !fclose && s:Balanced(l:lnum))
+          \ (b:js_cache[0] > l:lnum || idx < 0 && s:Balanced(l:lnum))
       let num = b:js_cache[1]
-    elseif fclose
-      let id = stridx('])}',l:line[0])
-      return indent(s:GetPair(escape('[({'[id],'['), '])}'[id],'bW','s:skip_func(s:looksyn)',2000))
+    elseif idx + 1
+      return indent(s:GetPair(escape('[({'[idx],'['), '])}'[idx],'bW','s:skip_func(s:looksyn)',2000))
     elseif indent(v:lnum) && syns =~? 'block'
       let num = s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000)
     else
@@ -233,7 +232,7 @@ function GetJavascriptIndent()
     let num = s:GetPair('[({[]','[])}]','bW',s:skip_expr,200,l:lnum)
   endif
 
-  if fclose
+  if idx + 1
     return indent(num)
   endif
   let num = max([num,0])
