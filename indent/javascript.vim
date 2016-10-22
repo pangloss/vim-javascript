@@ -255,7 +255,7 @@ function GetJavascriptIndent()
   " most significant, find the indent amount
   let isOp = l:line =~# s:opfirst || pline !~# s:expr_case . '$' && pline =~# s:continuation
   let bL = s:iscontOne(l:lnum,num,isOp)
-  let bL -= (bL && l:line =~ '^{') * s:W
+  let bL -= (bL && strridx(l:line,'{',0) + 1) * s:W
   if isOp && (!num || bchar && cursor(b:js_cache[1],b:js_cache[2])+1 && s:IsBlock())
     return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
   elseif num
