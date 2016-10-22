@@ -58,8 +58,8 @@ if has('reltime')
     return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
   endfunction
 else
-  function s:GetPair(start,end,flags,...)
-    return searchpair(a:start,'',a:end,a:flags,"line('.') < prevnonblank(v:lnum) - 2000 ? dummy : 0")
+  function s:GetPair(start,end,flags,skip,...)
+    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)]))
   endfunction
 endif
 
