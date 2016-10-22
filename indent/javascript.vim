@@ -165,7 +165,7 @@ function s:Balanced(lnum)
   let pos = match(l:line, '[][(){}]', 0)
   while pos != -1
     if synIDattr(synID(a:lnum,pos + 1,0),'name') !~? s:syng_strcom
-      if l:line[pos] =~ '[{([]'
+      if stridx('[({',l:line[pos]) + 1
         let l:open += 1
       else
         let l:open -= 1
@@ -215,14 +215,14 @@ function GetJavascriptIndent()
 
   " the containing paren, bracket, curly. Many hacks for performance
   call cursor(v:lnum,1)
-  let idx = stridx('])}',l:line[0])
+  let idx = strlen(l:line) ? stridx('])}',l:line[0]) : -1
   if indent(l:lnum)
     let [s:looksyn,s:free] = [v:lnum - 1,1]
     if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
           \ (b:js_cache[0] > l:lnum || idx < 0 && s:Balanced(l:lnum))
       let num = b:js_cache[1]
     elseif idx + 1
-      return indent(s:GetPair(escape('[({'[idx],'['), '])}'[idx],'bW','s:skip_func(s:looksyn)',2000))
+      return indent(s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000))
     elseif indent(v:lnum) && syns =~? 'block'
       let num = s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000)
     else
@@ -255,7 +255,7 @@ function GetJavascriptIndent()
   " most significant, find the indent amount
   let isOp = l:line =~# s:opfirst || pline !~# s:expr_case . '$' && pline =~# s:continuation
   let bL = s:iscontOne(l:lnum,num,isOp)
-  let bL -= (bL && l:line =~ '^{') * s:W
+  let bL -= (bL && strridx(l:line,'{',0) + 1) * s:W
   if isOp && (!num || bchar && cursor(b:js_cache[1],b:js_cache[2])+1 && s:IsBlock())
     return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
   elseif num
