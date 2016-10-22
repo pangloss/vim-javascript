@@ -215,14 +215,14 @@ function GetJavascriptIndent()
 
   " the containing paren, bracket, curly. Many hacks for performance
   call cursor(v:lnum,1)
-  let idx = stridx('])}',l:line[0])
+  let idx = strlen(l:line) ? stridx('])}',l:line[0]) : -1
   if indent(l:lnum)
     let [s:looksyn,s:free] = [v:lnum - 1,1]
     if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
           \ (b:js_cache[0] > l:lnum || idx < 0 && s:Balanced(l:lnum))
       let num = b:js_cache[1]
     elseif idx + 1
-      return indent(s:GetPair(escape('[({'[idx],'['), '])}'[idx],'bW','s:skip_func(s:looksyn)',2000))
+      return indent(s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000))
     elseif indent(v:lnum) && syns =~? 'block'
       let num = s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000)
     else
