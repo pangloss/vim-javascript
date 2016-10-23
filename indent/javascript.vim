@@ -226,7 +226,7 @@ function GetJavascriptIndent()
 
   if idx + 1
     if idx == 2 && search('\S','bW',line('.')) && getline('.')[col('.')-1] == ')'
-      call indent(s:GetPair('(',')','bW',s:skip_expr,200))
+      call s:GetPair('(',')','bW',s:skip_expr,200)
     endif
     return indent(line('.'))
   endif
