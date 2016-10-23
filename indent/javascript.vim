@@ -225,11 +225,13 @@ function GetJavascriptIndent()
   endif
 
   if idx + 1
-    while line('.') != v:lnum && search('[])}]\s*\%#','bW',line('.'))
-      let bs = strpart('(){}[]', stridx(')}]', getline('.')[col('.') - 1]) * 2, 2)
+    if line('.') == v:lnum
+      return -1
+    endif
+    while search('\S','bW',line('.'))
       let l:i = line('.')
-      let fb = s:GetPair(escape(bs[0], '\['), bs[1], 'bW', s:skip_expr,200)
-      if fb < 1 || fb == l:i
+      let idx = stridx('])}',getline(l:i)[col('.')-1])
+      if idx < 0 || s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW',s:skip_expr,200) < 1 || line('.') == l:i
         break
       endif
     endwhile
