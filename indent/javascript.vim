@@ -225,17 +225,15 @@ function GetJavascriptIndent()
   endif
 
   if idx + 1
-    if line('.') == v:lnum
-      return -1
-    endif
-    while search('\S','bW',line('.'))
-      let l:i = line('.')
+    let l:i = line('.')
+    while search('\S','bW',l:i)
       let idx = stridx('])}',getline(l:i)[col('.')-1])
       if idx < 0 || s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW',s:skip_expr,200) < 1 || line('.') == l:i
         break
       endif
+      let l:i = line('.')
     endwhile
-    return indent(line('.'))
+    return indent(l:i)
   endif
 
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : [line('.'),col('.')])
