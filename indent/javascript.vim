@@ -227,11 +227,8 @@ function GetJavascriptIndent()
   if idx + 1
     let l:i = line('.')
     if idx == 2
-      while search('\S','bW',l:i)
-        let idx = stridx('])}',getline(l:i)[col('.')-1])
-        if idx < 0 || index([0,-1,l:i],s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW',s:skip_expr,200)) + 1
-          break
-        endif
+      while search('\S','bW',l:i) && getline(l:i)[col('.')-1] == ')' &&
+            \ index([0,-1,l:i],s:GetPair('(',')','bW',s:skip_expr,200)) == -1
         let l:i = line('.')
       endwhile
     endif
