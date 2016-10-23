@@ -205,14 +205,6 @@ function GetJavascriptIndent()
 
   let l:line = substitute(l:line,'^\s*\%(\/\*.\{-}\*\/\s*\)*','','')
 
-  if l:line =~# '^' . s:expr_case
-    let cpo_switch = &cpo
-    set cpo+=%
-    let ind = cindent(v:lnum)
-    let &cpo = cpo_switch
-    return ind
-  endif
-
   " the containing paren, bracket, curly. Many hacks for performance
   call cursor(v:lnum,1)
   let idx = strlen(l:line) ? stridx('])}',l:line[0]) : -1
@@ -243,20 +235,27 @@ function GetJavascriptIndent()
     return indent(line('.'))
   endif
 
+  call call('cursor',b:js_cache[1:])
   let s:W = s:sw()
   let pline = s:Trimline(l:lnum)
-  call call('cursor',b:js_cache[1:])
   let bchar = getline('.')[col('.')-1] == '{'
-  let switch_offset = !num || !bchar || !(search(')\_s*\%#','bW') &&
-        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')) ? 0 :
-        \ &cino !~ ':' || !has('float') ? s:W :
-        \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
+  let switch_offset = 0
+  let in_switch = 0
+  if num && bchar && search(')\_s*\%#','bW') &&
+        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')
+    let in_switch = 1
+    let switch_offset = &cino !~ ':' || !has('float') ? s:W :
+          \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
+    if l:line =~# '^' . s:expr_case
+      return indent(num) + switch_offset
+    endif
+  endif
 
   " most significant, find the indent amount
-  let isOp = l:line =~# s:opfirst || pline !~# s:expr_case . '$' && pline =~# s:continuation
+  let isOp = l:line =~# s:opfirst || (in_switch && pline =~# s:expr_case . '$' ? 0 : pline =~# s:continuation)
   let bL = s:iscontOne(l:lnum,num,isOp)
   let bL -= (bL && l:line[0] == '{') * s:W
-  if isOp && (!num || bchar && call('cursor',b:js_cache[1:])+1 && s:IsBlock())
+  if isOp && (!num || in_switch || bchar && call('cursor',b:js_cache[1:])+1 && s:IsBlock())
     return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
   elseif num
     return indent(num) + s:W + switch_offset + bL
