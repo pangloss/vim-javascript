@@ -235,9 +235,9 @@ function GetJavascriptIndent()
     return indent(line('.'))
   endif
 
+  call call('cursor',b:js_cache[1:])
   let s:W = s:sw()
   let pline = s:Trimline(l:lnum)
-  call call('cursor',b:js_cache[1:])
   let bchar = getline('.')[col('.')-1] == '{'
   let switch_offset = 0
   let in_switch = 0
