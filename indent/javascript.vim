@@ -226,11 +226,8 @@ function GetJavascriptIndent()
 
   if idx + 1
     let l:i = line('.')
-    if idx == 2
-      while search('\S','bW',l:i) && getline(l:i)[col('.')-1] == ')' &&
-            \ index([0,-1,l:i],s:GetPair('(',')','bW',s:skip_expr,200)) == -1
-        let l:i = line('.')
-      endwhile
+    if idx == 2 && search('\S','bW',l:i) && getline(l:i)[col('.')-1] == ')'
+      return indent(s:GetPair('(',')','bW',s:skip_expr,200))
     endif
     return indent(l:i)
   endif
