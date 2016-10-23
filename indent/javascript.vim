@@ -229,7 +229,7 @@ function GetJavascriptIndent()
     if idx == 2
       while search('\S','bW',l:i)
         let idx = stridx('])}',getline(l:i)[col('.')-1])
-        if idx < 0 || s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW',s:skip_expr,200) < 1 || line('.') == l:i
+        if idx < 0 || index([0,-1,l:i],s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW',s:skip_expr,200)) + 1
           break
         endif
         let l:i = line('.')
