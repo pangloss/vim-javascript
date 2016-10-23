@@ -214,7 +214,9 @@ function GetJavascriptIndent()
           \ (b:js_cache[0] > l:lnum || idx < 0 && s:Balanced(l:lnum))
       let num = b:js_cache[1]
     elseif idx + 1
-      return indent(s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000))
+      call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000)
+      call cursor(line('.'),1)
+      return indent(s:GetPair('(',')','Wn',s:skip_expr,200,line('.')) == line('.') ? s:GetPair('(',')','bW',s:skip_expr,200) : line('.'))
     elseif indent(v:lnum) && syns =~? 'block'
       let num = s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000)
     else
@@ -225,7 +227,8 @@ function GetJavascriptIndent()
   endif
 
   if idx + 1
-    return indent(num)
+    call cursor(num,1)
+    return indent(s:GetPair('(',')','Wn',s:skip_expr,200,num) == num ? s:GetPair('(',')','bW',s:skip_expr,200) : num)
   endif
   let num = max([num,0])
   let b:js_cache = [v:lnum,num,line('.') == v:lnum && num ? b:js_cache[2] : col('.')]
