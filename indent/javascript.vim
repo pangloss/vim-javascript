@@ -226,13 +226,15 @@ function GetJavascriptIndent()
 
   if idx + 1
     let l:i = line('.')
-    while search('\S','bW',l:i)
-      let idx = stridx('])}',getline(l:i)[col('.')-1])
-      if idx < 0 || s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW',s:skip_expr,200) < 1 || line('.') == l:i
-        break
-      endif
-      let l:i = line('.')
-    endwhile
+    if idx == 2
+      while search('\S','bW',l:i)
+        let idx = stridx('])}',getline(l:i)[col('.')-1])
+        if idx < 0 || s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW',s:skip_expr,200) < 1 || line('.') == l:i
+          break
+        endif
+        let l:i = line('.')
+      endwhile
+    endif
     return indent(l:i)
   endif
 
