@@ -88,10 +88,10 @@ endfunction
 
 function s:iscontOne(i,num,cont)
   let [l:i, l:cont, l:num] = [a:i, a:cont, a:num + !a:num]
-  let pind = a:num ? indent(l:num) : -s:W
-  let ind = indent(l:i) + (!l:cont * s:W)
+  let pind = (a:num ? indent(l:num) + s:W : 0)
+  let ind = indent(l:i) + (a:cont ? 0 : s:W)
   let bL = 0
-  while l:i >= l:num && (!l:cont || ind > pind + s:W)
+  while l:i >= l:num && (!l:cont || ind > pind)
     if indent(l:i) < ind " first line always true for !a:cont, false for !!a:cont
       if s:OneScope(l:i,s:Trimline(l:i))
         if expand('<cword>') ==# 'while' &&
