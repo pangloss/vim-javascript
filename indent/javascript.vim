@@ -88,7 +88,7 @@ endfunction
 
 function s:iscontOne(i,num,cont)
   let [l:i, l:cont, l:num] = [a:i, a:cont, a:num + !a:num]
-  let pind = (a:num ? indent(l:num) + s:W : 0)
+  let pind = a:num ? indent(l:num) + s:W : 0
   let ind = indent(l:i) + (a:cont ? 0 : s:W)
   let bL = 0
   while l:i >= l:num && (!l:cont || ind > pind)
@@ -243,7 +243,7 @@ function GetJavascriptIndent()
   if num 
     if getline('.')[col('.')-1] == '{'
       if search(')\_s*\%#','bW')
-        let stmt= 1
+        let stmt = 1
         if s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')
           let switch_offset = &cino !~ ':' || !has('float') ? s:W :
                 \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
@@ -253,11 +253,11 @@ function GetJavascriptIndent()
           let stmt = pline !~# s:expr_case . '$'
         endif
       elseif s:IsBlock()
-        let stmt= 1
+        let stmt = 1
       endif
     endif
   else
-    let stmt=1
+    let stmt = 1
   endif
 
   if stmt
@@ -265,7 +265,7 @@ function GetJavascriptIndent()
     if l:line =~# '^while\>' && s:GetPair('\C\<do\>','\C\<while\>','bW',s:skip_expr . '|| !s:IsBlock()',100,num + 1) > 0
       return indent(line('.'))
     endif
-    let isOp = l:line =~# s:opfirst ||  pline =~# s:continuation
+    let isOp = l:line =~# s:opfirst || pline =~# s:continuation
     let bL = s:iscontOne(l:lnum,num,isOp)
     let bL -= (bL && l:line[0] == '{') * s:W
   endif
