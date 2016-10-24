@@ -211,7 +211,7 @@ function GetJavascriptIndent()
   if indent(l:lnum)
     let [s:looksyn,s:free] = [v:lnum - 1,1]
     if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
-          \ (b:js_cache[0] > l:lnum || idx < 0 && s:Balanced(l:lnum))
+          \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
       call call('cursor',b:js_cache[1:])
     elseif idx + 1
       call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000)
