@@ -63,7 +63,7 @@ else
   endfunction
 endif
 
-function s:Trimline(ln)
+function s:Trim(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
   let l:max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
   while l:max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? '\%(comment\|doc\)'
@@ -93,7 +93,7 @@ function s:iscontOne(i,num,cont)
   let bL = 0
   while l:i >= l:num && (!l:cont || ind > pind)
     if indent(l:i) < ind " first line always true for !a:cont, false for !!a:cont
-      if s:OneScope(l:i,s:Trimline(l:i))
+      if s:OneScope(l:i,s:Trim(l:i))
         if expand('<cword>') ==# 'while' &&
               \ s:GetPair('\C\<do\>','\C\<while\>','bW','line2byte(line(".")) + col(".") <'
               \ . (line2byte(l:num) + b:js_cache[2]) . '||'
@@ -237,9 +237,7 @@ function GetJavascriptIndent()
   let num = b:js_cache[1]
 
   call call('cursor',b:js_cache[1:])
-  let s:W = s:sw()
-  let pline = s:Trimline(l:lnum)
-  let [isOp,stmt,bL,switch_offset] = [0,0,0,0]
+  let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
   if num 
     if getline('.')[col('.')-1] == '{'
       if search(')\_s*\%#','bW')
