@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: October 19, 2016
+" Last Change: October 24, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -236,32 +236,42 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : [line('.'),col('.')])
   let num = b:js_cache[1]
 
-  call cursor(v:lnum,1)
-  if l:line =~# '^while\>' && s:GetPair('\C\<do\>','\C\<while\>','bW',s:skip_expr . '|| !s:IsBlock()',100,num + 1) > 0
-    return indent(line('.'))
-  endif
-
   call call('cursor',b:js_cache[1:])
   let s:W = s:sw()
   let pline = s:Trimline(l:lnum)
-  let bchar = getline('.')[col('.')-1] == '{'
-  let switch_offset = 0
-  let in_switch = 0
-  if num && bchar && search(')\_s*\%#','bW') &&
-        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')
-    let in_switch = 1
-    let switch_offset = &cino !~ ':' || !has('float') ? s:W :
-          \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
-    if l:line =~# '^' . s:expr_case
-      return indent(num) + switch_offset
+  let [isOp,stmt,bL,switch_offset] = [0,0,0,0]
+  if num 
+    if getline('.')[col('.')-1] == '{'
+      if search(')\_s*\%#','bW')
+        let stmt= 1
+        if s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')
+          let switch_offset = &cino !~ ':' || !has('float') ? s:W :
+                \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
+          if l:line =~# '^' . s:expr_case
+            return indent(num) + switch_offset
+          endif
+          let stmt = pline !~# s:expr_case . '$'
+        endif
+      elseif s:IsBlock()
+        let stmt= 1
+      endif
     endif
+  else
+    let stmt=1
+  endif
+
+  if stmt
+    call cursor(v:lnum,1)
+    if l:line =~# '^while\>' && s:GetPair('\C\<do\>','\C\<while\>','bW',s:skip_expr . '|| !s:IsBlock()',100,num + 1) > 0
+      return indent(line('.'))
+    endif
+    let isOp = l:line =~# s:opfirst ||  pline =~# s:continuation
+    let bL = s:iscontOne(l:lnum,num,isOp)
+    let bL -= (bL && l:line[0] == '{') * s:W
   endif
 
   " most significant, find the indent amount
-  let isOp = l:line =~# s:opfirst || (in_switch && pline =~# s:expr_case . '$' ? 0 : pline =~# s:continuation)
-  let bL = s:iscontOne(l:lnum,num,isOp)
-  let bL -= (bL && l:line[0] == '{') * s:W
-  if isOp && (!num || in_switch || bchar && call('cursor',b:js_cache[1:])+1 && s:IsBlock())
+  if isOp
     return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
   elseif num
     return indent(num) + s:W + switch_offset + bL
