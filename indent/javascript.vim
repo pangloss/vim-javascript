@@ -245,23 +245,36 @@ function GetJavascriptIndent()
   let s:W = s:sw()
   let pline = s:Trimline(l:lnum)
   let bchar = getline('.')[col('.')-1] == '{'
+  let isOp = 0
+  let isb= 0
   let switch_offset = 0
-  let in_switch = 0
-  if num && bchar && search(')\_s*\%#','bW') &&
-        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')
-    let in_switch = 1
-    let switch_offset = &cino !~ ':' || !has('float') ? s:W :
-          \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
-    if l:line =~# '^' . s:expr_case
-      return indent(num) + switch_offset
+  if num 
+    if bchar
+      if search(')\_s*\%#','bW')
+        let isb= 1
+        if s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')
+          let isOp = pline =~# s:expr_case . '$' ? 0 : l:line =~# s:opfirst ||  pline =~# s:continuation
+          let switch_offset = &cino !~ ':' || !has('float') ? s:W :
+                \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
+          if l:line =~# '^' . s:expr_case
+            return indent(num) + switch_offset
+          endif
+        else
+          let isOp = l:line =~# s:opfirst ||  pline =~# s:continuation
+        endif
+      elseif s:IsBlock()
+        let isb= 1
+        let isOp = l:line =~# s:opfirst ||  pline =~# s:continuation
+      endif
     endif
+  else
+    let isOp = l:line =~# s:opfirst ||  pline =~# s:continuation
   endif
 
   " most significant, find the indent amount
-  let isOp = l:line =~# s:opfirst || (in_switch && pline =~# s:expr_case . '$' ? 0 : pline =~# s:continuation)
-  let bL = s:iscontOne(l:lnum,num,isOp)
+  let bL = isb ? s:iscontOne(l:lnum,num,isOp) : 0
   let bL -= (bL && l:line[0] == '{') * s:W
-  if isOp && (!num || in_switch || bchar && call('cursor',b:js_cache[1:])+1 && s:IsBlock())
+  if isOp
     return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
   elseif num
     return indent(num) + s:W + switch_offset + bL
