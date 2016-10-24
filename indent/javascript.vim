@@ -245,10 +245,7 @@ function GetJavascriptIndent()
   let s:W = s:sw()
   let pline = s:Trimline(l:lnum)
   let bchar = getline('.')[col('.')-1] == '{'
-  let isOp = 0
-  let isb= 0
-  let bL = 0
-  let switch_offset = 0
+  let [isOp,isb,bL,switch_offset] = [0,0,0,0]
   if num 
     if bchar
       if search(')\_s*\%#','bW')
@@ -260,8 +257,6 @@ function GetJavascriptIndent()
             return indent(num) + switch_offset
           endif
           let isb = pline !~# s:expr_case . '$'
-        else
-          let isb=1
         endif
       elseif s:IsBlock()
         let isb= 1
