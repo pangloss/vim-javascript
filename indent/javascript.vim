@@ -106,6 +106,8 @@ function s:iscontOne(i,num,cont)
         break
       endif
       let ind = indent(l:i)
+    elseif !a:cont
+      break
     endif
     let l:i = s:PrevCodeLine(l:i - 1)
   endwhile
