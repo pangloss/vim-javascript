@@ -236,11 +236,6 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : [line('.'),col('.')])
   let num = b:js_cache[1]
 
-  call cursor(v:lnum,1)
-  if l:line =~# '^while\>' && s:GetPair('\C\<do\>','\C\<while\>','bW',s:skip_expr . '|| !s:IsBlock()',100,num + 1) > 0
-    return indent(line('.'))
-  endif
-
   call call('cursor',b:js_cache[1:])
   let s:W = s:sw()
   let pline = s:Trimline(l:lnum)
@@ -267,6 +262,10 @@ function GetJavascriptIndent()
   endif
 
   if isb
+    call cursor(v:lnum,1)
+    if l:line =~# '^while\>' && s:GetPair('\C\<do\>','\C\<while\>','bW',s:skip_expr . '|| !s:IsBlock()',100,num + 1) > 0
+      return indent(line('.'))
+    endif
     let isOp = l:line =~# s:opfirst ||  pline =~# s:continuation
     let bL = s:iscontOne(l:lnum,num,isOp)
     let bL -= (bL && l:line[0] == '{') * s:W
