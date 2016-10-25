@@ -12,7 +12,7 @@ let b:did_indent = 1
 
 " Now, set up our indentation expression and keys that trigger it.
 setlocal indentexpr=GetJavascriptIndent()
-setlocal nolisp noautoindent nosmartindent
+setlocal nolisp autoindent nosmartindent
 setlocal indentkeys=0{,0},0),0],:,!^F,o,O,e
 setlocal cinoptions+=j1,J1
 
@@ -236,7 +236,6 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : [line('.'),col('.')])
   let num = b:js_cache[1]
 
-  call call('cursor',b:js_cache[1:])
   let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
   if num 
     if getline('.')[col('.')-1] == '{'
@@ -268,7 +267,7 @@ function GetJavascriptIndent()
     let bL -= (bL && l:line[0] == '{') * s:W
   endif
 
-  " most significant, find the indent amount
+  " main return
   if isOp
     return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
   elseif num
