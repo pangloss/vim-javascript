@@ -100,7 +100,7 @@ function s:iscontOne(i,num,cont)
               \ . s:skip_expr . '|| !s:IsBlock()',100,l:num) > 0
           return 0
         endif
-        let bL += 1
+        let bL += s:W
         let [l:cont, l:i] = [0, line('.')]
       elseif !l:cont
         break
@@ -111,7 +111,7 @@ function s:iscontOne(i,num,cont)
     endif
     let l:i = s:PrevCodeLine(l:i - 1)
   endwhile
-  return bL * s:W
+  return bL
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
