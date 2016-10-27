@@ -140,7 +140,7 @@ function s:IsBlock()
     elseif char == '>'
       return pchar == '=' || syn =~? '^jsflow'
     elseif char == ':'
-      return cursor(line('.'),match(' ' . strpart(getline('.'),0,col('.')),s:expr_case . '$')) + 1 &&
+      return cursor(0,match(' ' . strpart(getline('.'),0,col('.')),s:expr_case . '$')) + 1 &&
             \ (expand('<cword>') !=# 'default' || !search('\S','bW') || getline('.')[col('.')-1] !~ '[,{]')
     else
       return stridx('-=~!<*+,/?^%|&([',char) < 0
