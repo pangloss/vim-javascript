@@ -142,9 +142,8 @@ function s:IsBlock()
     else
       return stridx('-=~!<*+,/?^%|&([',char) < 0
     endif
-  else
-    return 1
   endif
+  return 1
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
