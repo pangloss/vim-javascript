@@ -132,11 +132,8 @@ function s:IsBlock()
     if syn =~? '\%(xml\|jsx\)'
       return char != '{'
     elseif char =~# '\l'
-      if line('.') == l:ln && expand('<cword>') ==# 'return'
-        return 0
-      endif
-      return index(split('const let import export yield default delete var void typeof throw new in instanceof')
-            \ , expand('<cword>')) < 0
+      return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
+            \ , expand('<cword>')) < (0 + (line('.') != l:ln))
     elseif char == '>'
       return pchar == '=' || syn =~? '^jsflow'
     elseif char == ':'
