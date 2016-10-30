@@ -115,21 +115,15 @@ function s:iscontOne(i,num,cont)
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
-function s:IsBlock()
-  let l:ln = line('.')
+function s:IsBlock(...)
+  let l:ln = get(a:000,0,line('.'))
   if search('\S','bW')
     let char = getline('.')[col('.')-1]
     let pchar = getline('.')[col('.')-2]
     let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
-    if pchar . char == '*/' && syn =~? 'comment'
-      if !search('\/\*','bW') || !search('\S','bW')
-        return 1
-      endif
-      let char = getline('.')[col('.')-1]
-      let pchar = getline('.')[col('.')-2]
-      let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
-    endif
-    if syn =~? '\%(xml\|jsx\)'
+    if syn =~? 'comment'
+      return search('\/[/*]','bW') && s:IsBlock(l:ln)
+    elseif syn =~? '\%(xml\|jsx\)'
       return char != '{'
     elseif char =~# '\l'
       return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
