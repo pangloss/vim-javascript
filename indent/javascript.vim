@@ -50,7 +50,7 @@ function s:skip_func(lnum)
     return !s:free
   endif
   let s:looksyn = line('.')
-  return (strridx(getline('.'),'/',col('.')-1) + 1 || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
+  return (search('\/','nbW',s:looksyn) || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
 endfunction
 
 if has('reltime')
