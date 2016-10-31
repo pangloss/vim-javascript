@@ -119,7 +119,6 @@ function s:IsBlock(...)
   let l:ln = get(a:000,0,line('.'))
   if search('\S','bW')
     let char = getline('.')[col('.')-1]
-    let pchar = getline('.')[col('.')-2]
     let syn = synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name')
     if syn =~? '\%(xml\|jsx\)'
       return char != '{'
@@ -129,7 +128,7 @@ function s:IsBlock(...)
       return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
             \ , expand('<cword>')) < (0 + (line('.') != l:ln))
     elseif char == '>'
-      return pchar == '=' || syn =~? '^jsflow'
+      return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
     elseif char == ':'
       return cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:expr_case . '$')) + 1 &&
             \ (expand('<cword>') !=# 'default' || !search('\S','bW') || getline('.')[col('.')-1] !~ '[,{]')
