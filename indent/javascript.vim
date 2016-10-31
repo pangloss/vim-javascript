@@ -121,10 +121,10 @@ function s:IsBlock(...)
     let char = getline('.')[col('.')-1]
     let pchar = getline('.')[col('.')-2]
     let syn = synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name')
-    if syn =~? 'comment'
-      return search('\/[/*]','bW') && s:IsBlock(l:ln)
-    elseif syn =~? '\%(xml\|jsx\)'
+    if syn =~? '\%(xml\|jsx\)'
       return char != '{'
+    elseif syn =~? 'comment'
+      return search('\/[/*]','bW') && s:IsBlock(l:ln)
     elseif char =~# '\l'
       return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
             \ , expand('<cword>')) < (0 + (line('.') != l:ln))
