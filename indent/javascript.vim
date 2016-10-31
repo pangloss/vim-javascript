@@ -120,7 +120,7 @@ function s:IsBlock(...)
   if search('\S','bW')
     let char = getline('.')[col('.')-1]
     let pchar = getline('.')[col('.')-2]
-    let syn = synIDattr(synID(line('.'),col('.')-1,0),'name')
+    let syn = synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name')
     if syn =~? 'comment'
       return search('\/[/*]','bW') && s:IsBlock(l:ln)
     elseif syn =~? '\%(xml\|jsx\)'
