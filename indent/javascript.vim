@@ -118,22 +118,22 @@ endfunction
 function s:IsBlock(...)
   let l:ln = get(a:000,0,line('.'))
   if search('\S','bW')
-    let char = strpart(getline('.'),col('.')-2,2)
-    let syn = synIDattr(synID(line('.'),col('.')-(char[-1:] == '{'),0),'name')
+    let char = getline('.')[col('.')-1]
+    let syn = synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name')
     if syn =~? '\%(xml\|jsx\)'
-      return char[-1:] != '{'
+      return char != '{'
     elseif syn =~? 'comment'
       return search('\/[/*]','bW') && s:IsBlock(l:ln)
-    elseif char[-1:] =~# '\l'
+    elseif char =~# '\l'
       return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
             \ , expand('<cword>')) < (0 + (line('.') != l:ln))
-    elseif char[-1:] == '>'
-      return char[0] == '=' || syn =~? '^jsflow'
-    elseif char[-1:] == ':'
+    elseif char == '>'
+      return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
+    elseif char == ':'
       return cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:expr_case . '$')) + 1 &&
             \ (expand('<cword>') !=# 'default' || !search('\S','bW') || getline('.')[col('.')-1] !~ '[,{]')
     endif
-    return stridx('-=~!<*+,/?^%|&([',char[-1:]) < 0
+    return stridx('-=~!<*+,/?^%|&([',char) < 0
   endif
   return 1
 endfunction
