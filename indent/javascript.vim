@@ -124,7 +124,7 @@ function s:IsBlock(...)
       return char != '{'
     elseif syn =~? 'comment'
       return search('\/[/*]','bW') && s:IsBlock(l:ln)
-    elseif char =~# '\l'
+    elseif char =~# '\a'
       return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
             \ , expand('<cword>')) < (0 + (line('.') != l:ln))
     elseif char == '>'
