@@ -142,7 +142,10 @@ endfunction
 function s:PrevCodeLine(lnum)
   let l:lnum = prevnonblank(a:lnum)
   while l:lnum
-    if synIDattr(synID(l:lnum,matchend(getline(l:lnum), '^\s*[^''"`]'),0),'name') !~? s:syng_strcom
+    let syn = synIDattr(synID(l:lnum,matchend(getline(l:lnum), '^\s*[^''"`]'),0),'name')
+    if syn =~? 'html'
+      return
+    elseif syn !~? s:syng_strcom
       return l:lnum
     endif
     let l:lnum = prevnonblank(l:lnum - 1)
