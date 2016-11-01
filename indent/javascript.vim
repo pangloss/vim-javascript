@@ -156,13 +156,9 @@ function s:Balanced(lnum)
   let pos = match(l:line, '[][(){}]', 0)
   while pos != -1
     if synIDattr(synID(a:lnum,pos + 1,0),'name') !~? s:syng_strcom
-      if stridx('[({',l:line[pos]) + 1
-        let l:open += 1
-      else
-        let l:open -= 1
-        if l:open < 0
-          return 0
-        endif
+      let l:open += match(' ' . l:line[pos],'[[({]')
+      if l:open < 0
+        return 0
       endif
     endif
     let pos = match(l:line, '[][(){}]', pos + 1)
