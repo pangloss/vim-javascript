@@ -63,6 +63,14 @@ else
   endfunction
 endif
 
+function s:current_char()
+  return getline('.')[col('.')-1]
+endfunction
+
+function s:current_word()
+  return s:current_char() =~ '\a' ? expand('<cword>') : s:current_char()
+endfunction
+
 function s:Trim(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
   let l:max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
@@ -94,7 +102,7 @@ function s:iscontOne(i,num,cont)
   while l:i >= l:num && (!l:cont || ind > pind)
     if indent(l:i) < ind " first line always true for !a:cont, false for !!a:cont
       if s:OneScope(l:i,s:Trim(l:i))
-        if expand('<cword>') ==# 'while' &&
+        if s:current_word() ==# 'while' &&
               \ s:GetPair('\C\<do\>','\C\<while\>','bW','line2byte(line(".")) + col(".") <'
               \ . (line2byte(l:num) + b:js_cache[2]) . '||'
               \ . s:skip_expr . '|| !s:IsBlock()',100,l:num) > 0
@@ -118,22 +126,20 @@ endfunction
 function s:IsBlock(...)
   let l:ln = get(a:000,0,line('.'))
   if search('\S','bW')
-    let char = getline('.')[col('.')-1]
+    let char = s:current_word()
     let syn = synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name')
     if syn =~? '\%(xml\|jsx\)'
       return char != '{'
     elseif syn =~? 'comment'
       return search('\/[/*]','bW') && s:IsBlock(l:ln)
-    elseif char =~# '\a'
-      return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
-            \ , expand('<cword>')) < (0 + (line('.') != l:ln))
     elseif char == '>'
       return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
     elseif char == ':'
       return cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:expr_case . '$')) + 1 &&
-            \ (expand('<cword>') !=# 'default' || !search('\S','bW') || getline('.')[col('.')-1] !~ '[,{]')
+            \ (expand('<cword>') !=# 'default' || !search('\S','bW') || s:current_char() !~ '[,{]')
     endif
-    return stridx('-=~!<*+,/?^%|&([',char) < 0
+    return index(split('return const let import export yield default delete var void typeof throw new in instanceof'
+          \ . ' - = ~ ! < * + , / ? ^ % | & ( ['), char) < (0 + (line('.') != l:ln))
   endif
   return 1
 endfunction
@@ -215,7 +221,7 @@ function GetJavascriptIndent()
   endif
 
   if idx + 1
-    if idx == 2 && search('\S','bW',line('.')) && getline('.')[col('.')-1] == ')'
+    if idx == 2 && search('\S','bW',line('.')) && s:current_char() == ')'
       call s:GetPair('(',')','bW',s:skip_expr,200)
     endif
     return indent(line('.'))
@@ -226,10 +232,10 @@ function GetJavascriptIndent()
 
   let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
   if num 
-    if getline('.')[col('.')-1] == '{'
+    if s:current_char() == '{'
       if search(')\_s*\%#','bW')
         let stmt = 1
-        if s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')
+        if s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\S','bW') && s:current_word() ==# 'switch'
           let switch_offset = &cino !~ ':' || !has('float') ? s:W :
                 \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
           if l:line =~# '^' . s:expr_case
