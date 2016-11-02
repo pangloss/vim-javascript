@@ -75,7 +75,7 @@ endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
-      \ '\%([<>,?^%|*&]\|\/[/*]\@!\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)')
+      \ '\%([<>,?^%|*/&]\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
       \ '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)') . '$'
 
@@ -193,7 +193,7 @@ function GetJavascriptIndent()
     return 0
   endif
 
-  let l:line = substitute(l:line,'^\s*\%(\/\*.\{-}\*\/\s*\)*','','')
+  let l:line = substitute(substitute(l:line,'^\s*\%(\/\*.\{-}\*\/\s*\)*','',''),'^\/[/*].*','','')
 
   " the containing paren, bracket, curly. Many hacks for performance
   call cursor(v:lnum,1)
