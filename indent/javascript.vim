@@ -140,7 +140,7 @@ function s:IsBlock(...)
       return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
     elseif char == ':'
       return cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:expr_case . '$')) + 1 &&
-            \ (expand('<cword>') !=# 'default' || !search('\S','bW') || s:current_char() !~ '[,{]')
+            \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[,{]')
     endif
     return index(split('return const let import export yield default delete var void typeof throw new in instanceof'
           \ . ' - = ~ ! < * + , / ? ^ % | & ( ['), char) < (0 + (line('.') != l:ln))
@@ -239,7 +239,7 @@ function GetJavascriptIndent()
     if s:current_char() == '{'
       if search(')\_s*\%#','bW')
         let stmt = 1
-        if s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\S','bW') && s:token() ==# 'switch'
+        if s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
           let switch_offset = &cino !~ ':' || !has('float') ? s:W :
                 \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
           if l:line =~# '^' . s:expr_case
