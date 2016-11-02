@@ -67,8 +67,12 @@ function s:current_char()
   return getline('.')[col('.')-1]
 endfunction
 
-function s:current_word()
+function s:token()
   return s:current_char() =~ '\a' ? expand('<cword>') : s:current_char()
+endfunction
+
+function s:previous_token()
+  return search('\S\w\@!','bW') ? s:token() : ''
 endfunction
 
 function s:Trim(ln)
@@ -102,7 +106,7 @@ function s:iscontOne(i,num,cont)
   while l:i >= l:num && (!l:cont || ind > pind)
     if indent(l:i) < ind " first line always true for !a:cont, false for !!a:cont
       if s:OneScope(l:i,s:Trim(l:i))
-        if s:current_word() ==# 'while' &&
+        if s:token() ==# 'while' &&
               \ s:GetPair('\C\<do\>','\C\<while\>','bW','line2byte(line(".")) + col(".") <'
               \ . (line2byte(l:num) + b:js_cache[2]) . '||'
               \ . s:skip_expr . '|| !s:IsBlock()',100,l:num) > 0
@@ -126,7 +130,7 @@ endfunction
 function s:IsBlock(...)
   let l:ln = get(a:000,0,line('.'))
   if search('\S','bW')
-    let char = s:current_word()
+    let char = s:token()
     let syn = synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name')
     if syn =~? '\%(xml\|jsx\)'
       return char != '{'
@@ -235,7 +239,7 @@ function GetJavascriptIndent()
     if s:current_char() == '{'
       if search(')\_s*\%#','bW')
         let stmt = 1
-        if s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\S','bW') && s:current_word() ==# 'switch'
+        if s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\S','bW') && s:token() ==# 'switch'
           let switch_offset = &cino !~ ':' || !has('float') ? s:W :
                 \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
           if l:line =~# '^' . s:expr_case
