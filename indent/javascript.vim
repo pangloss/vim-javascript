@@ -101,7 +101,7 @@ function s:OneScope(lnum,text)
     endif
     return index(split('for if let while with'),token) + 1
   endif
-  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$')) + 1
+  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$\C')) + 1
 endfunction
 
 function s:iscontOne(i,num,cont)
