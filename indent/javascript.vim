@@ -71,6 +71,7 @@ function s:token()
   return s:current_char() =~ '\w' ? expand('<cword>') : s:current_char()
 endfunction
 
+" NOTE: moves the cursor
 function s:previous_token()
   return search('\<\|[^[:alnum:]_$[:space:]]','bW') ? s:token() : ''
 endfunction
