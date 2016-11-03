@@ -92,10 +92,15 @@ let s:continuation = get(g:,'javascript_continuation',
       \ '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)') . '$'
 
 function s:OneScope(lnum,text)
-  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$')) + 1 ||
-        \ cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
-        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 &&
-        \ search('\C\<\%(for\%(\_s\+\%(await\|each\)\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW')
+  if cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
+        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
+    let token = s:previous_token()
+    if index(split('await each'),token) + 1
+      return s:previous_token() ==# 'for'
+    endif
+    return index(split('for if let while with'),token) + 1
+  endif
+  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$')) + 1
 endfunction
 
 function s:iscontOne(i,num,cont)
