@@ -107,7 +107,7 @@ endfunction
 function s:iscontOne(i,num,cont)
   let [l:i, l:cont, l:num] = [a:i, a:cont, a:num + !a:num]
   let pind = a:num ? indent(l:num) + s:W : 0
-  let ind = indent(l:i) + (a:cont && a:num ? 0 : s:W)
+  let ind = indent(l:i) + (a:cont ? 0 : s:W)
   let bL = 0
   while l:i >= l:num && (!l:cont || ind > pind)
     if indent(l:i) < ind " first line always true for !a:cont, false for !!a:cont
@@ -123,10 +123,10 @@ function s:iscontOne(i,num,cont)
       elseif !l:cont
         break
       endif
-      let ind = indent(l:i)
     elseif !a:cont
       break
     endif
+    let ind = min([ind, indent(l:i)])
     let l:i = s:PrevCodeLine(l:i - 1)
   endwhile
   return bL
