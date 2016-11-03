@@ -124,7 +124,7 @@ function s:iscontOne(i,num,cont)
         break
       endif
       let ind = indent(l:i)
-    elseif !a:cont
+    elseif !a:cont || !a:num
       break
     endif
     let l:i = s:PrevCodeLine(l:i - 1)
