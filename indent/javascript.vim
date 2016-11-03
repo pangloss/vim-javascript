@@ -72,7 +72,7 @@ function s:token()
 endfunction
 
 function s:previous_token()
-  return search('\S\w\@!','bW') ? s:token() : ''
+  return search('\<\|[^[:alnum:]_$[:space:]]','bW') ? s:token() : ''
 endfunction
 
 function s:Trim(ln)
