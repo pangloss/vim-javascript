@@ -63,6 +63,19 @@ else
   endfunction
 endif
 
+function s:current_char()
+  return getline('.')[col('.')-1]
+endfunction
+
+function s:token()
+  return s:current_char() =~ '\w' ? expand('<cword>') : s:current_char()
+endfunction
+
+" NOTE: moves the cursor
+function s:previous_token()
+  return search('\<\|[^[:alnum:]_$[:space:]]','bW') ? s:token() : ''
+endfunction
+
 function s:Trim(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
   let l:max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
@@ -80,10 +93,15 @@ let s:continuation = get(g:,'javascript_continuation',
       \ '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)') . '$'
 
 function s:OneScope(lnum,text)
-  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$')) + 1 ||
-        \ cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
-        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 &&
-        \ search('\C\<\%(for\%(\_s\+\%(await\|each\)\)\=\|if\|let\|w\%(hile\|ith\)\)\_s*\%#','bW')
+  if cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
+        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
+    let token = s:previous_token()
+    if index(split('await each'),token) + 1
+      return s:previous_token() ==# 'for'
+    endif
+    return index(split('for if let while with'),token) + 1
+  endif
+  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$\C')) + 1
 endfunction
 
 function s:iscontOne(i,num,cont)
@@ -94,7 +112,7 @@ function s:iscontOne(i,num,cont)
   while l:i >= l:num && (!l:cont || ind > pind)
     if indent(l:i) < ind " first line always true for !a:cont, false for !!a:cont
       if s:OneScope(l:i,s:Trim(l:i))
-        if expand('<cword>') ==# 'while' &&
+        if s:token() ==# 'while' &&
               \ s:GetPair('\C\<do\>','\C\<while\>','bW','line2byte(line(".")) + col(".") <'
               \ . (line2byte(l:num) + b:js_cache[2]) . '||'
               \ . s:skip_expr . '|| !s:IsBlock()',100,l:num) > 0
@@ -105,10 +123,10 @@ function s:iscontOne(i,num,cont)
       elseif !l:cont
         break
       endif
-      let ind = indent(l:i)
     elseif !a:cont
       break
     endif
+    let ind = min([ind, indent(l:i)])
     let l:i = s:PrevCodeLine(l:i - 1)
   endwhile
   return bL
@@ -118,22 +136,20 @@ endfunction
 function s:IsBlock(...)
   let l:ln = get(a:000,0,line('.'))
   if search('\S','bW')
-    let char = getline('.')[col('.')-1]
+    let char = s:token()
     let syn = synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name')
     if syn =~? '\%(xml\|jsx\)'
       return char != '{'
     elseif syn =~? 'comment'
       return search('\/[/*]','bW') && s:IsBlock(l:ln)
-    elseif char =~# '\a'
-      return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
-            \ , expand('<cword>')) < (0 + (line('.') != l:ln))
     elseif char == '>'
       return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
     elseif char == ':'
       return cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:expr_case . '$')) + 1 &&
-            \ (expand('<cword>') !=# 'default' || !search('\S','bW') || getline('.')[col('.')-1] !~ '[,{]')
+            \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[,{]')
     endif
-    return stridx('-=~!<*+,/?^%|&([',char) < 0
+    return index(split('return const let import export yield default delete var void typeof throw new in instanceof'
+          \ . ' - = ~ ! < * + , / ? ^ % | & ( ['), char) < (0 + (line('.') != l:ln))
   endif
   return 1
 endfunction
@@ -215,7 +231,7 @@ function GetJavascriptIndent()
   endif
 
   if idx + 1
-    if idx == 2 && search('\S','bW',line('.')) && getline('.')[col('.')-1] == ')'
+    if idx == 2 && search('\S','bW',line('.')) && s:current_char() == ')'
       call s:GetPair('(',')','bW',s:skip_expr,200)
     endif
     return indent(line('.'))
@@ -226,10 +242,10 @@ function GetJavascriptIndent()
 
   let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
   if num 
-    if getline('.')[col('.')-1] == '{'
+    if s:current_char() == '{'
       if search(')\_s*\%#','bW')
         let stmt = 1
-        if s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && search('\C\<switch\_s*\%#','bW')
+        if s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
           let switch_offset = &cino !~ ':' || !has('float') ? s:W :
                 \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
           if l:line =~# '^' . s:expr_case
