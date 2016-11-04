@@ -68,7 +68,7 @@ function s:current_char()
 endfunction
 
 function s:token()
-  return s:current_char() =~ '\w' ? expand('<cword>') : s:current_char()
+  return s:current_char() =~ '\k' ? expand('<cword>') : s:current_char()
 endfunction
 
 " NOTE: moves the cursor
