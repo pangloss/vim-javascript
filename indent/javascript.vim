@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: Octember 31, 2016
+" Last Change: November 5, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -137,7 +137,7 @@ function s:IsBlock(...)
   let l:ln = get(a:000,0,line('.'))
   if search('\S','bW')
     let char = s:token()
-    let syn = synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name')
+    let syn = char =~ '[{>/]' || l:ln != line('.') ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
     if syn =~? '\%(xml\|jsx\)'
       return char != '{'
     elseif syn =~? 'comment'
@@ -241,20 +241,16 @@ function GetJavascriptIndent()
   let num = b:js_cache[1]
 
   let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
-  if num 
-    if s:current_char() == '{'
-      if search(')\_s*\%#','bW')
-        let stmt = 1
-        if s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
-          let switch_offset = &cino !~ ':' || !has('float') ? s:W :
-                \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
-          if l:line =~# '^' . s:expr_case
-            return indent(num) + switch_offset
-          endif
-          let stmt = pline !~# s:expr_case . '$'
+  if num
+    if s:current_char() == '{' && s:IsBlock()
+      let stmt = 1
+      if s:current_char() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
+        let switch_offset = &cino !~ ':' || !has('float') ? s:W :
+              \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
+        if l:line =~# '^' . s:expr_case
+          return indent(num) + switch_offset
         endif
-      elseif s:IsBlock()
-        let stmt = 1
+        let stmt = pline !~# s:expr_case . '$'
       endif
     endif
   else
