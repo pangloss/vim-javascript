@@ -245,15 +245,13 @@ function GetJavascriptIndent()
     if s:current_char() == '{'
       if s:IsBlock()
         let stmt = 1
-        if s:current_char() == ')'
-          if s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
-            let switch_offset = &cino !~ ':' || !has('float') ? s:W :
-                  \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
-            if l:line =~# '^' . s:expr_case
-              return indent(num) + switch_offset
-            endif
-            let stmt = pline !~# s:expr_case . '$'
+        if s:current_char() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
+          let switch_offset = &cino !~ ':' || !has('float') ? s:W :
+                \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
+          if l:line =~# '^' . s:expr_case
+            return indent(num) + switch_offset
           endif
+          let stmt = pline !~# s:expr_case . '$'
         endif
       endif
     endif
