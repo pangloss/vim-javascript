@@ -177,7 +177,7 @@ function s:Balanced(lnum)
     if synIDattr(synID(a:lnum,pos + 1,0),'name') !~? s:syng_strcom
       let l:open += match(' ' . l:line[pos],'[[({]')
       if l:open < 0
-        return 0
+        return
       endif
     endif
     let pos = match(l:line, '[][(){}]', pos + 1)
@@ -206,7 +206,7 @@ function GetJavascriptIndent()
   endif
   let l:lnum = s:PrevCodeLine(v:lnum - 1)
   if !l:lnum
-    return 0
+    return
   endif
 
   let l:line = substitute(substitute(l:line,'^\s*\%(\/\*.\{-}\*\/\s*\)*','',''),'^\/[/*].*','','')
