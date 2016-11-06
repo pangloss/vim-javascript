@@ -135,23 +135,22 @@ endfunction
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock(...)
   let l:ln = get(a:000,0,line('.'))
-  if search('\S','bW')
-    let char = s:token()
-    let syn = char =~ '[{>/]' || l:ln != line('.') ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
-    if syn =~? '\%(xml\|jsx\)'
-      return char != '{'
-    elseif syn =~? 'comment'
-      return search('\/[/*]','bW') && s:IsBlock(l:ln)
-    elseif char == '>'
-      return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
-    elseif char == ':'
-      return cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:expr_case . '$')) + 1 &&
-            \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[,{]')
-    endif
-    return index(split('return const let import export yield default delete var void typeof throw new in instanceof'
-          \ . ' - = ~ ! < * + , / ? ^ % | & ( ['), char) < (0 + (line('.') != l:ln))
+  let char = s:previous_token()
+  let syn = char =~ '[{>/]' || l:ln != line('.') ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
+  if char is ''
+    return 1
+  elseif syn =~? '\%(xml\|jsx\)'
+    return char != '{'
+  elseif syn =~? 'comment'
+    return search('\/[/*]','bW') && s:IsBlock(l:ln)
+  elseif char == '>'
+    return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
+  elseif char == ':'
+    return cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:expr_case . '$')) + 1 &&
+          \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[,{]')
   endif
-  return 1
+  return index(split('return const let import export yield default delete var void typeof throw new in instanceof'
+        \ . ' - = ~ ! < * + , / ? ^ % | & ( ['), char) < (0 + (line('.') != l:ln))
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
