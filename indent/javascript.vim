@@ -37,13 +37,14 @@ else
   endfunction
 endif
 
-let s:expr_case = '\<\%(\%(case\>\s*[^[:blank:]:].\{-}\)\|default\)\s*:\C'
+let s:case_stmt = '\<\%(\%(case\>\s*[^[:blank:]:].\{-}\)\|default\)\s*:\C'
+
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 function s:skip_func(lnum)
-  if !s:free || search('`','nW',a:lnum) || search('\*\/','nW',a:lnum)
+  if !s:free || search('`\|\%(\*\/\)','nW',a:lnum)
     let s:free = !eval(s:skip_expr . " . '\\|html'")
     let s:looksyn = s:free ? line('.') : s:looksyn
     return !s:free
@@ -145,7 +146,7 @@ function s:IsBlock(...)
   elseif char == '>'
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
-    return cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:expr_case . '$')) + 1 &&
+    return cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:case_stmt . '$')) + 1 &&
           \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[,{]')
   endif
   return index(split('return const let import export yield default delete var void typeof throw new in instanceof'
@@ -244,10 +245,10 @@ function GetJavascriptIndent()
     if s:current_char() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
       let switch_offset = &cino !~ ':' || !has('float') ? s:W :
             \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '.*:[^,]*s' ? s:W : 1))
-      if l:line =~# '^' . s:expr_case
+      if l:line =~# '^' . s:case_stmt
         return indent(num) + switch_offset
       endif
-      let stmt = pline !~# s:expr_case . '$'
+      let stmt = pline !~# s:case_stmt . '$'
     endif
   endif
 
