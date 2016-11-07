@@ -45,12 +45,12 @@ let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 function s:skip_func(lnum)
   if !s:free || search('`','nW',a:lnum) || search('\*\/','nW',a:lnum)
-    let s:free = !eval(s:skip_expr)
+    let s:free = !eval(s:skip_expr . '. "\\|html"')
     let s:looksyn = s:free ? line('.') : s:looksyn
     return !s:free
   endif
   let s:looksyn = line('.')
-  return (search('\/','nbW',s:looksyn) || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
+  return (search('\/','nbW',s:looksyn) || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr . '. "\\|html"')
 endfunction
 
 if has('reltime')
