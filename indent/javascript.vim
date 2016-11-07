@@ -37,14 +37,14 @@ else
   endfunction
 endif
 
-let s:case_stmt = '\<\%(\%(case\>\s*[^[:blank:]:].\{-}\)\|default\)\s*:\C'
+let s:case_stmt = '\<\%(case\>\s*[^[:blank:]:].\{-}\|default\s*\):\C'
 
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = '\%(s\%(tring\|pecial\)\|comment\|regex\|doc\|template\)'
+let s:syng_strcom = 'string\|comment\|regex\|special\|doc\|template'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 function s:skip_func(lnum)
-  if !s:free || search('`\|\%(\*\/\)','nW',a:lnum)
+  if !s:free || search('`\|\*\/','nW',a:lnum)
     let s:free = !eval(s:skip_expr . " . '\\|html'")
     let s:looksyn = s:free ? line('.') : s:looksyn
     return !s:free
@@ -79,7 +79,7 @@ endfunction
 function s:Trim(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
   let l:max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
-  while l:max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? '\%(comment\|doc\)'
+  while l:max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? 'comment\|doc'
     let pline = substitute(strpart(pline, 0, l:max),'\s*$','','')
     let l:max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
   endwhile
@@ -139,7 +139,7 @@ function s:IsBlock(...)
   let syn = char =~ '[{>/]' || l:ln != line('.') ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
   if char is ''
     return 1
-  elseif syn =~? '\%(xml\|jsx\)'
+  elseif syn =~? 'xml\|jsx'
     return char != '{'
   elseif syn =~? 'comment'
     return search('\/[/*]','bW') && s:IsBlock(l:ln)
@@ -194,13 +194,13 @@ function GetJavascriptIndent()
   let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
 
   " start with strings,comments,etc.
-  if syns =~? '\%(comment\|doc\)'
+  if syns =~? 'comment\|doc'
     if l:line =~ '^\s*\*'
       return cindent(v:lnum)
     elseif l:line !~ '^\s*\/'
       return -1
     endif
-  elseif syns =~? '\%(string\|template\)' && l:line !~ '^[''"]'
+  elseif syns =~? 'string\|template' && l:line !~ '^[''"]'
     return -1
   endif
   let l:lnum = s:PrevCodeLine(v:lnum - 1)
