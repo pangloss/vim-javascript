@@ -73,7 +73,7 @@ endfunction
 
 " NOTE: moves the cursor
 function s:previous_token()
-  return search('\<\|[]`^!"%-/:-?{-~[]','bW') ? s:token() : ''
+  return search('\<\|[][`^!"%-/:-?{-~]','bW') ? s:token() : ''
 endfunction
 
 function s:Trim(ln)
