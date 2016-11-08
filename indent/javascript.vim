@@ -179,9 +179,6 @@ function s:Balanced(lnum)
 endfunction
 
 function GetJavascriptIndent()
-  try
-    let save_magic = &magic
-    set magic
   let b:js_cache = get(b:,'js_cache',[0,0,0])
   " Get the current line.
   let l:line = getline(v:lnum)
@@ -259,10 +256,6 @@ function GetJavascriptIndent()
     return indent(num) + s:W + switch_offset + bL
   endif
   return bL
-  
-  finally
-    let &magic = save_magic
-  endtry
 endfunction
 
 let &cpo = s:cpo_save
