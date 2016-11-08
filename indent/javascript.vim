@@ -112,12 +112,6 @@ function s:iscontOne(i,num,cont)
   while l:i >= l:num && (!l:cont || ind > pind)
     if indent(l:i) < ind " first line always true for !a:cont, false for !!a:cont
       if s:OneScope(l:i,s:Trim(l:i))
-        if s:token() ==# 'while' &&
-              \ s:GetPair('\C\<do\>','\C\<while\>','bW','line2byte(line(".")) + col(".") <'
-              \ . (line2byte(l:num) + b:js_cache[2]) . '||'
-              \ . s:skip_expr . '|| !s:IsBlock()',100,l:num) > 0
-          return
-        endif
         let bL += s:W
         let [l:cont, l:i] = [0, line('.')]
       elseif !l:cont
