@@ -247,10 +247,6 @@ function GetJavascriptIndent()
   endif
 
   if stmt || !num
-    call cursor(v:lnum,1)
-    if l:line =~# '^while\>' && s:GetPair('\C\<do\>','\C\<while\>','bW',s:skip_expr . '|| !s:IsBlock()',100,num + 1) > 0
-      return indent(line('.'))
-    endif
     let isOp = l:line =~# s:opfirst || pline =~# s:continuation
     let bL = s:iscontOne(l:lnum,num,isOp)
     let bL -= (bL && l:line[0] == '{') * s:W
