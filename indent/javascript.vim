@@ -131,7 +131,7 @@ function s:IsBlock(...)
   let l:ln = get(a:000,0,line('.'))
   let char = s:previous_token()
   let syn = char =~ '[{>/]' || l:ln != line('.') ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
-  if char is ''
+  if char is '' || syn =~? 'regex'
     return 1
   elseif syn =~? 'xml\|jsx'
     return char != '{'
@@ -143,8 +143,8 @@ function s:IsBlock(...)
     return cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:case_stmt . '$')) + 1 &&
           \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[,{]')
   endif
-  return index(split('return const let import export yield default delete var void typeof throw new in instanceof'
-        \ . ' - = ~ ! < * + , / ? ^ % | & ( ['), char) < (0 + (line('.') != l:ln))
+  return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
+        \ + split('-=~!<*+,/?^%|&([','\zs'), char) < (0 + (line('.') != l:ln))
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
@@ -154,7 +154,7 @@ function s:PrevCodeLine(lnum)
     let syn = synIDattr(synID(l:lnum,matchend(getline(l:lnum), '^\s*[^''"`]'),0),'name')
     if syn =~? 'html'
       return
-    elseif syn !~? s:syng_strcom
+    elseif syn !~? 'comment\|doc\|string\|template'
       return l:lnum
     endif
     let l:lnum = prevnonblank(l:lnum - 1)
@@ -244,7 +244,8 @@ function GetJavascriptIndent()
   endif
 
   if stmt || !num
-    let isOp = l:line =~# s:opfirst || pline =~# s:continuation
+    let isOp = l:line =~# s:opfirst || pline =~# s:continuation &&
+          \ synIDattr(synID(l:lnum,match(' ' . pline,'\/$'),0),'name') !~? 'regex'
     let bL = s:iscontOne(l:lnum,num,isOp)
     let bL -= (bL && l:line[0] == '{') * s:W
   endif
