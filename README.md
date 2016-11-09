@@ -104,9 +104,10 @@ variables:
 ## Contributing
 
 If you'd like to be added as a contributor,
-the price of admission is 1 pull request. Please follow the general code style
+the price of admission is usually 1 pull request. Please follow the general code style
 guides (read the code) and in your pull request explain the reason for the
-proposed change and how it is valuable.
+proposed change and how it is valuable. All p.r.'s must be reviewed before making
+it into the master branch.
 
 
 ## Bug Reports
