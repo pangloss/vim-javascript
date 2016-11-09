@@ -131,7 +131,7 @@ function s:IsBlock(...)
   let l:ln = get(a:000,0,line('.'))
   let char = s:previous_token()
   let syn = char =~ '[{>/]' || l:ln != line('.') ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
-  if char is ''
+  if char is '' || syn =~? 'regex'
     return 1
   elseif syn =~? 'xml\|jsx'
     return char != '{'
@@ -244,7 +244,8 @@ function GetJavascriptIndent()
   endif
 
   if stmt || !num
-    let isOp = l:line =~# s:opfirst || pline =~# s:continuation
+    let isOp = l:line =~# s:opfirst || pline =~# s:continuation &&
+          \ synIDattr(synID(l:lnum,match(pline,'\/$')+1,0),'name') !~? 'regex'
     let bL = s:iscontOne(l:lnum,num,isOp)
     let bL -= (bL && l:line[0] == '{') * s:W
   endif
