@@ -106,7 +106,9 @@ variables:
 Please follow the general code style
 guides (read the code) and in your pull request explain the reason for the
 proposed change and how it is valuable. All p.r.'s will be reviewed by a
-maintainer(s) then, hopefully, merged. Thank you!
+maintainer(s) then, hopefully, merged.
+
+Thank you!
 
 
 ## Bug Reports
