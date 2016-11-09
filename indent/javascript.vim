@@ -154,7 +154,7 @@ function s:PrevCodeLine(lnum)
     let syn = synIDattr(synID(l:lnum,matchend(getline(l:lnum), '^\s*[^''"`]'),0),'name')
     if syn =~? 'html'
       return
-    elseif syn !~? s:syng_strcom
+    elseif syn !~? 'comment\|doc\|string\|template'
       return l:lnum
     endif
     let l:lnum = prevnonblank(l:lnum - 1)
