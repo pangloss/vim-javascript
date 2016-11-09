@@ -143,8 +143,8 @@ function s:IsBlock(...)
     return cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:case_stmt . '$')) + 1 &&
           \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[,{]')
   endif
-  return index(split('return const let import export yield default delete var void typeof throw new in instanceof'
-        \ . ' - = ~ ! < * + , / ? ^ % | & ( ['), char) < (0 + (line('.') != l:ln))
+  return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
+        \ + split('-=~!<*+,/?^%|&([','\zs'), char) < (0 + (line('.') != l:ln))
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
