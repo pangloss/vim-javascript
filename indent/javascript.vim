@@ -75,10 +75,9 @@ endfunction
 function s:previous_token()
   let l:ln = line('.')
   return search('\<\|[][`^!"%-/:-?{-~]','bW') ?
-        \ s:token() == '/' || line('.') != l:ln ?
-          \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
-            \ search(line('.') == l:ln ? '\/\*' : '\/\/','bW') ? s:previous_token() : ''
-          \ : s:token()
+        \ (s:token() == '/' || line('.') != l:ln) &&
+        \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
+          \ search(line('.') == l:ln ? '\/\*' : '\/\/','bW') ? s:previous_token() : ''
         \ : s:token()
       \ : ''
 endfunction
