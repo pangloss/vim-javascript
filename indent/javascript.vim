@@ -134,7 +134,7 @@ function s:iscontOne(i,num,cont)
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
-function s:IsBlock(...)
+function s:IsBlock()
   let l:ln = line('.')
   let char = s:previous_token()
   let syn = char =~ '[{>/]' || l:ln != line('.') ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
