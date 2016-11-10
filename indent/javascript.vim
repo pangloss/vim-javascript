@@ -72,12 +72,12 @@ function s:token()
 endfunction
 
 " NOTE: moves the cursor
-function s:previous_token()
-  let l:ln = line('.')
+function s:previous_token(...)
+  let l:ln = get(a:000,0,line('.'))
   return search('\<\|[][`^!"%-/:-?{-~]','bW') ?
         \ s:token() == '/' || line('.') != l:ln ?
           \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
-            \ search('\/[*/]','bW') ? s:previous_token() : ''
+            \ search('\/'.(line('.') == l:ln ? '\*' : '\/'),'bW') ? s:previous_token(l:ln) : ''
           \ : s:token()
         \ : s:token()
       \ : ''
@@ -135,7 +135,7 @@ endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock(...)
-  let l:ln = get(a:000,0,line('.'))
+  let l:ln = line('.')
   let char = s:previous_token()
   let syn = char =~ '[{>/]' || l:ln != line('.') ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
   if char is '' || syn =~? 'regex'
