@@ -73,7 +73,14 @@ endfunction
 
 " NOTE: moves the cursor
 function s:previous_token()
-  return search('\<\|[][`^!"%-/:-?{-~]','bW') ? s:token() : ''
+  let l:ln = line('.')
+  return search('\<\|[][`^!"%-/:-?{-~]','bW') ?
+        \ s:token() == '/' || line('.') != l:ln ?
+          \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
+            \ search('\/[*/]','bW') ? s:previous_token() : ''
+          \ : s:token()
+        \ : s:token()
+      \ : ''
 endfunction
 
 function s:Trim(ln)
@@ -135,8 +142,6 @@ function s:IsBlock(...)
     return 1
   elseif syn =~? 'xml\|jsx'
     return char != '{'
-  elseif syn =~? 'comment'
-    return search('\/[/*]','bW') && s:IsBlock(l:ln)
   elseif char == '>'
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
