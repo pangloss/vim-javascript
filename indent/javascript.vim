@@ -89,7 +89,6 @@ function s:Trim(ln)
     let pline = substitute(strpart(pline, 0, l:max),'\s*$','','')
     let l:max = max([match(pline,'.*\zs\/\@>[/*]'),0])
   endwhile
-  echom pline
   return pline
 endfunction
 
