@@ -94,9 +94,9 @@ endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
-      \ '\%([<>,?^%|*/&]\|\([-.:+]\)\1\@!\|=>\@!\|in\%(stanceof\)\=\>\)')
+      \ '\%([<>,?^%|*/&]\|\([-.:+]\)\1\@!\|=>\@!\|delete\>\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
-      \ '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<in\%(stanceof\)\=\)') . '$'
+      \ '\%([<=,.?/*^%|&:]\|\([-+]\)\&\1\@<!\1\|=\@<!>\|\<delete\|\<in\%(stanceof\)\=\)') . '$'
 
 function s:OneScope(lnum,text)
   if cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
