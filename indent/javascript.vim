@@ -96,7 +96,7 @@ endfunction
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\%([<>,?^%|*/&]\|\([-.:+]\)\1\@!\|=>\@!\|typeof\>\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
-      \ '\%([<=,.?/*^%|&:]\|\([-+]\)\&\1\@<!\1\|=\@<!>\|\<typeof\|\<in\%(stanceof\)\=\)') . '$'
+      \ '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<typeof\|\<in\%(stanceof\)\=\)') . '$'
 
 function s:OneScope(lnum,text)
   if cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
