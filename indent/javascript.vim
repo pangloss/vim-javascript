@@ -192,7 +192,7 @@ function GetJavascriptIndent()
   if syns =~? 'comment\|doc'
     if l:line =~ '^\s*\*'
       return cindent(v:lnum)
-    elseif l:line !~ '^\s*\/'
+    elseif l:line !~ '^\s*\/[/*]'
       return -1
     endif
   elseif syns =~? 'string\|template' && l:line !~ '^[''"]'
