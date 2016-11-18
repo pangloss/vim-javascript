@@ -237,7 +237,6 @@ function GetJavascriptIndent()
 
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : [line('.'),col('.')])
   let num = b:js_cache[1]
-  let stmt = exists('stmt') ? 1 : 0
 
   let [s:W, pline, stmt, isOp, bL, switch_offset] = [s:sw(), s:Trim(l:lnum), exists('stmt'),0,0,0]
   if num && s:current_char() == '{' && s:IsBlock()
