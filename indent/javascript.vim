@@ -239,8 +239,8 @@ function GetJavascriptIndent()
   let num = b:js_cache[1]
   let stmt = exists('stmt') ? 1 : 0
 
-  let [s:W, pline, isOp, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0]
-  if stmt || num && s:current_char() == '{' && s:IsBlock()
+  let [s:W, pline, stmt, isOp, bL, switch_offset] = [s:sw(), s:Trim(l:lnum), exists('stmt'),0,0,0]
+  if num && s:current_char() == '{' && s:IsBlock()
     let stmt = 1
     if s:current_char() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
       let switch_offset = &cino !~ ':' || !has('float') ? s:W :
