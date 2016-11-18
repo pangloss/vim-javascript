@@ -148,7 +148,7 @@ function s:IsBlock()
           \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[,{]')
   endif
   return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
-        \ + split('-=~!<*+,/?^%|&([','\zs'), char) < (0 + (line('.') != l:ln))
+        \ + split('-=~!<*+,./?^%|&([','\zs'), char) < (0 + (line('.') != l:ln))
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
