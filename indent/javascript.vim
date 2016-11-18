@@ -215,9 +215,13 @@ function GetJavascriptIndent()
       call call('cursor',b:js_cache[1:])
     elseif idx + 1
       call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000)
-    elseif indent(v:lnum) && syns =~? 'block'
+    elseif indent(v:lnum) && syns =~? 'block' ||
+          \ l:line !~# s:opfirst && s:IsBlock() && s:current_char() !~# '[])>]'
+      let stmt = 1
+      call cursor(v:lnum,1)
       call s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000)
     else
+      call cursor(v:lnum,1)
       call s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
     endif
   else
@@ -233,9 +237,10 @@ function GetJavascriptIndent()
 
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : [line('.'),col('.')])
   let num = b:js_cache[1]
+  let stmt = exists('stmt') ? 1 : 0
 
-  let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
-  if num && s:current_char() == '{' && s:IsBlock()
+  let [s:W, pline, isOp, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0]
+  if stmt || num && s:current_char() == '{' && s:IsBlock()
     let stmt = 1
     if s:current_char() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
       let switch_offset = &cino !~ ':' || !has('float') ? s:W :
