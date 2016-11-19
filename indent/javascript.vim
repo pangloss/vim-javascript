@@ -72,12 +72,12 @@ function s:token()
 endfunction
 
 " NOTE: moves the cursor
-function s:previous_token()
+function s:previous_token(...)
   let l:ln = line('.')
   return search('\<\|[][`^!"%-/:-?{-~]','bW') ?
-        \ (s:token() == '/' || line('.') != l:ln) &&
+        \ (a:0 || s:token() == '/' || line('.') != l:ln) &&
         \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
-        \ search('\/[/*]\&','bW') ? s:previous_token() : ''
+        \ search('\/[/*]\&','bW') ? s:previous_token(1) : ''
         \ : s:token()
         \ : ''
 endfunction
