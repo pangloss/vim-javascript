@@ -72,12 +72,12 @@ function s:token()
 endfunction
 
 " NOTE: moves the cursor
-function s:previous_token()
+function s:previous_token(...)
   let l:ln = line('.')
   return search('\<\|[][`^!"%-/:-?{-~]','bW') ?
-        \ (s:token() == '/' || line('.') != l:ln) &&
+        \ (a:0 || s:token() == '/' || line('.') != l:ln) &&
         \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
-        \ search('\/[/*]\&','bW') ? s:previous_token() : ''
+        \ search('\/[/*]\&','bW') ? s:previous_token(1) : ''
         \ : s:token()
         \ : ''
 endfunction
@@ -148,7 +148,7 @@ function s:IsBlock()
           \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[,{]')
   endif
   return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
-        \ + split('-=~!<*+,/?^%|&([','\zs'), char) < (0 + (line('.') != l:ln))
+        \ + split('-=~!<*+,./?^%|&([','\zs'), char) < (0 + (line('.') != l:ln))
 endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
@@ -215,9 +215,13 @@ function GetJavascriptIndent()
       call call('cursor',b:js_cache[1:])
     elseif idx + 1
       call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000)
-    elseif indent(v:lnum) && syns =~? 'block'
+    elseif indent(v:lnum) && syns =~? 'block' ||
+          \ l:line !~# s:opfirst && s:IsBlock() && s:current_char() !~# '[])>]'
+      let stmt = 1
+      call cursor(v:lnum,1)
       call s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000)
     else
+      call cursor(v:lnum,1)
       call s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
     endif
   else
@@ -234,7 +238,7 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : [line('.'),col('.')])
   let num = b:js_cache[1]
 
-  let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
+  let [s:W, pline, stmt, isOp, bL, switch_offset] = [s:sw(), s:Trim(l:lnum), exists('stmt'),0,0,0]
   if num && s:current_char() == '{' && s:IsBlock()
     let stmt = 1
     if s:current_char() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
