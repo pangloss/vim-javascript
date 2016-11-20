@@ -43,14 +43,16 @@ let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
 let s:syng_strcom = 'string\|comment\|regex\|special\|doc\|template'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
-function s:skip_func(lnum)
-  if !s:free || search('`\|\*\/','nW',a:lnum)
-    let s:free = !eval(s:skip_expr . " . '\\|html'")
-    let s:looksyn = s:free ? line('.') : s:looksyn
-    return !s:free
+
+function s:skip_func()
+  let multi = searchpos('`\|\*\/','nW',s:looksyn[0])
+  let strings = searchpos('[''"\\]','nW',line('.'))
+  if (multi[0] && line2byte(multi[0]) + multi[1] < line2byte(s:looksyn[0]) + s:looksyn[1]
+        \ || strings[0] && (line('.') != s:looksyn[0] || strings[1] < s:looksyn[1])
+        \ || search('\/',(line('.') != s:looksyn[0] ? 'b' : '' ).'nW',line('.'))) && eval(s:skip_expr . " . '\\|html'")
+    return 1
   endif
-  let s:looksyn = line('.')
-  return (search('\/','nbW',s:looksyn) || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr . " . '\\|html'")
+  let s:looksyn = [line('.'),col('.')]
 endfunction
 
 if has('reltime')
@@ -209,16 +211,16 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   let idx = strlen(l:line) ? stridx('])}',l:line[0]) : -1
   if indent(l:lnum)
-    let [s:looksyn,s:free] = [v:lnum - 1,1]
+    let s:looksyn = [v:lnum,1]
     if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
           \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
       call call('cursor',b:js_cache[1:])
     elseif idx + 1
-      call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000)
+      call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000)
     elseif indent(v:lnum) && syns =~? 'block'
-      call s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000)
+      call s:GetPair('{','}','bW','s:skip_func()',2000)
     else
-      call s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000)
+      call s:GetPair('[({[]','[])}]','bW','s:skip_func()',2000)
     endif
   else
     call s:GetPair('[({[]','[])}]','bW',s:skip_expr,200,l:lnum)
