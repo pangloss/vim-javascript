@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: November 12, 2016
+" Last Change: November 20, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -45,12 +45,12 @@ let s:syng_strcom = 'string\|comment\|regex\|special\|doc\|template'
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 function s:skip_func(lnum)
   if !s:free || search('`\|\*\/','nW',a:lnum)
-    let s:free = !eval(s:skip_expr . " . '\\|html'")
+    let s:free = !eval(s:skip_expr)
     let s:looksyn = s:free ? line('.') : s:looksyn
     return !s:free
   endif
   let s:looksyn = line('.')
-  return (search('\/','nbW',s:looksyn) || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr . " . '\\|html'")
+  return (search('\/','nbW',s:looksyn) || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
 endfunction
 
 if has('reltime')
@@ -63,12 +63,12 @@ else
   endfunction
 endif
 
-function s:current_char()
+function s:looking_at()
   return getline('.')[col('.')-1]
 endfunction
 
 function s:token()
-  return s:current_char() =~ '\k' ? expand('<cword>') : s:current_char()
+  return s:looking_at() =~ '\k' ? expand('<cword>') : s:looking_at()
 endfunction
 
 " NOTE: moves the cursor
@@ -156,10 +156,8 @@ function s:PrevCodeLine(lnum)
   let curp = [line('.'),col('.')]
   call cursor(a:lnum+1,1)
   while search('^\s*\%(\/\/\)\@!\S','bW')
-    let syn = synIDattr(synID(line('.'),matchend(getline('.'), '^\s*[^''"`]'),0),'name')
-    if syn =~? 'html'
-      return
-    elseif syn !~? 'comment\|doc\|string\|template'
+    if synIDattr(synID(line('.'),matchend(getline('.'), '^\s*[^''"`]'),0),'name') !~?
+          \ 'comment\|doc\|string\|template'
       return line('.') + call('cursor',curp)
     endif
   endwhile
@@ -225,7 +223,7 @@ function GetJavascriptIndent()
   endif
 
   if idx + 1
-    if idx == 2 && search('\S','bW',line('.')) && s:current_char() == ')'
+    if idx == 2 && search('\S','bW',line('.')) && s:looking_at() == ')'
       call s:GetPair('(',')','bW',s:skip_expr,200)
     endif
     return indent(line('.'))
@@ -235,9 +233,9 @@ function GetJavascriptIndent()
   let num = b:js_cache[1]
 
   let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
-  if num && s:current_char() == '{' && s:IsBlock()
+  if num && s:looking_at() == '{' && s:IsBlock()
     let stmt = 1
-    if s:current_char() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
+    if s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
       let switch_offset = &cino !~ ':' || !has('float') ? s:W :
             \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '\%(.*:\)\@>[^,]*s' ? s:W : 1))
       if l:line =~# '^' . s:case_stmt
