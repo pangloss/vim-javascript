@@ -46,15 +46,10 @@ let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_s
 
 function s:skip_func()
   let multi = searchpos('`\|\*\/','nW',s:looksyn[0])
-  if multi[0] && (line2byte(multi[0]) + multi[1] < line2byte(s:looksyn[0]) + s:looksyn[1]) && eval(s:skip_expr . " . '\\|html'")
-    return 1
-  endif
-  if search('\/',(line('.') != s:looksyn[0] ? 'b' : '' ).'nW',line('.')) && eval(s:skip_expr . " . '\\|html'")
-    return 1
-  endif
   let strings = searchpos('[''"\\]','nW',line('.'))
-  if strings[0] && (line('.') != s:looksyn[0] || (strings[1] < s:looksyn[1]))
-        \ && eval(s:skip_expr . " . '\\|html'")
+  if (multi[0] && line2byte(multi[0]) + multi[1] < line2byte(s:looksyn[0]) + s:looksyn[1]
+        \ || strings[0] && (line('.') != s:looksyn[0] || strings[1] < s:looksyn[1])
+        \ || search('\/',(line('.') != s:looksyn[0] ? 'b' : '' ).'nW',line('.'))) && eval(s:skip_expr . " . '\\|html'")
     return 1
   endif
   let s:looksyn = [line('.'),col('.')]
