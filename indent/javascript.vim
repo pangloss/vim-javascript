@@ -14,7 +14,6 @@ let b:did_indent = 1
 setlocal indentexpr=GetJavascriptIndent()
 setlocal autoindent nolisp nosmartindent
 setlocal indentkeys=0{,0},0),0],:,!^F,o,O,e
-setlocal cinoptions+=j1,J1
 
 let b:undo_indent = 'setlocal indentexpr< smartindent< autoindent< indentkeys< cinoptions<'
 
