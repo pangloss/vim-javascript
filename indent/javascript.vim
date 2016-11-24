@@ -244,8 +244,9 @@ function GetJavascriptIndent()
             \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '\%(.*:\)\@>[^,]*s' ? s:W : 1))
       if l:line =~# '^' . s:case_stmt
         return indent(num) + switch_offset
+      elseif pline =~# s:case_stmt . '$'
+        return indent(l:lnum) + s:W
       endif
-      let stmt = pline !~# s:case_stmt . '$'
     endif
   endif
 
