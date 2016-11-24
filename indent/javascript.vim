@@ -97,18 +97,14 @@ let s:opfirst = '^' . get(g:,'javascript_opfirst',
 let s:continuation = get(g:,'javascript_continuation',
       \ '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<typeof\|\<in\%(stanceof\)\=\)') . '$'
 
-function s:controlFlow(...)
-  let token = s:previous_token()
-  if index(split('await each'),token) + 1
-    return s:previous_token() ==# 'for'
-  endif
-  return index(split('switch for if let while with'),token,a:0) + 1
-endfunction
-
 function s:OneScope(lnum,text)
   if cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
-    return s:controlFlow(1)
+    let token = s:previous_token()
+    if index(split('await each'),token) + 1
+      return s:previous_token() ==# 'for'
+    endif
+    return index(split('for if let while with'),token) + 1
   endif
   return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$\C')) + 1
 endfunction
@@ -234,11 +230,9 @@ function GetJavascriptIndent()
 
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : [line('.'),col('.')])
   let num = b:js_cache[1]
-  let paren = num ? s:looking_at() : ''
 
   let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
-  if num && paren == '{' && s:IsBlock()
-    let stmt = 1
+  if num && s:looking_at() == '{' && s:IsBlock()
     if s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = line('.')
       if s:previous_token() ==# 'switch'
@@ -251,13 +245,12 @@ function GetJavascriptIndent()
         endif
       endif
     endif
+    let stmt = 1
   endif
 
-  let notlist = paren == '(' && s:controlFlow() || stmt
-  let isOp = pline =~# (notlist ? s:continuation : substitute(s:continuation,',','','')) &&
-        \ synIDattr(synID(l:lnum,match(' ' . pline,'\/$'),0),'name') !~? 'regex' ||
-        \ l:line =~# (notlist ? s:opfirst : substitute(s:opfirst,',','',''))
   if stmt || !num
+    let isOp = l:line =~# s:opfirst || pline =~# s:continuation &&
+          \ synIDattr(synID(l:lnum,match(' ' . pline,'\/$'),0),'name') !~? 'regex'
     let bL = s:iscontOne(l:lnum,num,isOp)
     let bL -= (bL && l:line[0] == '{') * s:W
   endif
