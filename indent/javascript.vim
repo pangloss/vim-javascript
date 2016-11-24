@@ -102,13 +102,13 @@ function s:controlFlow()
   if index(split('await each'),token) + 1
     return s:previous_token() ==# 'for'
   endif
-  return index(split('switch for if let while with'),token) + 1
+  return index(split('switch for if let while with'),token)
 endfunction
 
 function s:OneScope(lnum,text)
   if cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
-    return s:controlFlow() > 1
+    return s:controlFlow() > 0
   endif
   return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$\C')) + 1
 endfunction
