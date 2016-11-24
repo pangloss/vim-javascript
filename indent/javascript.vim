@@ -97,14 +97,18 @@ let s:opfirst = '^' . get(g:,'javascript_opfirst',
 let s:continuation = get(g:,'javascript_continuation',
       \ '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<typeof\|\<in\%(stanceof\)\=\)') . '$'
 
+function s:controlFlow()
+  let token = s:previous_token()
+  if index(split('await each'),token) + 1
+    return s:previous_token() ==# 'for'
+  endif
+  return index(split('switch for if let while with'),token) + 1
+endfunction
+
 function s:OneScope(lnum,text)
   if cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
-    let token = s:previous_token()
-    if index(split('await each'),token) + 1
-      return s:previous_token() ==# 'for'
-    endif
-    return index(split('for if let while with'),token) + 1
+    return s:controlFlow() > 1
   endif
   return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$\C')) + 1
 endfunction
@@ -230,9 +234,10 @@ function GetJavascriptIndent()
 
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : [line('.'),col('.')])
   let num = b:js_cache[1]
+  let paren = num ? s:looking_at() : ''
 
   let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
-  if num && s:looking_at() == '{' && s:IsBlock()
+  if num && paren == '{' && s:IsBlock()
     let stmt = 1
     if s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
       let switch_offset = &cino !~ ':' || !has('float') ? s:W :
@@ -244,9 +249,11 @@ function GetJavascriptIndent()
     endif
   endif
 
+  let notlist = paren == '(' && s:controlFlow() || stmt
+  let isOp = l:line =~# substitute(s:opfirst,(notlist ? '' : ','),'','') ||
+        \ pline =~# substitute(s:continuation,(notlist ? '' : ','),'','') &&
+        \ synIDattr(synID(l:lnum,match(' ' . pline,'\/$'),0),'name') !~? 'regex'
   if stmt || !num
-    let isOp = l:line =~# s:opfirst || pline =~# s:continuation &&
-          \ synIDattr(synID(l:lnum,match(' ' . pline,'\/$'),0),'name') !~? 'regex'
     let bL = s:iscontOne(l:lnum,num,isOp)
     let bL -= (bL && l:line[0] == '{') * s:W
   endif
