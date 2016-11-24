@@ -97,18 +97,18 @@ let s:opfirst = '^' . get(g:,'javascript_opfirst',
 let s:continuation = get(g:,'javascript_continuation',
       \ '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<typeof\|\<in\%(stanceof\)\=\)') . '$'
 
-function s:controlFlow()
+function s:controlFlow(...)
   let token = s:previous_token()
   if index(split('await each'),token) + 1
     return s:previous_token() ==# 'for'
   endif
-  return index(split('switch for if let while with'),token)
+  return index(split('switch for if let while with'),token,a:0) + 1
 endfunction
 
 function s:OneScope(lnum,text)
   if cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
-    return s:controlFlow() > 0
+    return s:controlFlow(1)
   endif
   return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$\C')) + 1
 endfunction
