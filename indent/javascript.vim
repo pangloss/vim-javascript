@@ -251,8 +251,8 @@ function GetJavascriptIndent()
   endif
 
   let notlist = paren == '(' && s:controlFlow() || stmt
-  let isOp = l:line =~# substitute(s:opfirst,(notlist ? '' : ','),'','') ||
-        \ pline =~# substitute(s:continuation,(notlist ? '' : ','),'','') &&
+  let isOp = pline =~# (notlist ? s:continuation : substitute(s:continuation,',','','')) ||
+        \ l:line =~# (notlist ? s:opfirst : substitute(s:opfirst,',','','')) &&
         \ synIDattr(synID(l:lnum,match(' ' . pline,'\/$'),0),'name') !~? 'regex'
   if stmt || !num
     let bL = s:iscontOne(l:lnum,num,isOp)
