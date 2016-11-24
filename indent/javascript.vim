@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: November 20, 2016
+" Last Change: November 24, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -93,7 +93,7 @@ endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
-      \ '\%([<>,?^%|*/&]\|\([-.:+]\)\1\@!\|=>\@!\|typeof\>\|in\%(stanceof\)\=\>\)')
+      \ '\%([<>,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|=>\@!\|typeof\>\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
       \ '\%([<=,.?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<typeof\|\<in\%(stanceof\)\=\)') . '$'
 
@@ -233,15 +233,19 @@ function GetJavascriptIndent()
 
   let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
   if num && s:looking_at() == '{' && s:IsBlock()
-    let stmt = 1
-    if s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
-      let switch_offset = &cino !~ ':' || !has('float') ? s:W :
-            \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '\%(.*:\)\@>[^,]*s' ? s:W : 1))
-      if l:line =~# '^' . s:case_stmt
-        return indent(num) + switch_offset
+    if s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
+      let num = line('.')
+      if s:previous_token() ==# 'switch'
+        let switch_offset = &cino !~ ':' || !has('float') ? s:W :
+              \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '\%(.*:\)\@>[^,]*s' ? s:W : 1))
+        if l:line =~# '^' . s:case_stmt
+          return indent(num) + switch_offset
+        elseif pline =~# s:case_stmt . '$'
+          return indent(l:lnum) + s:W
+        endif
       endif
-      let stmt = pline !~# s:case_stmt . '$'
     endif
+    let stmt = 1
   endif
 
   if stmt || !num
