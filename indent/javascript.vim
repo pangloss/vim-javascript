@@ -239,13 +239,16 @@ function GetJavascriptIndent()
   let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
   if num && paren == '{' && s:IsBlock()
     let stmt = 1
-    if s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0 && s:previous_token() ==# 'switch'
-      let switch_offset = &cino !~ ':' || !has('float') ? s:W :
-            \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '\%(.*:\)\@>[^,]*s' ? s:W : 1))
-      if l:line =~# '^' . s:case_stmt
-        return indent(num) + switch_offset
-      elseif pline =~# s:case_stmt . '$'
-        return indent(l:lnum) + s:W
+    if s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
+      let num = line('.')
+      if s:previous_token() ==# 'switch'
+        let switch_offset = &cino !~ ':' || !has('float') ? s:W :
+              \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '\%(.*:\)\@>[^,]*s' ? s:W : 1))
+        if l:line =~# '^' . s:case_stmt
+          return indent(num) + switch_offset
+        elseif pline =~# s:case_stmt . '$'
+          return indent(l:lnum) + s:W
+        endif
       endif
     endif
   endif
