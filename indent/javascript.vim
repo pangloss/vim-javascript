@@ -13,7 +13,7 @@ let b:did_indent = 1
 " Now, set up our indentation expression and keys that trigger it.
 setlocal indentexpr=GetJavascriptIndent()
 setlocal autoindent nolisp nosmartindent
-setlocal indentkeys=0{,0},0),0],:,!^F,o,O,e
+setlocal indentkeys=0{,0},0),0],:,!^F,o,O,e,0.
 
 let b:undo_indent = 'setlocal indentexpr< smartindent< autoindent< indentkeys<'
 
