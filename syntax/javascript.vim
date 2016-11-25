@@ -37,14 +37,15 @@ syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
 
 " Modules
-syntax keyword jsImport                     import skipwhite skipempty nextgroup=jsModuleAsterisk,jsModuleKeyword,jsModuleGroup
-syntax keyword jsExport                     export skipwhite skipempty nextgroup=@jsAll,jsModuleGroup,jsExportDefault,jsModuleAsterisk,jsModuleKeyword
-syntax match   jsModuleKeyword    contained /\k\+/ skipwhite skipempty nextgroup=jsModuleAs,jsFrom,jsModuleComma
-syntax keyword jsExportDefault    contained default skipwhite skipempty nextgroup=@jsExpression
-syntax match   jsModuleAsterisk   contained /\*/ skipwhite skipempty nextgroup=jsModuleKeyword,jsModuleAs,jsFrom
-syntax keyword jsModuleAs         contained as skipwhite skipempty nextgroup=jsModuleKeyword
-syntax keyword jsFrom             contained from skipwhite skipempty nextgroup=jsString
-syntax match   jsModuleComma      contained /,/ skipwhite skipempty nextgroup=jsModuleKeyword,jsModuleAsterisk,jsModuleGroup
+syntax keyword jsImport                       import skipwhite skipempty nextgroup=jsModuleAsterisk,jsModuleKeyword,jsModuleGroup
+syntax keyword jsExport                       export skipwhite skipempty nextgroup=@jsAll,jsModuleGroup,jsExportDefault,jsModuleAsterisk,jsModuleKeyword
+syntax match   jsModuleKeyword      contained /\k\+/ skipwhite skipempty nextgroup=jsModuleAs,jsFrom,jsModuleComma
+syntax keyword jsExportDefault      contained default skipwhite skipempty nextgroup=@jsExpression
+syntax keyword jsExportDefaultGroup contained default skipwhite skipempty nextgroup=jsModuleAs,jsFrom,jsModuleComma
+syntax match   jsModuleAsterisk     contained /\*/ skipwhite skipempty nextgroup=jsModuleKeyword,jsModuleAs,jsFrom
+syntax keyword jsModuleAs           contained as skipwhite skipempty nextgroup=jsModuleKeyword,jsExportDefaultGroup
+syntax keyword jsFrom               contained from skipwhite skipempty nextgroup=jsString
+syntax match   jsModuleComma        contained /,/ skipwhite skipempty nextgroup=jsModuleKeyword,jsModuleAsterisk,jsModuleGroup
 
 " Strings, Templates, Numbers
 syntax region  jsString           start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@Spell extend
@@ -327,7 +328,8 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsBuiltins             Constant
   HiLink jsImport               Include
   HiLink jsExport               Include
-  HiLink jsExportDefault        Include
+  HiLink jsExportDefault        StorageClass
+  HiLink jsExportDefaultGroup   jsExportDefault
   HiLink jsModuleAs             Include
   HiLink jsModuleComma          jsNoise
   HiLink jsModuleAsterisk       Noise
