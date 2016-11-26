@@ -101,6 +101,8 @@ variables:
 
 * `:h cino-:`
 
+* `:h 'indentkeys'`
+
 ## Contributing
 
 Please follow the general code style
