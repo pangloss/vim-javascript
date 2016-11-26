@@ -100,7 +100,6 @@ variables:
 ## Indentation Specific
 
 * `:h cino-:`
-
 * `:h 'indentkeys'`
 
 ## Contributing
