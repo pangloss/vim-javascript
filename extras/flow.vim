@@ -13,6 +13,7 @@ syntax match   jsFlowArrow          contained /=>/ skipwhite skipempty nextgroup
 syntax match   jsFlowMaybe          contained /?/ skipwhite skipempty nextgroup=jsFlowType,jsFlowTypeCustom,jsFlowParens,jsFlowArrowArguments
 syntax match   jsFlowObjectKey      contained /[0-9a-zA-Z_$?]*\(\s*:\)\@=/ contains=jsFunctionKey,jsFlowMaybe skipwhite skipempty nextgroup=jsObjectValue containedin=jsObject
 syntax match   jsFlowOrOperator     contained /|/ skipwhite skipempty nextgroup=@jsFlowCluster
+syntax keyword jsFlowImportType     contained type skipwhite skipempty nextgroup=jsModuleAsterisk,jsModuleKeyword,jsModuleGroup
 
 syntax match   jsFlowReturn         contained /:\s*/ contains=jsFlowNoise skipwhite skipempty nextgroup=@jsFlowReturnCluster
 syntax region  jsFlowReturnObject   contained matchgroup=jsFlowNoise start=/{/    end=/}/  contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturnOrOp

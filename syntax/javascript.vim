@@ -37,7 +37,7 @@ syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
 
 " Modules
-syntax keyword jsImport                       import skipwhite skipempty nextgroup=jsModuleAsterisk,jsModuleKeyword,jsModuleGroup
+syntax keyword jsImport                       import skipwhite skipempty nextgroup=jsModuleAsterisk,jsModuleKeyword,jsModuleGroup,jsFlowImportType
 syntax keyword jsExport                       export skipwhite skipempty nextgroup=@jsAll,jsModuleGroup,jsExportDefault,jsModuleAsterisk,jsModuleKeyword
 syntax match   jsModuleKeyword      contained /\k\+/ skipwhite skipempty nextgroup=jsModuleAs,jsFrom,jsModuleComma
 syntax keyword jsExportDefault      contained default skipwhite skipempty nextgroup=@jsExpression
