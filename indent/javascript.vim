@@ -150,10 +150,10 @@ function s:IsBlock()
         \ + split('-=~!<*+,/?^%|&([','\zs'), char) < (0 + (line('.') != l:ln))
 endfunction
 
-" Find line above 'lnum' that isn't empty or a comment
+" Find line above 'lnum' that isn't empty or in a comment
 function s:PrevCodeLine(lnum)
   let l:n = prevnonblank(a:lnum)
-  while getline(l:n) =~ '^\s*\/\/' || synIDattr(synID(l:n,indent(l:n)+1,0),'name') =~?
+  while getline(l:n) =~ '^\s*\/[/*]' || synIDattr(synID(l:n,1,0),'name') =~?
         \ 'comment\|doc'
     let l:n = prevnonblank(l:n-1)
   endwhile
