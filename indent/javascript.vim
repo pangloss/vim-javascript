@@ -152,11 +152,11 @@ endfunction
 
 " Find line above 'lnum' that isn't empty, in a comment, or in a string.
 function s:PrevCodeLine(lnum)
-  let curp = [line('.'),col('.')]
+  let curp = getpos('.')[1:2]
   call cursor(a:lnum+1,1)
   while search('^\s*\%(\/\/\)\@!\S','bW')
-    if synIDattr(synID(line('.'),matchend(getline('.'), '^\s*[^''"`]'),0),'name') !~?
-          \ 'comment\|doc\|string\|template'
+    if synIDattr(synID(line('.'),indent('.')+1,0),'name') !~?
+          \ 'comment\|doc'
       return line('.') + call('cursor',curp)
     endif
   endwhile
@@ -225,10 +225,10 @@ function GetJavascriptIndent()
     if idx == 2 && search('\S','bW',line('.')) && s:looking_at() == ')'
       call s:GetPair('(',')','bW',s:skip_expr,200)
     endif
-    return indent(line('.'))
+    return indent('.')
   endif
 
-  let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : [line('.'),col('.')])
+  let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : getpos('.')[1:2])
   let num = b:js_cache[1]
 
   let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
