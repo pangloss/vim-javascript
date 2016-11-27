@@ -97,6 +97,7 @@ variables:
     let g:javascript_conceal_super                = "Ω"
     let g:javascript_conceal_arrow_function       = "⇒"
     let g:javascript_conceal_noarg_arrow_function = "🞅"
+    let g:javascript_conceal_underscore_arrow_function = "🞅"
 
 ## Indentation Specific
 
