@@ -36,7 +36,7 @@ else
   endfunction
 endif
 
-let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
+let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|\%(\.\s*\)\@<!default\s*\):\C'
 
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = 'string\|comment\|regex\|special\|doc\|template'
@@ -95,7 +95,7 @@ endfunction
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
-      \ '\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
+      \ '\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\%(\.\s*\)\@<!\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
 
 function s:OneScope(lnum,text)
   if cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
@@ -106,7 +106,7 @@ function s:OneScope(lnum,text)
     endif
     return index(split('for if let while with'),token) + 1
   endif
-  return cursor(a:lnum, match(' ' . a:text, '\%(\<else\|\<do\|=>\)$\C')) + 1
+  return cursor(a:lnum, match(' ' . a:text, '\%(\%(\.\s*\)\@<!\<\%(else\|do\)\|=>\)$\C')) + 1
 endfunction
 
 function s:iscontOne(i,num,cont)
