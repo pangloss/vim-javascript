@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: November 24, 2016
+" Last Change: November 29, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -36,7 +36,7 @@ else
   endfunction
 endif
 
-let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|\%(\.\s*\)\@<!default\s*\):\C'
+let s:case_stmt = '\%(\.\s*\)\@<!\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
 
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = 'string\|comment\|regex\|special\|doc\|template'
