@@ -136,9 +136,7 @@ function s:IsBlock()
   let l:ln = line('.')
   let char = s:previous_token()
   let syn = char =~ '[{>/]' || l:ln != line('.') ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
-  if char is '' || syn =~? 'regex'
-    return 1
-  elseif syn =~? 'xml\|jsx'
+  if syn =~? 'xml\|jsx'
     return char != '{'
   elseif char =~ '\k'
     return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
@@ -149,7 +147,7 @@ function s:IsBlock()
     return !cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:case_stmt . '$')) &&
           \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[,{]')
   endif
-  return char !~ '[-=~!<*+,/?^%|&([]'
+  return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
