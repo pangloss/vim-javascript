@@ -98,7 +98,7 @@ let s:continuation = get(g:,'javascript_continuation',
       \ '\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\%(\.\s*\)\@<!\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
 
 function s:OneScope(lnum,text)
-  if cursor(a:lnum, match(' ' . a:text, ')$')) + 1 &&
+  if !cursor(a:lnum, match(' ' . a:text, ')$')) &&
         \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
     let token = s:previous_token()
     if index(split('await each'),token) + 1
@@ -106,7 +106,7 @@ function s:OneScope(lnum,text)
     endif
     return index(split('for if let while with'),token) + 1
   endif
-  return cursor(a:lnum, match(' ' . a:text, '\%(\%(\.\s*\)\@<!\<\%(else\|do\)\|=>\)$\C')) + 1
+  return !cursor(a:lnum, match(' ' . a:text, '\%(\%(\.\s*\)\@<!\<\%(else\|do\)\|=>\)$\C'))
 endfunction
 
 function s:iscontOne(i,num,cont)
@@ -146,7 +146,7 @@ function s:IsBlock()
   elseif char == '>'
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
-    return cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:case_stmt . '$')) + 1 &&
+    return !cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:case_stmt . '$')) &&
           \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[,{]')
   endif
   return char !~ '[-=~!<*+,/?^%|&([]'
