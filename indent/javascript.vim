@@ -74,7 +74,7 @@ endfunction
 function s:previous_token()
   let l:ln = line('.')
   return search('\<\|[][`^!"%-/:-?{-~]','bW') ?
-        \ (s:looking_at() == '/' || line('.') != l:ln) &&
+        \ (s:looking_at() == '/' || line('.') != l:ln && getline('.') =~ '\/\/') &&
         \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
         \ search('\%(\/\@<!\/\/\|\/\*\)\&','bW') ? s:previous_token() : ''
         \ : s:token()
