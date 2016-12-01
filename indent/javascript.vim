@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: November 29, 2016
+" Last Change: December 1, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -87,7 +87,8 @@ let s:opfirst = '^' . get(g:,'javascript_opfirst',
 let s:continuation = get(g:,'javascript_continuation',
       \ '\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\%(\.\s*\)\@<!\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
 
-" get the line (or if empty, look further back) of code stripped of comments
+" get the line of code stripped of comments. if called with two args, leave
+" cursor at the last non-comment char.
 function s:Trim(lnum,...)
   let p = a:0 ? [0,0] : getpos('.')[1:2]
   let r = !cursor(a:lnum+1,1) && s:previous_token() isnot '' ? strpart(getline('.'),0,col('.')) : ''
