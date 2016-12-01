@@ -96,16 +96,15 @@ function s:Trim(lnum,...)
 endfunction
 
 function s:OneScope(lnum)
-  if s:Trim(a:lnum,1)[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
+  let pline = s:Trim(a:lnum,1)
+  if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
     let token = s:previous_token()
     if index(split('await each'),token) + 1
       return s:previous_token() ==# 'for'
     endif
     return index(split('for if let while with'),token) + 1
   endif
-  let token = s:token()
-  return token == '>' ? getline('.')[col('.')-2] == '=' :
-        \ index(['do','else'],token) + 1 && s:previous_token() != '.'
+  return pline =~# '\%(\%(\.\s*\)\@<!\<\%(else\|do\)\|=>\)$'
 endfunction
 
 function s:iscontOne(i,num,cont)
