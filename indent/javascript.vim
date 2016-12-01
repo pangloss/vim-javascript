@@ -89,11 +89,17 @@ let s:continuation = get(g:,'javascript_continuation',
 
 " get the line of code stripped of comments. if called with two args, leave
 " cursor at the last non-comment char.
-function s:Trim(lnum,...)
-  let p = a:0 ? [0,0] : getpos('.')[1:2]
-  let r = !cursor(a:lnum+1,1) && s:previous_token() isnot '' ? strpart(getline('.'),0,col('.')) : ''
-  call call('cursor',p)
-  return r
+function s:Trim(ln,...)
+  let pline = substitute(getline(a:ln),'\s*$','','')
+  let l:max = max([match(pline,'.*\zs\%([^/]\zs\/\/\|\/\*\)'),0])
+  while l:max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? 'comment\|doc'
+    let pline = substitute(strpart(pline, 0, l:max),'\s*$','','')
+    let l:max = max([match(pline,'.*\zs\%([^/]\zs\/\/\|\/\*\)'),0])
+  endwhile
+  if a:0
+    call cursor(a:ln,strlen(pline))
+  endif
+  return pline
 endfunction
 
 function s:OneScope(lnum)
