@@ -96,10 +96,7 @@ function s:Trim(ln,...)
     let pline = substitute(strpart(pline, 0, l:max),'\s*$','','')
     let l:max = max([match(pline,'.*\zs\%([^/]\zs\/\/\|\/\*\)'),0])
   endwhile
-  if a:0
-    call cursor(a:ln,strlen(pline))
-  endif
-  return pline
+  return !a:0 || cursor(a:ln,strlen(pline)) ? pline : pline
 endfunction
 
 function s:OneScope(lnum)
