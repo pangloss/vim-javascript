@@ -73,22 +73,12 @@ endfunction
 " NOTE: moves the cursor
 function s:previous_token()
   let l:ln = line('.')
-  return search('\<\|[][`^!"%-/:-?{-~]','bW') ?
+  return search('.\>\|[][`^!"%-/:-?{-~]','bW') ?
         \ (s:looking_at() == '/' || line('.') != l:ln && getline('.') =~ '\/\/') &&
         \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
         \ search('\%(\/\@<!\/\/\|\/\*\)\&','bW') ? s:previous_token() : ''
         \ : s:token()
         \ : ''
-endfunction
-
-function s:Trim(ln)
-  let pline = substitute(getline(a:ln),'\s*$','','')
-  let l:max = max([match(pline,'.*\zs\%([^/]\zs\/\/\|\/\*\)'),0])
-  while l:max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? 'comment\|doc'
-    let pline = substitute(strpart(pline, 0, l:max),'\s*$','','')
-    let l:max = max([match(pline,'.*\zs\%([^/]\zs\/\/\|\/\*\)'),0])
-  endwhile
-  return pline
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -97,16 +87,24 @@ let s:opfirst = '^' . get(g:,'javascript_opfirst',
 let s:continuation = get(g:,'javascript_continuation',
       \ '\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\%(\.\s*\)\@<!\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
 
-function s:OneScope(lnum,text)
-  if !cursor(a:lnum, match(' ' . a:text, ')$')) &&
-        \ s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
+" get the line (or if empty, look further back) of code stripped of comments
+function s:Trim(lnum,...)
+  let p = a:0 ? [0,0] : getpos('.')[1:2]
+  let r = !cursor(a:lnum+1,1) && s:previous_token() isnot '' ? strpart(getline('.'),0,col('.')) : ''
+  call call('cursor',p)
+  return r
+endfunction
+
+function s:OneScope(lnum)
+  let pline = s:Trim(a:lnum,1)
+  if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
     let token = s:previous_token()
     if index(split('await each'),token) + 1
       return s:previous_token() ==# 'for'
     endif
     return index(split('for if let while with'),token) + 1
   endif
-  return !cursor(a:lnum, match(' ' . a:text, '\%(\%(\.\s*\)\@<!\<\%(else\|do\)\|=>\)$\C'))
+  return pline =~# '\%(\%(\.\s*\)\@<!\<\%(else\|do\)\|=>\)$'
 endfunction
 
 function s:iscontOne(i,num,cont)
@@ -116,7 +114,7 @@ function s:iscontOne(i,num,cont)
   let bL = 0
   while l:i >= l:num && (!l:cont || ind > pind)
     if indent(l:i) < ind " first line always true for !a:cont, false for !!a:cont
-      if s:OneScope(l:i,s:Trim(l:i))
+      if s:OneScope(l:i)
         let bL += s:W
         let [l:cont, l:i] = [0, line('.')]
       elseif !l:cont
@@ -136,9 +134,7 @@ function s:IsBlock()
   let l:ln = line('.')
   let char = s:previous_token()
   let syn = char =~ '[{>/]' || l:ln != line('.') ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
-  if char is '' || syn =~? 'regex'
-    return 1
-  elseif syn =~? 'xml\|jsx'
+  if syn =~? 'xml\|jsx'
     return char != '{'
   elseif char =~ '\k'
     return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
@@ -149,7 +145,7 @@ function s:IsBlock()
     return !cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:case_stmt . '$')) &&
           \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[,{]')
   endif
-  return char !~ '[-=~!<*+,/?^%|&([]'
+  return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
