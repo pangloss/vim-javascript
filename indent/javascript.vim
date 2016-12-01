@@ -89,7 +89,7 @@ let s:continuation = get(g:,'javascript_continuation',
 
 " get the line (or if empty, look further back) of code stripped of comments
 function s:Trim(lnum,...)
-  let p = a:1 ? [0,0] : getpos('.')[1:2]
+  let p = a:0 ? [0,0] : getpos('.')[1:2]
   let r = !cursor(a:lnum+1,1) && s:previous_token() isnot '' ? strpart(getline('.'),0,col('.')) : ''
   call call('cursor',p)
   return r
