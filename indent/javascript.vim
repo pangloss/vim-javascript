@@ -104,7 +104,8 @@ function s:OneScope(lnum)
     return index(split('for if let while with'),token) + 1
   endif
   let token = s:token()
-  return token == '>' ? getline('.')[col('.')-2] == '=' : index(['do','else'],token) + 1 
+  return token == '>' ? getline('.')[col('.')-2] == '=' :
+        \ index(['do','else'],token) + 1 && s:previous_token() != '.'
 endfunction
 
 function s:iscontOne(i,num,cont)
