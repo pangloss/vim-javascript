@@ -83,7 +83,7 @@ global vim option, we do not set it ourselves.
 
 ## Concealing Characters
 
-You can customize concealing characters by defining one or more of the following
+You can customize concealing characters, if your font provides the character you want, by defining one or more of the following
 variables (these are all disabled by default):
 
     let g:javascript_conceal_function             = "ƒ"
@@ -104,7 +104,7 @@ You can enable concealing within VIM with:
 
     set conceallevel=1
 
-OR if you wish to toggle concealing you may wish to bind a command such as the following which will map LEADER+L (leader is usually the comma key) to toggling conceal mode:
+OR if you wish to toggle concealing you may wish to bind a command such as the following which will map LEADER+L (leader is usually the `\` key) to toggling conceal mode:
 
     map <leader>l :exec &conceallevel ? "set conceallevel=0" : "set conceallevel=1"<CR>
 
