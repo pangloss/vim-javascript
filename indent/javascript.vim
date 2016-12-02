@@ -246,7 +246,7 @@ function GetJavascriptIndent()
         endif
       endif
     endif
-    if !num || pline[-1:] !~ '[{;]'
+    if pline[-1:] !~ '[{;]'
       let isOp = l:line =~# s:opfirst || pline =~# s:continuation &&
             \ synIDattr(synID(l:lnum,match(' ' . pline,'\/$'),0),'name') !~? 'regex'
       let bL = s:iscontOne(l:lnum,num,isOp)
