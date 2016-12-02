@@ -231,13 +231,14 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : getpos('.')[1:2])
   let num = b:js_cache[1]
 
-  let [s:W, pline, isOp, stmt, bL, switch_offset] = [s:sw(), s:Trim(l:lnum),0,0,0,0]
-  if num && s:looking_at() == '{' && s:IsBlock()
-    if s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
+  let [s:W, isOp, stmt, bL, switch_offset] = [s:sw(),0,0,0,0]
+  if !num || s:looking_at() == '{' && s:IsBlock()
+    if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = line('.')
       if s:previous_token() ==# 'switch'
         let switch_offset = &cino !~ ':' || !has('float') ? s:W :
               \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '\%(.*:\)\@>[^,]*s' ? s:W : 1))
+        let [stmt, pline] = [2, s:Trim(l:lnum)]
         if l:line =~# '^' . s:case_stmt
           return indent(num) + switch_offset
         elseif pline =~# s:case_stmt . '$'
@@ -247,6 +248,7 @@ function GetJavascriptIndent()
     endif
     let stmt = 1
   endif
+  let pline = stmt == 2 ? pline : stmt ? s:Trim(l:lnum) : ''
 
   if stmt && pline[-1:] != '{' || !num
     let isOp = l:line =~# s:opfirst || pline =~# s:continuation &&
