@@ -104,7 +104,7 @@ You can enable concealing within VIM with:
 
     set conceallevel=1
 
-OR if you wish to toggle concealing you may wish to bind a command such as the following which will map LEADER+L (leader is usually the `\` key) to toggling conceal mode:
+OR if you wish to toggle concealing you may wish to bind a command such as the following which will map <LEADER>l (leader is usually the `\` key) to toggling conceal mode:
 
     map <leader>l :exec &conceallevel ? "set conceallevel=0" : "set conceallevel=1"<CR>
 
