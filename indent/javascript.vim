@@ -233,12 +233,12 @@ function GetJavascriptIndent()
 
   let [s:W, isOp, stmt, bL, switch_offset] = [s:sw(),0,0,0,0]
   if !num || s:looking_at() == '{' && s:IsBlock()
+    let pline = s:Trim(l:lnum)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = line('.')
       if s:previous_token() ==# 'switch'
         let switch_offset = &cino !~ ':' || !has('float') ? s:W :
               \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '\%(.*:\)\@>[^,]*s' ? s:W : 1))
-        let [stmt, pline] = [2, s:Trim(l:lnum)]
         if l:line =~# '^' . s:case_stmt
           return indent(num) + switch_offset
         elseif pline =~# s:case_stmt . '$'
@@ -246,15 +246,12 @@ function GetJavascriptIndent()
         endif
       endif
     endif
-    let stmt = 1
-  endif
-  let pline = stmt == 2 ? pline : stmt ? s:Trim(l:lnum) : ''
-
-  if stmt && pline[-1:] != '{' || !num
-    let isOp = l:line =~# s:opfirst || pline =~# s:continuation &&
-          \ synIDattr(synID(l:lnum,match(' ' . pline,'\/$'),0),'name') !~? 'regex'
-    let bL = s:iscontOne(l:lnum,num,isOp)
-    let bL -= (bL && l:line[0] == '{') * s:W
+    if !num || pline[-1:] != '{'
+      let isOp = l:line =~# s:opfirst || pline =~# s:continuation &&
+            \ synIDattr(synID(l:lnum,match(' ' . pline,'\/$'),0),'name') !~? 'regex'
+      let bL = s:iscontOne(l:lnum,num,isOp)
+      let bL -= (bL && l:line[0] == '{') * s:W
+    endif
   endif
 
   " main return
