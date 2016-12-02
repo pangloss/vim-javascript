@@ -84,18 +84,30 @@ global vim option, we do not set it ourselves.
 ## Concealing Characters
 
 You can customize concealing characters by defining one or more of the following
-variables:
+variables (these are all disabled by default):
 
-    let g:javascript_conceal_function       = "ƒ"
-    let g:javascript_conceal_null           = "ø"
-    let g:javascript_conceal_this           = "@"
-    let g:javascript_conceal_return         = "⇚"
-    let g:javascript_conceal_undefined      = "¿"
-    let g:javascript_conceal_NaN            = "ℕ"
-    let g:javascript_conceal_prototype      = "¶"
-    let g:javascript_conceal_static         = "•"
-    let g:javascript_conceal_super          = "Ω"
-    let g:javascript_conceal_arrow_function = "⇒"
+    let g:javascript_conceal_function             = "ƒ"
+    let g:javascript_conceal_null                 = "ø"
+    let g:javascript_conceal_this                 = "@"
+    let g:javascript_conceal_return               = "⇚"
+    let g:javascript_conceal_undefined            = "¿"
+    let g:javascript_conceal_NaN                  = "ℕ"
+    let g:javascript_conceal_prototype            = "¶"
+    let g:javascript_conceal_static               = "•"
+    let g:javascript_conceal_super                = "Ω"
+    let g:javascript_conceal_arrow_function       = "⇒"
+    let g:javascript_conceal_noarg_arrow_function = "🞅"
+    let g:javascript_conceal_underscore_arrow_function = "🞅"
+
+
+You can enable concealing within VIM with:
+
+    set conceallevel=1
+
+OR if you wish to toggle concealing you may wish to bind a command such as the following which will map LEADER+L (leader is usually the comma key) to toggling conceal mode:
+
+    map <leader>l :exec &conceallevel ? "set conceallevel=0" : "set conceallevel=1"<CR>
+
 
 ## Indentation Specific
 
