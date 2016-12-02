@@ -84,7 +84,7 @@ global vim option, we do not set it ourselves.
 ## Concealing Characters
 
 You can customize concealing characters, if your font provides the character you want, by defining one or more of the following
-variables (these are all disabled by default):
+variables:
 
     let g:javascript_conceal_function             = "ƒ"
     let g:javascript_conceal_null                 = "ø"
