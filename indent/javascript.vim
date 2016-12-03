@@ -76,7 +76,7 @@ function s:previous_token()
   return search('.\>\|[][`^!"%-/:-?{-~]','bW') ?
         \ (s:looking_at() == '/' || line('.') != l:ln && getline('.') =~ '\/\/') &&
         \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
-        \ search('\%(\/\@<!\/\/\|\/\*\)\&','bW') ? s:previous_token() : ''
+        \ search('[^/]\zs\/[/*]','bW') ? s:previous_token() : ''
         \ : s:token()
         \ : ''
 endfunction
@@ -137,7 +137,7 @@ endfunction
 function s:IsBlock()
   let l:ln = line('.')
   let char = s:previous_token()
-  let syn = char =~ '[{>/]' || l:ln != line('.') ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
+  let syn = char =~ '[{>]' ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
   if syn =~? 'xml\|jsx'
     return char != '{'
   elseif char =~ '\k'
