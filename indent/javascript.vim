@@ -76,7 +76,7 @@ function s:previous_token()
   return search('.\>\|[][`^!"%-/:-?{-~]','bW') ?
         \ (s:looking_at() == '/' || line('.') != l:ln && getline('.') =~ '\/\/') &&
         \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
-        \ search('\%(\/\@<!\/\/\|\/\*\)\&','bW') ? s:previous_token() : ''
+        \ search('\_[^/]\zs\/[/*]','bW') ? s:previous_token() : ''
         \ : s:token()
         \ : ''
 endfunction
@@ -91,10 +91,10 @@ let s:continuation = get(g:,'javascript_continuation',
 " cursor at the last non-comment char.
 function s:Trim(ln,...)
   let pline = substitute(getline(a:ln),'\s*$','','')
-  let l:max = max([match(pline,'.*\zs\%([^/]\zs\/\/\|\/\*\)'),0])
+  let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
   while l:max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? 'comment\|doc'
     let pline = substitute(strpart(pline, 0, l:max),'\s*$','','')
-    let l:max = max([match(pline,'.*\zs\%([^/]\zs\/\/\|\/\*\)'),0])
+    let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
   endwhile
   return !a:0 || cursor(a:ln,strlen(pline)) ? pline : pline
 endfunction
@@ -137,7 +137,7 @@ endfunction
 function s:IsBlock()
   let l:ln = line('.')
   let char = s:previous_token()
-  let syn = char =~ '[{>/]' || l:ln != line('.') ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
+  let syn = char =~ '[{>/]' ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
   if syn =~? 'xml\|jsx'
     return char != '{'
   elseif char =~ '\k'
