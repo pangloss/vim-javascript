@@ -104,11 +104,6 @@ maintainer(s) then, hopefully, merged.
 Thank you!
 
 
-## Bug Reports
-
-Report a bug on [GitHub Issues](https://github.com/pangloss/vim-javascript/issues).
-
-
 ## License
 
 Distributed under the same terms as Vim itself. See `:help license`.
