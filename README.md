@@ -6,31 +6,11 @@ improved indentation.
 
 ## Installation
 
-### Install with [Vundle](https://github.com/gmarik/vundle)
-
-Add to vimrc:
-
-    Plugin 'pangloss/vim-javascript'
-
-And install it:
-
-    :so ~/.vimrc
-    :PluginInstall
-
-### Install with [vim-plug](https://github.com/junegunn/vim-plug)
-
-Add to vimrc:
-
-    Plug 'pangloss/vim-javascript'
-
-And install it:
-
-    :so ~/.vimrc
-    :PlugInstall
-
 ### Install with [pathogen](https://github.com/tpope/vim-pathogen)
 
       git clone https://github.com/pangloss/vim-javascript.git ~/.vim/bundle/vim-javascript
+
+### alternatively, use a package manager like [vim-plug](https://github.com/junegunn/vim-plug)
 
 
 ## Configuration Variables
