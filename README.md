@@ -10,7 +10,7 @@ improved indentation.
 
       git clone https://github.com/pangloss/vim-javascript.git ~/.vim/bundle/vim-javascript
 
-### alternatively, use a package manager like [vim-plug](https://github.com/junegunn/vim-plug)
+#### alternatively, use a package manager like [vim-plug](https://github.com/junegunn/vim-plug)
 
 
 ## Configuration Variables
