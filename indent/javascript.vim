@@ -76,7 +76,7 @@ function s:previous_token()
   return search('.\>\|[][`^!"%-/:-?{-~]','bW') ?
         \ (s:looking_at() == '/' || line('.') != l:ln && getline('.') =~ '\/\/') &&
         \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
-        \ search('[^/]\zs\/[/*]','bW') ? s:previous_token() : ''
+        \ search('\_[^/]\zs\/[/*]','bW') ? s:previous_token() : ''
         \ : s:token()
         \ : ''
 endfunction
