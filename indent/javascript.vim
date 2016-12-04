@@ -202,7 +202,7 @@ function GetJavascriptIndent()
 
   let l:line = substitute(substitute(l:line,'^\s*\%(\/\*.\{-}\*\/\s*\)*','',''),'^\/[/*].*','','')
 
-  " the containing paren, bracket, curly. Many hacks for performance
+  " the containing paren, bracket, or curly. Many hacks for performance
   call cursor(v:lnum,1)
   let idx = strlen(l:line) ? stridx('])}',l:line[0]) : -1
   if indent(l:lnum)
