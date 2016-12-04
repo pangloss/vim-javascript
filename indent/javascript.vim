@@ -67,13 +67,13 @@ function s:looking_at()
 endfunction
 
 function s:token()
-  return s:looking_at() =~ '\k' ? expand('<cword>') : s:looking_at()
+  return getline('.')[searchpos('\<\|[^[:alnum:]_$]','bcnW')[1]-1:col('.')-1]
 endfunction
 
 " NOTE: moves the cursor
 function s:previous_token()
   let l:ln = line('.')
-  return search('.\>\|[][`^!"%-/:-?{-~]','bW') ?
+  return search('.\>\|[^[:alnum:]_$]','bW') ?
         \ (s:looking_at() == '/' || line('.') != l:ln && getline('.') =~ '\/\/') &&
         \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
         \ search('\_[^/]\zs\/[/*]','bW') ? s:previous_token() : ''
