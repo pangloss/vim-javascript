@@ -67,7 +67,7 @@ function s:looking_at()
 endfunction
 
 function s:token()
-  return getline('.')[searchpos('\<\|[^[:alnum:]_$]','bcnW')[1]-1:col('.')-1]
+  return s:looking_at() =~ '\k' ? expand('<cword>') : s:looking_at()
 endfunction
 
 " NOTE: moves the cursor
