@@ -73,7 +73,7 @@ endfunction
 " NOTE: moves the cursor
 function s:previous_token()
   let l:ln = line('.')
-  return search('.\>\|[^[:alnum:][:space:]_$@]','bW') ?
+  return search('.\>\|[^[:alnum:][:space:]_$]','bW') ?
         \ (s:looking_at() == '/' || line('.') != l:ln && getline('.') =~ '\/\/') &&
         \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
         \ search('\_[^/]\zs\/[/*]','bW') ? s:previous_token() : ''
