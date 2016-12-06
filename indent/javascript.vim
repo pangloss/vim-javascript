@@ -245,10 +245,10 @@ function GetJavascriptIndent()
       if s:previous_token() ==# 'switch'
         let switch_offset = &cino !~ ':' || !has('float') ? s:W :
               \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '\%(.*:\)\@>[^,]*s' ? s:W : 1))
-        if pline[-1:] !~ '[.,]' && l:line =~# '^' . s:case_stmt
+        if pline[-1:] != '.' && l:line =~# '^' . s:case_stmt
           return indent(num) + switch_offset
         elseif pline =~# s:case_stmt . '$'
-          return indent(num) + switch_offset + s:W
+          return indent(l:lnum) + s:W
         endif
       endif
     endif
