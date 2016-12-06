@@ -214,17 +214,19 @@ function GetJavascriptIndent()
 
   " the containing paren, bracket, or curly. Many hacks for performance
   let idx = strlen(l:line) ? stridx('])}',l:line[0]) : -1
-  let top = (!indent(l:lnum) && synIDattr(synID(l:lnum, 1, 0), 'name') !~? 'string\|template') * l:lnum
-  let [s:looksyn,s:free] = [v:lnum - 1,1]
   if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
     call call('cursor',b:js_cache[1:])
-  elseif idx + 1
-    call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000,top)
-  elseif indent(v:lnum) && syns =~? 'block'
-    call s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000,top)
   else
-    call s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000,top)
+    let [s:looksyn, s:free, top] = [v:lnum - 1, 1, (!indent(l:lnum) &&
+          \ synIDattr(synID(l:lnum, 1, 0), 'name') !~? 'string\|template') * l:lnum]
+    if idx + 1
+      call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000,top)
+    elseif indent(v:lnum) && syns =~? 'block'
+      call s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000,top)
+    else
+      call s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000,top)
+    endif
   endif
 
   if idx + 1
