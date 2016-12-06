@@ -219,7 +219,7 @@ function GetJavascriptIndent()
     call call('cursor',b:js_cache[1:])
   else
     let [s:looksyn, s:free, top] = [v:lnum - 1, 1, (!indent(l:lnum) &&
-          \ synIDattr(synID(l:lnum, 1, 0), 'name') !~? 'string\|template') * l:lnum]
+          \ synIDattr(synID(l:lnum,1,0),'name') !~? 'string\|template') * l:lnum]
     if idx + 1
       call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000,top)
     elseif indent(v:lnum) && syns =~? 'block'
