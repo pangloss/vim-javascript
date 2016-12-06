@@ -36,7 +36,7 @@ else
   endfunction
 endif
 
-let s:case_stmt = '\%(\.\s*\)\@<!\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
+let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
 
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = 'string\|comment\|regex\|special\|doc\|template'
@@ -147,7 +147,7 @@ function s:IsBlock()
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
     return !cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:case_stmt . '$')) &&
-          \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[,{]')
+          \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[{,.]')
   endif
   return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
@@ -245,10 +245,10 @@ function GetJavascriptIndent()
       if s:previous_token() ==# 'switch'
         let switch_offset = &cino !~ ':' || !has('float') ? s:W :
               \ float2nr(str2float(matchstr(&cino,'.*:\zs[-0-9.]*')) * (&cino =~# '\%(.*:\)\@>[^,]*s' ? s:W : 1))
-        if l:line =~# '^' . s:case_stmt
+        if pline[-1:] !~ '[.,]' && l:line =~# '^' . s:case_stmt
           return indent(num) + switch_offset
         elseif pline =~# s:case_stmt . '$'
-          return indent(l:lnum) + s:W
+          return indent(num) + switch_offset + s:W
         endif
       endif
     endif
