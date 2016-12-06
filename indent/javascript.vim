@@ -193,7 +193,7 @@ function GetJavascriptIndent()
       return -1
     endif
   elseif syns =~? 'string\|template' && l:line !~ '^[''"]'
-    if b:js_cache[0] == v:lnum - 1
+    if b:js_cache[0] == v:lnum - 1 && s:Balanced(v:lnum-1)
       let b:js_cache[0] = v:lnum
     endif
     return -1
