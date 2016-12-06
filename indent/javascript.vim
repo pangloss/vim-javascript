@@ -193,6 +193,9 @@ function GetJavascriptIndent()
       return -1
     endif
   elseif syns =~? 'string\|template' && l:line !~ '^[''"]'
+    if b:js_cache[0] == v:lnum - 1
+      let b:js_cache[0] = v:lnum
+    endif
     return -1
   endif
   let l:lnum = s:PrevCodeLine(v:lnum - 1)
