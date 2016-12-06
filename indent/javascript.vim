@@ -214,7 +214,7 @@ function GetJavascriptIndent()
 
   " the containing paren, bracket, or curly. Many hacks for performance
   let idx = strlen(l:line) ? stridx('])}',l:line[0]) : -1
-  let top = !indent(l:lnum) * l:lnum
+  let top = (!indent(l:lnum) && synIDattr(synID(l:lnum, 1, 0), 'name') !~? 'string\|template') * l:lnum
   let [s:looksyn,s:free] = [v:lnum - 1,1]
   if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
