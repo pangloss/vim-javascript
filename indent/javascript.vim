@@ -40,6 +40,8 @@ let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
 
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = 'string\|comment\|regex\|special\|doc\|template'
+let s:syng_str = 'string\|template'
+let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 function s:skip_func(lnum)
@@ -75,7 +77,7 @@ function s:previous_token()
   let l:ln = line('.')
   return search('.\>\|[^[:alnum:][:space:]_$]','bW') ?
         \ (s:looking_at() == '/' || line('.') != l:ln && getline('.') =~ '\/\/') &&
-        \ synIDattr(synID(line('.'),col('.'),0),'name') =~? 'comment' ?
+        \ synIDattr(synID(line('.'),col('.'),0),'name') =~? s:syng_com ?
         \ search('\_[^/]\zs\/[/*]','bW') ? s:previous_token() : ''
         \ : s:token()
         \ : ''
@@ -92,7 +94,7 @@ let s:continuation = get(g:,'javascript_continuation',
 function s:Trim(ln,...)
   let pline = substitute(getline(a:ln),'\s*$','','')
   let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
-  while l:max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? 'comment\|doc'
+  while l:max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? s:syng_com
     let pline = substitute(strpart(pline, 0, l:max),'\s*$','','')
     let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
   endwhile
@@ -156,7 +158,7 @@ endfunction
 function s:PrevCodeLine(lnum)
   let l:n = prevnonblank(a:lnum)
   while getline(l:n) =~ '^\s*\/[/*]' || synIDattr(synID(l:n,1,0),'name') =~?
-        \ 'comment\|doc'
+        \ s:syng_com
     let l:n = prevnonblank(l:n-1)
   endwhile
   return l:n
@@ -186,13 +188,13 @@ function GetJavascriptIndent()
   let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
 
   " start with strings,comments,etc.
-  if syns =~? 'comment\|doc'
+  if syns =~? s:syng_com
     if l:line =~ '^\s*\*'
       return cindent(v:lnum)
     elseif l:line !~ '^\s*\/[/*]'
       return -1
     endif
-  elseif syns =~? 'string\|template' && l:line !~ '^[''"]'
+  elseif syns =~? s:syng_str && l:line !~ '^[''"]'
     if b:js_cache[0] == v:lnum - 1 && s:Balanced(v:lnum-1)
       let b:js_cache[0] = v:lnum
     endif
@@ -219,7 +221,7 @@ function GetJavascriptIndent()
     call call('cursor',b:js_cache[1:])
   else
     let [s:looksyn, s:free, top] = [v:lnum - 1, 1, (!indent(l:lnum) &&
-          \ synIDattr(synID(l:lnum,1,0),'name') !~? 'string\|template') * l:lnum]
+          \ synIDattr(synID(l:lnum,1,0),'name') !~? s:syng_str) * l:lnum]
     if idx + 1
       call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000,top)
     elseif indent(v:lnum) && syns =~? 'block'
