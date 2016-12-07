@@ -54,6 +54,21 @@ function s:skip_func(lnum)
   return (search('\/','nbW',s:looksyn) || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
 endfunction
 
+function s:fast(pat,stop)
+  " HACK: change next line
+  while s:GetPair(a:pat,'\%#','bW','s:skip_func(s:looksyn)',100,a:stop)
+    let idx = stridx('])}',getline('.')[col('.')-1])
+    if idx + 1
+      if !s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000,a:stop)
+        break
+      endif
+    else
+      return
+    endif
+  endwhile
+  return cursor(v:lnum,1)
+endfunction
+
 if has('reltime')
   function s:GetPair(start,end,flags,skip,time,...)
     return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
@@ -227,7 +242,7 @@ function GetJavascriptIndent()
     elseif indent(v:lnum) && syns =~? 'block'
       call s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000,top)
     else
-      call s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000,top)
+      call s:fast('[][(){}]',top)
     endif
   endif
 
