@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: December 1, 2016
+" Last Change: December 7, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -44,14 +44,31 @@ let s:syng_str = 'string\|template'
 let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
-function s:skip_func(lnum)
-  if !s:free || search('`\|\*\/','nW',a:lnum)
+
+function s:skip_func()
+  if !s:free || search('`\|\*\/','nW',s:looksyn)
     let s:free = !eval(s:skip_expr)
     let s:looksyn = s:free ? line('.') : s:looksyn
     return !s:free
   endif
   let s:looksyn = line('.')
   return (search('\/','nbW',s:looksyn) || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
+endfunction
+
+function s:alternatePair(stop)
+  while search('[][(){}]','bW',a:stop)
+    if !s:skip_func()
+      let idx = stridx('])}',s:looking_at())
+      if idx + 1
+        if !s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,a:stop)
+          break
+        endif
+      else
+        return
+      endif
+    endif
+  endwhile
+  call cursor(v:lnum,1)
 endfunction
 
 if has('reltime')
@@ -223,11 +240,11 @@ function GetJavascriptIndent()
     let [s:looksyn, s:free, top] = [v:lnum - 1, 1, (!indent(l:lnum) &&
           \ synIDattr(synID(l:lnum,1,0),'name') !~? s:syng_str) * l:lnum]
     if idx + 1
-      call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000,top)
+      call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,top)
     elseif indent(v:lnum) && syns =~? 'block'
-      call s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000,top)
+      call s:GetPair('{','}','bW','s:skip_func()',2000,top)
     else
-      call s:GetPair('[({[]','[])}]','bW','s:skip_func(s:looksyn)',2000,top)
+      call s:alternatePair(top)
     endif
   endif
 
