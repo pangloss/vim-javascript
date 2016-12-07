@@ -56,7 +56,7 @@ function s:skip_func(lnum)
 endfunction
 
 function s:alternatePair(stop)
-  while search('[][(){}]','bW',a:stop,100)
+  while search('[][(){}]','bW',a:stop)
     if !s:skip_func(s:looksyn)
       let idx = stridx('])}',s:looking_at())
       if idx + 1
