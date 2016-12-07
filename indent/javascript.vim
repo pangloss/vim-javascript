@@ -64,8 +64,8 @@ function s:searchSkip(...)
   call call('cursor',curp)
 endfunction
 
-function s:fast(pat,stop)
-  while s:searchSkip(a:pat,'bW',a:stop,100,'s:skip_func(s:looksyn)')
+function s:fast(stop)
+  while s:searchSkip('[][(){}]','bW',a:stop,100,'s:skip_func(s:looksyn)')
     let idx = stridx('])}',getline('.')[col('.')-1])
     if idx + 1
       if !s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000,a:stop)
@@ -75,7 +75,7 @@ function s:fast(pat,stop)
       return
     endif
   endwhile
-  return cursor(v:lnum,1)
+  call cursor(v:lnum,1)
 endfunction
 
 if has('reltime')
@@ -251,7 +251,7 @@ function GetJavascriptIndent()
     elseif indent(v:lnum) && syns =~? 'block'
       call s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000,top)
     else
-      call s:fast('[][(){}]',top)
+      call s:fast(top)
     endif
   endif
 
