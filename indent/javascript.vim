@@ -54,25 +54,17 @@ function s:skip_func(lnum)
   return (search('\/','nbW',s:looksyn) || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
 endfunction
 
-function s:searchSkip(...)
-  let curp = getpos('.')[1:2]
-  while call('search',a:000[:-2])
-    if !eval(a:000[-1])
-      return line('.')
-    endif
-  endwhile
-  call call('cursor',curp)
-endfunction
-
 function s:fast(stop)
-  while s:searchSkip('[][(){}]','bW',a:stop,100,'s:skip_func(s:looksyn)')
-    let idx = stridx('])}',getline('.')[col('.')-1])
-    if idx + 1
-      if !s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000,a:stop)
-        break
+  while search('[][(){}]','bW',a:stop,100)
+    if !s:skip_func(s:looksyn)
+      let idx = stridx('])}',getline('.')[col('.')-1])
+      if idx + 1
+        if !s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000,a:stop)
+          break
+        endif
+      else
+        return
       endif
-    else
-      return
     endif
   endwhile
   call cursor(v:lnum,1)
