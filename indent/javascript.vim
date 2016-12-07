@@ -45,8 +45,8 @@ let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
-function s:skip_func(lnum)
-  if !s:free || search('`\|\*\/','nW',a:lnum)
+function s:skip_func()
+  if !s:free || search('`\|\*\/','nW',s:looksyn)
     let s:free = !eval(s:skip_expr)
     let s:looksyn = s:free ? line('.') : s:looksyn
     return !s:free
@@ -57,10 +57,10 @@ endfunction
 
 function s:alternatePair(stop)
   while search('[][(){}]','bW',a:stop)
-    if !s:skip_func(s:looksyn)
+    if !s:skip_func()
       let idx = stridx('])}',s:looking_at())
       if idx + 1
-        if !s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000,a:stop)
+        if !s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,a:stop)
           break
         endif
       else
@@ -240,9 +240,9 @@ function GetJavascriptIndent()
     let [s:looksyn, s:free, top] = [v:lnum - 1, 1, (!indent(l:lnum) &&
           \ synIDattr(synID(l:lnum,1,0),'name') !~? s:syng_str) * l:lnum]
     if idx + 1
-      call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func(s:looksyn)',2000,top)
+      call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,top)
     elseif indent(v:lnum) && syns =~? 'block'
-      call s:GetPair('{','}','bW','s:skip_func(s:looksyn)',2000,top)
+      call s:GetPair('{','}','bW','s:skip_func()',2000,top)
     else
       call s:alternatePair(top)
     endif
