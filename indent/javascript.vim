@@ -90,14 +90,14 @@ function s:token()
 endfunction
 
 " NOTE: moves the cursor
-function s:previous_token()
-  let l:ln = line('.')
-  return search('.\>\|[^[:alnum:][:space:]_$]','bW') ?
-        \ (s:looking_at() == '/' || line('.') != l:ln && getline('.') =~ '\/\/') &&
+function s:previous_token(...)
+  let l:ln = getpos('.')[1:2]
+  return [search('.\>\|[^[:alnum:][:space:]_$]','bW') ?
+        \ (s:looking_at() == '/' || line('.') != l:ln[0] && getline('.') =~ '\/\/') &&
         \ synIDattr(synID(line('.'),col('.'),0),'name') =~? s:syng_com ?
         \ search('\_[^/]\zs\/[/*]','bW') ? s:previous_token() : ''
         \ : s:token()
-        \ : ''
+        \ : ''][a:0 && call('cursor',l:ln)]
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -127,7 +127,9 @@ function s:OneScope(lnum)
     endif
     return index(split('for if let while with'),token) + 1
   endif
-  return pline =~# '\%(\%(\.\s*\)\@<!\<\%(else\|do\)\|=>\)$'
+  return eval((['getline(".")[col(".")-2] == "="'] +
+        \ repeat(['s:previous_token(1) != "."'],2) + [0])[
+        \ index(split('> else do'),s:token())])
 endfunction
 
 function s:iscontOne(i,num,cont)
