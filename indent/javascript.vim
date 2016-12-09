@@ -89,15 +89,15 @@ function s:token()
   return s:looking_at() =~ '\k' ? expand('<cword>') : s:looking_at()
 endfunction
 
-" NOTE: moves the cursor
+" NOTE: Moves the cursor, unless a arg is supplied.
 function s:previous_token(...)
-  let l:ln = getpos('.')[1:2]
+  let l:pos = getpos('.')[1:2]
   return [search('.\>\|[^[:alnum:][:space:]_$]','bW') ?
-        \ (s:looking_at() == '/' || line('.') != l:ln[0] && getline('.') =~ '\/\/') &&
+        \ (s:looking_at() == '/' || line('.') != l:pos[0] && getline('.') =~ '\/\/') &&
         \ synIDattr(synID(line('.'),col('.'),0),'name') =~? s:syng_com ?
         \ search('\_[^/]\zs\/[/*]','bW') ? s:previous_token() : ''
         \ : s:token()
-        \ : ''][a:0 && call('cursor',l:ln)]
+        \ : ''][a:0 && call('cursor',l:pos)]
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
