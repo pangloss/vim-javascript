@@ -150,7 +150,6 @@ function s:Balanced(lnum)
   return !l:open
 endfunction
 
-" start of a braceless scope?
 function s:OneScope(lnum)
   let pline = s:Trim(a:lnum,1)
   if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
@@ -168,21 +167,16 @@ endfunction
 " returns braceless levels started by 'i' and above lines * &sw.
 " 'num' is the lineNr which encloses the entire context, 'cont' if whether
 " line 'i' + 1 is a continued expression, which could have started in a
-" braceless context created above 'i'
+" braceless context
 function s:iscontOne(i,num,cont)
-  let [l:i, l:cont, l:num] = [a:i, a:cont, a:num + !a:num]
+  let [l:i, l:num, bL] = [a:i, a:num + !a:num, 0]
   let pind = a:num ? indent(l:num) + s:W : 0
   let ind = indent(l:i) + (a:cont ? 0 : s:W)
-  let bL = 0
-  while l:i >= l:num && (!l:cont || ind > pind)
-    if indent(l:i) < ind " first line depends on a:cont
-      if s:OneScope(l:i)
-        let bL += s:W
-        let [l:cont, l:i] = [0, line('.')]
-      elseif !l:cont
-        break
-      endif
-    elseif !a:cont
+  while l:i >= l:num && (ind > pind || l:i == l:num)
+    if indent(l:i) < ind && s:OneScope(l:i)
+      let bL += s:W
+      let l:i = line('.')
+    elseif !a:cont || bL || ind < indent(a:i)
       break
     endif
     let ind = min([ind, indent(l:i)])
