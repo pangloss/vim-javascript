@@ -168,21 +168,21 @@ endfunction
 " returns braceless levels started by 'i' and above lines * &sw.
 " 'num' is the lineNr which encloses the entire context, 'cont' if whether
 " line 'i' + 1 is a continued expression, which could have started in a
-" braceless context created above 'i'
+" braceless context
 function s:iscontOne(i,num,cont)
   let [l:i, l:cont, l:num] = [a:i, a:cont, a:num + !a:num]
   let pind = a:num ? indent(l:num) + s:W : 0
-  let ind = indent(l:i) + (a:cont ? 0 : s:W)
+  let ind = indent(l:i) + s:W
   let bL = 0
   while l:i >= l:num && (!l:cont || ind > pind)
     if indent(l:i) < ind " first line depends on a:cont
-      if s:OneScope(l:i)
+      if !l:cont && s:OneScope(l:i)
         let bL += s:W
-        let [l:cont, l:i] = [0, line('.')]
-      elseif !l:cont
-        break
+        let l:i = line('.')
+      else
+        let l:cont = 0
       endif
-    elseif !a:cont
+    elseif !l:cont
       break
     endif
     let ind = min([ind, indent(l:i)])
