@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: December 7, 2016
+" Last Change: December 9, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -36,7 +36,16 @@ else
   endfunction
 endif
 
-let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
+" searchpair() wrapper
+if has('reltime')
+  function s:GetPair(start,end,flags,skip,time,...)
+    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
+  endfunction
+else
+  function s:GetPair(start,end,flags,skip,...)
+    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)]))
+  endfunction
+endif
 
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = 'string\|comment\|regex\|special\|doc\|template'
@@ -71,15 +80,9 @@ function s:alternatePair(stop)
   call cursor(v:lnum,1)
 endfunction
 
-if has('reltime')
-  function s:GetPair(start,end,flags,skip,time,...)
-    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
-  endfunction
-else
-  function s:GetPair(start,end,flags,skip,...)
-    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)]))
-  endfunction
-endif
+function s:syn_at(l,c)
+  return synIDattr(synID(a:l,a:c,0),'name')
+endfunction
 
 function s:looking_at()
   return getline('.')[col('.')-1]
@@ -89,16 +92,19 @@ function s:token()
   return s:looking_at() =~ '\k' ? expand('<cword>') : s:looking_at()
 endfunction
 
-" NOTE: moves the cursor
-function s:previous_token()
-  let l:ln = line('.')
-  return search('.\>\|[^[:alnum:][:space:]_$]','bW') ?
-        \ (s:looking_at() == '/' || line('.') != l:ln && getline('.') =~ '\/\/') &&
-        \ synIDattr(synID(line('.'),col('.'),0),'name') =~? s:syng_com ?
+" NOTE: Moves the cursor, unless a arg is supplied.
+function s:previous_token(...)
+  let l:pos = getpos('.')[1:2]
+  return [search('.\>\|[^[:alnum:][:space:]_$]','bW') ?
+        \ (s:looking_at() == '/' || line('.') != l:pos[0] && getline('.') =~ '\/\/') &&
+        \ s:syn_at(line('.'),col('.')) =~? s:syng_com ?
         \ search('\_[^/]\zs\/[/*]','bW') ? s:previous_token() : ''
         \ : s:token()
-        \ : ''
+        \ : ''][a:0 && call('cursor',l:pos)]
 endfunction
+
+" switch case label pattern
+let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
@@ -111,13 +117,40 @@ let s:continuation = get(g:,'javascript_continuation',
 function s:Trim(ln,...)
   let pline = substitute(getline(a:ln),'\s*$','','')
   let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
-  while l:max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? s:syng_com
+  while l:max && s:syn_at(a:ln, strlen(pline)) =~? s:syng_com
     let pline = substitute(strpart(pline, 0, l:max),'\s*$','','')
     let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
   endwhile
   return !a:0 || cursor(a:ln,strlen(pline)) ? pline : pline
 endfunction
 
+" Find line above 'lnum' that isn't empty or in a comment
+function s:PrevCodeLine(lnum)
+  let l:n = prevnonblank(a:lnum)
+  while getline(l:n) =~ '^\s*\/[/*]' || s:syn_at(l:n,1) =~? s:syng_com
+    let l:n = prevnonblank(l:n-1)
+  endwhile
+  return l:n
+endfunction
+
+" Check if line 'lnum' has a balanced amount of parentheses.
+function s:Balanced(lnum)
+  let l:open = 0
+  let l:line = getline(a:lnum)
+  let pos = match(l:line, '[][(){}]', 0)
+  while pos != -1
+    if s:syn_at(a:lnum,pos + 1) !~? s:syng_strcom
+      let l:open += match(' ' . l:line[pos],'[[({]')
+      if l:open < 0
+        return
+      endif
+    endif
+    let pos = match(l:line, '[][(){}]', pos + 1)
+  endwhile
+  return !l:open
+endfunction
+
+" start of a braceless scope?
 function s:OneScope(lnum)
   let pline = s:Trim(a:lnum,1)
   if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
@@ -127,16 +160,22 @@ function s:OneScope(lnum)
     endif
     return index(split('for if let while with'),token) + 1
   endif
-  return pline =~# '\%(\%(\.\s*\)\@<!\<\%(else\|do\)\|=>\)$'
+  return eval((['getline(".")[col(".")-2] == "="'] +
+        \ repeat(['s:previous_token(1) != "."'],2) + [0])[
+        \ index(split('> else do'),s:token())])
 endfunction
 
+" returns braceless levels started by 'i' and above lines * &sw.
+" 'num' is the lineNr which encloses the entire context, 'cont' if whether
+" line 'i' + 1 is a continued expression, which could have started in a
+" braceless context created above 'i'
 function s:iscontOne(i,num,cont)
   let [l:i, l:cont, l:num] = [a:i, a:cont, a:num + !a:num]
   let pind = a:num ? indent(l:num) + s:W : 0
   let ind = indent(l:i) + (a:cont ? 0 : s:W)
   let bL = 0
   while l:i >= l:num && (!l:cont || ind > pind)
-    if indent(l:i) < ind " first line always true for !a:cont, false for !!a:cont
+    if indent(l:i) < ind " first line depends on a:cont
       if s:OneScope(l:i)
         let bL += s:W
         let [l:cont, l:i] = [0, line('.')]
@@ -156,7 +195,7 @@ endfunction
 function s:IsBlock()
   let l:ln = line('.')
   let char = s:previous_token()
-  let syn = char =~ '[{>/]' ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
+  let syn = char =~ '[{>/]' ? s:syn_at(line('.'),col('.')-(char == '{')) : ''
   if syn =~? 'xml\|jsx'
     return char != '{'
   elseif char =~ '\k'
@@ -171,38 +210,11 @@ function s:IsBlock()
   return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
 
-" Find line above 'lnum' that isn't empty or in a comment
-function s:PrevCodeLine(lnum)
-  let l:n = prevnonblank(a:lnum)
-  while getline(l:n) =~ '^\s*\/[/*]' || synIDattr(synID(l:n,1,0),'name') =~?
-        \ s:syng_com
-    let l:n = prevnonblank(l:n-1)
-  endwhile
-  return l:n
-endfunction
-
-" Check if line 'lnum' has a balanced amount of parentheses.
-function s:Balanced(lnum)
-  let l:open = 0
-  let l:line = getline(a:lnum)
-  let pos = match(l:line, '[][(){}]', 0)
-  while pos != -1
-    if synIDattr(synID(a:lnum,pos + 1,0),'name') !~? s:syng_strcom
-      let l:open += match(' ' . l:line[pos],'[[({]')
-      if l:open < 0
-        return
-      endif
-    endif
-    let pos = match(l:line, '[][(){}]', pos + 1)
-  endwhile
-  return !l:open
-endfunction
-
 function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
   " Get the current line.
   let l:line = getline(v:lnum)
-  let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
+  let syns = s:syn_at(v:lnum, 1)
 
   " start with strings,comments,etc.
   if syns =~? s:syng_com
@@ -238,7 +250,7 @@ function GetJavascriptIndent()
     call call('cursor',b:js_cache[1:])
   else
     let [s:looksyn, s:free, top] = [v:lnum - 1, 1, (!indent(l:lnum) &&
-          \ synIDattr(synID(l:lnum,1,0),'name') !~? s:syng_str) * l:lnum]
+          \ s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum]
     if idx + 1
       call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,top)
     elseif indent(v:lnum) && syns =~? 'block'
@@ -275,7 +287,7 @@ function GetJavascriptIndent()
     endif
     if pline[-1:] !~ '[{;]'
       let isOp = l:line =~# s:opfirst || pline =~# s:continuation &&
-            \ synIDattr(synID(l:lnum,match(' ' . pline,'\/$'),0),'name') !~? 'regex'
+            \ s:syn_at(l:lnum,match(' ' . pline,'\/$')) !~? 'regex'
       let bL = s:iscontOne(l:lnum,num,isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
