@@ -150,7 +150,6 @@ function s:Balanced(lnum)
   return !l:open
 endfunction
 
-" start of a braceless scope?
 function s:OneScope(lnum)
   let pline = s:Trim(a:lnum,1)
   if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
@@ -175,11 +174,13 @@ function s:iscontOne(i,num,cont)
   let ind = indent(l:i) + (a:cont ? 0 : s:W)
   let bL = 0
   while l:i >= l:num && (ind > pind || l:i == l:num)
-    if indent(l:i) < ind && s:OneScope(l:i)
-      let bL += s:W
-      let l:i = line('.')
-    elseif !a:cont || bL
-      break
+    if indent(l:i) < ind
+      if s:OneScope(l:i)
+        let bL += s:W
+        let l:i = line('.')
+      elseif !a:cont || bL || ind < indent(a:i)
+        break
+      endif
     endif
     let ind = min([ind, indent(l:i)])
     let l:i = s:PrevCodeLine(l:i - 1)
