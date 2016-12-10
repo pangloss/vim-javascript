@@ -175,7 +175,7 @@ function s:iscontOne(i,num,cont)
   let ind = indent(l:i) + (a:cont ? 0 : s:W)
   let bL = 0
   while l:i >= l:num && ind > pind
-    if (indent(l:i) < ind || !l:cont) && s:OneScope(l:i)
+    if indent(l:i) < ind && s:OneScope(l:i)
       let bL += s:W
       let l:i = line('.')
     elseif !l:cont || bL
