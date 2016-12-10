@@ -81,6 +81,10 @@ else
   endfunction
 endif
 
+function s:syn_at(l,c)
+  return synIDattr(synID(a:l,a:c,0),'name')
+endfunction
+
 function s:looking_at()
   return getline('.')[col('.')-1]
 endfunction
@@ -94,7 +98,7 @@ function s:previous_token(...)
   let l:pos = getpos('.')[1:2]
   return [search('.\>\|[^[:alnum:][:space:]_$]','bW') ?
         \ (s:looking_at() == '/' || line('.') != l:pos[0] && getline('.') =~ '\/\/') &&
-        \ synIDattr(synID(line('.'),col('.'),0),'name') =~? s:syng_com ?
+        \ s:syn_at(line('.'),col('.')) =~? s:syng_com ?
         \ search('\_[^/]\zs\/[/*]','bW') ? s:previous_token() : ''
         \ : s:token()
         \ : ''][a:0 && call('cursor',l:pos)]
@@ -111,7 +115,7 @@ let s:continuation = get(g:,'javascript_continuation',
 function s:Trim(ln,...)
   let pline = substitute(getline(a:ln),'\s*$','','')
   let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
-  while l:max && synIDattr(synID(a:ln, strlen(pline), 0), 'name') =~? s:syng_com
+  while l:max && s:syn_at(a:ln, strlen(pline)) =~? s:syng_com
     let pline = substitute(strpart(pline, 0, l:max),'\s*$','','')
     let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
   endwhile
@@ -158,7 +162,7 @@ endfunction
 function s:IsBlock()
   let l:ln = line('.')
   let char = s:previous_token()
-  let syn = char =~ '[{>/]' ? synIDattr(synID(line('.'),col('.')-(char == '{'),0),'name') : ''
+  let syn = char =~ '[{>/]' ? s:syn_at(line('.'),col('.')-(char == '{')) : ''
   if syn =~? 'xml\|jsx'
     return char != '{'
   elseif char =~ '\k'
@@ -176,7 +180,7 @@ endfunction
 " Find line above 'lnum' that isn't empty or in a comment
 function s:PrevCodeLine(lnum)
   let l:n = prevnonblank(a:lnum)
-  while getline(l:n) =~ '^\s*\/[/*]' || synIDattr(synID(l:n,1,0),'name') =~?
+  while getline(l:n) =~ '^\s*\/[/*]' || s:syn_at(l:n,1) =~?
         \ s:syng_com
     let l:n = prevnonblank(l:n-1)
   endwhile
@@ -189,7 +193,7 @@ function s:Balanced(lnum)
   let l:line = getline(a:lnum)
   let pos = match(l:line, '[][(){}]', 0)
   while pos != -1
-    if synIDattr(synID(a:lnum,pos + 1,0),'name') !~? s:syng_strcom
+    if s:syn_at(a:lnum,pos + 1) !~? s:syng_strcom
       let l:open += match(' ' . l:line[pos],'[[({]')
       if l:open < 0
         return
@@ -204,7 +208,7 @@ function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
   " Get the current line.
   let l:line = getline(v:lnum)
-  let syns = synIDattr(synID(v:lnum, 1, 0), 'name')
+  let syns = s:syn_at(v:lnum, 1)
 
   " start with strings,comments,etc.
   if syns =~? s:syng_com
@@ -240,7 +244,7 @@ function GetJavascriptIndent()
     call call('cursor',b:js_cache[1:])
   else
     let [s:looksyn, s:free, top] = [v:lnum - 1, 1, (!indent(l:lnum) &&
-          \ synIDattr(synID(l:lnum,1,0),'name') !~? s:syng_str) * l:lnum]
+          \ s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum]
     if idx + 1
       call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,top)
     elseif indent(v:lnum) && syns =~? 'block'
@@ -277,7 +281,7 @@ function GetJavascriptIndent()
     endif
     if pline[-1:] !~ '[{;]'
       let isOp = l:line =~# s:opfirst || pline =~# s:continuation &&
-            \ synIDattr(synID(l:lnum,match(' ' . pline,'\/$'),0),'name') !~? 'regex'
+            \ s:syn_at(l:lnum,match(' ' . pline,'\/$')) !~? 'regex'
       let bL = s:iscontOne(l:lnum,num,isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
