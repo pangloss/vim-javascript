@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: December 7, 2016
+" Last Change: December 9, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -36,7 +36,16 @@ else
   endfunction
 endif
 
-let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
+" searchpair() wrapper
+if has('reltime')
+  function s:GetPair(start,end,flags,skip,time,...)
+    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
+  endfunction
+else
+  function s:GetPair(start,end,flags,skip,...)
+    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)]))
+  endfunction
+endif
 
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = 'string\|comment\|regex\|special\|doc\|template'
@@ -71,16 +80,6 @@ function s:alternatePair(stop)
   call cursor(v:lnum,1)
 endfunction
 
-if has('reltime')
-  function s:GetPair(start,end,flags,skip,time,...)
-    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
-  endfunction
-else
-  function s:GetPair(start,end,flags,skip,...)
-    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)]))
-  endfunction
-endif
-
 function s:syn_at(l,c)
   return synIDattr(synID(a:l,a:c,0),'name')
 endfunction
@@ -104,6 +103,9 @@ function s:previous_token(...)
         \ : ''][a:0 && call('cursor',l:pos)]
 endfunction
 
+" switch case label pattern
+let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
+
 " configurable regexes that define continuation lines, not including (, {, or [.
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
@@ -122,6 +124,33 @@ function s:Trim(ln,...)
   return !a:0 || cursor(a:ln,strlen(pline)) ? pline : pline
 endfunction
 
+" Find line above 'lnum' that isn't empty or in a comment
+function s:PrevCodeLine(lnum)
+  let l:n = prevnonblank(a:lnum)
+  while getline(l:n) =~ '^\s*\/[/*]' || s:syn_at(l:n,1) =~? s:syng_com
+    let l:n = prevnonblank(l:n-1)
+  endwhile
+  return l:n
+endfunction
+
+" Check if line 'lnum' has a balanced amount of parentheses.
+function s:Balanced(lnum)
+  let l:open = 0
+  let l:line = getline(a:lnum)
+  let pos = match(l:line, '[][(){}]', 0)
+  while pos != -1
+    if s:syn_at(a:lnum,pos + 1) !~? s:syng_strcom
+      let l:open += match(' ' . l:line[pos],'[[({]')
+      if l:open < 0
+        return
+      endif
+    endif
+    let pos = match(l:line, '[][(){}]', pos + 1)
+  endwhile
+  return !l:open
+endfunction
+
+" start of a braceless scope?
 function s:OneScope(lnum)
   let pline = s:Trim(a:lnum,1)
   if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
@@ -136,6 +165,10 @@ function s:OneScope(lnum)
         \ index(split('> else do'),s:token())])
 endfunction
 
+" returns braceless levels started by 'i' and above lines * &sw.
+" 'num' is the lineNr which encloses the entire context, 'cont' if whether
+" line 'i' + 1 is a continued expression, which could have started in a
+" braceless context created above 'i'
 function s:iscontOne(i,num,cont)
   let [l:i, l:cont, l:num] = [a:i, a:cont, a:num + !a:num]
   let pind = a:num ? indent(l:num) + s:W : 0
@@ -175,33 +208,6 @@ function s:IsBlock()
           \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[{,.]')
   endif
   return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
-endfunction
-
-" Find line above 'lnum' that isn't empty or in a comment
-function s:PrevCodeLine(lnum)
-  let l:n = prevnonblank(a:lnum)
-  while getline(l:n) =~ '^\s*\/[/*]' || s:syn_at(l:n,1) =~?
-        \ s:syng_com
-    let l:n = prevnonblank(l:n-1)
-  endwhile
-  return l:n
-endfunction
-
-" Check if line 'lnum' has a balanced amount of parentheses.
-function s:Balanced(lnum)
-  let l:open = 0
-  let l:line = getline(a:lnum)
-  let pos = match(l:line, '[][(){}]', 0)
-  while pos != -1
-    if s:syn_at(a:lnum,pos + 1) !~? s:syng_strcom
-      let l:open += match(' ' . l:line[pos],'[[({]')
-      if l:open < 0
-        return
-      endif
-    endif
-    let pos = match(l:line, '[][(){}]', pos + 1)
-  endwhile
-  return !l:open
 endfunction
 
 function GetJavascriptIndent()
