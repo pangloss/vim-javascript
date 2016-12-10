@@ -172,17 +172,13 @@ endfunction
 function s:iscontOne(i,num,cont)
   let [l:i, l:cont, l:num] = [a:i, a:cont, a:num + !a:num]
   let pind = a:num ? indent(l:num) + s:W : 0
-  let ind = indent(l:i) + s:W
+  let ind = indent(l:i) + (a:cont ? 0 : s:W)
   let bL = 0
-  while l:i >= l:num && (!l:cont || ind > pind)
-    if indent(l:i) < ind " first line depends on a:cont
-      if !l:cont && s:OneScope(l:i)
-        let bL += s:W
-        let l:i = line('.')
-      else
-        let l:cont = 0
-      endif
-    elseif !l:cont
+  while l:i >= l:num && ind > pind
+    if (indent(l:i) < ind || !l:cont) && s:OneScope(l:i)
+      let bL += s:W
+      let l:i = line('.')
+    elseif !l:cont || bL
       break
     endif
     let ind = min([ind, indent(l:i)])
