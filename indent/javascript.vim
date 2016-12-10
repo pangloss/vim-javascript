@@ -174,13 +174,11 @@ function s:iscontOne(i,num,cont)
   let ind = indent(l:i) + (a:cont ? 0 : s:W)
   let bL = 0
   while l:i >= l:num && (ind > pind || l:i == l:num)
-    if indent(l:i) < ind
-      if s:OneScope(l:i)
-        let bL += s:W
-        let l:i = line('.')
-      elseif !a:cont || bL || ind < indent(a:i)
-        break
-      endif
+    if indent(l:i) < ind && s:OneScope(l:i)
+      let bL += s:W
+      let l:i = line('.')
+    elseif !a:cont || bL || ind < indent(a:i)
+      break
     endif
     let ind = min([ind, indent(l:i)])
     let l:i = s:PrevCodeLine(l:i - 1)
