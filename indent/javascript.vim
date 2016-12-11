@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: December 9, 2016
+" Last Change: December 10, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -164,10 +164,9 @@ function s:OneScope(lnum)
         \ index(split('> else do'),s:token())])
 endfunction
 
-" returns braceless levels started by 'i' and above lines * &sw.
-" 'num' is the lineNr which encloses the entire context, 'cont' if whether
-" line 'i' + 1 is a continued expression, which could have started in a
-" braceless context
+" returns braceless levels started by 'i' and above lines * &sw. 'num' is the
+" lineNr which encloses the entire context, 'cont' if whether line 'i' + 1 is
+" a continued expression, which could have started in a braceless context
 function s:iscontOne(i,num,cont)
   let [l:i, l:num, bL] = [a:i, a:num + !a:num, 0]
   let pind = a:num ? indent(l:num) + s:W : 0
