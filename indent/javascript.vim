@@ -198,7 +198,7 @@ function s:IsBlock()
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
     return !cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:case_stmt . '$')) &&
-          \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[{,.]')
+          \ (expand('<cword>') !=# 'default' || s:previous_token(1) !~ '[{,.]')
   endif
   return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
