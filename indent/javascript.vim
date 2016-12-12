@@ -273,7 +273,8 @@ function GetJavascriptIndent()
           let switch_offset = s:W
         else
           let cinc = matchlist(&cino,'.*:\(-\)\=\([0-9.]*\)\(s\)\=\C')
-          let switch_offset = float2nr(str2float(cinc[1].(strlen(cinc[2]) ? cinc[2] : 1)) * (strlen(cinc[3]) ? s:W : 1))
+          let switch_offset = float2nr(str2float(cinc[1].(strlen(cinc[2]) ? cinc[2] : strlen(cinc[3])))
+                \ * (strlen(cinc[3]) ? s:W : 1))
         endif
         if pline[-1:] != '.' && l:line =~# '^' . s:case_stmt
           return indent(num) + switch_offset
