@@ -107,7 +107,7 @@ endfunction
 let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
 
 function s:label_end(ln,con)
-  return !cursor(a:ln,match(' ' . a:con, '.*\zs' . s:case_stmt . '$')) &&
+  return !cursor(a:ln,match(' '.a:con, '.*\zs' . s:case_stmt . '$')) &&
         \ (expand('<cword>') !=# 'default' || s:previous_token(1) !~ '[{,.]')
 endfunction
 
