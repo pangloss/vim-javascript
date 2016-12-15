@@ -118,11 +118,10 @@ let s:continuation = get(g:,'javascript_continuation',
       \ '\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
 
 function s:continues(ln,con)
-  if !cursor(a:ln, match(' '.a:con,s:continuation))
-    return eval((['s:syn_at(line("."),col(".")) !~? "regex"'] +
-          \ repeat(['s:previous_token() != "."'],5) + [1])[
-          \ index(split('/ typeof in instanceof void delete'),s:token())])
-  endif
+  return !cursor(a:ln, match(' '.a:con,s:continuation)) &&
+        \ eval((['s:syn_at(line("."),col(".")) !~? "regex"'] +
+        \ repeat(['s:previous_token() != "."'],5) + [1])[
+        \ index(split('/ typeof in instanceof void delete'),s:token())])
 endfunction
 
 " get the line of code stripped of comments. if called with two args, leave
