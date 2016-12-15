@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: December 10, 2016
+" Last Change: December 14, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -106,11 +106,23 @@ endfunction
 " switch case label pattern
 let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
 
+function s:label_end(ln,con)
+  return !cursor(a:ln,match(' '.a:con, '.*\zs' . s:case_stmt . '$')) &&
+        \ (expand('<cword>') !=# 'default' || s:previous_token(1) !~ '[{,.]')
+endfunction
+
 " configurable regexes that define continuation lines, not including (, {, or [.
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
-      \ '\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\%(\.\s*\)\@<!\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
+      \ '\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
+
+function s:continues(ln,con)
+  return !cursor(a:ln, match(' '.a:con,s:continuation)) &&
+        \ eval((['s:syn_at(line("."),col(".")) !~? "regex"'] +
+        \ repeat(['s:previous_token() != "."'],5) + [1])[
+        \ index(split('/ typeof in instanceof void delete'),s:token())])
+endfunction
 
 " get the line of code stripped of comments. if called with two args, leave
 " cursor at the last non-comment char.
@@ -197,8 +209,7 @@ function s:IsBlock()
   elseif char == '>'
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
-    return !cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:case_stmt . '$')) &&
-          \ (expand('<cword>') !=# 'default' || s:previous_token(1) !~ '[{,.]')
+    return s:label_end(0,strpart(getline('.'),0,col('.')))
   endif
   return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
@@ -278,14 +289,13 @@ function GetJavascriptIndent()
         endif
         if pline[-1:] != '.' && l:line =~# '^' . s:case_stmt
           return indent(num) + switch_offset
-        elseif pline =~# s:case_stmt . '$'
+        elseif s:label_end(l:lnum,pline)
           return indent(l:lnum) + s:W
         endif
       endif
     endif
     if pline[-1:] !~ '[{;]'
-      let isOp = l:line =~# s:opfirst || pline =~# s:continuation &&
-            \ s:syn_at(l:lnum,match(' ' . pline,'\/$')) !~? 'regex'
+      let isOp = l:line =~# s:opfirst || s:continues(l:lnum,pline)
       let bL = s:iscontOne(l:lnum,num,isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
