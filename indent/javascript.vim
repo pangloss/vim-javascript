@@ -110,7 +110,15 @@ let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
-      \ '\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\%(\.\s*\)\@<!\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
+      \ '\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
+
+function s:continues(ln,con)
+  if !cursor(a:ln, match(' '.a:con,s:continuation))
+    return eval((['s:syn_at(line("."),col(".") !~? "regex"'] +
+          \ repeat(['s:previous_token() != "."'],5) + [1])[
+          \ index(split('/ typeof in instanceof void delete'),s:token())])
+  endif
+endfunction
 
 " get the line of code stripped of comments. if called with two args, leave
 " cursor at the last non-comment char.
@@ -278,14 +286,14 @@ function GetJavascriptIndent()
         endif
         if pline[-1:] != '.' && l:line =~# '^' . s:case_stmt
           return indent(num) + switch_offset
-        elseif pline =~# s:case_stmt . '$'
+        elseif !cursor(l:lnum,match(' ' . pline, s:case_stmt . '$')) &&
+              \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[{,.]')
           return indent(l:lnum) + s:W
         endif
       endif
     endif
     if pline[-1:] !~ '[{;]'
-      let isOp = l:line =~# s:opfirst || pline =~# s:continuation &&
-            \ s:syn_at(l:lnum,match(' ' . pline,'\/$')) !~? 'regex'
+      let isOp = l:line =~# s:opfirst || s:continues(l:lnum,pline)
       let bL = s:iscontOne(l:lnum,num,isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
