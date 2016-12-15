@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: December 10, 2016
+" Last Change: December 14, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -114,7 +114,7 @@ let s:continuation = get(g:,'javascript_continuation',
 
 function s:continues(ln,con)
   if !cursor(a:ln, match(' '.a:con,s:continuation))
-    return eval((['s:syn_at(line("."),col(".") !~? "regex"'] +
+    return eval((['s:syn_at(line("."),col(".")) !~? "regex"'] +
           \ repeat(['s:previous_token() != "."'],5) + [1])[
           \ index(split('/ typeof in instanceof void delete'),s:token())])
   endif
