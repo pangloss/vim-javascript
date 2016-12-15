@@ -106,6 +106,11 @@ endfunction
 " switch case label pattern
 let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
 
+function s:label_end(ln,con)
+  return !cursor(a:ln,match(' ' . a:con, '.*\zs' . s:case_stmt . '$')) &&
+        \ (expand('<cword>') !=# 'default' || s:previous_token(1) !~ '[{,.]')
+endfunction
+
 " configurable regexes that define continuation lines, not including (, {, or [.
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
@@ -205,8 +210,7 @@ function s:IsBlock()
   elseif char == '>'
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
-    return !cursor(0,match(' ' . strpart(getline('.'),0,col('.')),'.*\zs' . s:case_stmt . '$')) &&
-          \ (expand('<cword>') !=# 'default' || s:previous_token(1) !~ '[{,.]')
+    return s:label_end(0,strpart(getline('.'),0,col('.')))
   endif
   return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
@@ -286,8 +290,7 @@ function GetJavascriptIndent()
         endif
         if pline[-1:] != '.' && l:line =~# '^' . s:case_stmt
           return indent(num) + switch_offset
-        elseif !cursor(l:lnum,match(' ' . pline, s:case_stmt . '$')) &&
-              \ (expand('<cword>') !=# 'default' || s:previous_token() !~ '[{,.]')
+        elseif s:label_end(l:lnum,pline)
           return indent(l:lnum) + s:W
         endif
       endif
