@@ -173,8 +173,7 @@ function s:OneScope(lnum)
   endif
   let token = s:token()
   return token == '>' ? getline('.')[col('.')-2] == '=' :
-        \ index(split('else do for if let while with'),token) + 1 &&
-        \ s:previous_token(1) != '.'
+        \ token =~# '^\%(else\|do\)$' && s:previous_token(1) != '.'
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
