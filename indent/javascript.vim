@@ -170,16 +170,16 @@ endfunction
 
 function s:OneScope(lnum)
   let pline = s:Trim(a:lnum,1)
+  let kw = 'else do'
   if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
-    let token = s:previous_token()
-    if index(split('await each'),token) + 1
-      return s:previous_token() ==# 'for'
+    call s:previous_token()
+    let kw = 'for if let while with'
+    if index(split('await each'),s:token()) + 1
+      call s:previous_token()
+      let kw = 'for'
     endif
-    return index(split('for if let while with'),token) + 1
   endif
-  let token = s:token()
-  return token == '>' ? getline('.')[col('.')-2] == '=' :
-        \ token =~# '^\%(else\|do\)$' && s:previous_token(1) != '.'
+  return pline[-2:] == '=>' || index(split(kw),s:token()) + 1 && s:previous_token(1) != '.'
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
