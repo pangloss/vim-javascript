@@ -169,9 +169,9 @@ function s:OneScope(lnum)
     if index(split('await each'),token) + 1
       return s:previous_token() ==# 'for'
     endif
-  else
-    let token = s:token()
+    return index(split('for if let while with'),token) + 1
   endif
+  let token = s:token()
   return token == '>' ? getline('.')[col('.')-2] == '=' :
         \ index(split('else do for if let while with'),token) + 1 &&
         \ s:previous_token(1) != '.'
