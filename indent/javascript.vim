@@ -95,12 +95,18 @@ endfunction
 " NOTE: Moves the cursor, unless a arg is supplied.
 function s:previous_token(...)
   let l:pos = getpos('.')[1:2]
-  return [search('.\>\|[^[:alnum:][:space:]_$]','bW') ?
-        \ (s:looking_at() == '/' || line('.') != l:pos[0] && getline('.') =~ '\/\/') &&
-        \ s:syn_at(line('.'),col('.')) =~? s:syng_com ?
-        \ search('\_[^/]\zs\/[/*]','bW') ? s:previous_token() : ''
-        \ : s:token()
-        \ : ''][a:0 && call('cursor',l:pos)]
+  let token = ''
+  while search('.\>\|[^[:alnum:][:space:]_$]','bW')
+    if (s:looking_at() == '/' || line('.') != l:pos[0] && search('\/\/','nbW',
+          \ line('.'))) && s:syn_at(line('.'),col('.')) =~? s:syng_com
+      call search('\_[^/]\zs\/[/*]','bW')
+    else
+      let token = s:token()
+      break
+    endif
+  endwhile
+  call call('cursor', a:0 ? l:pos : [0,0])
+  return token
 endfunction
 
 " switch case label pattern
