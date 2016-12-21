@@ -174,7 +174,7 @@ function s:OneScope(lnum)
   endif
   return eval((['getline(".")[col(".")-2] == "="'] +
         \ repeat(['s:previous_token(1) != "."'],7) + [0])[
-        \ index(split('> else do for if let while with'),s:token())])
+        \ index(split('> else do for if let while with'),token)])
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
