@@ -169,11 +169,12 @@ function s:OneScope(lnum)
     if index(split('await each'),token) + 1
       return s:previous_token() ==# 'for'
     endif
-    return index(split('for if let while with'),token) + 1
+  else
+    let token = s:token()
   endif
   return eval((['getline(".")[col(".")-2] == "="'] +
-        \ repeat(['s:previous_token(1) != "."'],2) + [0])[
-        \ index(split('> else do'),s:token())])
+        \ repeat(['s:previous_token(1) != "."'],7) + [0])[
+        \ index(split('> else do for if let while with'),s:token())])
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
