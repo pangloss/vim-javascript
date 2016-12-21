@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: December 14, 2016
+" Last Change: December 20, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -205,7 +205,7 @@ function s:IsBlock()
     return char != '{'
   elseif char =~ '\k'
     return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
-          \ ,char) < (0 + (line('.') != l:ln)) || s:previous_token() == '.'
+          \ ,char) < (line('.') != l:ln) || s:previous_token() == '.'
   elseif char == '>'
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
@@ -279,7 +279,7 @@ function GetJavascriptIndent()
     let pline = s:Trim(l:lnum)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = line('.')
-      if s:previous_token() ==# 'switch'
+      if s:previous_token() ==# 'switch' && s:previous_token() != '.'
         if &cino !~ ':' || !has('float')
           let switch_offset = s:W
         else
