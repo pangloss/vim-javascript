@@ -145,10 +145,15 @@ endfunction
 " Find line above 'lnum' that isn't empty or in a comment
 function s:PrevCodeLine(lnum)
   let l:n = prevnonblank(a:lnum)
-  while getline(l:n) =~ '^\s*\%(\/[/*]\|-->\|<!--\|#\)' || s:syn_at(l:n,1) =~? s:syng_com
-    let l:n = prevnonblank(l:n-1)
+  while l:n
+    if getline(l:n) =~ '^\s*\%(\/[/*]\|-->\|<!--\|#\)' 
+      let l:n = prevnonblank(l:n-1)
+    elseif s:syn_at(l:n,1) =~? s:syng_com
+      let l:n = search('\/\*\%<' . l:n . 'l','nbW')
+    else
+      return l:n
+    endif
   endwhile
-  return l:n
 endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
@@ -223,7 +228,8 @@ endfunction
 function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
   " Get the current line.
-  let l:line = getline(v:lnum)
+  call cursor(v:lnum,1)
+  let l:line = getline('.')
   let syns = s:syn_at(v:lnum, 1)
 
   " start with strings,comments,etc.
@@ -253,7 +259,6 @@ function GetJavascriptIndent()
   endif
 
   " the containing paren, bracket, or curly. Many hacks for performance
-  call cursor(v:lnum,1)
   let idx = strlen(l:line) ? stridx('])}',l:line[0]) : -1
   if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
@@ -299,6 +304,7 @@ function GetJavascriptIndent()
           return indent(l:lnum) + s:W
         endif
       endif
+      call cursor(v:lnum,1) " normalize pos
     endif
     if pline[-1:] !~ '[{;]'
       let isOp = l:line =~# s:opfirst || s:continues(l:lnum,pline)
