@@ -145,7 +145,7 @@ endfunction
 " Find line above 'lnum' that isn't empty or in a comment
 function s:PrevCodeLine(lnum)
   let l:n = prevnonblank(a:lnum)
-  while getline(l:n) =~ '^\s*\/[/*]' || s:syn_at(l:n,1) =~? s:syng_com
+  while getline(l:n) =~ '^\s*\%(\/[/*]\|-->\|<!--\|#\)' || s:syn_at(l:n,1) =~? s:syng_com
     let l:n = prevnonblank(l:n-1)
   endwhile
   return l:n
