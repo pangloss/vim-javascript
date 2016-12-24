@@ -258,7 +258,7 @@ function GetJavascriptIndent()
   if l:line[:1] == '/*'
     let l:line = substitute(l:line,'^\%(\/\*.\{-}\*\/\s*\)*','','')
   endif
-  if l:line =~ '^\/[/*]'
+  if l:line =~ '^\%(\/[/*]\|-->\|<!--\|#\)'
     let l:line = ''
   endif
 
