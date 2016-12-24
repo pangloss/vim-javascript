@@ -147,6 +147,10 @@ function s:PrevCodeLine(lnum)
   let l:n = prevnonblank(a:lnum)
   while l:n
     if getline(l:n) =~ '^\s*\%(\/[/*]\|-->\|<!--\|#\)' 
+      if (getline(l:n-1)[-1:] == '\' || stridx(getline(l:n),'`') > 0) &&
+            \ s:syn_at(l:n,1) =~? s:syng_str
+        return l:n
+      endif
       let l:n = prevnonblank(l:n-1)
     elseif s:syn_at(l:n,1) =~? s:syng_com
       let l:n = search('\/\*\%<' . l:n . 'l','nbW')
