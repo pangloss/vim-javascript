@@ -117,6 +117,10 @@ function s:label_end(ln,con)
         \ (expand('<cword>') !=# 'default' || s:previous_token(1) !~ '[{,.]')
 endfunction
 
+function s:jump_label(ln,con)
+  return !cursor(a:ln,match(' '.a:con, ':$')) && s:previous_token() =~ '\k' && s:IsBlock()
+endfunction
+
 " configurable regexes that define continuation lines, not including (, {, or [.
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
@@ -195,6 +199,7 @@ endfunction
 " lineNr which encloses the entire context, 'cont' if whether line 'i' + 1 is
 " a continued expression, which could have started in a braceless context
 function s:iscontOne(i,num,cont)
+  call cursor(v:lnum,1) " normalize pos
   let [l:i, l:num, bL] = [a:i, a:num + !a:num, 0]
   let pind = a:num ? indent(l:num) + s:W : 0
   let ind = indent(l:i) + (a:cont ? 0 : s:W)
@@ -308,10 +313,9 @@ function GetJavascriptIndent()
           return indent(l:lnum) + s:W
         endif
       endif
-      call cursor(v:lnum,1) " normalize pos
     endif
     if pline[-1:] !~ '[{;]'
-      let isOp = l:line =~# s:opfirst || s:continues(l:lnum,pline)
+      let isOp = !s:jump_label(l:lnum,pline) && (l:line =~# s:opfirst || s:continues(l:lnum,pline))
       let bL = s:iscontOne(l:lnum,num,isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
