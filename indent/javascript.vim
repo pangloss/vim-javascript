@@ -112,7 +112,7 @@ endfunction
 " switch case label pattern
 let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
 
-function s:label_end(ln,con)
+function s:case_end(ln,con)
   return !cursor(a:ln,match(' '.a:con, '.*\zs' . s:case_stmt . '$')) &&
         \ (expand('<cword>') !=# 'default' || s:previous_token(1) !~ '[{,.]')
 endfunction
@@ -229,7 +229,8 @@ function s:IsBlock()
   elseif char == '>'
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
-    return s:label_end(0,strpart(getline('.'),0,col('.')))
+    let lp = strpart(getline('.'),0,col('.'))
+    return lp =~# '\<case\>\s*[^ \t:].*:' || s:jump_label(line('.'),lp) && (s:looking_at() != '{' || s:IsBlock())
   endif
   return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
@@ -309,7 +310,7 @@ function GetJavascriptIndent()
         endif
         if pline[-1:] != '.' && l:line =~# '^' . s:case_stmt
           return indent(num) + switch_offset
-        elseif s:label_end(l:lnum,pline)
+        elseif s:case_end(l:lnum,pline)
           return indent(l:lnum) + s:W
         endif
       endif
