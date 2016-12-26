@@ -112,13 +112,15 @@ endfunction
 " switch case label pattern
 let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
 
-function s:case_end(ln,con)
-  return !cursor(a:ln,match(' '.a:con, '.*\zs' . s:case_stmt . '$')) &&
-        \ (expand('<cword>') !=# 'default' || s:previous_token(1) !~ '[{,.]')
-endfunction
-
 function s:jump_label(ln,con)
-  return !cursor(a:ln,match(' '.a:con, ':$')) && s:previous_token() =~ '\k' && s:IsBlock()
+  if !cursor(a:ln,match(' '.a:con, ':$'))
+    let id = s:previous_token()
+    let pos = getpos('.')[1:2]
+    if id =~ '\k' && s:IsBlock()
+      call call('cursor',pos)
+      return id ==# 'default' ? 2 : 1
+    endif
+  endif
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -298,6 +300,7 @@ function GetJavascriptIndent()
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
   if !num || s:looking_at() == '{' && s:IsBlock()
     let pline = s:Trim(l:lnum)
+    let label = s:jump_label(l:lnum,pline)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = line('.')
       if s:previous_token() ==# 'switch' && s:previous_token() != '.'
@@ -310,13 +313,13 @@ function GetJavascriptIndent()
         endif
         if pline[-1:] != '.' && l:line =~# '^' . s:case_stmt
           return indent(num) + switch_offset
-        elseif s:case_end(l:lnum,pline)
+        elseif label == 2 || pline =~# '\<case\>\s*[^ \t:].*:$'
           return indent(l:lnum) + s:W
         endif
       endif
     endif
-    if pline[-1:] !~ '[{;]'
-      let isOp = !s:jump_label(l:lnum,pline) && (l:line =~# s:opfirst || s:continues(l:lnum,pline))
+    if !label && pline[-1:] !~ '[{;]'
+      let isOp = l:line =~# s:opfirst || s:continues(l:lnum,pline)
       let bL = s:iscontOne(l:lnum,num,isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
