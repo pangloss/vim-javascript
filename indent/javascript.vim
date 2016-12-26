@@ -197,7 +197,8 @@ function s:OneScope(lnum)
       let kw = 'for'
     endif
   endif
-  return pline[-2:] == '=>' || index(split(kw),s:token()) + 1 && s:save_pos('s:previous_token') != '.'
+  return pline[-2:] == '=>' || index(split(kw),s:token()) + 1 &&
+        \ s:save_pos('s:previous_token') != '.'
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
@@ -235,7 +236,8 @@ function s:IsBlock()
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
     let lp = strpart(getline('.'),0,col('.'))
-    return lp =~# '\<case\>\s*[^ \t:].*:$' || s:save_pos('s:jump_label',line('.'),lp) && (s:looking_at() != '{' || s:IsBlock())
+    return lp =~# '\<case\>\s*[^ \t:].*:$' || s:save_pos('s:jump_label',line('.'),lp) &&
+          \ (s:looking_at() != '{' || s:IsBlock())
   endif
   return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
