@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: December 23, 2016
+" Last Change: December 26, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -99,7 +99,6 @@ function s:token()
   return s:looking_at() =~ '\k' ? expand('<cword>') : s:looking_at()
 endfunction
 
-" NOTE: Moves the cursor, unless a arg is supplied.
 function s:previous_token()
   let ln = line('.')
   let token = ''
