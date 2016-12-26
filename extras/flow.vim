@@ -11,7 +11,8 @@ syntax region  jsFlowGroup          contained matchgroup=jsFlowNoise start=/</ e
 syntax region  jsFlowArrowArguments contained matchgroup=jsFlowNoise start=/(/  end=/)\%(\s*=>\)\@=/ oneline skipwhite skipempty nextgroup=jsFlowArrow contains=@jsFlowCluster
 syntax match   jsFlowArrow          contained /=>/ skipwhite skipempty nextgroup=jsFlowType,jsFlowTypeCustom,jsFlowParens
 syntax match   jsFlowMaybe          contained /?/ skipwhite skipempty nextgroup=jsFlowType,jsFlowTypeCustom,jsFlowParens,jsFlowArrowArguments
-syntax match   jsFlowObjectKey      contained /[0-9a-zA-Z_$?]*\(\s*:\)\@=/ contains=jsFunctionKey,jsFlowMaybe skipwhite skipempty nextgroup=jsObjectValue containedin=jsObject
+syntax match   jsFlowObjectKey      contained /[0-9a-zA-Z_$?]*\(\s*:\)\@=/ contains=jsFunctionKey,jsFlowMaybe skipwhite skipempty nextgroup=jsFlowObjectValue containedin=jsObject
+syntax region  jsFlowObjectValue    contained start=/:/ end=/\%(,\|;\|}\)\@=/ contains=jsObjectColon,@jsFlowCluster,@jsNoise extend
 syntax match   jsFlowOrOperator     contained /|/ skipwhite skipempty nextgroup=@jsFlowCluster
 syntax keyword jsFlowImportType     contained type skipwhite skipempty nextgroup=jsModuleAsterisk,jsModuleKeyword,jsModuleGroup
 syntax match   jsFlowWildcard       contained /*/
