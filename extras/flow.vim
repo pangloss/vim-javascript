@@ -14,6 +14,7 @@ syntax match   jsFlowMaybe          contained /?/ skipwhite skipempty nextgroup=
 syntax match   jsFlowObjectKey      contained /[0-9a-zA-Z_$?]*\(\s*:\)\@=/ contains=jsFunctionKey,jsFlowMaybe skipwhite skipempty nextgroup=jsObjectValue containedin=jsObject
 syntax match   jsFlowOrOperator     contained /|/ skipwhite skipempty nextgroup=@jsFlowCluster
 syntax keyword jsFlowImportType     contained type skipwhite skipempty nextgroup=jsModuleAsterisk,jsModuleKeyword,jsModuleGroup
+syntax match   jsFlowWildcard       contained /*/
 
 syntax match   jsFlowReturn         contained /:\s*/ contains=jsFlowNoise skipwhite skipempty nextgroup=@jsFlowReturnCluster
 syntax region  jsFlowReturnObject   contained matchgroup=jsFlowNoise start=/{/    end=/}/  contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturnOrOp
@@ -23,6 +24,7 @@ syntax match   jsFlowReturnKeyword  contained /\k\+/ contains=jsFlowType,jsFlowT
 syntax match   jsFlowReturnMaybe    contained /?/ skipwhite skipempty nextgroup=jsFlowReturnKeyword
 syntax region  jsFlowReturnGroup    contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturnOrOp
 syntax match   jsFlowReturnOrOp     contained /\s*|\s*/ skipwhite skipempty nextgroup=@jsFlowReturnCluster
+syntax match   jsFlowWildcardReturn contained /*/ skipwhite skipempty nextgroup=jsFuncBlock
 
 syntax region  jsFlowFunctionGroup  contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncArgs
 syntax region  jsFlowClassGroup     contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsClassBlock
@@ -42,8 +44,8 @@ syntax region  jsFlowDeclareBlock   contained matchgroup=jsFlowNoise start=/{/ e
 
 syntax region jsFlowInterfaceBlock  contained matchgroup=jsFlowNoise start=/{/ end=/}/ contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectMethodType,jsGenerator,jsComment,jsObjectStringKey,jsSpreadExpression,jsFlowNoise keepend
 
-syntax cluster jsFlowReturnCluster            contains=jsFlowNoise,jsFlowReturnObject,jsFlowReturnArray,jsFlowReturnKeyword,jsFlowReturnGroup,jsFlowReturnMaybe,jsFlowReturnOrOp
-syntax cluster jsFlowCluster                  contains=jsFlowArray,jsFlowObject,jsFlowNoise,jsFlowTypeof,jsFlowType,jsFlowGroup,jsFlowArrowArguments,jsFlowMaybe,jsFlowParens,jsFlowOrOperator
+syntax cluster jsFlowReturnCluster            contains=jsFlowNoise,jsFlowReturnObject,jsFlowReturnArray,jsFlowReturnKeyword,jsFlowReturnGroup,jsFlowReturnMaybe,jsFlowReturnOrOp,jsFlowWildcardReturn
+syntax cluster jsFlowCluster                  contains=jsFlowArray,jsFlowObject,jsFlowNoise,jsFlowTypeof,jsFlowType,jsFlowGroup,jsFlowArrowArguments,jsFlowMaybe,jsFlowParens,jsFlowOrOperator,jsFlowWildcard
 
 if version >= 508 || !exists("did_javascript_syn_inits")
   if version < 508
@@ -84,5 +86,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFlowObjectKey          jsObjectKey
   HiLink jsFlowOrOperator         PreProc
   HiLink jsFlowReturnOrOp         jsFlowOrOperator
+  HiLink jsFlowWildcard           PreProc
+  HiLink jsFlowWildcardReturn     PreProc
   delcommand HiLink
 endif
