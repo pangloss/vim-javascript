@@ -80,6 +80,13 @@ function s:alternatePair(stop)
   call cursor(v:lnum,1)
 endfunction
 
+function s:save_pos(f,...)
+  let l:pos = getpos('.')[1:2]
+  let ret = call(a:f,a:000)
+  call call('cursor',l:pos)
+  return ret
+endfunction
+
 function s:syn_at(l,c)
   return synIDattr(synID(a:l,a:c,0),'name')
 endfunction
@@ -93,11 +100,11 @@ function s:token()
 endfunction
 
 " NOTE: Moves the cursor, unless a arg is supplied.
-function s:previous_token(...)
-  let l:pos = getpos('.')[1:2]
+function s:previous_token()
+  let ln = line('.')
   let token = ''
   while search('.\>\|[^[:alnum:][:space:]_$]','bW')
-    if (s:looking_at() == '/' || line('.') != l:pos[0] && search('\/\/','nbW',
+    if (s:looking_at() == '/' || line('.') != ln && search('\/\/','nbW',
           \ line('.'))) && s:syn_at(line('.'),col('.')) =~? s:syng_com
       call search('\_[^/]\zs\/[/*]','bW')
     else
@@ -105,7 +112,6 @@ function s:previous_token(...)
       break
     endif
   endwhile
-  call call('cursor', a:0 ? l:pos : [0,0])
   return token
 endfunction
 
@@ -115,9 +121,7 @@ let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
 function s:jump_label(ln,con)
   if !cursor(a:ln,match(' '.a:con, ':$'))
     let id = s:previous_token()
-    let pos = getpos('.')[1:2]
     if id =~ '\k' && s:IsBlock()
-      call call('cursor',pos)
       return id ==# 'default' ? 2 : 1
     endif
   endif
@@ -194,7 +198,7 @@ function s:OneScope(lnum)
       let kw = 'for'
     endif
   endif
-  return pline[-2:] == '=>' || index(split(kw),s:token()) + 1 && s:previous_token(1) != '.'
+  return pline[-2:] == '=>' || index(split(kw),s:token()) + 1 && s:save_pos('s:previous_token') != '.'
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
@@ -232,7 +236,7 @@ function s:IsBlock()
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
     let lp = strpart(getline('.'),0,col('.'))
-    return lp =~# '\<case\>\s*[^ \t:].*:$' || s:jump_label(line('.'),lp) && (s:looking_at() != '{' || s:IsBlock())
+    return lp =~# '\<case\>\s*[^ \t:].*:$' || s:save_pos('s:jump_label',line('.'),lp) && (s:looking_at() != '{' || s:IsBlock())
   endif
   return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
@@ -300,7 +304,7 @@ function GetJavascriptIndent()
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
   if !num || s:looking_at() == '{' && s:IsBlock()
     let pline = s:Trim(l:lnum)
-    let label = s:jump_label(l:lnum,pline)
+    let label = s:save_pos('s:jump_label',l:lnum,pline)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = line('.')
       if s:previous_token() ==# 'switch' && s:previous_token() != '.'
