@@ -236,7 +236,7 @@ function s:IsBlock()
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
     let lp = strpart(getline('.'),0,col('.'))
-    return lp =~# '\<case\>\s*[^ \t:].*:$' || s:save_pos('s:jump_label',line('.'),lp) &&
+    return lp =~# '\<case\>\s*[^ \t:].*:$' || s:jump_label(line('.'),lp) &&
           \ (s:looking_at() != '{' || s:IsBlock())
   endif
   return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
