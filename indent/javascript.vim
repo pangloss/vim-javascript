@@ -55,7 +55,7 @@ let s:syng_com = 'comment\|doc'
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
 function s:skip_func()
-  if !s:free || search('\m\%(`\|\*\/\)','nW',s:looksyn)
+  if !s:free || search('\m`\|\*\/','nW',s:looksyn)
     let s:free = !eval(s:skip_expr)
     let s:looksyn = s:free ? line('.') : s:looksyn
     return !s:free
@@ -102,7 +102,7 @@ endfunction
 function s:previous_token()
   let ln = line('.')
   let token = ''
-  while search('\m\%(.\>\|[^[:alnum:][:space:]_$]\)','bW')
+  while search('\m.\>\|[^[:alnum:][:space:]_$]','bW')
     if (s:looking_at() == '/' || line('.') != ln && search('\m\/\/','nbW',
           \ line('.'))) && s:syn_at(line('.'),col('.')) =~? s:syng_com
       call search('\m\_[^/]\zs\/[/*]','bW')
