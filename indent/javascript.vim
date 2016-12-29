@@ -39,11 +39,11 @@ endif
 " searchpair() wrapper
 if has('reltime')
   function s:GetPair(start,end,flags,skip,time,...)
-    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
   endfunction
 else
   function s:GetPair(start,end,flags,skip,...)
-    return searchpair(a:start,'',a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)]))
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)]))
   endfunction
 endif
 
@@ -55,17 +55,17 @@ let s:syng_com = 'comment\|doc'
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
 function s:skip_func()
-  if !s:free || search('`\|\*\/','nW',s:looksyn)
+  if !s:free || search('\m\%(`\|\*\/\)','nW',s:looksyn)
     let s:free = !eval(s:skip_expr)
     let s:looksyn = s:free ? line('.') : s:looksyn
     return !s:free
   endif
   let s:looksyn = line('.')
-  return (search('\/','nbW',s:looksyn) || search('[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
+  return (search('\m\/','nbW',s:looksyn) || search('\m[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
 endfunction
 
 function s:alternatePair(stop)
-  while search('[][(){}]','bW',a:stop)
+  while search('\m[][(){}]','bW',a:stop)
     if !s:skip_func()
       let idx = stridx('])}',s:looking_at())
       if idx + 1
@@ -102,10 +102,10 @@ endfunction
 function s:previous_token()
   let ln = line('.')
   let token = ''
-  while search('.\>\|[^[:alnum:][:space:]_$]','bW')
-    if (s:looking_at() == '/' || line('.') != ln && search('\/\/','nbW',
+  while search('\m\%(.\>\|[^[:alnum:][:space:]_$]\)','bW')
+    if (s:looking_at() == '/' || line('.') != ln && search('\m\/\/','nbW',
           \ line('.'))) && s:syn_at(line('.'),col('.')) =~? s:syng_com
-      call search('\_[^/]\zs\/[/*]','bW')
+      call search('\m\_[^/]\zs\/[/*]','bW')
     else
       let token = s:token()
       break
@@ -162,7 +162,7 @@ function s:PrevCodeLine(lnum)
       endif
       let l:n = prevnonblank(l:n-1)
     elseif s:syn_at(l:n,1) =~? s:syng_com
-      let l:n = search('\/\*\%<' . l:n . 'l','nbW')
+      let l:n = search('\m\/\*\%<' . l:n . 'l','nbW')
     else
       return l:n
     endif
@@ -293,7 +293,7 @@ function GetJavascriptIndent()
   endif
 
   if idx + 1
-    if idx == 2 && search('\S','bW',line('.')) && s:looking_at() == ')'
+    if idx == 2 && search('\m\S','bW',line('.')) && s:looking_at() == ')'
       call s:GetPair('(',')','bW',s:skip_expr,200)
     endif
     return indent('.')
