@@ -54,6 +54,13 @@ let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
+function s:others()
+  return ((line2byte(getline(line('.'))) + col('.')) <= (line2byte(b:js_cache[1]) + b:js_cache[2])) || eval(s:skip_expr)
+endfunction
+function s:tern_skip()
+  return eval(s:skip_expr) || s:GetPair('{','}','nbW','s:others()',200,b:js_cache[1]) > 0
+endfunction
+
 function s:skip_func()
   if !s:free || search('\m`\|\*\/','nW',s:looksyn)
     let s:free = !eval(s:skip_expr)
@@ -318,7 +325,7 @@ function GetJavascriptIndent()
         endif
         if pline[-1:] != '.' && l:line =~# '^' . s:case_stmt
           return indent(num) + switch_offset
-        elseif label == 2 || pline =~# '\<case\>\s*[^ \t:].*:$'
+        elseif label == 2 || pline =~# '[^:]:$' && (cursor(l:lnum,strlen(pline)) || !s:GetPair('?',':','bW','s:tern_skip()',20000,num))
           return indent(l:lnum) + s:W
         endif
       endif
