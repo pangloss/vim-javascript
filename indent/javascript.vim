@@ -61,7 +61,7 @@ function s:tern_skip(p)
   return eval(s:skip_expr) || s:GetPair('{','}','nbW','s:others('.string(a:p).')',200,a:p[0]) > 0
 endfunction
 function s:tern_col(p)
-  return s:GetPair('?',':','bW','s:tern_skip('.string(a:p).')',20000,a:p[0])
+  return s:GetPair('?',':','bW','s:tern_skip('.string(a:p).')',20000,a:p[0]) > 0
 endfunction
 
 function s:skip_func()
