@@ -55,7 +55,7 @@ let s:syng_com = 'comment\|doc'
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
 function s:others()
-  return ((line2byte(getline(line('.'))) + col('.')) <= (line2byte(b:js_cache[1]) + b:js_cache[2])) || eval(s:skip_expr)
+  return ((line2byte(line('.')) + col('.')) <= (line2byte(b:js_cache[1]) + b:js_cache[2])) || eval(s:skip_expr)
 endfunction
 function s:tern_skip()
   return eval(s:skip_expr) || s:GetPair('{','}','nbW','s:others()',200,b:js_cache[1]) > 0
