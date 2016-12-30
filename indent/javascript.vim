@@ -54,11 +54,14 @@ let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
-function s:others()
-  return ((line2byte(line('.')) + col('.')) <= (line2byte(b:js_cache[1]) + b:js_cache[2])) || eval(s:skip_expr)
+function s:others(p)
+  return ((line2byte(line('.')) + col('.')) <= (line2byte(a:p[0]) + a:p[1])) || eval(s:skip_expr)
 endfunction
-function s:tern_skip()
-  return eval(s:skip_expr) || s:GetPair('{','}','nbW','s:others()',200,b:js_cache[1]) > 0
+function s:tern_skip(p)
+  return eval(s:skip_expr) || s:GetPair('{','}','nbW','s:others('.string(a:p).')',200,a:p[0]) > 0
+endfunction
+function s:tern_col(p)
+  return s:GetPair('?',':','bW','s:tern_skip('.string(a:p).')',20000,a:p[0])
 endfunction
 
 function s:skip_func()
@@ -325,7 +328,8 @@ function GetJavascriptIndent()
         endif
         if pline[-1:] != '.' && l:line =~# '^' . s:case_stmt
           return indent(num) + switch_offset
-        elseif label == 2 || pline =~# '[^:]:$' && (cursor(l:lnum,strlen(pline)) || !s:GetPair('?',':','bW','s:tern_skip()',20000,num))
+        elseif label == 2 || pline =~# '[^:]:$' &&
+              \ (cursor(l:lnum,strlen(pline)) || !s:tern_col(b:js_cache[1:2]))
           return indent(l:lnum) + s:W
         endif
       endif
