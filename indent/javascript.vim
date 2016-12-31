@@ -135,12 +135,9 @@ function s:previous_token()
   return token
 endfunction
 
-" switch case label pattern
-let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
-
 function s:jump_label()
   let id = s:previous_token()
-  return id !~ '\k' || s:token() ==# 'default' || s:previous_token() ==# 'case'
+  return id !~ '\k' || id ==# 'default' || s:previous_token() ==# 'case'
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -179,7 +176,8 @@ function s:PrevCodeLine(lnum)
       endif
       let l:n = prevnonblank(l:n-1)
     elseif s:syn_at(l:n,1) =~? s:syng_com
-      let l:n = search('\m\/\*\%<' . l:n . 'l','nbW')
+      let l:n = s:save_pos('eval',
+            \ 'cursor('.l:n.',0) + search(''\m\/\*\%<' . l:n . "l','bW')")
     else
       return l:n
     endif
@@ -222,7 +220,6 @@ endfunction
 " lineNr which encloses the entire context, 'cont' if whether line 'i' + 1 is
 " a continued expression, which could have started in a braceless context
 function s:iscontOne(i,num,cont)
-  call cursor(v:lnum,1) " normalize pos
   let [l:i, l:num, bL] = [a:i, a:num + !a:num, 0]
   let pind = a:num ? indent(l:num) + s:W : 0
   let ind = indent(l:i) + (a:cont ? 0 : s:W)
@@ -330,11 +327,11 @@ function GetJavascriptIndent()
           let switch_offset = float2nr(str2float(cinc[1].(strlen(cinc[2]) ? cinc[2] : strlen(cinc[3])))
                 \ * (strlen(cinc[3]) ? s:W : 1))
         endif
-        if pline[-1:] != '.' && l:line =~# '^' . s:case_stmt
+        if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
           return indent(num) + switch_offset
         elseif pline =~# '[^:]:$'
           call cursor(l:lnum,strlen(pline))
-          if !s:save_pos('s:tern_col',b:js_cache[1:2]) && s:jump_label()
+          if !s:tern_col(b:js_cache[1:2]) && s:jump_label()
             return indent(l:lnum) + s:W
           endif
         endif
