@@ -114,11 +114,6 @@ function s:previous_token()
   return token
 endfunction
 
-function s:switch_case()
-  let id = s:previous_token()
-  return id !~ '\K\k*' || id ==# 'default' || s:previous_token() ==# 'case'
-endfunction
-
 function s:others(p)
   return ((line2byte(line('.')) + col('.')) <= (line2byte(a:p[0]) + a:p[1])) || eval(s:skip_expr)
 endfunction
@@ -129,6 +124,11 @@ endfunction
 
 function s:tern_col(p)
   return s:GetPair('?',':\@<!::\@!','nbW','s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
+endfunction
+
+function s:switch_case(p)
+  return !s:tern_col(a:p) && s:GetPair('\C\<\%(default\|case\)\>',':','cnbW',
+        \ s:skip_expr.'||s:looking_at()== ":" && s:tern_col('.string(a:p).')||dummy',200)
 endfunction
 
 function s:label_col()
@@ -334,7 +334,7 @@ function GetJavascriptIndent()
           return indent(num) + switch_offset
         elseif pline =~# '[^:]:$'
           call cursor(l:lnum,strlen(pline))
-          if !s:tern_col(b:js_cache[1:2]) && s:switch_case()
+          if s:switch_case(b:js_cache[1:2])
             return indent(l:lnum) + s:W
           endif
         endif
