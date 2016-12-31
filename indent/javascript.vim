@@ -116,7 +116,7 @@ endfunction
 
 function s:switch_case()
   let id = s:previous_token()
-  return id !~ '\K' || id ==# 'default' || s:previous_token() ==# 'case'
+  return id !~ '\K\k*' || id ==# 'default' || s:previous_token() ==# 'case'
 endfunction
 
 function s:others(p)
@@ -128,7 +128,7 @@ function s:tern_skip(p)
 endfunction
 
 function s:tern_col(p)
-  return s:GetPair('?',':\@<!::\@!','bW','s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
+  return s:GetPair('?',':\@<!::\@!','nbW','s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
 endfunction
 
 function s:label_col()
