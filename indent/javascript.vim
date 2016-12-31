@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: December 26, 2016
+" Last Change: December 31, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -53,29 +53,6 @@ let s:syng_str = 'string\|template'
 let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
-
-function s:others(p)
-  return ((line2byte(line('.')) + col('.')) <= (line2byte(a:p[0]) + a:p[1])) || eval(s:skip_expr)
-endfunction
-
-function s:tern_skip(p)
-  return eval(s:skip_expr) || s:GetPair('{','}','nbW','s:others('.string(a:p).')',200,a:p[0]) > 0
-endfunction
-
-function s:tern_col(p)
-  return s:GetPair('?',':','nbW','s:tern_skip('.string(a:p).')',20000,a:p[0]) > 0
-endfunction
-
-function s:unknown()
-  let pos = getpos('.')[1:2]
-  let [s:looksyn,s:free] = pos
-  try
-    return s:alternatePair(0) && s:looking_at() == '{' && s:save_pos('s:IsBlock') &&
-          \ !s:tern_col(getpos('.')[1:2])
-  finally
-    call call('cursor',pos)
-  endtry
-endfunction
 
 function s:skip_func()
   if !s:free || search('\m`\|\*\/','nW',s:looksyn)
@@ -137,9 +114,32 @@ function s:previous_token()
   return token
 endfunction
 
-function s:jump_label()
+function s:switch_case()
   let id = s:previous_token()
-  return id !~ '\k' || id ==# 'default' || s:previous_token() ==# 'case'
+  return id !~ '\K' || id ==# 'default' || s:previous_token() ==# 'case'
+endfunction
+
+function s:others(p)
+  return ((line2byte(line('.')) + col('.')) <= (line2byte(a:p[0]) + a:p[1])) || eval(s:skip_expr)
+endfunction
+
+function s:tern_skip(p)
+  return eval(s:skip_expr) || s:GetPair('{','}','nbW','s:others('.string(a:p).')',200,a:p[0]) > 0
+endfunction
+
+function s:tern_col(p)
+  return s:GetPair('?',':\@<!::\@!','bW','s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
+endfunction
+
+function s:label_col()
+  let pos = getpos('.')[1:2]
+  let [s:looksyn,s:free] = pos
+  try
+    return s:alternatePair(0) && s:looking_at() == '{' && s:save_pos('s:IsBlock') &&
+          \ !s:tern_col(getpos('.')[1:2])
+  finally
+    call call('cursor',pos)
+  endtry
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -251,7 +251,7 @@ function s:IsBlock()
   elseif char == '>'
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
-    return getline('.')[col('.')-2] != ':' && s:unknown()
+    return getline('.')[col('.')-2] != ':' && s:label_col()
   endif
   return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
@@ -333,7 +333,7 @@ function GetJavascriptIndent()
           return indent(num) + switch_offset
         elseif pline =~# '[^:]:$'
           call cursor(l:lnum,strlen(pline))
-          if !s:tern_col(b:js_cache[1:2]) && s:jump_label()
+          if !s:tern_col(b:js_cache[1:2]) && s:switch_case()
             return indent(l:lnum) + s:W
           endif
         endif
