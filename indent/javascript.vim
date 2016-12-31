@@ -61,7 +61,18 @@ function s:tern_skip(p)
   return eval(s:skip_expr) || s:GetPair('{','}','nbW','s:others('.string(a:p).')',200,a:p[0]) > 0
 endfunction
 function s:tern_col(p)
-  return s:GetPair('?',':','bW','s:tern_skip('.string(a:p).')',20000,a:p[0]) > 0
+  return s:GetPair('?',':','nbW','s:tern_skip('.string(a:p).')',20000,a:p[0]) > 0
+endfunction
+function s:unknown()
+  let pos = getpos('.')[1:2]
+  let [s:looksyn,s:free] = [line('.'),1]
+  call s:alternatePair(0)
+  let poss = getpos('.')[1:2]
+  if s:looking_at() == '{' && s:IsBlock()
+    call call('cursor',pos)
+    return !s:tern_col(poss)
+  endif
+  call call('cursor',pos)
 endfunction
 
 function s:skip_func()
@@ -127,13 +138,9 @@ endfunction
 " switch case label pattern
 let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
 
-function s:jump_label(ln,con)
-  if !cursor(a:ln,match(' '.a:con, ':$'))
-    let id = s:previous_token()
-    if id =~ '\k' && s:IsBlock()
-      return id ==# 'default' ? 2 : 1
-    endif
-  endif
+function s:jump_label()
+  let id = s:previous_token()
+  return id !~ '\k' || s:token() ==# 'default' || s:previous_token() ==# 'case'
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -245,9 +252,7 @@ function s:IsBlock()
   elseif char == '>'
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
-    let lp = strpart(getline('.'),0,col('.'))
-    return lp =~# '\<case\>\s*[^ \t:].*:$' || s:jump_label(line('.'),lp) &&
-          \ (s:looking_at() != '{' || s:IsBlock())
+    return getline('.')[col('.')-2] != ':' && s:unknown()
   endif
   return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
@@ -315,7 +320,6 @@ function GetJavascriptIndent()
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
   if !num || s:looking_at() == '{' && s:IsBlock()
     let pline = s:Trim(l:lnum)
-    let label = s:save_pos('s:jump_label',l:lnum,pline)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = line('.')
       if s:previous_token() ==# 'switch' && s:previous_token() != '.'
@@ -328,13 +332,15 @@ function GetJavascriptIndent()
         endif
         if pline[-1:] != '.' && l:line =~# '^' . s:case_stmt
           return indent(num) + switch_offset
-        elseif label == 2 || pline =~# '[^:]:$' &&
-              \ (cursor(l:lnum,strlen(pline)) || !s:tern_col(b:js_cache[1:2]))
-          return indent(l:lnum) + s:W
+        elseif pline =~# '[^:]:$'
+          call cursor(l:lnum,strlen(pline))
+          if !s:save_pos('s:tern_col',b:js_cache[1:2]) && s:jump_label()
+            return indent(l:lnum) + s:W
+          endif
         endif
       endif
     endif
-    if !label && pline[-1:] !~ '[{;]'
+    if pline[-1:] !~ '[{;]'
       let isOp = l:line =~# s:opfirst || s:continues(l:lnum,pline)
       let bL = s:iscontOne(l:lnum,num,isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
