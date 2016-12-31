@@ -134,12 +134,13 @@ endfunction
 function s:label_col()
   let pos = getpos('.')[1:2]
   let [s:looksyn,s:free] = pos
-  try
-    return s:alternatePair(0) && s:looking_at() == '{' && s:save_pos('s:IsBlock') &&
-          \ !s:tern_col(getpos('.')[1:2])
-  finally
-    call call('cursor',pos)
-  endtry
+  if !s:alternatePair(0)
+    return call('cursor',pos) || !s:tern_col([0,0])
+  elseif s:looking_at() == '{' && s:save_pos('s:IsBlock')
+    let poss = getpos('.')[1:2]
+    return call('cursor',pos) || !s:tern_col(poss)
+  endif
+  call call('cursor',pos)
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
