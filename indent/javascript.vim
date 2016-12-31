@@ -57,22 +57,24 @@ let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_s
 function s:others(p)
   return ((line2byte(line('.')) + col('.')) <= (line2byte(a:p[0]) + a:p[1])) || eval(s:skip_expr)
 endfunction
+
 function s:tern_skip(p)
   return eval(s:skip_expr) || s:GetPair('{','}','nbW','s:others('.string(a:p).')',200,a:p[0]) > 0
 endfunction
+
 function s:tern_col(p)
   return s:GetPair('?',':','nbW','s:tern_skip('.string(a:p).')',20000,a:p[0]) > 0
 endfunction
+
 function s:unknown()
   let pos = getpos('.')[1:2]
-  let [s:looksyn,s:free] = [line('.'),1]
-  call s:alternatePair(0)
-  let poss = getpos('.')[1:2]
-  if s:looking_at() == '{' && s:IsBlock()
+  let [s:looksyn,s:free] = pos
+  try
+    return s:alternatePair(0) && s:looking_at() == '{' && s:save_pos('s:IsBlock') &&
+          \ !s:tern_col(getpos('.')[1:2])
+  finally
     call call('cursor',pos)
-    return !s:tern_col(poss)
-  endif
-  call call('cursor',pos)
+  endtry
 endfunction
 
 function s:skip_func()
@@ -94,7 +96,7 @@ function s:alternatePair(stop)
           break
         endif
       else
-        return
+        return 1
       endif
     endif
   endwhile
