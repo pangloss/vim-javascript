@@ -129,7 +129,7 @@ endfunction
 
 function s:switch_case(p)
   return !s:tern_col(eval(a:p)) && (s:GetPair('\C\<\%(default\|case\)\>',':','nbW',s:skip_expr
-        \ .'|| (s:looking_at()== ":" ? s:tern_col('.a:p.') : s:tern_skip('.a:p.') || dummy)',200) < 0)
+        \ .'|| (s:looking_at() == ":" ? s:tern_col('.a:p.') : s:tern_skip('.a:p.') || s:previous_token() == "." || dummy)',200) < 0)
 endfunction
 
 function s:label_col()
@@ -181,7 +181,7 @@ function s:PrevCodeLine(lnum)
       let l:n = prevnonblank(l:n-1)
     elseif s:syn_at(l:n,1) =~? s:syng_com
       let l:n = s:save_pos('eval',
-            \ 'cursor('.l:n.',0) + search(''\m\/\*\%<' . l:n . "l','bW')")
+            \ 'cursor('.l:n.',1) + search(''\m\/\*','bW')")
     else
       return l:n
     endif
