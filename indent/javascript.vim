@@ -65,6 +65,7 @@ function s:skip_func()
 endfunction
 
 function s:alternatePair(stop)
+  let pos = getpos('.')[1:2]
   while search('\m[][(){}]','bW',a:stop)
     if !s:skip_func()
       let idx = stridx('])}',s:looking_at())
@@ -73,11 +74,11 @@ function s:alternatePair(stop)
           break
         endif
       else
-        return 1
+        return
       endif
     endif
   endwhile
-  call cursor(v:lnum,1)
+  call call('cursor',pos)
 endfunction
 
 function s:save_pos(f,...)
@@ -134,13 +135,13 @@ endfunction
 function s:label_col()
   let pos = getpos('.')[1:2]
   let [s:looksyn,s:free] = pos
-  if !s:alternatePair(0)
-    return call('cursor',pos) || !s:tern_col([0,0])
-  elseif s:looking_at() == '{' && s:save_pos('s:IsBlock')
+  call s:alternatePair(0)
+  if s:looking_at() == '{' && s:save_pos('s:IsBlock')
     let poss = getpos('.')[1:2]
     return call('cursor',pos) || !s:tern_col(poss)
+  elseif s:looking_at() == ':'
+    return !s:tern_col([0,0])
   endif
-  call call('cursor',pos)
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
