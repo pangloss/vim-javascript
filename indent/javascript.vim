@@ -128,7 +128,7 @@ endfunction
 
 function s:switch_case(p)
   return !s:tern_col(a:p) && s:GetPair('\C\<\%(default\|case\)\>',':','cnbW',
-        \ s:skip_expr.'||s:looking_at()== ":" && s:tern_col('.string(a:p).')||dummy',200)
+        \ s:skip_expr.'||(s:looking_at()== ":"? s:tern_col('.string(a:p).') : s:tern_skip('.string(a:p).')||dummy)',200)
 endfunction
 
 function s:label_col()
