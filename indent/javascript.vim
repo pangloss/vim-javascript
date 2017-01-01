@@ -120,16 +120,16 @@ function s:others(p)
 endfunction
 
 function s:tern_skip(p)
-  return eval(s:skip_expr) || s:GetPair('{','}','nbW','s:others('.string(a:p).')',200,a:p[0]) > 0
+  return s:GetPair('{','}','nbW','s:others('.string(a:p).')',200,a:p[0]) > 0
 endfunction
 
 function s:tern_col(p)
-  return s:GetPair('?',':\@<!::\@!','nbW','s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
+  return s:GetPair('?',':\@<!::\@!','nbW',s:skip_expr .'|| s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
 endfunction
 
 function s:switch_case(p)
-  return !s:tern_col(a:p) && s:GetPair('\C\<\%(default\|case\)\>',':','cnbW',
-        \ s:skip_expr.'||(s:looking_at()== ":"? s:tern_col('.string(a:p).') : s:tern_skip('.string(a:p).')||dummy)',200)
+  return !s:tern_col(eval(a:p)) && (s:GetPair('\C\<\%(default\|case\)\>',':','nbW',s:skip_expr
+        \ .'|| (s:looking_at()== ":" ? s:tern_col('.a:p.') : s:tern_skip('.a:p.') || dummy)',200) < 0)
 endfunction
 
 function s:label_col()
@@ -335,7 +335,7 @@ function GetJavascriptIndent()
           return indent(num) + switch_offset
         elseif pline =~# '[^:]:$'
           call cursor(l:lnum,strlen(pline))
-          if s:switch_case(b:js_cache[1:2])
+          if s:switch_case(string(b:js_cache[1:2]))
             return indent(l:lnum) + s:W
           endif
         endif
