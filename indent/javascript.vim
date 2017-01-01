@@ -181,7 +181,7 @@ function s:PrevCodeLine(lnum)
       let l:n = prevnonblank(l:n-1)
     elseif s:syn_at(l:n,1) =~? s:syng_com
       let l:n = s:save_pos('eval',
-            \ 'cursor('.l:n.',1) + search(''\m\/\*','bW')")
+            \ 'cursor('.l:n.',1) + search(''\m\/\*'',"bW")')
     else
       return l:n
     endif
