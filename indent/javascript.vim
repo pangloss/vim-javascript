@@ -337,7 +337,7 @@ function GetJavascriptIndent()
         elseif pline =~# '[^:]:$'
           call cursor(l:lnum,strlen(pline))
           if s:switch_case(string(b:js_cache[1:2]))
-            return indent(l:lnum) + s:W
+            return indent(num) + switch_offset + s:W
           endif
         endif
       endif
