@@ -128,8 +128,9 @@ function s:tern_col(p)
 endfunction
 
 function s:switch_case(p)
-  return !s:tern_col(eval(a:p)) && (s:GetPair('\C\<\%(default\|case\)\>',':','nbW',s:skip_expr
-        \ .'|| (s:looking_at() == ":" ? s:tern_col('.a:p.') : s:tern_skip('.a:p.') || s:previous_token() == "." || dummy)',200) < 0)
+  return !s:tern_col(eval(a:p)) && s:GetPair('\C\<\%(default\|case\)\>',':','nbW',s:skip_expr
+        \ .'|| (s:looking_at() == ":" ? s:tern_col('.a:p.') : s:save_pos("s:previous_token") == ".")'
+        \ .'|| s:tern_skip('.a:p.')',200) > 0
 endfunction
 
 function s:label_col()
