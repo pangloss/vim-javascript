@@ -332,7 +332,7 @@ function GetJavascriptIndent()
       endif
     endif
     if pline[-1:] !~ '[{;]'
-      if pline =~# '[^:]:$'
+      if pline =~# ':\@<!:$'
         call cursor(l:lnum,strlen(pline))
         let isOp = s:tern_col(b:js_cache[1:2])
       else
