@@ -127,12 +127,6 @@ function s:tern_col(p)
   return s:GetPair('?',':\@<!::\@!','nbW',s:skip_expr .'|| s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
 endfunction
 
-function s:switch_case(p)
-  return !s:tern_col(eval(a:p)) && s:GetPair('\C\<\%(default\|case\)\>',':','nbW',s:skip_expr
-        \ .'|| (s:looking_at() == ":" ? s:tern_col('.a:p.') : s:save_pos("s:previous_token") == ".")'
-        \ .'|| s:tern_skip('.a:p.')',200) > 0
-endfunction
-
 function s:label_col()
   let pos = getpos('.')[1:2]
   let [s:looksyn,s:free] = pos
@@ -334,16 +328,16 @@ function GetJavascriptIndent()
         endif
         if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
           return indent(num) + switch_offset
-        elseif pline =~# '[^:]:$'
-          call cursor(l:lnum,strlen(pline))
-          if s:switch_case(string(b:js_cache[1:2]))
-            return indent(num) + switch_offset + s:W
-          endif
         endif
       endif
     endif
     if pline[-1:] !~ '[{;]'
-      let isOp = l:line =~# s:opfirst || s:continues(l:lnum,pline)
+      if pline =~# '[^:]:$'
+        call cursor(l:lnum,strlen(pline))
+        let isOp = s:tern_col(b:js_cache[1:2])
+      else
+        let isOp = l:line =~# s:opfirst || s:continues(l:lnum,pline)
+      endif
       let bL = s:iscontOne(l:lnum,num,isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
