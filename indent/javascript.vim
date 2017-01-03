@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: December 26, 2016
+" Last Change: December 31, 2016
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -65,6 +65,7 @@ function s:skip_func()
 endfunction
 
 function s:alternatePair(stop)
+  let pos = getpos('.')[1:2]
   while search('\m[][(){}]','bW',a:stop)
     if !s:skip_func()
       let idx = stridx('])}',s:looking_at())
@@ -77,7 +78,7 @@ function s:alternatePair(stop)
       endif
     endif
   endwhile
-  call cursor(v:lnum,1)
+  call call('cursor',pos)
 endfunction
 
 function s:save_pos(f,...)
@@ -114,15 +115,29 @@ function s:previous_token()
   return token
 endfunction
 
-" switch case label pattern
-let s:case_stmt = '\<\%(case\>\s*[^ \t:].*\|default\s*\):\C'
+function s:others(p)
+  return ((line2byte(line('.')) + col('.')) <= (line2byte(a:p[0]) + a:p[1])) || eval(s:skip_expr)
+endfunction
 
-function s:jump_label(ln,con)
-  if !cursor(a:ln,match(' '.a:con, ':$'))
-    let id = s:previous_token()
-    if id =~ '\k' && s:IsBlock()
-      return id ==# 'default' ? 2 : 1
-    endif
+function s:tern_skip(p)
+  return s:GetPair('{','}','nbW','s:others('.string(a:p).')',200,a:p[0]) > 0
+endfunction
+
+function s:tern_col(p)
+  return s:GetPair('?',':\@<!::\@!','nbW',s:skip_expr
+        \ .' . ''\|jsflow\%(noise\|\%(return\)\=maybe\)'''
+        \ .' || s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
+endfunction
+
+function s:label_col()
+  let pos = getpos('.')[1:2]
+  let [s:looksyn,s:free] = pos
+  call s:alternatePair(0)
+  if s:looking_at() == '{' && s:save_pos('s:IsBlock')
+    let poss = getpos('.')[1:2]
+    return call('cursor',pos) || !s:tern_col(poss)
+  elseif s:looking_at() == ':'
+    return !s:tern_col([0,0])
   endif
 endfunction
 
@@ -162,7 +177,8 @@ function s:PrevCodeLine(lnum)
       endif
       let l:n = prevnonblank(l:n-1)
     elseif s:syn_at(l:n,1) =~? s:syng_com
-      let l:n = search('\m\/\*\%<' . l:n . 'l','nbW')
+      let l:n = s:save_pos('eval',
+            \ 'cursor('.l:n.',1) + search(''\m\/\*'',"bW")')
     else
       return l:n
     endif
@@ -205,7 +221,6 @@ endfunction
 " lineNr which encloses the entire context, 'cont' if whether line 'i' + 1 is
 " a continued expression, which could have started in a braceless context
 function s:iscontOne(i,num,cont)
-  call cursor(v:lnum,1) " normalize pos
   let [l:i, l:num, bL] = [a:i, a:num + !a:num, 0]
   let pind = a:num ? indent(l:num) + s:W : 0
   let ind = indent(l:i) + (a:cont ? 0 : s:W)
@@ -235,9 +250,7 @@ function s:IsBlock()
   elseif char == '>'
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
-    let lp = strpart(getline('.'),0,col('.'))
-    return lp =~# '\<case\>\s*[^ \t:].*:$' || s:jump_label(line('.'),lp) &&
-          \ (s:looking_at() != '{' || s:IsBlock())
+    return getline('.')[col('.')-2] != ':' && s:label_col()
   endif
   return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
@@ -305,7 +318,6 @@ function GetJavascriptIndent()
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
   if !num || s:looking_at() == '{' && s:IsBlock()
     let pline = s:Trim(l:lnum)
-    let label = s:save_pos('s:jump_label',l:lnum,pline)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = line('.')
       if s:previous_token() ==# 'switch' && s:previous_token() != '.'
@@ -316,15 +328,18 @@ function GetJavascriptIndent()
           let switch_offset = float2nr(str2float(cinc[1].(strlen(cinc[2]) ? cinc[2] : strlen(cinc[3])))
                 \ * (strlen(cinc[3]) ? s:W : 1))
         endif
-        if pline[-1:] != '.' && l:line =~# '^' . s:case_stmt
+        if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
           return indent(num) + switch_offset
-        elseif label == 2 || pline =~# '\<case\>\s*[^ \t:].*:$'
-          return indent(l:lnum) + s:W
         endif
       endif
     endif
-    if !label && pline[-1:] !~ '[{;]'
-      let isOp = l:line =~# s:opfirst || s:continues(l:lnum,pline)
+    if pline[-1:] !~ '[{;]'
+      if pline =~# ':\@<!:$'
+        call cursor(l:lnum,strlen(pline))
+        let isOp = s:tern_col(b:js_cache[1:2])
+      else
+        let isOp = l:line =~# s:opfirst || s:continues(l:lnum,pline)
+      endif
       let bL = s:iscontOne(l:lnum,num,isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
