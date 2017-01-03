@@ -116,15 +116,15 @@ function s:previous_token()
 endfunction
 
 function s:others(p)
-  return ((line2byte(line('.')) + col('.')) <= (line2byte(a:p[0]) + a:p[1])) || eval(s:skip_expr)
+  return "((line2byte(line('.')) + col('.')) <= ".(line2byte(a:p[0]) + a:p[1]).") || ".s:skip_expr
 endfunction
 
 function s:tern_skip(p)
-  return s:GetPair('{','}','nbW','s:others('.string(a:p).')',200,a:p[0]) > 0
+  return s:GetPair('{','}','nbW',s:others(a:p),200,a:p[0]) > 0
 endfunction
 
 function s:tern_col(p)
-  return s:GetPair('?',':\@<!::\@!','nbW',s:skip_expr
+  return s:GetPair('?',':\@<!::\@!','nbW',s:others(a:p)
         \ .' . ''\|jsflow\%(noise\|\%(return\)\=maybe\)'''
         \ .' || s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
 endfunction
