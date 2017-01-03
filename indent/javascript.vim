@@ -125,8 +125,8 @@ endfunction
 
 function s:tern_col(p)
   return s:GetPair('?',':\@<!::\@!','nbW',s:skip_expr
-        \ .'.''\|jsflow\%(noise\|\%(return\)\=maybe\)'''
-        \ .'|| s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
+        \ .' . ''\|jsflow\%(noise\|\%(return\)\=maybe\)'''
+        \ .' || s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
 endfunction
 
 function s:label_col()
