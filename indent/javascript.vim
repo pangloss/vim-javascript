@@ -305,7 +305,7 @@ function GetJavascriptIndent()
     endif
   endif
 
-  if idx + 1
+  if idx + 1 || l:line[:1] == '|}'
     if idx == 2 && search('\m\S','bW',line('.')) && s:looking_at() == ')'
       call s:GetPair('(',')','bW',s:skip_expr,200)
     endif
