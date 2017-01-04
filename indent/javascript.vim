@@ -125,7 +125,6 @@ endfunction
 
 function s:tern_col(p)
   return s:GetPair('?',':\@<!::\@!','nbW',s:others(a:p)
-        \ .' . ''\|jsflow\%(noise\|\%(return\)\=maybe\)'''
         \ .' || s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
 endfunction
 
