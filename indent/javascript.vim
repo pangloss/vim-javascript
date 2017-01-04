@@ -36,23 +36,25 @@ else
   endfunction
 endif
 
-" searchpair() wrapper
-if has('reltime')
-  function s:GetPair(start,end,flags,skip,time,...)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
-  endfunction
-else
-  function s:GetPair(start,end,flags,skip,...)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)]))
-  endfunction
-endif
-
 " Regex of syntax group names that are or delimit string or are comments.
 let s:syng_strcom = 'string\|comment\|regex\|special\|doc\|template'
 let s:syng_str = 'string\|template'
 let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
+
+" searchpair() wrapper
+if has('reltime')
+  function s:GetPair(start,end,flags,skip,time,...)
+    let [s:looksyn,s:free] = [line('.'),1]
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
+  endfunction
+else
+  function s:GetPair(start,end,flags,skip,...)
+    let [s:looksyn,s:free] = [line('.'),1]
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)]))
+  endfunction
+endif
 
 function s:skip_func()
   if !s:free || search('\m`\|\*\/','nW',s:looksyn)
@@ -116,7 +118,7 @@ function s:previous_token()
 endfunction
 
 function s:others(p)
-  return "((line2byte(line('.')) + col('.')) <= ".(line2byte(a:p[0]) + a:p[1]).") || ".s:skip_expr
+  return "((line2byte(line('.')) + col('.')) <= ".(line2byte(a:p[0]) + a:p[1]).") || s:skip_func()"
 endfunction
 
 function s:tern_skip(p)
@@ -131,7 +133,6 @@ endfunction
 
 function s:label_col()
   let pos = getpos('.')[1:2]
-  let [s:looksyn,s:free] = pos
   call s:alternatePair(0)
   if s:looking_at() == '{' && s:save_pos('s:IsBlock')
     let poss = getpos('.')[1:2]
@@ -205,7 +206,7 @@ endfunction
 function s:OneScope(lnum)
   let pline = s:Trim(a:lnum,1)
   let kw = 'else do'
-  if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
+  if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', 's:skip_func()', 100) > 0
     call s:previous_token()
     let kw = 'for if let while with'
     if index(split('await each'),s:token()) + 1
@@ -294,8 +295,8 @@ function GetJavascriptIndent()
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
     call call('cursor',b:js_cache[1:])
   else
-    let [s:looksyn, s:free, top] = [v:lnum - 1, 1, (!indent(l:lnum) &&
-          \ s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum]
+    let top = (!indent(l:lnum) &&
+          \ s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum
     if idx + 1
       call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,top)
     elseif indent(v:lnum) && syns =~? 'block'
@@ -307,7 +308,7 @@ function GetJavascriptIndent()
 
   if idx + 1 || l:line[:1] == '|}'
     if idx == 2 && search('\m\S','bW',line('.')) && s:looking_at() == ')'
-      call s:GetPair('(',')','bW',s:skip_expr,200)
+      call s:GetPair('(',')','bW','s:skip_func()',200)
     endif
     return indent('.')
   endif
@@ -318,7 +319,7 @@ function GetJavascriptIndent()
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
   if !num || s:looking_at() == '{' && s:IsBlock()
     let pline = s:Trim(l:lnum)
-    if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
+    if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', 's:skip_func()', 100) > 0
       let num = line('.')
       if s:previous_token() ==# 'switch' && s:previous_token() != '.'
         if &cino !~ ':' || !has('float')
