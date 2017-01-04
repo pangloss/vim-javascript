@@ -68,6 +68,7 @@ endfunction
 
 function s:alternatePair(stop)
   let pos = getpos('.')[1:2]
+  let [s:looksyn,s:free] = pos
   while search('\m[][(){}]','bW',a:stop)
     if !s:skip_func()
       let idx = stridx('])}',s:looking_at())
@@ -295,8 +296,8 @@ function GetJavascriptIndent()
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
     call call('cursor',b:js_cache[1:])
   else
-    let [s:looksyn, s:free, top] = [v:lnum - 1, 1, (!indent(l:lnum) &&
-          \ s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum]
+    let top = (!indent(l:lnum) &&
+          \ s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum
     if idx + 1
       call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,top)
     elseif indent(v:lnum) && syns =~? 'block'
