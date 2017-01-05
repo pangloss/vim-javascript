@@ -126,12 +126,7 @@ function s:b_skip()
 endfunction
 
 function s:previous_token()
-  let l:n = line('.')
-  let token = ''
-  if s:b_skip()
-    let token = s:token()
-  endif
-  return token
+  return s:b_skip() ? s:token() : ''
 endfunction
 
 function s:others(p)
