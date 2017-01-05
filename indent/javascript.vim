@@ -252,7 +252,7 @@ function s:IsBlock()
     if syn =~? 'xml\|jsx'
       return char != '{'
     elseif char =~ '\k'
-      return index(split('return const let import export yield default delete var void typeof case new in instanceof')
+      return index(split('return const let import export yield default delete var void typeof throw case new in instanceof')
             \ ,char) < (line('.') != l:n) || s:previous_token() == '.'
     elseif char == '>'
       return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
