@@ -109,7 +109,7 @@ endfunction
 
 function s:b_skip()
   while s:b_token()
-    if (getline('.')[col('.')-2:col('.')] == '*/' || search('\m\/\/\&','nbW',
+    if (getline('.')[col('.')-2:col('.')] == '*/' || search('\m\/\/','nbW',
           \ line('.'))) && s:syn_at(line('.'),col('.')) =~? s:syng_com
       if getline('.')[col('.')-2] == '*'
         call search('\S','bW')
