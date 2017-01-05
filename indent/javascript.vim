@@ -108,10 +108,10 @@ function s:b_token()
 endfunction
 
 function s:previous_token()
-  let ln = line('.')
+  let l:n = line('.')
   let token = ''
   while s:b_token()
-    if (s:looking_at() == '/' || line('.') != ln && search('\m\/\/','nbW',
+    if (s:looking_at() == '/' || line('.') != l:n && search('\m\/\/','nbW',
           \ line('.'))) && s:syn_at(line('.'),col('.')) =~? s:syng_com
       call search('\m\_[^/]\zs\/[/*]','bW')
     else
@@ -139,7 +139,7 @@ function s:label_col()
   let pos = getpos('.')[1:2]
   let [s:looksyn,s:free] = pos
   call s:alternatePair(0)
-  if s:looking_at() == '{' && s:save_pos('s:IsBlock')
+  if s:save_pos('s:IsBlock')
     let poss = getpos('.')[1:2]
     return call('cursor',pos) || !s:tern_col(poss)
   elseif s:looking_at() == ':'
@@ -245,20 +245,22 @@ endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
-  let l:ln = line('.')
-  let char = s:previous_token()
-  let syn = char =~ '[{>/]' ? s:syn_at(line('.'),col('.')-(char == '{')) : ''
-  if syn =~? 'xml\|jsx'
-    return char != '{'
-  elseif char =~ '\k'
-    return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
-          \ ,char) < (line('.') != l:ln) || s:previous_token() == '.'
-  elseif char == '>'
-    return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
-  elseif char == ':'
-    return getline('.')[col('.')-2] != ':' && s:label_col()
+  if s:looking_at() == '{'
+    let l:n = line('.')
+    let char = s:previous_token()
+    let syn = char =~ '[{>/]' ? s:syn_at(line('.'),col('.')-(char == '{')) : ''
+    if syn =~? 'xml\|jsx'
+      return char != '{'
+    elseif char =~ '\k'
+      return index(split('return const let import export yield default delete var void typeof throw new in instanceof')
+            \ ,char) < (line('.') != l:n) || s:previous_token() == '.'
+    elseif char == '>'
+      return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
+    elseif char == ':'
+      return getline('.')[col('.')-2] != ':' && s:label_col()
+    endif
+    return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
   endif
-  return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
 endfunction
 
 function GetJavascriptIndent()
@@ -322,7 +324,7 @@ function GetJavascriptIndent()
   let num = b:js_cache[1]
 
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
-  if !num || s:looking_at() == '{' && s:IsBlock()
+  if !num || s:IsBlock()
     let pline = s:Trim(l:lnum)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = line('.')
