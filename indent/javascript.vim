@@ -107,18 +107,30 @@ function s:b_token()
   return search('\m\S','bW')
 endfunction
 
+function s:b_skip()
+  while s:b_token()
+    if (getline('.')[col('.')-2:col('.')] == '*/' || search('\m\/\/','nbW',
+          \ line('.'))) && s:syn_at(line('.'),col('.')) =~? s:syng_com
+      if getline('.')[col('.')-2] == '*'
+        call search('\S','bW')
+      endif
+      if s:GetPair('\/\*','\*\/','nbW','s:looking_at() == "*" ? fail : 0',300) > 0
+        keepjumps norm! [*
+      else
+        call search('\m\/\/\&','bW')
+      endif
+      continue
+    endif
+    return 1
+  endwhile
+endfunction
+
 function s:previous_token()
   let l:n = line('.')
   let token = ''
-  while s:b_token()
-    if (s:looking_at() == '/' || line('.') != l:n && search('\m\/\/','nbW',
-          \ line('.'))) && s:syn_at(line('.'),col('.')) =~? s:syng_com
-      call search('\m\_[^/]\zs\/[/*]','bW')
-    else
-      let token = s:token()
-      break
-    endif
-  endwhile
+  if s:b_skip()
+    let token = s:token()
+  endif
   return token
 endfunction
 
