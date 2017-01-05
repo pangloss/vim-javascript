@@ -251,7 +251,8 @@ function s:IsBlock()
   if syn =~? 'xml\|jsx'
     return char != '{'
   elseif char =~ '\k'
-    return char !=# 'return' || line('.') != l:ln
+    return index(split('return const let var export import')
+          \ ,char) < (line('.') != l:ln) || s:previous_token() == '.'
   elseif char == '>'
     return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
   elseif char == ':'
