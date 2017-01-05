@@ -100,10 +100,17 @@ function s:token()
   return s:looking_at() =~ '\k' ? expand('<cword>') : s:looking_at()
 endfunction
 
+function s:b_token()
+  if s:looking_at() =~ '\k'
+    call search('\m\<','cbW')
+  endif
+  return search('\m\S','bW')
+endfunction
+
 function s:previous_token()
   let ln = line('.')
   let token = ''
-  while search('\m.\>\|[^[:alnum:][:space:]_$]','bW')
+  while s:b_token()
     if (s:looking_at() == '/' || line('.') != ln && search('\m\/\/','nbW',
           \ line('.'))) && s:syn_at(line('.'),col('.')) =~? s:syng_com
       call search('\m\_[^/]\zs\/[/*]','bW')
