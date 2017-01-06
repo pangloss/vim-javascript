@@ -4,7 +4,7 @@ syntax region  jsFlowArray          contained matchgroup=jsFlowNoise start=/\[/ 
 syntax region  jsFlowObject         contained matchgroup=jsFlowNoise start=/{/    end=/}/         contains=@jsFlowCluster
 syntax region  jsFlowParens         contained matchgroup=jsFlowNoise start=/(/  end=/)/ contains=@jsFlowCluster
 syntax match   jsFlowNoise          contained /[:;,<>]/
-syntax keyword jsFlowType           contained boolean number string null void any mixed JSON array function object array bool class
+syntax keyword jsFlowType           contained boolean number string null void any mixed JSON array Function object array bool class
 syntax keyword jsFlowTypeof         contained typeof skipempty skipempty nextgroup=jsFlowTypeCustom,jsFlowType
 syntax match   jsFlowTypeCustom     contained /[0-9a-zA-Z_.]*/ skipwhite skipempty nextgroup=jsFlowGroup
 syntax region  jsFlowGroup          contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster
