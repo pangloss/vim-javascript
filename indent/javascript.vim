@@ -111,13 +111,13 @@ function s:b_skip()
   while s:b_token()
     if (getline('.')[col('.')-2:col('.')] == '*/' || search('\m\/\/','nbW',
           \ line('.'))) && s:syn_at(line('.'),col('.')) =~? s:syng_com
-      if getline('.')[col('.')-2] == '*'
-        call search('\S','bW')
-      endif
-      if s:GetPair('\/\*','\*\/','nbW','s:looking_at() == "*" ? fail : 0',300) > 0
-        keepjumps norm! [*
-      else
-        call search('\m\/\/\&','bW')
+      let l:pos = getpos('.')[1:2]
+      keepjumps norm! [*
+      if getpos('.')[1:2] != l:pos
+        if call('s:syn_at',getpos('.')[1:2]) !~? s:syng_com
+          call call('cursor',l:pos)
+          call search('\m\/\/\&','bW')
+        endif
       endif
       continue
     endif
