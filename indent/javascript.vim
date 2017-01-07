@@ -107,19 +107,27 @@ function s:b_token()
   return search('\m\S','bW')
 endfunction
 
-function s:previous_token()
-  let l:n = line('.')
-  let token = ''
+function s:b_skip()
   while s:b_token()
-    if (s:looking_at() == '/' || line('.') != l:n && search('\m\/\/','nbW',
-          \ line('.'))) && s:syn_at(line('.'),col('.')) =~? s:syng_com
-      call search('\m\_[^/]\zs\/[/*]','bW')
-    else
-      let token = s:token()
-      break
+    let l:pos = getpos('.')[1:2]
+    if getline('.')[col('.')-2:col('.')] == '*/'
+      keepjumps norm! [*
     endif
+    if getpos('.')[1:2] != l:pos && call('s:syn_at',getpos('.')[1:2]) =~? s:syng_com
+      continue
+    endif
+    call call('cursor',l:pos)
+    let sp = searchpos('\m\/\/\&','cnbW',line('.'))
+    if sp[0] && call('s:syn_at',sp) =~? s:syng_com
+      call call('cursor',sp)
+      continue
+    endif
+    return 1
   endwhile
-  return token
+endfunction
+
+function s:previous_token()
+  return s:b_skip() ? s:token() : ''
 endfunction
 
 function s:others(p)
@@ -160,37 +168,6 @@ function s:continues(ln,con)
         \ index(split('/ typeof in instanceof void delete'),s:token())])
 endfunction
 
-" get the line of code stripped of comments. if called with two args, leave
-" cursor at the last non-comment char.
-function s:Trim(ln,...)
-  let pline = substitute(getline(a:ln),'\s*$','','')
-  let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
-  while l:max && s:syn_at(a:ln, strlen(pline)) =~? s:syng_com
-    let pline = substitute(strpart(pline, 0, l:max),'\s*$','','')
-    let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
-  endwhile
-  return !a:0 || cursor(a:ln,strlen(pline)) ? pline : pline
-endfunction
-
-" Find line above 'lnum' that isn't empty or in a comment
-function s:PrevCodeLine(lnum)
-  let l:n = prevnonblank(a:lnum)
-  while l:n
-    if getline(l:n) =~ '^\s*\%(\/[/*]\|-->\|<!--\|#\)' 
-      if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
-            \ s:syn_at(l:n,1) =~? s:syng_str
-        return l:n
-      endif
-      let l:n = prevnonblank(l:n-1)
-    elseif s:syn_at(l:n,1) =~? s:syng_com
-      let l:n = s:save_pos('eval',
-            \ 'cursor('.l:n.',1) + search(''\m\/\*'',"bW")')
-    else
-      return l:n
-    endif
-  endwhile
-endfunction
-
 " Check if line 'lnum' has a balanced amount of parentheses.
 function s:Balanced(lnum)
   let l:open = 0
@@ -208,14 +185,14 @@ function s:Balanced(lnum)
   return !l:open
 endfunction
 
-function s:OneScope(lnum)
-  let pline = s:Trim(a:lnum,1)
+function s:OneScope()
+  let pline = strpart(getline('.'),0,col('.'))
   let kw = 'else do'
   if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
-    call s:previous_token()
+    call s:b_skip()
     let kw = 'for if let while with'
     if index(split('await each'),s:token()) + 1
-      call s:previous_token()
+      call s:b_skip()
       let kw = 'for'
     endif
   endif
@@ -227,18 +204,18 @@ endfunction
 " lineNr which encloses the entire context, 'cont' if whether line 'i' + 1 is
 " a continued expression, which could have started in a braceless context
 function s:iscontOne(i,num,cont)
-  let [l:i, l:num, bL] = [a:i, a:num + !a:num, 0]
+  let [l:num, bL] = [a:num + !a:num, 0]
   let pind = a:num ? indent(l:num) + s:W : 0
-  let ind = indent(l:i) + (a:cont ? 0 : s:W)
-  while l:i >= l:num && (ind > pind || l:i == l:num)
-    if indent(l:i) < ind && s:OneScope(l:i)
+  let ind = indent(a:i) + (a:cont ? 0 : s:W)
+  call cursor(a:i + 1,1)
+  while s:b_skip() && line('.') >= l:num && (ind > pind || line('.') == l:num)
+    if indent('.') < ind && s:OneScope()
       let bL += s:W
-      let l:i = line('.')
     elseif !a:cont || bL || ind < indent(a:i)
       break
     endif
-    let ind = min([ind, indent(l:i)])
-    let l:i = s:PrevCodeLine(l:i - 1)
+    let ind = min([ind, indent('.')])
+    call cursor(0,1)
   endwhile
   return bL
 endfunction
@@ -283,8 +260,12 @@ function GetJavascriptIndent()
     endif
     return -1
   endif
-  let l:lnum = s:PrevCodeLine(v:lnum - 1)
-  if !l:lnum
+
+  if s:b_skip()
+    let pline = strpart(getline('.'),0,col('.'))
+    let l:lnum = line('.')
+    call cursor(v:lnum,1)
+  else
     return
   endif
 
@@ -325,7 +306,6 @@ function GetJavascriptIndent()
 
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
   if !num || s:IsBlock()
-    let pline = s:Trim(l:lnum)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = line('.')
       if s:previous_token() ==# 'switch' && s:previous_token() != '.'
