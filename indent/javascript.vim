@@ -61,7 +61,7 @@ function s:skip_func()
     return !s:free
   endif
   let s:looksyn = line('.')
-  return (search('\m\/','nbW',s:looksyn) || search('\m[''"\\]','nW',s:looksyn)) && eval(s:skip_expr)
+  return (search('\m\/','nbW',s:looksyn) || search('\m[''"]\|\\$','nW',s:looksyn)) && eval(s:skip_expr)
 endfunction
 
 function s:alternatePair(stop)
@@ -109,17 +109,15 @@ endfunction
 
 function s:previous_token()
   let l:n = line('.')
-  let token = ''
   while s:b_token()
     if (s:looking_at() == '/' || line('.') != l:n && search('\m\/\/','nbW',
           \ line('.'))) && s:syn_at(line('.'),col('.')) =~? s:syng_com
       call search('\m\_[^/]\zs\/[/*]','bW')
     else
-      let token = s:token()
-      break
+      return s:token()
     endif
   endwhile
-  return token
+  return ''
 endfunction
 
 function s:others(p)
