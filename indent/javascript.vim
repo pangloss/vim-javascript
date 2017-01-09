@@ -174,7 +174,7 @@ endfunction
 function s:PrevCodeLine(lnum)
   let l:n = prevnonblank(a:lnum)
   while l:n
-    if getline(l:n) =~ '^\s*\%(\/[/*]\|-->\|<!--\|#\)' 
+    if getline(l:n) =~ '^\s*\/[/*]' 
       if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
             \ s:syn_at(l:n,1) =~? s:syng_str
         return l:n
@@ -290,7 +290,7 @@ function GetJavascriptIndent()
   if l:line[:1] == '/*'
     let l:line = substitute(l:line,'^\%(\/\*.\{-}\*\/\s*\)*','','')
   endif
-  if l:line =~ '^\%(\/[/*]\|-->\|<!--\|#\)'
+  if l:line =~ '^\/[/*]'
     let l:line = ''
   endif
 
