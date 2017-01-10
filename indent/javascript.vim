@@ -158,16 +158,16 @@ function s:continues(ln,con)
         \ index(split('/ typeof in instanceof void delete'),s:token())])
 endfunction
 
-" get the line of code stripped of comments. if called with two args, leave
-" cursor at the last non-comment char.
-function s:Trim(ln,...)
+" get the line of code stripped of comments and move cursor to the last
+" non-comment char.
+function s:Trim(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
   let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
   while l:max && s:syn_at(a:ln, strlen(pline)) =~? s:syng_com
     let pline = substitute(strpart(pline, 0, l:max),'\s*$','','')
     let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
   endwhile
-  return !a:0 || cursor(a:ln,strlen(pline)) ? pline : pline
+  return cursor(a:ln,strlen(pline)) ? pline : pline
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
@@ -207,7 +207,7 @@ function s:Balanced(lnum)
 endfunction
 
 function s:OneScope(lnum)
-  let pline = s:Trim(a:lnum,1)
+  let pline = s:Trim(a:lnum)
   let kw = 'else do'
   if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
     call s:previous_token()
@@ -323,7 +323,7 @@ function GetJavascriptIndent()
 
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
   if !num || s:IsBlock()
-    let pline = s:Trim(l:lnum)
+    let pline = s:save_pos('s:Trim',l:lnum)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = line('.')
       if s:previous_token() ==# 'switch' && s:previous_token() != '.'
