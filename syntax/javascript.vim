@@ -96,19 +96,22 @@ exe 'syntax keyword jsThis      this             '.(exists('g:javascript_conceal
 exe 'syntax keyword jsSuper     super  contained '.(exists('g:javascript_conceal_super')     ? 'conceal cchar='.g:javascript_conceal_super      : '')
 
 " Statement Keywords
-syntax keyword jsStatement    contained break continue with yield debugger
-syntax keyword jsConditional            if           skipwhite skipempty nextgroup=jsParenIfElse
-syntax keyword jsConditional            else         skipwhite skipempty nextgroup=jsCommentMisc,jsIfElseBlock
-syntax keyword jsConditional            switch       skipwhite skipempty nextgroup=jsParenSwitch
-syntax keyword jsRepeat                 while for    skipwhite skipempty nextgroup=jsParenRepeat,jsForAwait
-syntax keyword jsDo                     do           skipwhite skipempty nextgroup=jsRepeatBlock
+syntax keyword jsStatement    contained with yield debugger
+syntax keyword jsStatement    contained break continue skipwhite skipempty nextgroup=jsBlockLabelKey
+syntax keyword jsConditional            if             skipwhite skipempty nextgroup=jsParenIfElse
+syntax keyword jsConditional            else           skipwhite skipempty nextgroup=jsCommentMisc,jsIfElseBlock
+syntax keyword jsConditional            switch         skipwhite skipempty nextgroup=jsParenSwitch
+syntax keyword jsRepeat                 while for      skipwhite skipempty nextgroup=jsParenRepeat,jsForAwait
+syntax keyword jsDo                     do             skipwhite skipempty nextgroup=jsRepeatBlock
 syntax keyword jsLabel        contained case default
-syntax keyword jsTry                    try          skipwhite skipempty nextgroup=jsTryCatchBlock
-syntax keyword jsFinally      contained finally      skipwhite skipempty nextgroup=jsFinallyBlock
-syntax keyword jsCatch        contained catch        skipwhite skipempty nextgroup=jsParenCatch
+syntax keyword jsTry                    try            skipwhite skipempty nextgroup=jsTryCatchBlock
+syntax keyword jsFinally      contained finally        skipwhite skipempty nextgroup=jsFinallyBlock
+syntax keyword jsCatch        contained catch          skipwhite skipempty nextgroup=jsParenCatch
 syntax keyword jsException              throw
 syntax keyword jsAsyncKeyword           async await
-syntax match   jsSwitchColon  contained /:/          skipwhite skipempty nextgroup=jsSwitchBlock
+syntax match   jsSwitchColon   contained /:/            skipwhite skipempty nextgroup=jsSwitchBlock
+syntax match   jsBlockLabel              /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\s*:/    contains=jsNoise skipwhite skipempty nextgroup=jsBlock
+syntax match   jsBlockLabelKey contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\%(\s*\%(;\|\n\)\)\@=/
 
 " Keywords
 syntax keyword jsGlobalObjects      Array Boolean Date Function Iterator Number Object Symbol Map WeakMap Set RegExp String Proxy Promise Buffer ParallelArray ArrayBuffer DataView Float32Array Float64Array Int16Array Int32Array Int8Array Uint16Array Uint32Array Uint8Array Uint8ClampedArray JSON Math console document window Intl Collator DateTimeFormat NumberFormat fetch
@@ -230,7 +233,7 @@ if exists("javascript_plugin_flow")
 endif
 
 syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsDo
-syntax cluster jsAll         contains=@jsExpression,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsStatement,jsException,jsTry,jsAsyncKeyword,jsNoise
+syntax cluster jsAll         contains=@jsExpression,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsStatement,jsException,jsTry,jsAsyncKeyword,jsNoise,,jsBlockLabel
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
@@ -347,6 +350,8 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsClassMethodType      Type
   HiLink jsObjectMethodType     Type
   HiLink jsClassDefinition      jsFuncName
+  HiLink jsBlockLabel           Identifier
+  HiLink jsBlockLabelKey        jsBlockLabel
 
   HiLink jsDestructuringBraces     Noise
   HiLink jsDestructuringProperty   jsFuncArgs
