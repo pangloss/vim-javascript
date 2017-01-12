@@ -58,7 +58,7 @@ syntax match   jsFloat            /\<\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\
 
 " Regular Expressions
 syntax match   jsSpecial          contained "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)"
-syntax region  jsTemplateVar      contained matchgroup=jsTemplateBraces start=+${+ end=+}+ contains=@jsExpression
+syntax region  jsTemplateVar      contained matchgroup=jsTemplateBraces start=+${+ end=+}+ contains=@jsExpression keepend
 syntax region  jsRegexpCharClass  contained start=+\[+ skip=+\\.+ end=+\]+
 syntax match   jsRegexpBoundary   contained "\v%(\<@![\^$]|\\[bB])"
 syntax match   jsRegexpBackRef    contained "\v\\[1-9][0-9]*"
