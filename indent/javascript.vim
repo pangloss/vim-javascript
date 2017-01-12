@@ -61,7 +61,8 @@ function s:skip_func()
     return !s:free
   endif
   let s:looksyn = line('.')
-  return (search('\m\/','nbW',s:looksyn) || search('\m[''"]\|\\$','nW',s:looksyn)) && eval(s:skip_expr)
+  return (search('\m[''"]\|\\$','nW',s:looksyn) || getline('.') =~ '\/\%(.*\/\)\@=.*\%'.col('.').'c') &&
+        \ eval(s:skip_expr)
 endfunction
 
 function s:alternatePair(stop)
