@@ -55,13 +55,13 @@ let s:syng_com = 'comment\|doc'
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
 function s:skip_func()
-  if !s:free || search('\m`\|\*\/','znW',s:looksyn)
+  if !s:free || search('\m`\|\*\/','nW',s:looksyn)
     let s:free = !eval(s:skip_expr)
     let s:looksyn = line('.')
     return !s:free
   endif
   let s:looksyn = line('.')
-  return (search('\m[''"]\|\\$','znW',s:looksyn) || getline('.') =~ '\/\%<'.(col('.')+1).'c.\{-}\/') &&
+  return (search('\m[''"]\|\\$','nW',s:looksyn) || getline('.') =~ '\/\%<'.(col('.')+1).'c.\{-}\/') &&
         \ eval(s:skip_expr)
 endfunction
 
