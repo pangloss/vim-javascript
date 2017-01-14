@@ -8,4 +8,4 @@ if exists(":CompilerSet") != 2
 endif
 
 CompilerSet makeprg=eslint\ -f\ compact\ %
-CompilerSet errorformat=%E%f:\ line\ %l\\,\ col\ %c\\,\ Error\ -\ %m,%W%f:\ line\ %l\\,\ col\ %c\\,\ Warning\ -\ %m
+CompilerSet errorformat=%f:\ line\ %l\\,\ col\ %c\\,\ %m
