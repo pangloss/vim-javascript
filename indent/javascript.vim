@@ -61,7 +61,7 @@ function s:skip_func()
     return !s:free
   endif
   let s:looksyn = line('.')
-  return (search('\m[''"]\|\\$','nW',s:looksyn) || getline('.') =~ '\/\%<'.(col('.')+1).'c.\{-}\/') &&
+  return getline('.') =~ '\%<'.col('.').'c\/.\{-}\/\|\%>'.col('.').'c[''"]\|\\$' &&
         \ eval(s:skip_expr)
 endfunction
 
