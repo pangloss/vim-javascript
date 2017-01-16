@@ -111,8 +111,8 @@ endfunction
 function s:previous_token()
   let l:n = line('.')
   while s:b_token()
-    if (s:looking_at() == '/' || line('.') != l:n && search('\m\/\/','nbW',
-          \ line('.'))) && s:syn_at(line('.'),col('.')) =~? s:syng_com
+    if (getline('.')[col('.')-2:col('.')-1] == '*/' || line('.') != l:n &&
+          \ getline('.') =~ '\%<'.col('.').'c\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
       call search('\m\_[^/]\zs\/[/*]','bW')
     else
       return s:token()
@@ -340,7 +340,7 @@ function GetJavascriptIndent()
         endif
       endif
     endif
-    if pline[-1:] !~ '[{;]'
+    if pline !~ '[{;]$'
       if pline =~# ':\@<!:$'
         call cursor(l:lnum,strlen(pline))
         let isOp = s:tern_col(b:js_cache[1:2])
