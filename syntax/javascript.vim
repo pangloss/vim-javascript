@@ -50,22 +50,22 @@ syntax match   jsModuleComma        contained /,/ skipwhite skipempty nextgroup=
 " Strings, Templates, Numbers
 syntax region  jsString           start=+"+  skip=+\\\("\|$\)+  end=+"\|$+  contains=jsSpecial,@Spell extend
 syntax region  jsString           start=+'+  skip=+\\\('\|$\)+  end=+'\|$+  contains=jsSpecial,@Spell extend
-syntax region  jsTemplateString   start=+`+  skip=+\\\(`\|$\)+  end=+`+     contains=jsTemplateVar,jsSpecial extend
+syntax region  jsTemplateString   start=+`+  skip=+\\\(`\|$\)+  end=+`+     contains=jsTemplateExpression,jsSpecial extend
 syntax match   jsTaggedTemplate   /\k\+\%(`\)\@=/ nextgroup=jsTemplateString
 syntax match   jsNumber           /\<\d\+\%([eE][+-]\=\d\+\)\=\>\|\<0[bB][01]\+\>\|\<0[oO]\o\+\>\|\<0[xX]\x\+\>/
 syntax keyword jsNumber           Infinity
 syntax match   jsFloat            /\<\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%([eE][+-]\=\d\+\)\=\>/
 
 " Regular Expressions
-syntax match   jsSpecial          contained "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)"
-syntax region  jsTemplateVar      contained matchgroup=jsTemplateBraces start=+${+ end=+}+ contains=@jsExpression keepend
-syntax region  jsRegexpCharClass  contained start=+\[+ skip=+\\.+ end=+\]+
-syntax match   jsRegexpBoundary   contained "\v%(\<@![\^$]|\\[bB])"
-syntax match   jsRegexpBackRef    contained "\v\\[1-9][0-9]*"
-syntax match   jsRegexpQuantifier contained "\v\\@<!%([?*+]|\{\d+%(,|,\d+)?})\??"
-syntax match   jsRegexpOr         contained "\v\<@!\|"
-syntax match   jsRegexpMod        contained "\v\(@<=\?[:=!>]"
-syntax region  jsRegexpGroup      contained start="\\\@<!(" skip="\\.\|\[\(\\.\|[^]]\)*\]" end="\\\@<!)" contains=jsRegexpCharClass,@jsRegexpSpecial keepend
+syntax match   jsSpecial            contained "\v\\%(0|\\x\x\{2\}\|\\u\x\{4\}\|\c[A-Z]|.)"
+syntax region  jsTemplateExpression contained matchgroup=jsTemplateBraces start=+${+ end=+}+ contains=@jsExpression keepend
+syntax region  jsRegexpCharClass    contained start=+\[+ skip=+\\.+ end=+\]+
+syntax match   jsRegexpBoundary     contained "\v%(\<@![\^$]|\\[bB])"
+syntax match   jsRegexpBackRef      contained "\v\\[1-9][0-9]*"
+syntax match   jsRegexpQuantifier   contained "\v\\@<!%([?*+]|\{\d+%(,|,\d+)?})\??"
+syntax match   jsRegexpOr           contained "\v\<@!\|"
+syntax match   jsRegexpMod          contained "\v\(@<=\?[:=!>]"
+syntax region  jsRegexpGroup        contained start="\\\@<!(" skip="\\.\|\[\(\\.\|[^]]\)*\]" end="\\\@<!)" contains=jsRegexpCharClass,@jsRegexpSpecial keepend
 if v:version > 703 || v:version == 603 && has("patch1088")
   syntax region  jsRegexpString   start=+\%(\%(\%(return\|case\)\s\+\)\@50<=\|\%(\%([)\]"']\|\d\|\w\)\s*\)\@50<!\)/\(\*\|/\)\@!+ skip=+\\.\|\[\%(\\.\|[^]]\)*\]+ end=+/[gimy]\{,4}+ contains=jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial oneline keepend extend
 else
@@ -324,7 +324,6 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsRepeatBraces         Noise
   HiLink jsSwitchBraces         Noise
   HiLink jsSpecial              Special
-  HiLink jsTemplateVar          Special
   HiLink jsTemplateBraces       Noise
   HiLink jsGlobalObjects        Constant
   HiLink jsGlobalNodeObjects    Constant
