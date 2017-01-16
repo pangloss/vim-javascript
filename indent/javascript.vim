@@ -258,7 +258,8 @@ function s:IsBlock()
     elseif char == ':'
       return getline('.')[col('.')-2] != ':' && s:label_col()
     endif
-    return syn =~? 'regex' || char !~ '[-=~!<*+,/?^%|&([]'
+    return syn =~? 'regex' || char !~ '[=~!<*,/?^%|&([]' &&
+          \ (char !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == char)
   endif
 endfunction
 
