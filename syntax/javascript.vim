@@ -97,7 +97,7 @@ exe 'syntax keyword jsThis      this             '.(exists('g:javascript_conceal
 exe 'syntax keyword jsSuper     super  contained '.(exists('g:javascript_conceal_super')     ? 'conceal cchar='.g:javascript_conceal_super      : '')
 
 " Statement Keywords
-syntax match   jsBlockLabel              /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\s*:/    contains=jsNoise skipwhite skipempty nextgroup=jsBlock
+syntax match   jsBlockLabel              /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\s*::\@!/    contains=jsNoise skipwhite skipempty nextgroup=jsBlock
 syntax match   jsBlockLabelKey contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\%(\s*\%(;\|\n\)\)\@=/
 syntax keyword jsStatement    contained with yield debugger
 syntax keyword jsStatement    contained break continue skipwhite skipempty nextgroup=jsBlockLabelKey
