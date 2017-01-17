@@ -313,13 +313,6 @@ function GetJavascriptIndent()
     endif
   endif
 
-  if idx + 1 || l:line[:1] == '|}'
-    if idx == 2 && search('\m\S','bW',line('.')) && s:looking_at() == ')'
-      call s:GetPair('(',')','bW',s:skip_expr,200)
-    endif
-    return indent('.')
-  endif
-
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : getpos('.')[1:2])
   let num = b:js_cache[1]
 
@@ -328,7 +321,7 @@ function GetJavascriptIndent()
     let pline = s:save_pos('s:Trim',l:lnum)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = line('.')
-      if s:previous_token() ==# 'switch' && s:previous_token() != '.'
+      if idx < 0 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
         if &cino !~ ':' || !has('float')
           let switch_offset = s:W
         else
@@ -341,7 +334,7 @@ function GetJavascriptIndent()
         endif
       endif
     endif
-    if pline !~ '[{;]$'
+    if idx < 0 && pline !~ '[{;]$'
       if pline =~# ':\@<!:$'
         call cursor(l:lnum,strlen(pline))
         let isOp = s:tern_col(b:js_cache[1:2])
@@ -351,6 +344,10 @@ function GetJavascriptIndent()
       let bL = s:iscontOne(l:lnum,num,isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
+  endif
+
+  if idx + 1 || l:line[:1] == '|}'
+    return indent(num)
   endif
 
   " main return
