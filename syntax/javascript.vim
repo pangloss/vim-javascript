@@ -33,6 +33,7 @@ syntax keyword jsStorageClass   const var let skipwhite skipempty nextgroup=jsDe
 syntax match   jsVariableDef    contained /\k\+/ skipwhite skipempty nextgroup=jsFlowDefinition
 syntax keyword jsOperator       delete instanceof typeof void new in of skipwhite skipempty nextgroup=@jsExpression
 syntax match   jsOperator       /[\!\|\&\+\-\<\>\=\%\/\*\~\^]\{1}/ skipwhite skipempty nextgroup=@jsExpression
+syntax match   jsOperator       /::/ skipwhite skipempty nextgroup=@jsExpression
 syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
 
@@ -80,7 +81,7 @@ syntax region  jsObjectKeyString   contained start=+"+  skip=+\\\("\|$\)+  end=+
 syntax region  jsObjectKeyString   contained start=+'+  skip=+\\\('\|$\)+  end=+'\|$+  contains=jsSpecial,@Spell skipwhite skipempty nextgroup=jsObjectValue
 syntax region  jsObjectKeyComputed contained matchgroup=jsBrackets start=/\[/ end=/]/ contains=@jsExpression skipwhite skipempty nextgroup=jsObjectValue,jsFuncArgs extend
 syntax match   jsObjectSeparator   contained /,/
-syntax region  jsObjectValue       contained start=/:/ end=/\%(,\|}\)\@=/ contains=jsObjectColon,@jsExpression extend
+syntax region  jsObjectValue       contained matchgroup=jsNoise start=/:/ end=/\%(,\|}\)\@=/ contains=@jsExpression extend
 syntax match   jsObjectFuncName    contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>[\r\n\t ]*(\@=/ skipwhite skipempty nextgroup=jsFuncArgs
 syntax match   jsFunctionKey       contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\(\s*:\s*function\s*\)\@=/
 syntax match   jsObjectMethodType  contained /\%(get\|set\)\%( \k\+\)\@=/ skipwhite skipempty nextgroup=jsObjectFuncName
@@ -96,7 +97,7 @@ exe 'syntax keyword jsThis      this             '.(exists('g:javascript_conceal
 exe 'syntax keyword jsSuper     super  contained '.(exists('g:javascript_conceal_super')     ? 'conceal cchar='.g:javascript_conceal_super      : '')
 
 " Statement Keywords
-syntax match   jsBlockLabel              /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\s*:/    contains=jsNoise skipwhite skipempty nextgroup=jsBlock
+syntax match   jsBlockLabel              /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\s*::\@!/    contains=jsNoise skipwhite skipempty nextgroup=jsBlock
 syntax match   jsBlockLabelKey contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>\%(\s*\%(;\|\n\)\)\@=/
 syntax keyword jsStatement    contained with yield debugger
 syntax keyword jsStatement    contained break continue skipwhite skipempty nextgroup=jsBlockLabelKey
@@ -111,7 +112,7 @@ syntax keyword jsFinally      contained finally        skipwhite skipempty nextg
 syntax keyword jsCatch        contained catch          skipwhite skipempty nextgroup=jsParenCatch
 syntax keyword jsException              throw
 syntax keyword jsAsyncKeyword           async await
-syntax match   jsSwitchColon   contained /:/            skipwhite skipempty nextgroup=jsSwitchBlock
+syntax match   jsSwitchColon   contained /::\@!/       skipwhite skipempty nextgroup=jsSwitchBlock
 
 " Keywords
 syntax keyword jsGlobalObjects      Array Boolean Date Function Iterator Number Object Symbol Map WeakMap Set RegExp String Proxy Promise Buffer ParallelArray ArrayBuffer DataView Float32Array Float64Array Int16Array Int32Array Int8Array Uint16Array Uint32Array Uint8Array Uint8ClampedArray JSON Math console document window Intl Collator DateTimeFormat NumberFormat fetch
