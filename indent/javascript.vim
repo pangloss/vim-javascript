@@ -348,7 +348,7 @@ function GetJavascriptIndent()
   endif
 
   " main return
-  if idx + 1 || l:line[:1] == '|}' && getline(num)[b:js_cache[2]] == '|'
+  if idx + 1 || l:line[:1] == '|}'
     return indent(num)
   elseif isOp
     return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
