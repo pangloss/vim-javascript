@@ -318,9 +318,10 @@ function GetJavascriptIndent()
 
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
   if !num || s:IsBlock()
+    let ilnum = line('.')
     let pline = s:save_pos('s:Trim',l:lnum)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
-      let num = line('.')
+      let num = ilnum == num ? line('.') : num
       if idx < 0 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
         if &cino !~ ':' || !has('float')
           let switch_offset = s:W
@@ -341,13 +342,13 @@ function GetJavascriptIndent()
       else
         let isOp = l:line =~# s:opfirst || s:continues(l:lnum,pline)
       endif
-      let bL = s:iscontOne(l:lnum,num,isOp)
+      let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
   endif
 
   " main return
-  if idx + 1 || l:line[:1] == '|}'
+  if idx + 1 || l:line[:1] == '|}' && getline(num)[b:js_cache[2]] == '|'
     return indent(num)
   elseif isOp
     return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
