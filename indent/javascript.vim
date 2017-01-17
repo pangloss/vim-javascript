@@ -346,12 +346,10 @@ function GetJavascriptIndent()
     endif
   endif
 
+  " main return
   if idx + 1 || l:line[:1] == '|}'
     return indent(num)
-  endif
-
-  " main return
-  if isOp
+  elseif isOp
     return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
   elseif num
     return indent(num) + s:W + switch_offset + bL
