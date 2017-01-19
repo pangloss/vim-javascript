@@ -101,23 +101,20 @@ function s:token()
   return s:looking_at() =~ '\k' ? expand('<cword>') : s:looking_at()
 endfunction
 
-function s:b_token()
-  if s:looking_at() =~ '\k'
-    call search('\m\<','cbW')
-  endif
-  return search('\m\S','bW')
-endfunction
-
 function s:previous_token()
   let l:n = line('.')
-  while s:b_token()
+  if (s:looking_at() !~ '\k' || search('\m\<','cbW')) && search('\m\S','bW')
     if (getline('.')[col('.')-2:col('.')-1] == '*/' || line('.') != l:n &&
           \ getline('.') =~ '\%<'.col('.').'c\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
-      call search('\m\_[^/]\zs\/[/*]','bW')
+      while search('\m\/\ze[/*]','cbW')
+        if search('\m\S','bW') && s:syn_at(line('.'),col('.')) !~? s:syng_com
+          return s:token()
+        endif
+      endwhile
     else
       return s:token()
     endif
-  endwhile
+  endif
   return ''
 endfunction
 
@@ -162,13 +159,9 @@ endfunction
 " get the line of code stripped of comments and move cursor to the last
 " non-comment char.
 function s:Trim(ln)
-  let pline = substitute(getline(a:ln),'\s*$','','')
-  let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
-  while l:max && s:syn_at(a:ln, strlen(pline)) =~? s:syng_com
-    let pline = substitute(strpart(pline, 0, l:max),'\s*$','','')
-    let l:max = max([match(pline,'.*[^/]\zs\/[/*]'),0])
-  endwhile
-  return cursor(a:ln,strlen(pline)) ? pline : pline
+  call cursor(a:ln+1,1)
+  call s:previous_token()
+  return strpart(getline('.'),0,col('.'))
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
