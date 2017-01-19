@@ -114,7 +114,7 @@ function s:previous_token()
     if (getline('.')[col('.')-2:col('.')-1] == '*/' || line('.') != l:n &&
           \ getline('.') =~ '\%<'.col('.').'c\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
       while search('\m\/\ze[/*]','cbW')
-        if search('\S','bW') && s:syn_at(line('.'),col('.')) !~? s:syng_com
+        if search('\m\S','bW') && s:syn_at(line('.'),col('.')) !~? s:syng_com
           return s:token()
         endif
       endwhile
