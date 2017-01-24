@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: January 16, 2017
+" Last Change: January 24, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -333,9 +333,9 @@ function GetJavascriptIndent()
     if idx < 0 && pline !~ '[{;]$'
       if pline =~# ':\@<!:$'
         call cursor(l:lnum,strlen(pline))
-        let isOp = s:tern_col(b:js_cache[1:2])
+        let isOp = s:tern_col(b:js_cache[1:2]) * s:W
       else
-        let isOp = l:line =~# s:opfirst || s:continues(l:lnum,pline)
+        let isOp = (l:line =~# s:opfirst || s:continues(l:lnum,pline)) * s:W
       endif
       let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
@@ -345,12 +345,10 @@ function GetJavascriptIndent()
   " main return
   if idx + 1 || l:line[:1] == '|}'
     return indent(num)
-  elseif isOp
-    return (num ? indent(num) : -s:W) + (s:W * 2) + switch_offset + bL
   elseif num
-    return indent(num) + s:W + switch_offset + bL
+    return indent(num) + s:W + switch_offset + bL + isOp
   endif
-  return bL
+  return bL + isOp
 endfunction
 
 let &cpo = s:cpo_save
