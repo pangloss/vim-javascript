@@ -71,7 +71,7 @@ function s:alternatePair(stop)
     if !s:skip_func()
       let idx = stridx('])}',s:looking_at())
       if idx + 1
-        if !s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,a:stop)
+        if s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,a:stop) <= 0
           break
         endif
       else
