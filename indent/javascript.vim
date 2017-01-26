@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: January 24, 2017
+" Last Change: January 25, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -149,13 +149,14 @@ endfunction
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
-      \ '\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
+      \ '\%([-+<>=,.~!?/*^%|&:]\|\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
 
 function s:continues(ln,con)
   return !cursor(a:ln, match(' '.a:con,s:continuation)) &&
-        \ eval((['s:syn_at(line("."),col(".")) !~? "regex"'] +
+        \ eval( (['s:syn_at(line("."),col(".")) !~? "regex"'] +
+        \ repeat(['getline(".")[col(".")-2] != "'.tr(a:con[-1:],'>','=').'"'],3) +
         \ repeat(['s:previous_token() != "."'],5) + [1])[
-        \ index(split('/ typeof in instanceof void delete'),s:token())])
+        \ index(split('/ > - + typeof in instanceof void delete'),s:token())])
 endfunction
 
 " get the line of code stripped of comments and move cursor to the last
