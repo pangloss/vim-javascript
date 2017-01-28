@@ -293,7 +293,7 @@ function GetJavascriptIndent()
   endif
 
   " the containing paren, bracket, or curly. Many hacks for performance
-  let idx = strlen(l:line) ? stridx('])}',l:line[0]) : -1
+  let idx = index([']',')','}'],l:line[0])
   if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
     call call('cursor',b:js_cache[1:])
