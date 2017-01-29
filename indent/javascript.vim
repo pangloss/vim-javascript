@@ -322,7 +322,7 @@ function GetJavascriptIndent()
         if &cino !~ ':'
           let switch_offset = s:W
         else
-          let cinc = matchlist(&cino,'.*\zs:\(-\)\=\(\d*\)\(\.[1-9]\d*\)\=\(s\)\=\C')
+          let cinc = matchlist(&cino,'.*\zs:\(-\)\=\(\d*\)\(\.\d\+\)\=\(s\)\=\C')
           let switch_offset = strlen(cinc[0]) == 1 ? 0 : (cinc[1] is '' ? 1 : -1) *
                 \ ((strlen(cinc[2].cinc[3]) ? cinc[2].printf('%d',cinc[3][1]) : 10) *
                 \ (strlen(cinc[4]) ? s:W : 1)) / 10
