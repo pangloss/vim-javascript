@@ -325,7 +325,7 @@ function GetJavascriptIndent()
           let cinc = matchlist(&cino,'.*:\zs\(-\)\=\(\d*\)\(\.\d\+\)\=\(s\)\=\C')
           let switch_offset = cinc[0] is '' ? 0 : (cinc[1] is '' ? 1 : -1) *
                 \ ((strlen(cinc[2].cinc[3]) ? cinc[2].printf('%d',cinc[3][1]) : 10) *
-                \ (strlen(cinc[4]) ? s:W : 1)) / 10
+                \ (cinc[4] is '' ? 1 : s:W)) / 10
         endif
         if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
           return indent(num) + switch_offset
