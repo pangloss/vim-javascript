@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: January 24, 2017
+" Last Change: February 6, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -253,8 +253,10 @@ function s:IsBlock()
       return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
     elseif char == ':'
       return getline('.')[col('.')-2] != ':' && s:label_col()
+    elseif char == '*'
+      return s:previous_token() ==# 'function' && s:previous_token() != '.'
     endif
-    return syn =~? 'regex' || char !~ '[=~!<*,/?^%|&([]' &&
+    return syn =~? 'regex' || char !~ '[=~!<,/?^%|&([]' &&
           \ (char !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == char)
   endif
 endfunction
