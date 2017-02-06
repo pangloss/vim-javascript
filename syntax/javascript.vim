@@ -25,7 +25,8 @@ syntax sync fromstart
 syntax case match
 
 syntax match   jsNoise          /[:,\;]\{1}/
-syntax match   jsNoise          /[\.]\{1}/ skipwhite skipempty nextgroup=jsObjectProp
+syntax match   jsNoise          /[\.]\{1}/ skipwhite skipempty nextgroup=jsObjectProp,jsFuncCall
+syntax match   jsObjectProp     contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>/
 syntax match   jsFuncCall       /\k\+\%(\s*(\)\@=/
 syntax match   jsParensError    /[)}\]]/
 
@@ -221,7 +222,6 @@ syntax region  jsCommentMisc        contained start=/\/\*/ end=/\*\// contains=j
 " Decorators
 syntax match   jsDecorator                    /^\s*@/ nextgroup=jsDecoratorFunction
 syntax match   jsDecoratorFunction  contained /[a-zA-Z_][a-zA-Z0-9_.]*/ nextgroup=jsParenDecorator
-syntax match   jsObjectProp         contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>/
 
 if exists("javascript_plugin_jsdoc")
   runtime extras/jsdoc.vim
