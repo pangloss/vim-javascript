@@ -303,7 +303,7 @@ function GetJavascriptIndent()
           \ s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum]
     if idx + 1
       call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000,top)
-    elseif getline(v:lnum) =~ '^\%(\s\|$\)' && syns =~? 'block'
+    elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
       call s:GetPair('{','}','bW','s:skip_func()',2000,top)
     else
       call s:alternatePair(top)
