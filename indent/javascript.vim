@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: January 24, 2017
+" Last Change: February 8, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -177,7 +177,7 @@ function s:PrevCodeLine(lnum)
         return l:n
       endif
       let l:n = prevnonblank(l:n-1)
-    elseif s:syn_at(l:n,1) =~? s:syng_com
+    elseif getline(l:n) =~ '\([/*]\)\1\@![/*]' && s:syn_at(l:n,1) =~? s:syng_com
       let l:n = s:save_pos('eval',
             \ 'cursor('.l:n.',1) + search(''\m\/\*'',"bW")')
     else
@@ -264,7 +264,8 @@ function GetJavascriptIndent()
   " Get the current line.
   call cursor(v:lnum,1)
   let l:line = getline('.')
-  let syns = s:syn_at(v:lnum, 1)
+  " use synstack as it validates syn state
+  let syns = synIDattr(get(synstack(v:lnum, 1),-1),'name')
 
   " start with strings,comments,etc.
   if syns =~? s:syng_com
@@ -301,8 +302,8 @@ function GetJavascriptIndent()
     let [s:looksyn, s:free, top] = [v:lnum - 1, 1, (!indent(l:lnum) &&
           \ s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum]
     if idx + 1
-      call s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,top)
-    elseif indent(v:lnum) && syns =~? 'block'
+      call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000,top)
+    elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
       call s:GetPair('{','}','bW','s:skip_func()',2000,top)
     else
       call s:alternatePair(top)
