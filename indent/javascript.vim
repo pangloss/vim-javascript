@@ -243,7 +243,7 @@ function s:IsBlock()
   if s:looking_at() == '{'
     let l:n = line('.')
     let char = s:previous_token()
-    let syn = char =~ '[{>/]' || match(s:synstack,'xml\|jsx') + 1 ? s:syn_at(line('.'),col('.')-(char == '{')) : ''
+    let syn = char =~ '[{>/]' || match(s:stack,'xml\|jsx') + 1 ? s:syn_at(line('.'),col('.')-(char == '{')) : ''
     if syn =~? 'xml\|jsx'
       return char != '{'
     elseif char =~ '\k'
