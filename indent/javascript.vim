@@ -243,7 +243,7 @@ function s:IsBlock()
   if s:looking_at() == '{'
     let l:n = line('.')
     let char = s:previous_token()
-    let syn = char =~ '[{>/]' ? s:syn_at(line('.'),col('.')-(char == '{')) : ''
+    let syn = char =~ '[{>/]' || match(s:synstack,'xml\|jsx') + 1 ? s:syn_at(line('.'),col('.')-(char == '{')) : ''
     if syn =~? 'xml\|jsx'
       return char != '{'
     elseif char =~ '\k'
@@ -264,8 +264,9 @@ function GetJavascriptIndent()
   " Get the current line.
   call cursor(v:lnum,1)
   let l:line = getline('.')
-  " use synstack as it validates syn state
-  let syns = synIDattr(get(synstack(v:lnum, 1),-1),'name')
+  " use synstack as it validates syn state and works in a empty line
+  let s:stack = synstack(v:lnum,1)
+  let syns = synIDattr(get(s:stack,-1),'name')
 
   " start with strings,comments,etc.
   if syns =~? s:syng_com
