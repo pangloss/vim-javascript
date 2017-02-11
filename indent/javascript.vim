@@ -264,7 +264,7 @@ function GetJavascriptIndent()
   " Get the current line.
   call cursor(v:lnum,1)
   let l:line = getline('.')
-  " use synstack as it validates syn state and works in a empty line
+  " use synstack as it validates syn state and works in an empty line
   let s:stack = synstack(v:lnum,1)
   let syns = synIDattr(get(s:stack,-1),'name')
 
