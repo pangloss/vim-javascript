@@ -243,18 +243,19 @@ function s:IsBlock()
   if s:looking_at() == '{'
     let l:n = line('.')
     let char = s:previous_token()
-    let syn = char =~ '[>/]' || match(s:stack,'xml\|jsx') + 1 ? s:syn_at(line('.'),col('.')-1) : ''
-    if syn =~? 'xml\|jsx'
+    if match(s:stack,'xml\|jsx') + 1 && s:syn_at(line('.'),col('.')-1) =~? 'xml\|jsx'
       return char != '{'
     elseif char =~ '\k'
       return index(split('return const let import export yield default delete var await void typeof throw case new in instanceof')
             \ ,char) < (line('.') != l:n) || s:previous_token() == '.'
     elseif char == '>'
-      return getline('.')[col('.')-2] == '=' || syn =~? '^jsflow'
+      return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? '^jsflow'
     elseif char == ':'
       return getline('.')[col('.')-2] != ':' && s:label_col()
+    elseif char == '/'
+      return s:syn_at(line('.'),col('.')) =~? 'regex'
     endif
-    return syn =~? 'regex\|special' || char !~ '[=~!<*,/?^%|&([]' &&
+    return char !~ '[=~!<*,?^%|&([]' &&
           \ (char !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == char)
   endif
 endfunction
