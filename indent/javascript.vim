@@ -48,9 +48,9 @@ else
 endif
 
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = 'string\|comment\|regex\|special\|jsdoc\|template\%(braces\)\@!'
+let s:syng_strcom = 'string\|comment\|regex\|special\|doc\|template\%(braces\)\@!'
 let s:syng_str = 'string\|template\|special'
-let s:syng_com = 'comment\|jsdoc'
+let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
