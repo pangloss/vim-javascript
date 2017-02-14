@@ -129,7 +129,7 @@ function s:tern_skip(p)
 endfunction
 
 function s:tern_col(p)
-  return s:GetPair('?',':\@<!::\@!','nbW',s:others(a:p)
+  return s:GetPair('?','\_[^:]\zs::\@!','nbW',s:others(a:p)
         \ .' || s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
 endfunction
 
