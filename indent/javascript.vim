@@ -149,7 +149,7 @@ endfunction
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
-      \ '\%([-+<>=,.~!?/*^%|&:]\|\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
+      \ '\C\%([-+<>=,.~!?/*^%|&:]\|\<\%(typeof\|delete\|void\|in\|instanceof\)\)') . '$'
 
 function s:continues(ln,con)
   return !cursor(a:ln, match(' '.a:con,s:continuation)) &&
@@ -243,7 +243,7 @@ function s:IsBlock()
   if s:looking_at() == '{'
     let l:n = line('.')
     let char = s:previous_token()
-    if match(s:stack,'xml\|jsx') + 1 && s:syn_at(line('.'),col('.')-1) =~? 'xml\|jsx'
+    if match(s:stack,'\cxml\|jsx') + 1 && s:syn_at(line('.'),col('.')-1) =~? 'xml\|jsx'
       return char != '{'
     elseif char =~ '\k'
       return index(split('return const let import export yield default delete var await void typeof throw case new in instanceof')
@@ -336,7 +336,7 @@ function GetJavascriptIndent()
       endif
     endif
     if idx < 0 && pline !~ '[{;]$'
-      if pline =~# ':\@<!:$'
+      if pline =~ ':\@<!:$'
         call cursor(l:lnum,strlen(pline))
         let isOp = s:tern_col(b:js_cache[1:2]) * s:W
       else
