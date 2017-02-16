@@ -133,15 +133,13 @@ function s:difcol()
         endif
       elseif s:looking_at() =~ '[;{]'
         return ':label'
-      elseif s:looking_at() == ':' && getline('.')[max([col('.')-2,0]):col('.')] !~ '::'
-        let bal -= 1
-      elseif s:looking_at() == '?'
+      elseif s:looking_at() == ':'
+        let bal -= getline('.')[max([col('.')-2,0]):col('.')] !~ '::'
+      else
         let bal += 1
         if bal > 0
           return ':ternary'
         endif
-      else
-        break
       endif
     endif
   endwhile
@@ -153,7 +151,8 @@ function s:expr_col()
 endfunction
 
 function s:label_col()
-  return s:difcol() !~ 'ternary\|bind' && (s:looking_at() != '{' || s:IsBlock()) 
+  return s:save_pos('eval',
+        \ "s:difcol() == ':label' && (s:looking_at() != '{' || s:IsBlock())")
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
