@@ -133,7 +133,7 @@ function s:difcol()
         endif
       elseif s:looking_at() =~ '[;{]'
         return ':label'
-      elseif s:looking_at() == ':'
+      elseif s:looking_at() == ':' && getline('.')[col('.')-2:col('.')] !~ '::'
         let bal -= 1
       elseif s:looking_at() == '?'
         let bal += 1
@@ -176,7 +176,7 @@ function s:continues(ln,con)
   return !cursor(a:ln, match(' '.a:con,s:continuation)) &&
         \ eval( (['s:syn_at(line("."),col(".")) !~? "regex"'] +
         \ repeat(['getline(".")[col(".")-2] != tr(s:looking_at(),">","=")'],3) +
-        \ ['s:save_pos("s:expr_col")'] +
+        \ ['s:expr_col()'] +
         \ repeat(['s:previous_token() != "."'],5) + [1])[
         \ index(split('/ > - + : typeof in instanceof void delete'),s:token())])
 endfunction
