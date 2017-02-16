@@ -159,7 +159,6 @@ function s:label_col()
   let [s:looksyn,s:free] = pos
   call s:alternatePair(0)
   if s:save_pos('s:IsBlock')
-    let poss = getpos('.')[1:2]
     return call('cursor',pos) || !s:expr_col()
   elseif s:looking_at() == ':'
     return !s:expr_col()
