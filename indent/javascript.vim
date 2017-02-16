@@ -125,7 +125,7 @@ function s:difcol()
     return ':bind'
   endif
   let bal = 0
-  while search('\m\C[{}?:;]','bW')
+  while search('\m[{}?:;]','bW')
     if !eval(s:skip_expr)
       if s:looking_at() == '}'
         if s:GetPair('{','}','bW',s:skip_expr,200) <= 0
@@ -133,7 +133,7 @@ function s:difcol()
         endif
       elseif s:looking_at() =~ '[;{]'
         return ':label'
-      elseif s:looking_at() == ':' && getline('.')[col('.')-2:col('.')] !~ '::'
+      elseif s:looking_at() == ':' && getline('.')[max([col('.')-2,0]):col('.')] !~ '::'
         let bal -= 1
       elseif s:looking_at() == '?'
         let bal += 1
