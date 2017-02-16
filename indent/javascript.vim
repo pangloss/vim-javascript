@@ -125,7 +125,7 @@ function s:difcol()
     return ':bind'
   endif
   let bal = 0
-  while search('\m\C[{}?:;]\|\<case\>','bW')
+  while search('\m\C[{}?:;]','bW')
     if !eval(s:skip_expr)
       if s:looking_at() == '}'
         if s:GetPair('{','}','bW',s:skip_expr,200) <= 0
@@ -140,8 +140,6 @@ function s:difcol()
         if bal > 0
           return ':ternary'
         endif
-      elseif s:looking_at() ==# 'c' && s:save_pos('s:previous_token') != '.' 
-        return ':case'
       else
         break
       endif
@@ -155,14 +153,7 @@ function s:expr_col()
 endfunction
 
 function s:label_col()
-  let pos = getpos('.')[1:2]
-  let [s:looksyn,s:free] = pos
-  call s:alternatePair(0)
-  if s:save_pos('s:IsBlock')
-    return call('cursor',pos) || !s:expr_col()
-  elseif s:looking_at() == ':'
-    return !s:expr_col()
-  endif
+  return s:difcol() !~ 'ternary\|bind' && (s:looking_at() != '{' || s:IsBlock()) 
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
