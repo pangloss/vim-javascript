@@ -120,17 +120,38 @@ function s:previous_token()
   return ''
 endfunction
 
-function s:others(p)
-  return "((line2byte(line('.')) + col('.')) <= ".(line2byte(a:p[0]) + a:p[1]).") || ".s:skip_expr
+function s:difcol()
+  if getline('.')[col('.')-2] == ':'
+    return ':bind'
+  endif
+  let bal = 0
+  while search('\m\C[{}?:;]\|\<case\>','bW')
+    if !eval(s:skip_expr)
+      if s:looking_at() == '}'
+        if s:GetPair('{','}','bW',s:skip_expr,200) <= 0
+          break
+        endif
+      elseif s:looking_at() =~ '[;{]'
+        return ':label'
+      elseif s:looking_at() == ':'
+        let bal -= 1
+      elseif s:looking_at() == '?'
+        let bal += 1
+        if bal > 0
+          return ':ternary'
+        endif
+      elseif s:looking_at() ==# 'c' && s:save_pos('s:previous_token') != '.' 
+        return ':case'
+      else
+        break
+      endif
+    endif
+  endwhile
+  return ':label'
 endfunction
 
-function s:tern_skip(p)
-  return s:GetPair('{','}','nbW',s:others(a:p),200,a:p[0]) > 0
-endfunction
-
-function s:tern_col(p)
-  return s:GetPair('?','\%([^:]\|^\)\zs::\@!','nbW',s:others(a:p)
-        \ .' || s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
+function s:expr_col()
+  return s:save_pos('s:difcol') =~ 'ternary\|bind'
 endfunction
 
 function s:label_col()
@@ -139,9 +160,9 @@ function s:label_col()
   call s:alternatePair(0)
   if s:save_pos('s:IsBlock')
     let poss = getpos('.')[1:2]
-    return call('cursor',pos) || !s:tern_col(poss)
+    return call('cursor',pos) || !s:expr_col()
   elseif s:looking_at() == ':'
-    return !s:tern_col([0,0])
+    return !s:expr_col()
   endif
 endfunction
 
@@ -155,8 +176,9 @@ function s:continues(ln,con)
   return !cursor(a:ln, match(' '.a:con,s:continuation)) &&
         \ eval( (['s:syn_at(line("."),col(".")) !~? "regex"'] +
         \ repeat(['getline(".")[col(".")-2] != tr(s:looking_at(),">","=")'],3) +
+        \ ['s:save_pos("s:expr_col")'] +
         \ repeat(['s:previous_token() != "."'],5) + [1])[
-        \ index(split('/ > - + typeof in instanceof void delete'),s:token())])
+        \ index(split('/ > - + : typeof in instanceof void delete'),s:token())])
 endfunction
 
 " get the line of code stripped of comments and move cursor to the last
@@ -251,7 +273,7 @@ function s:IsBlock()
     elseif char == '>'
       return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? '^jsflow'
     elseif char == ':'
-      return getline('.')[col('.')-2] != ':' && s:label_col()
+      return s:label_col()
     elseif char == '/'
       return s:syn_at(line('.'),col('.')) =~? 'regex'
     endif
@@ -336,12 +358,7 @@ function GetJavascriptIndent()
       endif
     endif
     if idx < 0 && pline !~ '[{;]$'
-      if pline =~ ':\@<!:$'
-        call cursor(l:lnum,strlen(pline))
-        let isOp = s:tern_col(b:js_cache[1:2]) * s:W
-      else
-        let isOp = (l:line =~# s:opfirst || s:continues(l:lnum,pline)) * s:W
-      endif
+      let isOp = (l:line =~# s:opfirst || s:continues(l:lnum,pline)) * s:W
       let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
