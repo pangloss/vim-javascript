@@ -106,10 +106,8 @@ function s:previous_token()
   if (s:looking_at() !~ '\k' || search('\m\<','cbW')) && search('\m\S','bW')
     if (getline('.')[col('.')-2:col('.')-1] == '*/' || line('.') != l:n &&
           \ getline('.') =~ '\%<'.col('.').'c\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
-      while search('\m\/\ze[/*]','cbW')
-        if !search('\m\S','bW')
-          break
-        elseif s:syn_at(line('.'),col('.')) !~? s:syng_com
+      while search('\m\S\ze\_s*\/[/*]','bW')
+        if s:syn_at(line('.'),col('.')) !~? s:syng_com
           return s:token()
         endif
       endwhile
@@ -120,29 +118,35 @@ function s:previous_token()
   return ''
 endfunction
 
-function s:others(p)
-  return "((line2byte(line('.')) + col('.')) <= ".(line2byte(a:p[0]) + a:p[1]).") || ".s:skip_expr
-endfunction
-
-function s:tern_skip(p)
-  return s:GetPair('{','}','nbW',s:others(a:p),200,a:p[0]) > 0
-endfunction
-
-function s:tern_col(p)
-  return s:GetPair('?','\%([^:]\|^\)\zs::\@!','nbW',s:others(a:p)
-        \ .' || s:tern_skip('.string(a:p).')',200,a:p[0]) > 0
-endfunction
-
-function s:label_col()
-  let pos = getpos('.')[1:2]
-  let [s:looksyn,s:free] = pos
-  call s:alternatePair(0)
-  if s:save_pos('s:IsBlock')
-    let poss = getpos('.')[1:2]
-    return call('cursor',pos) || !s:tern_col(poss)
-  elseif s:looking_at() == ':'
-    return !s:tern_col([0,0])
+function s:expr_col()
+  if getline('.')[col('.')-2] == ':'
+    return 1
   endif
+  let [l:pos,bal] = [getpos('.')[1:2],0]
+  try
+    while search('\m[{}?:;]','bW')
+      if !eval(s:skip_expr)
+        if s:looking_at() == '}'
+          if s:GetPair('{','}','bW',s:skip_expr,200) <= 0
+            return
+          endif
+        elseif s:looking_at() == '{'
+          return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()
+        elseif s:looking_at() == ';'
+          return
+        elseif s:looking_at() == ':'
+          let bal -= getline('.')[max([col('.')-2,0]):col('.')] !~ '::'
+        else
+          let bal += 1
+          if bal > 0
+            return 1
+          endif
+        endif
+      endif
+    endwhile
+  finally
+    call call('cursor',l:pos)
+  endtry
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -155,8 +159,8 @@ function s:continues(ln,con)
   return !cursor(a:ln, match(' '.a:con,s:continuation)) &&
         \ eval( (['s:syn_at(line("."),col(".")) !~? "regex"'] +
         \ repeat(['getline(".")[col(".")-2] != tr(s:looking_at(),">","=")'],3) +
-        \ repeat(['s:previous_token() != "."'],5) + [1])[
-        \ index(split('/ > - + typeof in instanceof void delete'),s:token())])
+        \ repeat(['s:previous_token() != "."'],5) + ['s:expr_col()',1])[
+        \ index(split('/ > - + typeof in instanceof void delete :'),s:token())])
 endfunction
 
 " get the line of code stripped of comments and move cursor to the last
@@ -251,7 +255,7 @@ function s:IsBlock()
     elseif char == '>'
       return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? '^jsflow'
     elseif char == ':'
-      return getline('.')[col('.')-2] != ':' && s:label_col()
+      return !s:expr_col()
     elseif char == '/'
       return s:syn_at(line('.'),col('.')) =~? 'regex'
     endif
@@ -336,12 +340,7 @@ function GetJavascriptIndent()
       endif
     endif
     if idx < 0 && pline !~ '[{;]$'
-      if pline =~ ':\@<!:$'
-        call cursor(l:lnum,strlen(pline))
-        let isOp = s:tern_col(b:js_cache[1:2]) * s:W
-      else
-        let isOp = (l:line =~# s:opfirst || s:continues(l:lnum,pline)) * s:W
-      endif
+      let isOp = (l:line =~# s:opfirst || s:continues(l:lnum,pline)) * s:W
       let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
