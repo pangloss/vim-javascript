@@ -65,18 +65,28 @@ function s:skip_func()
         \ eval(s:skip_expr)
 endfunction
 
+function s:earchs(p,f,l,s)
+  while 1
+    let r = searchpos(a:p,a:f,a:l)
+    if !r[0]
+      return
+    elseif s:save_pos('eval',
+          \ 'cursor('.join(r,',').') + !eval('.a:s.')')
+      return r[0]
+    endif
+  endwhile
+endfunction
+
 function s:alternatePair(stop)
   let pos = getpos('.')[1:2]
-  while search('\m[][(){}]','bW',a:stop)
-    if !s:skip_func()
-      let idx = stridx('])}',s:looking_at())
-      if idx + 1
-        if s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,a:stop) <= 0
-          break
-        endif
-      else
-        return
+  while s:earchs('\m[][(){}]','bW',a:stop,'s:skip_func()')
+    let idx = stridx('])}',s:looking_at())
+    if idx + 1
+      if s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,a:stop) <= 0
+        break
       endif
+    else
+      return
     endif
   endwhile
   call call('cursor',pos)
@@ -106,16 +116,11 @@ function s:previous_token()
   if (s:looking_at() !~ '\k' || search('\m\<','cbW')) && search('\m\S','bW')
     if (getline('.')[col('.')-2:col('.')-1] == '*/' || line('.') != l:n &&
           \ getline('.') =~ '\%<'.col('.').'c\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
-      while search('\m\/\ze[/*]','cbW')
-        if !search('\m\S','bW')
-          break
-        elseif s:syn_at(line('.'),col('.')) !~? s:syng_com
-          return s:token()
-        endif
-      endwhile
-    else
-      return s:token()
+      if !s:earchs('\m\S\ze\_s*\/[/*]','bW',0,s:skip_expr)
+        return ''
+      endif
     endif
+    return s:token()
   endif
   return ''
 endfunction
@@ -126,23 +131,21 @@ function s:expr_col()
   endif
   let [l:pos,bal] = [getpos('.')[1:2],0]
   try
-    while search('\m[{}?:;]','bW')
-      if !eval(s:skip_expr)
-        if s:looking_at() == '}'
-          if s:GetPair('{','}','bW',s:skip_expr,200) <= 0
-            return
-          endif
-        elseif s:looking_at() == '{'
-          return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()
-        elseif s:looking_at() == ';'
+    while s:earchs('\m[{}?:;]','bW',0,s:skip_expr)
+      if s:looking_at() == '}'
+        if s:GetPair('{','}','bW',s:skip_expr,200) <= 0
           return
-        elseif s:looking_at() == ':'
-          let bal -= getline('.')[max([col('.')-2,0]):col('.')] !~ '::'
-        else
-          let bal += 1
-          if bal > 0
-            return 1
-          endif
+        endif
+      elseif s:looking_at() == '{'
+        return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()
+      elseif s:looking_at() == ';'
+        return
+      elseif s:looking_at() == ':'
+        let bal -= getline('.')[max([col('.')-2,0]):col('.')] !~ '::'
+      else
+        let bal += 1
+        if bal > 0
+          return 1
         endif
       endif
     endwhile
