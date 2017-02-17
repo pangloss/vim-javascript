@@ -132,8 +132,10 @@ function s:expr_col()
           if s:GetPair('{','}','bW',s:skip_expr,200) <= 0
             return
           endif
-        elseif s:looking_at() =~ '[;{]'
-          return s:looking() == '{' && !(getpos('.')[1:2] == b:js_cache[1:2] || s:IsBlock())
+        elseif s:looking_at() == '{'
+          return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()
+        elseif s:looking_at() == ';'
+          return
         elseif s:looking_at() == ':'
           let bal -= getline('.')[max([col('.')-2,0]):col('.')] !~ '::'
         else
