@@ -120,33 +120,33 @@ function s:previous_token()
   return ''
 endfunction
 
-function s:difcol()
+function s:expr_col()
   if getline('.')[col('.')-2] == ':'
     return 1
   endif
-  let bal = 0
-  while search('\m[{}?:;]','bW')
-    if !eval(s:skip_expr)
-      if s:looking_at() == '}'
-        if s:GetPair('{','}','bW',s:skip_expr,200) <= 0
-          return
-        endif
-      elseif s:looking_at() =~ '[;{]'
-        return s:looking() == '{' && !(getpos('.')[1:2] == b:js_cache[1:2] || s:IsBlock())
-      elseif s:looking_at() == ':'
-        let bal -= getline('.')[max([col('.')-2,0]):col('.')] !~ '::'
-      else
-        let bal += 1
-        if bal > 0
-          return 1
+  let [l:pos,bal] = [getpos('.')[1:2],0]
+  try
+    while search('\m[{}?:;]','bW')
+      if !eval(s:skip_expr)
+        if s:looking_at() == '}'
+          if s:GetPair('{','}','bW',s:skip_expr,200) <= 0
+            return
+          endif
+        elseif s:looking_at() =~ '[;{]'
+          return s:looking() == '{' && !(getpos('.')[1:2] == b:js_cache[1:2] || s:IsBlock())
+        elseif s:looking_at() == ':'
+          let bal -= getline('.')[max([col('.')-2,0]):col('.')] !~ '::'
+        else
+          let bal += 1
+          if bal > 0
+            return 1
+          endif
         endif
       endif
-    endif
-  endwhile
-endfunction
-
-function s:expr_col()
-  return s:save_pos('s:difcol')
+    endwhile
+  finally
+    call call('cursor',l:pos)
+  endtry
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -159,9 +159,8 @@ function s:continues(ln,con)
   return !cursor(a:ln, match(' '.a:con,s:continuation)) &&
         \ eval( (['s:syn_at(line("."),col(".")) !~? "regex"'] +
         \ repeat(['getline(".")[col(".")-2] != tr(s:looking_at(),">","=")'],3) +
-        \ ['s:expr_col()'] +
-        \ repeat(['s:previous_token() != "."'],5) + [1])[
-        \ index(split('/ > - + : typeof in instanceof void delete'),s:token())])
+        \ repeat(['s:previous_token() != "."'],5) + ['s:expr_col()',1])[
+        \ index(split('/ > - + typeof in instanceof void delete :'),s:token())])
 endfunction
 
 " get the line of code stripped of comments and move cursor to the last
