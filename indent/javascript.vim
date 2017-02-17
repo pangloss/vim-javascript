@@ -106,10 +106,8 @@ function s:previous_token()
   if (s:looking_at() !~ '\k' || search('\m\<','cbW')) && search('\m\S','bW')
     if (getline('.')[col('.')-2:col('.')-1] == '*/' || line('.') != l:n &&
           \ getline('.') =~ '\%<'.col('.').'c\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
-      while search('\m\/\ze[/*]','cbW')
-        if !search('\m\S','bW')
-          break
-        elseif s:syn_at(line('.'),col('.')) !~? s:syng_com
+      while search('\m\S\ze\_s*\/[/*]','bW')
+        if s:syn_at(line('.'),col('.')) !~? s:syng_com
           return s:token()
         endif
       endwhile
