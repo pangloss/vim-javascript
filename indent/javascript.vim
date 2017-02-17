@@ -122,37 +122,31 @@ endfunction
 
 function s:difcol()
   if getline('.')[col('.')-2] == ':'
-    return ':bind'
+    return 1
   endif
   let bal = 0
   while search('\m[{}?:;]','bW')
     if !eval(s:skip_expr)
       if s:looking_at() == '}'
         if s:GetPair('{','}','bW',s:skip_expr,200) <= 0
-          break
+          return
         endif
       elseif s:looking_at() =~ '[;{]'
-        return ':label'
+        return s:looking() == '{' && !(getpos('.')[1:2] == b:js_cache[1:2] || s:IsBlock())
       elseif s:looking_at() == ':'
         let bal -= getline('.')[max([col('.')-2,0]):col('.')] !~ '::'
       else
         let bal += 1
         if bal > 0
-          return ':ternary'
+          return 1
         endif
       endif
     endif
   endwhile
-  return ':label'
 endfunction
 
 function s:expr_col()
-  return s:save_pos('s:difcol') =~ 'ternary\|bind'
-endfunction
-
-function s:label_col()
-  return s:save_pos('eval',
-        \ "s:difcol() == ':label' && (s:looking_at() != '{' || s:IsBlock())")
+  return s:save_pos('s:difcol')
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -262,7 +256,7 @@ function s:IsBlock()
     elseif char == '>'
       return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? '^jsflow'
     elseif char == ':'
-      return s:label_col()
+      return !s:expr_col()
     elseif char == '/'
       return s:syn_at(line('.'),col('.')) =~? 'regex'
     endif
