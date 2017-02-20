@@ -102,7 +102,7 @@ endfunction
 
 function s:previous_token()
   let l:n = line('.')
-  if (s:looking_at() !~ '\k' || search('\m\<','cbW')) && search('\m\S','bW')
+  if search('\k\+\|\S','bW')
     if (getline('.')[col('.')-2:col('.')-1] == '*/' || line('.') != l:n &&
           \ getline('.') =~ '\%<'.col('.').'c\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
       while search('\m\S\ze\_s*\/[/*]','bW')
