@@ -151,14 +151,14 @@ endfunction
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
-      \ '\C\%([-+<>=,.~!?/*^%|&:]\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\|yield\)\)') . '$'
+      \ '\C\%([-+<>=,.~!?/*^%|&:]\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\)\)') . '$'
 
 function s:continues(ln,con)
   return !cursor(a:ln, match(' '.a:con,s:continuation)) &&
         \ eval( (['s:syn_at(line("."),col(".")) !~? "regex"'] +
         \ repeat(['getline(".")[col(".")-2] != tr(s:looking_at(),">","=")'],3) +
-        \ repeat(['s:previous_token() != "."'],8) + ['s:expr_col()',1])[
-        \ index(split('/ > - + typeof new delete void in instanceof await yield :'),s:token())])
+        \ repeat(['s:previous_token() != "."'],7) + ['s:expr_col()',1])[
+        \ index(split('/ > - + typeof new delete void in instanceof await :'),s:token())])
 endfunction
 
 " get the line of code stripped of comments and move cursor to the last
