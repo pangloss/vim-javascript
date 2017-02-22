@@ -151,14 +151,14 @@ endfunction
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
-      \ '\C\%([-+<>=,.~!?/*^%|&:]\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\)\)') . '$'
+      \ '\C\%([-+<>=,.~!?/*^%|&:]\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\)\)') . '$'
 
 function s:continues(ln,con)
   return !cursor(a:ln, match(' '.a:con,s:continuation)) &&
         \ eval( (['s:syn_at(line("."),col(".")) !~? "regex"'] +
         \ repeat(['getline(".")[col(".")-2] != tr(s:looking_at(),">","=")'],3) +
-        \ repeat(['s:previous_token() != "."'],6) + ['s:expr_col()',1])[
-        \ index(split('/ > - + typeof new delete void in instanceof :'),s:token())])
+        \ repeat(['s:previous_token() != "."'],7) + ['s:expr_col()',1])[
+        \ index(split('/ > - + typeof new delete void in instanceof await :'),s:token())])
 endfunction
 
 " get the line of code stripped of comments and move cursor to the last
@@ -248,7 +248,7 @@ function s:IsBlock()
     if match(s:stack,'\cxml\|jsx') + 1 && s:syn_at(line('.'),col('.')-1) =~? 'xml\|jsx'
       return char != '{'
     elseif char =~ '\k'
-      return index(split('return const let import export yield default delete var await void typeof throw case new in instanceof')
+      return index(split('return const let import export yield default delete var await void typeof throw case new of in instanceof')
             \ ,char) < (line('.') != l:n) || s:save_pos('s:previous_token') == '.'
     elseif char == '>'
       return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? '^jsflow'
