@@ -55,14 +55,13 @@ let s:syng_com = 'comment\|doc'
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
 function s:skip_func()
-  if !s:free || search('\m`\|\${\|\*\/','nW',s:looksyn)
+  if getline('.') =~ '\%<'.col('.').'c\/.\{-}\/\|\%>'.col('.').'c[''"]\|\\$'
+    return eval(s:skip_expr)
+  elseif !s:free || search('\m`\|\${\|\*\/','nW',s:looksyn)
     let s:free = !eval(s:skip_expr)
-    let s:looksyn = line('.')
-    return !s:free
   endif
   let s:looksyn = line('.')
-  return getline('.') =~ '\%<'.col('.').'c\/.\{-}\/\|\%>'.col('.').'c[''"]\|\\$' &&
-        \ eval(s:skip_expr)
+  return !s:free
 endfunction
 
 function s:alternatePair(stop)
