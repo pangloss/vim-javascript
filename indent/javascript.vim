@@ -154,10 +154,10 @@ let s:continuation = get(g:,'javascript_continuation',
 
 function s:continues(ln,con)
   return !cursor(a:ln, match(' '.a:con,s:continuation)) &&
-        \ eval( (['s:syn_at(line("."),col(".")) !~? "regex"'] +
-        \ repeat(['getline(".")[col(".")-2] != tr(s:looking_at(),">","=")'],3) +
-        \ repeat(['s:previous_token() != "."'],7) + ['s:expr_col()',1])[
-        \ index(split('/ > - + typeof new delete void in instanceof await :'),s:token())])
+        \ eval(['s:syn_at(line("."),col(".")) !~? "regex"',
+        \ 'getline(".")[col(".")-2] != tr(s:looking_at(),">","=")',
+        \ 's:previous_token() != "."','s:expr_col()',1][
+        \ match(matchlist(s:looking_at(),'\(\/\)\|\([-+>]\)\|\(\l\)\|\(:\)')[1:],'.')])
 endfunction
 
 " get the line of code stripped of comments and move cursor to the last
