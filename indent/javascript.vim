@@ -267,8 +267,8 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   let l:line = getline('.')
   " use synstack as it validates syn state and works in an empty line
-  let s:stack = synstack(v:lnum,1)
-  let syns = synIDattr(get(s:stack,-1),'name')
+  let s:stack = map(synstack(v:lnum,1),"synIDattr(v:val,'name')")
+  let syns = get(s:stack,-1,'')
 
   " start with strings,comments,etc.
   if syns =~? s:syng_com
