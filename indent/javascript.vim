@@ -157,7 +157,7 @@ function s:continues(ln,con)
         \ eval(['s:syn_at(line("."),col(".")) !~? "regex"',
         \ 'getline(".")[col(".")-2] != tr(s:looking_at(),">","=")',
         \ 's:previous_token() != "."','s:expr_col()',1][
-        \ match(matchlist(s:looking_at(),'\v(\/)|([-+>])|(\l)|(:)')[1:],'.')])
+        \ match(matchlist(s:looking_at(),'\(\/\)\|\([-+>]\)\|\(\l\)\|\(:\)')[1:],'.')])
 endfunction
 
 " get the line of code stripped of comments and move cursor to the last
