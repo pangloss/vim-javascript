@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: February 8, 2017
+" Last Change: February 25, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -100,9 +100,9 @@ function s:token()
 endfunction
 
 function s:previous_token()
-  let l:n = line('.')
+  let l:pos = getpos('.')[1:2]
   if (s:looking_at() !~ '\k' || search('\m\<','cbW')) && search('\m\S','bW')
-    if (getline('.')[col('.')-2:col('.')-1] == '*/' || line('.') != l:n &&
+    if (getline('.')[col('.')-2:col('.')-1] == '*/' || line('.') != l:pos[0] &&
           \ getline('.') =~ '\%<'.col('.').'c\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
       while search('\m\S\ze\_s*\/[/*]','bW')
         if s:syn_at(line('.'),col('.')) !~? s:syng_com
@@ -113,6 +113,7 @@ function s:previous_token()
       return s:token()
     endif
   endif
+  call call('cursor',l:pos)
   return ''
 endfunction
 
