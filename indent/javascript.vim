@@ -278,7 +278,7 @@ function GetJavascriptIndent()
     elseif l:line !~ '^\s*\/[/*]'
       return -1
     endif
-  elseif syns =~? s:syng_str && l:line !~ '^[''"]'
+  elseif syns =~? s:syng_str
     if b:js_cache[0] == v:lnum - 1 && s:Balanced(v:lnum-1)
       let b:js_cache[0] = v:lnum
     endif
