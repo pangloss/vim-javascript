@@ -93,6 +93,7 @@ OR if you wish to toggle concealing you may wish to bind a command such as the f
 
 * `:h cino-:`
 * `:h cino-star`
+* `:h cino-(` (only an empty argument or 0)
 * `:h 'indentkeys'`
 
 ## Contributing
