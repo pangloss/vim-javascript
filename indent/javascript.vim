@@ -342,7 +342,8 @@ function GetJavascriptIndent()
       let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
-  elseif num && idx < 0 && s:looking_at() == '(' && &cino =~ '\%(.*(\)\@>0\=\%(,\|$\)'
+  elseif num && idx < 0 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' &&
+        \ &cino =~ '\%(.*(\)\@>0\=\%(,\|$\)'
     return -(!!search('\S','W',num)) + col('.')
   endif
 
