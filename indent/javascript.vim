@@ -54,6 +54,13 @@ let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
+function s:parse_cino(f)
+  let cin = matchlist(&cino,'.*'.a:f.'\zs\(-\)\=\(\d*\)\(\.\d\+\)\=\(s\)\=\C')
+  return cin[0] is '' ? 0 : (cin[1].1) *
+        \ ((strlen(cin[2].cin[3]) ? str2nr(cin[2].str2nr(cin[3][1])) : 10) *
+        \ (cin[4] is '' ? 1 : s:W)) / 10
+endfunction
+
 function s:skip_func()
   if getline('.') =~ '\%<'.col('.').'c\/.\{-}\/\|\%>'.col('.').'c[''"]\|\\$'
     return eval(s:skip_expr)
@@ -327,13 +334,10 @@ function GetJavascriptIndent()
         if &cino !~ ':'
           let switch_offset = s:W
         else
-          let cinc = matchlist(&cino,'.*:\zs\(-\)\=\(\d*\)\(\.\d\+\)\=\(s\)\=\C')
-          let switch_offset = max([cinc[0] is '' ? 0 : (cinc[1].1) *
-                \ ((strlen(cinc[2].cinc[3]) ? str2nr(cinc[2].str2nr(cinc[3][1])) : 10) *
-                \ (cinc[4] is '' ? 1 : s:W)) / 10, -indent(num)])
+          let switch_offset = max([-indent(num),s:parse_cino(':')])
         endif
         if pline[-1:] != '.' && l:line =~# '^\%(default\|case'
-              \ .(&cino =~# '\%(.*b\)\@>[^0,]' ? '\|break' : '').'\)\>'
+              \ .(s:parse_cino('b') ? '\|break' : '').'\)\>'
           return indent(num) + switch_offset
         endif
       endif
@@ -343,9 +347,10 @@ function GetJavascriptIndent()
       let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
-  elseif idx < 0 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' &&
-        \ &cino =~ '\%(.*(\)\@>0\=\%(,\|$\)'
-    return -(!!search('\S','W',num)) + col('.')
+  elseif idx < 0 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '('
+    let pval = s:parse_cino('(')
+    return !pval ? -(!!search('\S','W',num)) + col('.') : max([indent('.') + pval +
+          \ (s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:W),-indent('.')])
   endif
 
   " main return
