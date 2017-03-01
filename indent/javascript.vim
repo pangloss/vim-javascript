@@ -350,7 +350,7 @@ function GetJavascriptIndent()
   elseif idx < 0 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '('
     let pval = s:parse_cino('(')
     return !pval ? -(!!search('\S','W',num)) + col('.') : max([indent('.') + pval +
-          \ (s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:W),-indent('.')])
+          \ (s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:W),0])
   endif
 
   " main return
