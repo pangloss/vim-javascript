@@ -332,7 +332,8 @@ function GetJavascriptIndent()
                 \ ((strlen(cinc[2].cinc[3]) ? str2nr(cinc[2].str2nr(cinc[3][1])) : 10) *
                 \ (cinc[4] is '' ? 1 : s:W)) / 10, -indent(num)])
         endif
-        if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
+        if pline[-1:] != '.' && l:line =~# '^\%(default\|case'
+              \ .(&cino =~ '\%(.*b\)\@>[^0,]' ? '\|break' : '').'\)\>'
           return indent(num) + switch_offset
         endif
       endif
