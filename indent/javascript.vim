@@ -56,7 +56,7 @@ let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_s
 
 function s:parse_cino(f)
   let cin = matchlist(&cino,'.*'.a:f.'\zs\(-\)\=\(\d*\)\(\.\d\+\)\=\(s\)\=\C')
-  return get(cin,0,'') is '' ? 0 : (cin[1].1) *
+  return get(cin,0) =~ '^[-0]*$' ? 0 : (cin[1].1) *
         \ ((strlen(cin[2].cin[3]) ? str2nr(cin[2].str2nr(cin[3][1])) : 10) *
         \ (cin[4] is '' ? 1 : s:W)) / 10
 endfunction
