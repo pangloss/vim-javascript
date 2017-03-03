@@ -351,12 +351,7 @@ function GetJavascriptIndent()
     let pval = s:parse_cino('(')
     if !pval
       let graph = searchpos('\m\S','nW',num)[1]
-      if !graph
-        let W = s:parse_cino('W')
-        let ind = W ? indent('.') + W : col('.')
-      else
-        let ind = s:parse_cino('w') ? graph - 1 : col('.')
-      endif
+      let ind = graph && !s:parse_cino('w') ? graph - 1 : col('.')
     else
       let ind = indent('.') + pval + (s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:W)
     endif
