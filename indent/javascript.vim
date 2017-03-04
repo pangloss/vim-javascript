@@ -73,9 +73,11 @@ endfunction
 
 function s:alternatePair(stop)
   let pos = getpos('.')[1:2]
-  while search('\m[][(){}]','bW',a:stop)
+  let pat = '[][(){};]'
+  while search('\m'.pat,'bW',a:stop)
     if s:skip_func() | continue | endif
-    let idx = stridx('])}',s:looking_at())
+    let idx = stridx('])};',s:looking_at())
+    if idx is 3 | let pat = '[{}()]' | continue | endif
     if idx + 1
       if s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,a:stop) <= 0
         break
