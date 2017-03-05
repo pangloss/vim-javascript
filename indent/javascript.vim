@@ -36,6 +36,10 @@ else
   endfunction
 endif
 
+" Performance for forwards search(): start search at pos rather than masking
+" matches before pos.
+let s:z = has('patch-7.4.984') ? 'z' : ''
+
 " searchpair() wrapper
 if has('reltime')
   function s:GetPair(start,end,flags,skip,time,...)
@@ -64,7 +68,7 @@ endfunction
 function s:skip_func()
   if getline('.') =~ '\%<'.col('.').'c\/.\{-}\/\|\%>'.col('.').'c[''"]\|\\$'
     return eval(s:skip_expr)
-  elseif !s:free || search('\m`\|\${\|\*\/','nW',s:looksyn)
+  elseif !s:free || search('\m`\|\${\|\*\/','nW'.s:z,s:looksyn)
     let s:free = !eval(s:skip_expr)
   endif
   let s:looksyn = line('.')
@@ -351,7 +355,7 @@ function GetJavascriptIndent()
     endif
   elseif idx < 0 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '('
     let pval = s:parse_cino('(')
-    return !pval ? (s:parse_cino('w') ? 0 : -(!!search('\m\S','W',num))) + col('.') :
+    return !pval ? (s:parse_cino('w') ? 0 : -(search('\m\S','pW'.s:z,num))) + col('.') :
           \ max([indent('.') + pval + (s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:W),0])
   endif
 
