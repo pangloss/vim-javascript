@@ -68,11 +68,11 @@ endfunction
 function s:skip_func()
   if getline('.') =~ '\%<'.col('.').'c\/.\{-}\/\|\%>'.col('.').'c[''"]\|\\$'
     return eval(s:skip_expr)
-  elseif !s:free || search('\m`\|\${\|\*\/','nW'.s:z,s:looksyn)
-    let s:free = !eval(s:skip_expr)
+  elseif s:checkIn || search('\m`\|\${\|\*\/','nW'.s:z,s:looksyn)
+    let s:checkIn = eval(s:skip_expr)
   endif
   let s:looksyn = line('.')
-  return !s:free
+  return s:checkIn
 endfunction
 
 function s:alternatePair(stop)
@@ -316,7 +316,7 @@ function GetJavascriptIndent()
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
     call call('cursor',b:js_cache[1:])
   else
-    let [s:looksyn, s:free, top] = [v:lnum - 1, 1, (!indent(l:lnum) &&
+    let [s:looksyn, s:checkIn, top] = [v:lnum - 1, 0, (!indent(l:lnum) &&
           \ s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum]
     if idx + 1
       call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000,top)
