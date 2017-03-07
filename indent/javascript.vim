@@ -360,7 +360,7 @@ function GetJavascriptIndent()
   endif
 
   " main return
-  if idx + 1 || l:line[:1] == '|}'
+  if l:line =~ '^\%([])}]\||}\)'
     return max([indent(num),0])
   elseif num
     return indent(num) + s:W + switch_offset + bL + isOp
