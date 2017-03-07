@@ -348,7 +348,7 @@ function GetJavascriptIndent()
         endif
       endif
     endif
-    if idx < 0 && pline !~ '[{;]$'
+    if idx < 0 && pline[-1:] !~ '[{;]'
       let isOp = (l:line =~# s:opfirst || s:continues(l:lnum,pline)) * s:W
       let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
@@ -360,7 +360,7 @@ function GetJavascriptIndent()
   endif
 
   " main return
-  if idx + 1 || l:line[:1] == '|}'
+  if l:line =~ '^\%([])}]\||}\)'
     return max([indent(num),0])
   elseif num
     return indent(num) + s:W + switch_offset + bL + isOp
