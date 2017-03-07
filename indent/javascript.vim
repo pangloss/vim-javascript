@@ -348,7 +348,7 @@ function GetJavascriptIndent()
         endif
       endif
     endif
-    if idx < 0 && pline !~ '[{;]$'
+    if idx < 0 && pline[-1:] !~ '[{;]'
       let isOp = (l:line =~# s:opfirst || s:continues(l:lnum,pline)) * s:W
       let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
