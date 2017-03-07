@@ -342,8 +342,7 @@ function GetJavascriptIndent()
         else
           let switch_offset = max([-indent(num),s:parse_cino(':')])
         endif
-        if pline[-1:] != '.' && l:line =~# '^\%(default\|case'
-              \ .(s:parse_cino('b') ? '\|break' : '').'\)\>'
+        if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
           return indent(num) + switch_offset
         endif
       endif
