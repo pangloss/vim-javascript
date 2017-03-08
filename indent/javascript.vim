@@ -59,10 +59,9 @@ let s:syng_com = 'comment\|doc'
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
 function s:parse_cino(f)
-  let cin = matchlist(&cino,'.*'.a:f.'\zs\(-\)\=\(\d*\)\(\.\d\+\)\=\(s\)\=\C')
-  return get(cin,0) =~ '^[-0]*$' ? 0 : (cin[1].1) *
-        \ ((strlen(cin[2].cin[3]) ? str2nr(cin[2].str2nr(cin[3][1])) : 10) *
-        \ (cin[4] is '' ? 1 : s:W)) / 10
+  silent! return float2nr(eval(substitute(substitute(join(split(
+        \ matchstr(&cino,'.*'.a:f.'\zs[^,]*'), 's',1), '*'.s:W)
+        \ , '^-\=\zs\*','',''), '^-\=\zs\.','0.','')))
 endfunction
 
 function s:skip_func()
