@@ -176,9 +176,14 @@ endfunction
 " get the line of code stripped of comments and move cursor to the last
 " non-comment char.
 function s:Trim(ln)
-  call cursor(a:ln+1,1)
-  call s:previous_token()
-  return strpart(getline('.'),0,col('.'))
+  let pline = substitute(getline(a:ln),'\s*$','','')
+  let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
+  while l:max != -1 && s:syn_at(a:ln, strlen(pline)) =~? s:syng_com
+    let pline = pline[: l:max]
+    let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
+    let pline = substitute(pline[:-2],'\s*$','','')
+  endwhile
+  return pline is '' || cursor(a:ln,strlen(pline)) ? pline : pline
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
