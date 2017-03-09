@@ -183,7 +183,7 @@ function s:Trim(ln)
     let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
     let pline = substitute(pline[:-2],'\s*$','','')
   endwhile
-  return cursor(a:ln,strlen(pline)) ? pline : pline
+  return pline is '' || cursor(a:ln,strlen(pline)) ? pline : pline
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
