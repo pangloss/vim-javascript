@@ -177,10 +177,10 @@ endfunction
 " non-comment char.
 function s:Trim(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
-  let l:max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
-  while l:max && s:syn_at(a:ln, strlen(pline)) =~? s:syng_com
+  let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
+  while l:max != -1 && s:syn_at(a:ln, strlen(pline)) =~? s:syng_com
     let pline = pline[: l:max]
-    let l:max = max([strridx(pline,'//'),strridx(pline,'/*'),0])
+    let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
     let pline = substitute(pline[:-2],'\s*$','','')
   endwhile
   return cursor(a:ln,strlen(pline)) ? pline : pline
