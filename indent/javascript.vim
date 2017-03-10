@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: February 25, 2017
+" Last Change: March 9, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -133,30 +133,26 @@ function s:expr_col()
   if getline('.')[col('.')-2] == ':'
     return 1
   endif
-  let [l:pos,bal] = [getpos('.')[1:2],0]
-  try
-    while search('\m[{}?:;]','bW')
-      if eval(s:skip_expr) | continue | endif
-      if s:looking_at() == '}'
-        if s:GetPair('{','}','bW',s:skip_expr,200) <= 0
-          return
-        endif
-      elseif s:looking_at() == '{'
-        return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()
-      elseif s:looking_at() == ';'
+  let bal = 0
+  while search('\m[{}?:;]','bW')
+    if eval(s:skip_expr) | continue | endif
+    if s:looking_at() == '}'
+      if s:GetPair('{','}','bW',s:skip_expr,200) <= 0
         return
-      elseif s:looking_at() == ':'
-        let bal -= getline('.')[max([col('.')-2,0]):col('.')] !~ '::'
-      else
-        let bal += 1
-        if bal > 0
-          return 1
-        endif
       endif
-    endwhile
-  finally
-    call call('cursor',l:pos)
-  endtry
+    elseif s:looking_at() == '{'
+      return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()
+    elseif s:looking_at() == ';'
+      return
+    elseif s:looking_at() == ':'
+      let bal -= getline('.')[max([col('.')-2,0]):col('.')] !~ '::'
+    else
+      let bal += 1
+      if bal > 0
+        return 1
+      endif
+    endif
+  endwhile
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -272,7 +268,7 @@ function s:IsBlock()
     elseif char == '>'
       return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? '^jsflow'
     elseif char == ':'
-      return !s:expr_col()
+      return !s:save_pos('s:expr_col')
     elseif char == '/'
       return s:syn_at(line('.'),col('.')) =~? 'regex'
     endif
