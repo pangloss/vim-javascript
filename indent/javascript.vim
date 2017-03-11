@@ -136,22 +136,12 @@ function s:expr_col()
   let bal = 0
   while search('\m[{}?:;]','bW')
     if eval(s:skip_expr) | continue | endif
-    if s:looking_at() == '}'
-      if s:GetPair('{','}','bW',s:skip_expr,200) <= 0
-        return
-      endif
-    elseif s:looking_at() == '{'
-      return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()
-    elseif s:looking_at() == ';'
-      return
-    elseif s:looking_at() == ':'
-      let bal -= getline('.')[max([col('.')-2,0]):col('.')] !~ '::'
-    else
-      let bal += 1
-      if bal > 0
-        return 1
-      endif
-    endif
+    " switch (looking_at())
+    exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) <= 0 | return | endif",
+          \ ';': "return",
+          \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
+          \ ':': "let bal -= getline('.')[max([col('.')-2,0]):col('.')] !~ '::'",
+          \ '?': "let bal += 1 | if bal > 0 | return 1 | endif" }[s:looking_at()]
   endwhile
 endfunction
 
