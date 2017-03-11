@@ -136,7 +136,6 @@ function s:expr_col()
   let bal = 0
   while search('\m[{}?:;]','bW')
     if eval(s:skip_expr) | continue | endif
-
     " switch (looking_at())
     exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) <= 0 | return | endif",
           \ ';': "return",
