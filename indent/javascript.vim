@@ -32,7 +32,7 @@ if exists('*shiftwidth')
   endfunction
 else
   function s:sw()
-    return &sw
+    return &l:shiftwidth == 0 ? &l:tabstop : &l:shiftwidth
   endfunction
 endif
 
