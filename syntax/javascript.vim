@@ -311,8 +311,9 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFloat                Float
   HiLink jsBooleanTrue          Boolean
   HiLink jsBooleanFalse         Boolean
-  HiLink jsObjectColon          jsNoise
   HiLink jsNoise                Noise
+  HiLink jsDot                  jsNoise
+  HiLink jsObjectColon          jsNoise
   HiLink jsBrackets             Noise
   HiLink jsParens               Noise
   HiLink jsBraces               Noise
