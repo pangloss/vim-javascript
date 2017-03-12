@@ -195,7 +195,7 @@ function s:PrevCodeLine(lnum)
         break
       endif
       let in_comm = 1
-    elseif !in_comm
+    elseif !in_comm || stridx(getline(l:n), '/*') + 1
       break
     endif
     let l:n = prevnonblank(l:n-1)
