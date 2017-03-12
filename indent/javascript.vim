@@ -157,7 +157,7 @@ function s:continues(ln,con)
     if teol == '/'
       return s:syn_at(line("."),col(".")) !~? "regex"
     elseif teol =~ '[-+>]'
-      return getline(".")[col(".")-2] != tr(s:looking_at(),">","=")
+      return getline(".")[col(".")-2] != tr(teol,">","=")
     elseif teol =~ '\l'
       return s:previous_token() != "."
     elseif teol == ':'
