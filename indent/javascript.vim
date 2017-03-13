@@ -260,7 +260,7 @@ function s:IsBlock()
     if match(s:stack,'\cxml\|jsx') + 1 && s:syn_at(line('.'),col('.')-1) =~? 'xml\|jsx'
       return char != '{'
     elseif char =~ '\k'
-      return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
+      return index(split('return const let import export extends yield default delete var await void type typeof throw case new of in instanceof')
             \ ,char) < (line('.') != l:n) || s:save_pos('s:previous_token') == '.'
     elseif char == '>'
       return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? '^jsflow'
