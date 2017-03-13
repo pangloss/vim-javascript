@@ -182,24 +182,20 @@ endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
 function s:PrevCodeLine(lnum)
+  let l:pos = getpos('.')[1:2]
   let [in_comm,l:n] = [0,prevnonblank(a:lnum)]
   while l:n
-    if getline(l:n) =~ '^\s*\/[/*]' 
-      if (stridx(getline(l:n),'`') + 1 || getline(l:n-1)[-1:] == '\') &&
-            \ s:syn_at(l:n,1) =~? s:syng_str
-        break
-      endif
-      let in_comm = 0
-    elseif stridx(getline(l:n), '*/') + 1
-      if s:syn_at(l:n,1) !~? s:syng_com
-        break
-      endif
-      let in_comm = 1
-    elseif !in_comm || stridx(getline(l:n), '/*') + 1
+    if getline(l:n) =~ '^\s*\/[/*]'
+      let l:n = prevnonblank(l:n-1)
+    elseif stridx(getline(l:n), '*/') + 1 && s:syn_at(l:n,1) =~? s:syng_com
+      call cursor(l:n,1)
+      keepjumps norm! [*
+      let l:n = search('\m\S','nbW')
+    else
       break
     endif
-    let l:n = prevnonblank(l:n-1)
   endwhile
+  call call('cursor',l:pos)
   return l:n
 endfunction
 
