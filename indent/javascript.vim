@@ -261,7 +261,7 @@ function s:IsBlock()
       return char != '{'
     elseif char =~ '\k'
       if char ==# 'type'
-        return s:previous_token() !~# '\<\%(im\|ex\)port\>'
+        return s:previous_token() !~# '^\%(im\|ex\)port$'
       endif
       return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
             \ ,char) < (line('.') != l:n) || s:save_pos('s:previous_token') == '.'
