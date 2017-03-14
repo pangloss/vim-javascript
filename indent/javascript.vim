@@ -221,11 +221,11 @@ function s:OneScope(lnum)
   let pline = s:Trim(a:lnum)
   let kw = 'else do'
   if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
-    call s:previous_token()
-    let kw = 'for if let while with'
-    if index(split('await each'),s:token()) + 1
+    if s:previous_token() =~# '^\%(await\|each\)$'
       call s:previous_token()
       let kw = 'for'
+    else
+      let kw = 'for if let while with'
     endif
   endif
   return pline[-2:] == '=>' || index(split(kw),s:token()) + 1 &&
