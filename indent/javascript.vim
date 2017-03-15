@@ -16,8 +16,8 @@ setlocal autoindent nolisp nosmartindent
 setlocal indentkeys+=0],0)
 " Testable with something like:
 " vim  -eNs "+filetype plugin indent on" "+syntax on" "+set ft=javascript" \
-"	"+norm! gg=G" '+g/^\s*$/d' '+%print' '+:q!' testfile.js \
-"	| diff -uB testfile.js -
+"	"+norm! gg=G" '+%print' '+:q!' testfile.js \
+"	| diff -uBZ testfile.js -
 
 let b:undo_indent = 'setlocal indentexpr< smartindent< autoindent< indentkeys<'
 
