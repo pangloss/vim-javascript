@@ -14,6 +14,10 @@ let b:did_indent = 1
 setlocal indentexpr=GetJavascriptIndent()
 setlocal autoindent nolisp nosmartindent
 setlocal indentkeys+=0],0)
+" Testable with something like:
+" vim  -eNs "+filetype plugin indent on" "+syntax on" "+set ft=javascript" \
+"	"+norm! gg=G" '+%print' '+:q!' testfile.js \
+"	| diff -uBZ testfile.js -
 
 let b:undo_indent = 'setlocal indentexpr< smartindent< autoindent< indentkeys<'
 
