@@ -58,8 +58,8 @@ let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
-function s:parse_cino(f)
-  silent! return float2nr(eval(substitute(substitute(join(split(
+function s:parse_cino(f) abort
+  return float2nr(eval(substitute(substitute(join(split(
         \ matchstr(&cino,'.*'.a:f.'\zs[^,]*'), 's',1), '*'.s:W)
         \ , '^-\=\zs\*','',''), '^-\=\zs\.','0.','')))
 endfunction
@@ -155,11 +155,11 @@ function s:continues(ln,con)
   if !cursor(a:ln, match(' '.a:con,s:continuation))
     let teol = s:looking_at()
     if teol == '/'
-      return s:syn_at(line("."),col(".")) !~? "regex"
+      return s:syn_at(line('.'),col('.')) !~? 'regex'
     elseif teol =~ '[-+>]'
-      return getline(".")[col(".")-2] != tr(teol,">","=")
+      return getline('.')[col('.')-2] != tr(teol,'>','=')
     elseif teol =~ '\l'
-      return s:previous_token() != "."
+      return s:previous_token() != '.'
     elseif teol == ':'
       return s:expr_col()
     endif
