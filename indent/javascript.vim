@@ -360,7 +360,7 @@ function GetJavascriptIndent()
     endif
   elseif idx < 0 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~# '[(k]'
     let k = s:parse_cino('k')
-    if k && s:previous_token() =~# '^\%(if\|for\|while\)$' && line('.') == num &&
+    if k && search('\m\<\%(if\|for\|while\)\>\s*\%#','bW')
           \ s:previous_token() != '.'
       return max([indent(num) + k,0])
     elseif &cino =~ '('
