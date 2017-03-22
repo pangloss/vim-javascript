@@ -64,7 +64,7 @@ let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_s
 
 function s:parse_cino(f) abort
   return float2nr(eval(substitute(substitute(join(split(
-        \ matchstr(&cino,'.*'.a:f.'\zs[^,]*'), 's',1), '*'.s:W)
+        \ matchstr(&cino,'\C.*'.a:f.'\zs[^,]*'), 's',1), '*'.s:W)
         \ , '^-\=\zs\*','',''), '^-\=\zs\.','0.','')))
 endfunction
 
