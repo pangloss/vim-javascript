@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: March 9, 2017
+" Last Change: March 23, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -79,12 +79,11 @@ function s:skip_func()
 endfunction
 
 function s:alternatePair(stop)
-  let pos = getpos('.')[1:2]
-  let pat = '[][(){};]'
+  let [pos, pat, l:for] = [getpos('.')[1:2], '[][(){};]', 3]
   while search('\m'.pat,'bW',a:stop)
     if s:skip_func() | continue | endif
     let idx = stridx('])};',s:looking_at())
-    if idx is 3 | let pat = '[{}()]' | continue | endif
+    if idx is 3 | let l:for -= 1 | let pat = !l:for ? '[{}]' : '[{}();]' | continue | endif
     if idx + 1
       if s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,a:stop) <= 0
         break
@@ -118,7 +117,7 @@ endfunction
 function s:previous_token()
   let l:pos = getpos('.')[1:2]
   if search('\m\k\{1,}\|\S','ebW')
-    if (getline('.')[col('.')-2:col('.')-1] == '*/' || line('.') != l:pos[0] &&
+    if (strpart(getline('.'),col('.')-2,2) == '*/' || line('.') != l:pos[0] &&
           \ getline('.') =~ '\%<'.col('.').'c\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
       while search('\m\S\ze\_s*\/[/*]','bW')
         if s:syn_at(line('.'),col('.')) !~? s:syng_com
@@ -144,7 +143,7 @@ function s:expr_col()
     exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) <= 0 | return | endif",
           \ ';': "return",
           \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
-          \ ':': "let bal -= getline('.')[max([col('.')-2,0]):col('.')] !~ '::'",
+          \ ':': "let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'",
           \ '?': "let bal += 1 | if bal > 0 | return 1 | endif" }[s:looking_at()]
   endwhile
 endfunction
