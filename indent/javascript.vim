@@ -232,7 +232,25 @@ function s:OneScope(lnum)
     endif
   endif
   return pline[-2:] == '=>' || index(split(kw),s:token()) + 1 &&
-        \ s:save_pos('s:previous_token') != '.'
+        \ s:save_pos('s:previous_token') != '.' && !s:save_pos('s:doWhile')
+endfunction
+
+function s:doWhile()
+  if expand('<cword>') ==# 'while'
+    call search('\m\<','cbW')
+    let bal = 0
+    while search('\m\C[{}]\|\<\%(do\|while\)\>','bW',b:js_cache[1])
+      if eval(s:skip_expr) | continue | endif
+      " switch (token())
+      exe get({'}': "if s:GetPair('{','}','bW',s:skip_expr,200) <= 0 | return | endif",
+            \  '{': "return",
+            \  'do': "let bal += s:save_pos('s:IsBlock',1)"}, s:token(),
+            \        "let bal -= s:save_pos('s:previous_token') != '.'")
+      if bal > 0
+        return 1
+      endif
+    endwhile
+  endif
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
@@ -256,8 +274,8 @@ function s:iscontOne(i,num,cont)
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
-function s:IsBlock()
-  if s:looking_at() == '{'
+function s:IsBlock(...)
+  if a:0 || s:looking_at() == '{'
     let l:n = line('.')
     let char = s:previous_token()
     if match(s:stack,'\cxml\|jsx') + 1 && s:syn_at(line('.'),col('.')-1) =~? 'xml\|jsx'
