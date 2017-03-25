@@ -236,7 +236,7 @@ function s:OneScope(lnum)
 endfunction
 
 function s:doWhile()
-  if s:token() ==# 'while'
+  if expand('<cword>') ==# 'while'
     call search('\m\<','cbW')
     let bal = 0
     while search('\m\C[{}]\|\<\%(do\|while\)\>','bW',b:js_cache[1])
