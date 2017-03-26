@@ -375,10 +375,17 @@ function GetJavascriptIndent()
       let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp,pline)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
-  elseif idx < 0 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '('
-    let pval = s:parse_cino('(')
-    return !pval ? (s:parse_cino('w') ? 0 : -(!!search('\m\S','W'.s:z,num))) + virtcol('.') :
-          \ max([indent('.') + pval + (s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:W),0])
+  elseif idx < 0 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~# '[(k]'
+    let k = s:parse_cino('k')
+    if k && search('\m\C\<\%(if\|for\|while\)\s*\%#','bW') &&
+          \ s:previous_token() != '.'
+      return max([indent(num) + k,0])
+    elseif &cino =~ '('
+      call call('cursor',b:js_cache[1:])
+      let pval = s:parse_cino('(')
+      return !pval ? (s:parse_cino('w') ? 0 : -(!!search('\m\S','W'.s:z,num))) + virtcol('.') :
+            \ max([indent('.') + pval + (s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:W),0])
+    endif
   endif
 
   " main return
