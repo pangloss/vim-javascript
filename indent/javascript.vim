@@ -293,7 +293,7 @@ function s:IsBlock(...)
     elseif char == '/'
       return s:syn_at(line('.'),col('.')) =~? 'regex'
     endif
-    return char !~ '[=~!<*,?^%|&([]' &&
+    return char !~ '[=~!<*,.?^%|&([]' &&
           \ (char !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == char)
   endif
 endfunction
