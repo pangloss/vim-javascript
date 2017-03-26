@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: March 23, 2017
+" Last Change: March 25, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -170,8 +170,6 @@ function s:continues(ln,con)
   endif
 endfunction
 
-" get the line of code stripped of comments and move cursor to the last
-" non-comment char.
 function s:Trim(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
   let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
@@ -180,7 +178,7 @@ function s:Trim(ln)
     let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
     let pline = substitute(pline[:-2],'\s*$','','')
   endwhile
-  return pline is '' || cursor(a:ln,strlen(pline)) ? pline : pline
+  return pline
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
@@ -220,8 +218,9 @@ function s:Balanced(lnum)
   return !l:open
 endfunction
 
-function s:OneScope(lnum)
-  let pline = s:Trim(a:lnum)
+function s:OneScope(lnum,...)
+  let pline = a:0 ? a:1 : s:Trim(a:lnum)
+  call cursor(a:lnum,strlen(pline))
   let kw = 'else do'
   if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
     if s:previous_token() =~# '^\%(await\|each\)$'
@@ -256,12 +255,13 @@ endfunction
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
 " lineNr which encloses the entire context, 'cont' if whether line 'i' + 1 is
 " a continued expression, which could have started in a braceless context
-function s:iscontOne(i,num,cont)
+function s:iscontOne(i,num,cont,cached)
   let [l:i, l:num, bL] = [a:i, a:num + !a:num, 0]
   let pind = a:num ? indent(l:num) + s:W : 0
   let ind = indent(l:i) + (a:cont ? 0 : s:W)
   while l:i >= l:num && (ind > pind || l:i == l:num)
-    if indent(l:i) < ind && s:OneScope(l:i)
+    if indent(l:i) < ind &&
+          \ call('s:OneScope',[l:i] + (l:i == a:i ? [a:cached] : []))
       let bL += s:W
       let l:i = line('.')
     elseif !a:cont || bL || ind < indent(a:i)
@@ -356,7 +356,7 @@ function GetJavascriptIndent()
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
   if !num || s:IsBlock()
     let ilnum = line('.')
-    let pline = s:save_pos('s:Trim',l:lnum)
+    let pline = s:Trim(l:lnum)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = ilnum == num ? line('.') : num
       if idx < 0 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
@@ -372,7 +372,7 @@ function GetJavascriptIndent()
     endif
     if idx < 0 && pline[-1:] !~ '[{;]'
       let isOp = (l:line =~# s:opfirst || s:continues(l:lnum,pline)) * s:W
-      let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp)
+      let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp,pline)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
   elseif idx < 0 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '('
