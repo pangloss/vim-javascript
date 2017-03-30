@@ -118,7 +118,7 @@ function s:previous_token()
   let l:pos = getpos('.')[1:2]
   if search('\m\k\{1,}\|\S','ebW')
     if (strpart(getline('.'),col('.')-2,2) == '*/' || line('.') != l:pos[0] &&
-          \ getline('.') =~ '\%<'.col('.').'c\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
+          \ getline('.')[:col('.')-1] =~ '\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
       while search('\m\S\ze\_s*\/[/*]','bW')
         if s:syn_at(line('.'),col('.')) !~? s:syng_com
           return s:token()
