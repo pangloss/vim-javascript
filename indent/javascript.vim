@@ -118,7 +118,7 @@ function s:previous_token()
   let l:pos = getpos('.')[1:2]
   if search('\m\k\{1,}\|\S','ebW')
     if (strpart(getline('.'),col('.')-2,2) == '*/' || line('.') != l:pos[0] &&
-          \ getline('.') =~ '\%<'.col('.').'c\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
+          \ getline('.')[:col('.')-1] =~ '\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
       while search('\m\S\ze\_s*\/[/*]','bW')
         if s:syn_at(line('.'),col('.')) !~? s:syng_com
           return s:token()
@@ -287,7 +287,7 @@ function s:IsBlock(...)
       return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
             \ ,char) < (line('.') != l:n) || s:save_pos('s:previous_token') == '.'
     elseif char == '>'
-      return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? '^jsflow'
+      return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? 'jsflow'
     elseif char == ':'
       return !s:save_pos('s:expr_col')
     elseif char == '/'
@@ -382,7 +382,7 @@ function GetJavascriptIndent()
   endif
 
   " main return
-  if l:line =~ '^\%([])}]\||}\)'
+  if l:line =~ '^[])}]\|^|}'
     return max([indent(num),0])
   elseif num
     return indent(num) + s:W + switch_offset + bL + isOp
