@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: March 25, 2017
+" Last Change: March 31, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -83,9 +83,13 @@ function s:alternatePair(stop)
   while search('\m'.pat,'bW',a:stop)
     if s:skip_func() | continue | endif
     let idx = stridx('])};',s:looking_at())
-    if idx is 3 | let l:for -= 1 | let pat = !l:for ? '[{}]' : '[{}();]' | continue | endif
-    if idx + 1
-      if s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,a:stop) <= 0
+    if idx is 3
+      if l:for is 1
+        return s:GetPair('{','}','bW','s:skip_func()',2000,a:stop) > 0 || call('cursor',pos)
+      endif
+      let [pat, l:for] = ['[{}();]', l:for - 1]
+    elseif idx + 1
+      if s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,a:stop) < 1
         break
       endif
     else
@@ -140,7 +144,7 @@ function s:expr_col()
   while search('\m[{}?:;]','bW')
     if eval(s:skip_expr) | continue | endif
     " switch (looking_at())
-    exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) <= 0 | return | endif",
+    exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
           \ ';': "return",
           \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
           \ ':': "let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'",
@@ -241,7 +245,7 @@ function s:doWhile()
     while search('\m\C[{}]\|\<\%(do\|while\)\>','bW',b:js_cache[1])
       if eval(s:skip_expr) | continue | endif
       " switch (token())
-      exe get({'}': "if s:GetPair('{','}','bW',s:skip_expr,200) <= 0 | return | endif",
+      exe get({'}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
             \  '{': "return",
             \  'do': "let bal += s:save_pos('s:IsBlock',1)"}, s:token(),
             \        "let bal -= s:save_pos('s:previous_token') != '.'")
