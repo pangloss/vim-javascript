@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: March 25, 2017
+" Last Change: March 31, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -85,7 +85,7 @@ function s:alternatePair(stop)
     let idx = stridx('])};',s:looking_at())
     if idx is 3
       if l:for is 1
-        return s:GetPair('{','}','bW','s:skip_func()',1000,a:stop) > 0 || call('cursor',pos)
+        return s:GetPair('{','}','bW','s:skip_func()',2000,a:stop) > 0 || call('cursor',pos)
       endif
       let [pat, l:for] = ['[{}();]', l:for - 1]
     elseif idx + 1
