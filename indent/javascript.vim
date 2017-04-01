@@ -291,7 +291,7 @@ function s:IsBlock(...)
       return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
             \ ,char) < (line('.') != l:n) || s:save_pos('s:previous_token') == '.'
     elseif char == '>'
-      return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? 'jsflow'
+      return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? 'jsflow\|html'
     elseif char == ':'
       return !s:save_pos('s:expr_col')
     elseif char == '/'
@@ -349,6 +349,8 @@ function GetJavascriptIndent()
       call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000,top)
     elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
       call s:GetPair('{','}','bW','s:skip_func()',2000,top)
+    elseif getline(v:lnum) !~ '^\S' && syns ==# 'javaScript' && search('\m\c^\s*<\s*script\>.*>\s*$','bW')
+      let inhtml = 1
     else
       call s:alternatePair(top)
     endif
@@ -358,7 +360,7 @@ function GetJavascriptIndent()
   let num = b:js_cache[1]
 
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
-  if !num || s:IsBlock()
+  if !num || !exists('inhtml') && s:IsBlock()
     let ilnum = line('.')
     let pline = s:Trim(l:lnum)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
