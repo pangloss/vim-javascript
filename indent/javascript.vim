@@ -351,6 +351,7 @@ function GetJavascriptIndent()
       call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000,top)
     elseif getline(v:lnum) !~ '^\S' && syns ==# 'javaScript' && &indentexpr =~? '^html' &&
           \ search('\m\c^\s*<\s*script\>.*>\s*$','bW')
+      let b:hi_js1indent = 'GetJavascriptIndent()'
       let inhtml = 1
     elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
       call s:GetPair('{','}','bW','s:skip_func()',2000,top)
