@@ -163,8 +163,10 @@ function s:continues(ln,con)
     let teol = s:looking_at()
     if teol == '/'
       return s:syn_at(line('.'),col('.')) !~? 'regex'
-    elseif teol =~ '[-+>]'
-      return getline('.')[col('.')-2] != tr(teol,'>','=')
+    elseif teol == '>'
+      return getline('.')[col('.')-2] != '=' && s:syn_at(line('.'),col('.')) !~? '^html'
+    elseif teol =~ '[-+]'
+      return getline('.')[col('.')-2] != teol
     elseif teol =~ '\l'
       return s:previous_token() != '.'
     elseif teol == ':'
@@ -347,7 +349,7 @@ function GetJavascriptIndent()
           \ s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum]
     if idx + 1
       call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000,top)
-    elseif getline(v:lnum) !~ '^\S' && syns ==# 'javaScript' && &indentexpr =~? '^html' &&
+    elseif getline(v:lnum) !~ '^\S' && syns ==# 'javaScript' && &indentexpr =~ 'html' &&
           \ search('\m\c^\s*<\s*script\>.*>\s*$','bW')
       let inhtml = 1
     elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
@@ -361,7 +363,7 @@ function GetJavascriptIndent()
   let num = b:js_cache[1]
 
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
-  if !num || !exists('inhtml') && s:IsBlock()
+  if !num || exists('inhtml') || s:IsBlock()
     let ilnum = line('.')
     let pline = s:Trim(l:lnum)
     if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
