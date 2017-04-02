@@ -164,7 +164,7 @@ function s:continues(ln,con)
     if teol == '/'
       return s:syn_at(line('.'),col('.')) !~? 'regex'
     elseif teol == '>'
-      return getline('.')[col('.')-2] != '=' && s:syn_at(line('.'),col('.')) !~? '^html'
+      return getline('.')[col('.')-2] != '=' && s:syn_at(line('.'),col('.')) !~? 'jsflow\|^html'
     elseif teol =~ '[-+]'
       return getline('.')[col('.')-2] != teol
     elseif teol =~ '\l'
