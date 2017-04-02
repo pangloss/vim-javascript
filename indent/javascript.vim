@@ -347,7 +347,7 @@ function GetJavascriptIndent()
   else
     if &indentexpr =~? '^html'
       let b:hi_js1indent = 'GetJavascriptIndent()'
-      let l:scriptTag = search('\m\c^\s*<\s*script\>.*>\s*$','nbW')
+      let l:scriptTag = b:hi_indent.blocklnr
     endif
     let [s:looksyn, s:checkIn, top] = [v:lnum - 1, 0, max([get(l:,'scriptTag'),
           \ (!indent(l:lnum) && s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum])]
@@ -367,7 +367,7 @@ function GetJavascriptIndent()
   if !num || get(l:,'scriptTag') || s:IsBlock()
     let ilnum = line('.')
     let pline = s:Trim(l:lnum)
-    if b:js_cache[2] && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
+    if b:js_cache[2] && s:looking_at() == ')' && s:GetPair('(',')','bW',s:skip_expr,100) > 0
       let num = ilnum == num ? line('.') : num
       if idx < 0 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
         if &cino !~ ':'
