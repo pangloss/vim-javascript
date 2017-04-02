@@ -345,6 +345,8 @@ function GetJavascriptIndent()
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
     if b:js_cache[2]
       call call('cursor',b:js_cache[1:])
+    elseif b:js_cache[1]
+      let l:scriptTag = b:js_cache[1]
     endif
   else
     if &indentexpr =~? '^html'
