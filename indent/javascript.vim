@@ -364,7 +364,7 @@ function GetJavascriptIndent()
   let num = b:js_cache[1]
 
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
-  if !num || get(l:,'scriptTag') || s:IsBlock()
+  if !num || !b:js_cache[2] || s:IsBlock()
     let ilnum = line('.')
     let pline = s:Trim(l:lnum)
     if b:js_cache[2] && s:looking_at() == ')' && s:GetPair('(',')','bW',s:skip_expr,100) > 0
