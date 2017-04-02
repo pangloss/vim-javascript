@@ -10,6 +10,9 @@ if exists('b:did_indent')
 endif
 let b:did_indent = 1
 
+" indent correctly if inside <script>
+let b:html_indent_script1 = 'inc'
+
 " Now, set up our indentation expression and keys that trigger it.
 setlocal indentexpr=GetJavascriptIndent()
 setlocal autoindent nolisp nosmartindent
@@ -350,7 +353,6 @@ function GetJavascriptIndent()
     endif
   else
     if &indentexpr =~? '^html'
-      let b:hi_js1indent = 'GetJavascriptIndent()'
       let l:scriptTag = b:hi_indent.blocklnr
     endif
     let [s:looksyn, s:checkIn, top] = [v:lnum - 1, 0, max([get(l:,'scriptTag'),
