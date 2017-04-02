@@ -343,19 +343,15 @@ function GetJavascriptIndent()
   endif
 
   " the containing paren, bracket, or curly. Many hacks for performance
+  let l:scriptTag = &indentexpr =~? '^html' ? b:hi_indent.blocklnr : 0
   let idx = index([']',')','}'],l:line[0])
   if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
     if b:js_cache[2]
       call call('cursor',b:js_cache[1:])
-    elseif b:js_cache[1]
-      let l:scriptTag = b:js_cache[1]
     endif
   else
-    if &indentexpr =~? '^html'
-      let l:scriptTag = b:hi_indent.blocklnr
-    endif
-    let [s:looksyn, s:checkIn, top] = [v:lnum - 1, 0, max([get(l:,'scriptTag'),
+    let [s:looksyn, s:checkIn, top] = [v:lnum - 1, 0, max([l:scriptTag,
           \ (!indent(l:lnum) && s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum])]
     if idx + 1
       call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000,top)
@@ -366,7 +362,7 @@ function GetJavascriptIndent()
     endif
   endif
 
-  let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [get(l:,'scriptTag'),0] : getpos('.')[1:2])
+  let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [l:scriptTag,0] : getpos('.')[1:2])
   let num = b:js_cache[1]
 
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
