@@ -144,7 +144,7 @@ function s:expr_col()
     return 1
   endif
   let bal = 0
-  while search('\m[{}?:;]','bW',s:scriptTag+1)
+  while search('\m[{}?:;]','bW',s:scriptTag)
     if eval(s:skip_expr) | continue | endif
     " switch (looking_at())
     exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
