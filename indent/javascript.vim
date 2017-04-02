@@ -345,14 +345,14 @@ function GetJavascriptIndent()
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
     call call('cursor',b:js_cache[1:])
   else
-    let [s:looksyn, s:checkIn, top] = [v:lnum - 1, 0, (!indent(l:lnum) &&
-          \ s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum]
+    if &indentexpr =~? '^html'
+      let b:hi_js1indent = 'GetJavascriptIndent()'
+      let l:scriptTag = search('\m\c^\s*<\s*script\>.*>\s*$','nbW')
+    endif
+    let [s:looksyn, s:checkIn, top] = [v:lnum - 1, 0, max([get(l:,'scriptTag'),
+          \ (!indent(l:lnum) && s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum])]
     if idx + 1
       call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000,top)
-    elseif getline(v:lnum) !~ '^\S' && syns ==# 'javaScript' && &indentexpr =~? '^html' &&
-          \ search('\m\c^\s*<\s*script\>.*>\s*$','bW')
-      let b:hi_js1indent = 'GetJavascriptIndent()'
-      let inhtml = 1
     elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
       call s:GetPair('{','}','bW','s:skip_func()',2000,top)
     else
@@ -360,14 +360,14 @@ function GetJavascriptIndent()
     endif
   endif
 
-  let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : getpos('.')[1:2])
+  let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [get(l:,'scriptTag'),0] : getpos('.')[1:2])
   let num = b:js_cache[1]
 
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
-  if !num || exists('inhtml') || s:IsBlock()
+  if !num || get(l:,'scriptTag') || s:IsBlock()
     let ilnum = line('.')
     let pline = s:Trim(l:lnum)
-    if num && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
+    if b:js_cache[2] && s:looking_at() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
       let num = ilnum == num ? line('.') : num
       if idx < 0 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
         if &cino !~ ':'
