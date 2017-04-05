@@ -233,7 +233,7 @@ if exists("javascript_plugin_jsdoc")
   endif
 endif
 
-if exists("javascript_plugin_flow") || search('\v\C%^\_s*%(//\s*|/\*[ \t\n*]*)\@flow>','nw')
+if exists("javascript_plugin_flow")
   runtime extras/flow.vim
 endif
 
