@@ -1,7 +1,13 @@
-au BufNewFile,BufRead *.js setf javascript
-au BufNewFile,BufRead *.jsm setf javascript
-au BufNewFile,BufRead Jakefile setf javascript
-au BufNewFile,BufRead *.es6 setf javascript
+au BufNewFile,BufRead *.jsm\\\{,1\},Jakefile,*.es6 setf javascript
+
+fun! s:SourceFlowSyntax()
+  if !exists('javascript_plugin_flow') && !exists('b:flow_active') &&
+        \ search('\v\C%^\_s*%(//\s*|/\*[ \t\n*]*)\@flow>','nw')
+    runtime extras/flow.vim
+    let b:flow_active = 1
+  endif
+endfun
+au FileType javascript au BufRead,BufWritePost <buffer> call s:SourceFlowSyntax()
 
 fun! s:SelectJavascript()
   if getline(1) =~# '^#!.*/bin/\%(env\s\+\)\?node\>'
