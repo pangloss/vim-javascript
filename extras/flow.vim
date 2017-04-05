@@ -25,6 +25,7 @@ syntax match   jsFlowReturnMaybe    contained /?/ skipwhite skipempty nextgroup=
 syntax region  jsFlowReturnGroup    contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturnOrOp
 syntax match   jsFlowReturnOrOp     contained /\s*|\s*/ skipwhite skipempty nextgroup=@jsFlowReturnCluster
 syntax match   jsFlowWildcardReturn contained /*/ skipwhite skipempty nextgroup=jsFuncBlock
+syntax region  jsFlowReturnFunc     contained start=/([^=]*\(=>\)/ end=/{\@=/ contains=jsFlowArrowArguments,jsFlowArrow,jsFlowReturn,jsFlowType skipwhite skipempty nextgroup=jsFuncBlock
 
 syntax region  jsFlowFunctionGroup  contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncArgs
 syntax region  jsFlowClassGroup     contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsClassBlock
@@ -44,7 +45,7 @@ syntax region  jsFlowDeclareBlock   contained matchgroup=jsFlowNoise start=/{/ e
 
 syntax region jsFlowInterfaceBlock  contained matchgroup=jsFlowNoise start=/{/ end=/}/ contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectMethodType,jsGenerator,jsComment,jsObjectStringKey,jsSpreadExpression,jsFlowNoise keepend
 
-syntax cluster jsFlowReturnCluster            contains=jsFlowNoise,jsFlowReturnObject,jsFlowReturnArray,jsFlowReturnKeyword,jsFlowReturnGroup,jsFlowReturnMaybe,jsFlowReturnOrOp,jsFlowWildcardReturn
+syntax cluster jsFlowReturnCluster            contains=jsFlowNoise,jsFlowReturnObject,jsFlowReturnArray,jsFlowReturnKeyword,jsFlowReturnGroup,jsFlowReturnMaybe,jsFlowReturnOrOp,jsFlowWildcardReturn,jsFlowReturnFunc
 syntax cluster jsFlowCluster                  contains=jsFlowArray,jsFlowObject,jsFlowNoise,jsFlowTypeof,jsFlowType,jsFlowGroup,jsFlowArrowArguments,jsFlowMaybe,jsFlowParens,jsFlowOrOperator,jsFlowWildcard
 
 if version >= 508 || !exists("did_javascript_syn_inits")
