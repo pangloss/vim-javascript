@@ -247,7 +247,7 @@ function s:doWhile()
   if expand('<cword>') ==# 'while'
     call search('\m\<','cbW')
     let bal = 0
-    while search('\m\C[{}]\|\<\%(do\|while\)\>','bW',b:js_cache[1])
+    while search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
       if eval(s:skip_expr) | continue | endif
       " switch (token())
       exe get({'}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
