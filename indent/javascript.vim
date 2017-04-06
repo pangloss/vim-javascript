@@ -247,7 +247,7 @@ function s:doWhile()
   if expand('<cword>') ==# 'while'
     call search('\m\<','cbW')
     let bal = 0
-    while search('\m\C[{}]\|\<\%(do\|while\)\>','bW',b:js_cache[1])
+    while search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
       if eval(s:skip_expr) | continue | endif
       " switch (token())
       exe get({'}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
@@ -291,18 +291,20 @@ function s:IsBlock(...)
       return char != '{'
     elseif char =~ '\k'
       if char ==# 'type'
-        return s:previous_token() !~# '^\%(im\|ex\)port$'
+        return s:save_pos('s:previous_token') !~# '^\%(im\|ex\)port$'
       endif
       return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
             \ ,char) < (line('.') != l:n) || s:save_pos('s:previous_token') == '.'
     elseif char == '>'
       return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? 'jsflow\|^html'
+    elseif char == '*'
+      return s:save_pos('s:previous_token') == ':'
     elseif char == ':'
       return !s:save_pos('s:expr_col')
     elseif char == '/'
       return s:syn_at(line('.'),col('.')) =~? 'regex'
     endif
-    return char !~ '[=~!<*,.?^%|&([]' &&
+    return char !~ '[=~!<,.?^%|&([]' &&
           \ (char !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == char)
   endif
 endfunction
