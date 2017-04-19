@@ -198,7 +198,7 @@ function s:PrevCodeLine(lnum)
     if getline(l:n) =~ '^\s*\/[/*]'
       if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
             \ s:syn_at(l:n,1) =~? s:syng_str
-        return l:n
+        break
       endif
       let l:n = prevnonblank(l:n-1)
     elseif stridx(getline(l:n), '*/') + 1 && s:syn_at(l:n,1) =~? s:syng_com
