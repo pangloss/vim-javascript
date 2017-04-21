@@ -149,7 +149,6 @@ function s:expr_col()
     if eval(s:skip_expr) | continue | endif
     " switch (looking_at())
     exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
-          \ ';': "return",
           \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
           \ ':': "let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'",
           \ '?': "let bal += 1 | if bal > 0 | return 1 | endif" }[s:looking_at()]
@@ -252,17 +251,14 @@ function s:doWhile()
   if expand('<cword>') ==# 'while'
     call search('\m\<','cbW')
     let bal = 0
-    while search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
+    while bal < 1 && search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
       if eval(s:skip_expr) | continue | endif
       " switch (looking_at())
       exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
-            \  '{': "return",
             \  'd': "let bal += s:save_pos('s:IsBlock',1)",
             \  'w': "let bal -= s:save_pos('s:previous_token') != '.'" }[s:looking_at()]
-      if bal > 0
-        return 1
-      endif
     endwhile
+    return max([bal,0])
   endif
 endfunction
 
