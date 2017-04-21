@@ -255,10 +255,10 @@ function s:doWhile()
     while search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
       if eval(s:skip_expr) | continue | endif
       " switch (token())
-      exe get({'}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
+      exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
             \  '{': "return",
-            \  'do': "let bal += s:save_pos('s:IsBlock',1)"}, s:token(),
-            \        "let bal -= s:save_pos('s:previous_token') != '.'")
+            \  'd': "let bal += s:save_pos('s:IsBlock',1)",
+            \  'w': "let bal -= s:save_pos('s:previous_token') != '.'" }[s:looking_at()]
       if bal > 0
         return 1
       endif
