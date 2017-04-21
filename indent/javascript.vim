@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: March 31, 2017
+" Last Change: April 21, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -254,7 +254,7 @@ function s:doWhile()
     let bal = 0
     while search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
       if eval(s:skip_expr) | continue | endif
-      " switch (token())
+      " switch (looking_at())
       exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
             \  '{': "return",
             \  'd': "let bal += s:save_pos('s:IsBlock',1)",
