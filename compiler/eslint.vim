@@ -1,3 +1,8 @@
+" Vim compiler plugin
+" Language:     JavaScript
+" Maintainer:   vim-javascript community
+" URL:          https://github.com/pangloss/vim-javascript
+
 if exists("current_compiler")
   finish
 endif
