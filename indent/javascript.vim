@@ -145,14 +145,15 @@ function s:expr_col()
     return 1
   endif
   let bal = 0
-  while search('\m[{}?:;]','bW',s:scriptTag)
+  while bal < 1 && search('\m[{}?:;]','bW',s:scriptTag)
     if eval(s:skip_expr) | continue | endif
     " switch (looking_at())
     exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
           \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
           \ ':': "let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'",
-          \ '?': "let bal += 1 | if bal > 0 | return 1 | endif" }[s:looking_at()]
+          \ '?': "let bal += 1" }[s:looking_at()]
   endwhile
+  return max([bal,0])
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
