@@ -66,10 +66,12 @@ let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
-function s:parse_cino(f) abort
-  return float2nr(eval(substitute(substitute(join(split(
-        \ matchstr(&cino,'\C.*'.a:f.'\zs-\=\d*\%(\.\d\+\)\=s\=')
-        \ , 's',1), '*'.s:W), '^-\=\zs\*','',''), '^-\=\zs\.','0.','')))
+function s:parse_cino(f)
+  let pv = matchstr(&cino,'\C.*'.a:f.'\zs-\=\d*\%(\.\d\+\)\=s\=')
+  let factor = 1 . repeat(0,strlen(matchstr(pv,'\.\zs\d*')))
+  return eval(substitute(substitute(join(split(pv
+            \ , 's',1), '*'.s:W), '^-\=\zs\*','',''),  '\.','',''))
+            \ / factor
 endfunction
 
 function s:skip_func()
