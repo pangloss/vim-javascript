@@ -351,7 +351,7 @@ function GetJavascriptIndent()
   endif
 
   " the containing paren, bracket, or curly. Many hacks for performance
-  let s:scriptTag = &indentexpr =~? '^html' ? b:hi_indent.blocklnr : 0
+  let s:scriptTag = get(get(b:,'hi_indent',{}),'blocklnr')
   let idx = index([']',')','}'],l:line[0])
   if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
