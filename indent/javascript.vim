@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: April 21, 2017
+" Last Change: April 25, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -393,7 +393,8 @@ function GetJavascriptIndent()
     endif
   elseif idx < 0 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '('
     let pval = s:parse_cino('(')
-    return !pval ? (s:parse_cino('w') ? 0 : -(!!search('\m\S','W'.s:z,num))) + virtcol('.') :
+    return !pval || !search('\S','nbW',line('.')) && !s:parse_cino('U') ?
+          \ (s:parse_cino('w') ? 0 : -(!!search('\m\S','W'.s:z,num))) + virtcol('.') :
           \ max([indent('.') + pval + (s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:W),0])
   endif
 
