@@ -25,6 +25,8 @@ setlocal indentkeys+=0],0)
 
 let b:undo_indent = 'setlocal indentexpr< smartindent< autoindent< indentkeys<'
 
+let b:undo_indent = 'setlocal smartindent< indentexpr< formatexpr< indentkeys< cinoptions<'
+
 " Only define the function once.
 if exists('*GetJavascriptIndent')
   finish
