@@ -69,9 +69,12 @@ let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_s
 function s:parse_cino(f)
   let pv = matchstr(&cino,'\C.*'.a:f.'\zs-\=\d*\%(\.\d\+s\@=\)\=s\=[^,]\@!')
   let factor = 1 . repeat(0,strlen(matchstr(pv,'\.\zs\d*')))
-  return eval(substitute(join(split(pv,'s',1), '*'.s:W), '^-\=\%($\|\zs\*\)\|\.','','g'))
-            \ / factor
+  return eval(substitute(join(split(pv,'s',1), '*'.s:W), '^-\=\%($\|\zs\*\)\|\.',
+        \ '\=submatch(0)[1:]','g'))
+        \ / factor
 endfunction
+
+
 
 function s:skip_func()
   if getline('.') =~ '\%<'.col('.').'c\/.\{-}\/\|\%>'.col('.').'c[''"]\|\\$'
