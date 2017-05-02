@@ -88,7 +88,7 @@ function s:parse_cino(f)
       break
     endif
   endfor
-  return sign * n / max([str2nr(divider),1])
+  return sign * str2nr(n) / max([str2nr(divider),1])
 endfunction
 
 function s:skip_func()
