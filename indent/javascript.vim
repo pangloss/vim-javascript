@@ -67,7 +67,7 @@ let s:syng_com = 'comment\|doc'
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
 function s:parse_cino(f)
-  let [cin, divider, n, sign] = [strridx(&cino,a:f), 0, '', 1]
+  let [cin, divider, n] = [strridx(&cino,a:f), 0, '']
   if cin == -1
     return
   endif
