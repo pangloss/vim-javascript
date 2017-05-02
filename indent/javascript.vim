@@ -83,8 +83,7 @@ function s:parse_cino(f)
       endif
       break
     elseif c =~ '\d'
-      let n .= c
-      let divider .= 0
+      let [n, divider] .= [c, 0]
     else
       break
     endif
