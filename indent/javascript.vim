@@ -79,7 +79,7 @@ function s:parse_cino(f)
       if n is ''
         let n = s:W
       else
-        let n = n * s:W
+        let n = str2nr(n) * s:W
       endif
       break
     elseif c =~ '\d'
