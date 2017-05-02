@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: April 25, 2017
+" Last Change: May 2, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -67,10 +67,28 @@ let s:syng_com = 'comment\|doc'
 let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
 
 function s:parse_cino(f)
-  let pv = matchstr(&cino,'\C.*'.a:f.'\zs-\=\d*\%(\.\d\+\)\=s\=')
-  let factor = 1 . repeat(0,strlen(matchstr(pv,'\.\zs\d*')))
-  return eval(substitute(join(split(pv,'s',1), '*'.s:W), '^-\=\zs\*\|\.','','g'))
-            \ / factor
+  let [cin, divider, n, sign] = [strridx(&cino,a:f), 0, '', 1]
+  if cin == -1
+    return
+  endif
+  let [sign, cstr] = &cino[cin+1] ==# '-' ? [-1, &cino[cin+2:]] : [1, &cino[cin+1:]]
+  for c in split(cstr,'\zs')
+    if c ==# '.' && !divider
+      let divider = 1
+    elseif c ==# 's'
+      if n is ''
+        let n = s:W
+      else
+        let n = n * s:W
+      endif
+      break
+    elseif c =~ '\d'
+      let [n, divider] .= [c, 0]
+    else
+      break
+    endif
+  endfor
+  return sign * n / max([str2nr(divider),1])
 endfunction
 
 function s:skip_func()
