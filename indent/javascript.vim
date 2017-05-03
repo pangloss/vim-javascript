@@ -92,8 +92,7 @@ function s:parse_cino(f)
 endfunction
 
 function s:skip_func()
-  if get(b:,'topCol') == 1
-    unlet b:topCol
+  if b:topCol = 1
     throw 'no match'
   endif
   let b:topCol = col('.')
@@ -384,8 +383,8 @@ function GetJavascriptIndent()
   endif
 
   " the containing paren, bracket, or curly. Many hacks for performance
-  let s:scriptTag = get(get(b:,'hi_indent',{}),'blocklnr')
-  let idx = index([']',')','}'],l:line[0])
+  let [ s:scriptTag, idx, b:topCol ] = [ get(get(b:,'hi_indent',{}),'blocklnr'),
+        \ index([']',')','}'],l:line[0]), 0 ]
   if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
     call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [0,0])
