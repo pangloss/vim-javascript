@@ -92,10 +92,21 @@ function s:parse_cino(f)
 endfunction
 
 function s:skip_func()
-  if getline('.') =~ '\%<'.col('.').'c\/.\{-}\/\|\%>'.col('.').'c[''"]\|\\$'
-    return eval(s:skip_expr)
+  if get(b:,'topCol') == 1
+    unlet b:topCol
+    throw 'no match'
+  endif
+  let b:topCol = col('.')
+  if getline('.') =~ '\%<'.b:topCol.'c\/.\{-}\/\|\%>'.b:topCol.'c[''"]\|\\$'
+    if eval(s:skip_expr)
+      let b:topCol = 0
+    endif
+    return !b:topCol
   elseif s:checkIn || search('\m`\|\${\|\*\/','nW'.s:z,s:looksyn)
     let s:checkIn = eval(s:skip_expr)
+    if s:checkIn
+      let b:topCol = 0
+    endif
   endif
   let s:looksyn = line('.')
   return s:checkIn
@@ -103,6 +114,7 @@ endfunction
 
 function s:alternatePair(stop)
   let [pos, pat, l:for] = [getpos('.')[1:2], '[][(){};]', 3]
+  try
   while search('\m'.pat,'bW',a:stop)
     if s:skip_func() | continue | endif
     let idx = stridx('])};',s:looking_at())
@@ -119,6 +131,8 @@ function s:alternatePair(stop)
       return
     endif
   endwhile
+  catch
+  endtry
   call call('cursor',pos)
 endfunction
 
