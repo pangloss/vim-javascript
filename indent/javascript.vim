@@ -114,7 +114,6 @@ endfunction
 
 function s:alternatePair(stop)
   let [pos, pat, l:for] = [getpos('.')[1:2], '[][(){};]', 3]
-  try
   while search('\m'.pat,'bW',a:stop)
     if s:skip_func() | continue | endif
     let idx = stridx('])};',s:looking_at())
@@ -131,8 +130,6 @@ function s:alternatePair(stop)
       return
     endif
   endwhile
-  catch
-  endtry
   call call('cursor',pos)
 endfunction
 
@@ -386,9 +383,7 @@ function GetJavascriptIndent()
   let idx = index([']',')','}'],l:line[0])
   if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
-    if b:js_cache[2]
-      call call('cursor',b:js_cache[1:])
-    endif
+    call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [0,0])
   else
     let [s:looksyn, s:checkIn, top] = [v:lnum - 1, 0, max([s:scriptTag,
           \ (!indent(l:lnum) && s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum])]
