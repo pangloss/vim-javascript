@@ -114,13 +114,7 @@ endfunction
 
 function s:alternatePair(stop)
   let [pos, pat, l:for] = [getpos('.')[1:2], '[][(){};]', 3]
-  while search('\m'.pat,'bW',a:stop)
-    try
-      let not = s:skip_func()
-    catch
-      break
-    endtry
-    if not | continue | endif
+  while searchpair('\m'.pat,'','\_$.','bW','s:skip_func()',a:stop) > 0
     let idx = stridx('])};',s:looking_at())
     if idx is 3
       if l:for is 1
