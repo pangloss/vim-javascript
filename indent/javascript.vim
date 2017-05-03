@@ -115,20 +115,24 @@ endfunction
 function s:alternatePair(stop)
   let [pos, pat, l:for] = [getpos('.')[1:2], '[][(){};]', 3]
   while search('\m'.pat,'bW',a:stop)
-    if s:skip_func() | continue | endif
-    let idx = stridx('])};',s:looking_at())
-    if idx is 3
-      if l:for is 1
-        return s:GetPair('{','}','bW','s:skip_func()',2000,a:stop) > 0 || call('cursor',pos)
+    try
+    if !s:skip_func()
+      let idx = stridx('])};',s:looking_at())
+      if idx is 3
+        if l:for is 1
+          return s:GetPair('{','}','bW','s:skip_func()',2000,a:stop) > 0 || call('cursor',pos)
+        endif
+        let [pat, l:for] = ['[{}();]', l:for - 1]
+      elseif idx + 1
+        if s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,a:stop) < 1
+          break
+        endif
+      else
+        return
       endif
-      let [pat, l:for] = ['[{}();]', l:for - 1]
-    elseif idx + 1
-      if s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,a:stop) < 1
-        break
-      endif
-    else
-      return
     endif
+  catch
+  endtry
   endwhile
   call call('cursor',pos)
 endfunction
