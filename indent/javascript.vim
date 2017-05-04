@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: May 2, 2017
+" Last Change: May 4, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -92,27 +92,40 @@ function s:parse_cino(f)
 endfunction
 
 function s:skip_func()
-  if getline('.') =~ '\%<'.col('.').'c\/.\{-}\/\|\%>'.col('.').'c[''"]\|\\$'
-    return eval(s:skip_expr)
+  if s:topCol == 1
+    return {} " :break, causes E731 in searchpair()
+  endif
+  let s:topCol = col('.')
+  if getline('.') =~ '\%<'.s:topCol.'c\/.\{-}\/\|\%>'.s:topCol.'c[''"]\|\\$'
+    if eval(s:skip_expr)
+      let s:topCol = 0
+    endif
+    return !s:topCol
   elseif s:checkIn || search('\m`\|\${\|\*\/','nW'.s:z,s:looksyn)
     let s:checkIn = eval(s:skip_expr)
+    if s:checkIn
+      let s:topCol = 0
+    endif
   endif
   let s:looksyn = line('.')
   return s:checkIn
 endfunction
 
-function s:alternatePair(stop)
+function s:alternatePair()
   let [pos, pat, l:for] = [getpos('.')[1:2], '[][(){};]', 3]
-  while search('\m'.pat,'bW',a:stop)
-    if s:skip_func() | continue | endif
+  while search('\m'.pat,'bW')
+    let not = s:skip_func()
+    if type(not) == type({})
+      break
+    elseif not | continue | endif
     let idx = stridx('])};',s:looking_at())
     if idx is 3
       if l:for is 1
-        return s:GetPair('{','}','bW','s:skip_func()',2000,a:stop) > 0 || call('cursor',pos)
+        return s:GetPair('{','}','bW','s:skip_func()',2000) > 0 || call('cursor',pos)
       endif
       let [pat, l:for] = ['[{}();]', l:for - 1]
     elseif idx + 1
-      if s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000,a:stop) < 1
+      if s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000) < 1
         break
       endif
     else
@@ -368,22 +381,19 @@ function GetJavascriptIndent()
   endif
 
   " the containing paren, bracket, or curly. Many hacks for performance
-  let s:scriptTag = get(get(b:,'hi_indent',{}),'blocklnr')
-  let idx = index([']',')','}'],l:line[0])
+  let [ s:scriptTag, idx ] = [ get(get(b:,'hi_indent',{}),'blocklnr'),
+        \ index([']',')','}'],l:line[0]) ]
   if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
-    if b:js_cache[2]
-      call call('cursor',b:js_cache[1:])
-    endif
+    call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [0,0])
   else
-    let [s:looksyn, s:checkIn, top] = [v:lnum - 1, 0, max([s:scriptTag,
-          \ (!indent(l:lnum) && s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum])]
+    let [s:looksyn, s:checkIn, s:topCol] = [v:lnum - 1, 0, 0]
     if idx + 1
-      call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000,top)
+      call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000)
     elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
-      call s:GetPair('{','}','bW','s:skip_func()',2000,top)
+      call s:GetPair('{','}','bW','s:skip_func()',2000)
     else
-      call s:alternatePair(top)
+      call s:alternatePair()
     endif
   endif
 
