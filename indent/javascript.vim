@@ -93,7 +93,7 @@ endfunction
 
 function s:skip_func()
   if s:topCol == 1
-    return {}
+    return {} " :break, for searchpair() condition expression
   endif
   let s:topCol = col('.')
   if getline('.') =~ '\%<'.s:topCol.'c\/.\{-}\/\|\%>'.s:topCol.'c[''"]\|\\$'
