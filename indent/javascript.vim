@@ -92,19 +92,19 @@ function s:parse_cino(f)
 endfunction
 
 function s:skip_func()
-  if b:topCol == 1
+  if s:topCol == 1
     return {}
   endif
-  let b:topCol = col('.')
-  if getline('.') =~ '\%<'.b:topCol.'c\/.\{-}\/\|\%>'.b:topCol.'c[''"]\|\\$'
+  let s:topCol = col('.')
+  if getline('.') =~ '\%<'.s:topCol.'c\/.\{-}\/\|\%>'.s:topCol.'c[''"]\|\\$'
     if eval(s:skip_expr)
-      let b:topCol = 0
+      let s:topCol = 0
     endif
-    return !b:topCol
+    return !s:topCol
   elseif s:checkIn || search('\m`\|\${\|\*\/','nW'.s:z,s:looksyn)
     let s:checkIn = eval(s:skip_expr)
     if s:checkIn
-      let b:topCol = 0
+      let s:topCol = 0
     endif
   endif
   let s:looksyn = line('.')
@@ -381,13 +381,13 @@ function GetJavascriptIndent()
   endif
 
   " the containing paren, bracket, or curly. Many hacks for performance
-  let [ s:scriptTag, idx, b:topCol ] = [ get(get(b:,'hi_indent',{}),'blocklnr'),
-        \ index([']',')','}'],l:line[0]), 0 ]
+  let [ s:scriptTag, idx ] = [ get(get(b:,'hi_indent',{}),'blocklnr'),
+        \ index([']',')','}'],l:line[0]) ]
   if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
     call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [0,0])
   else
-    let [s:looksyn, s:checkIn] = [v:lnum - 1, 0]
+    let [s:looksyn, s:checkIn, s:topCol] = [v:lnum - 1, 0, 0]
     if idx + 1
       call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000)
     elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
