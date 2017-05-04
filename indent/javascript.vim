@@ -93,7 +93,7 @@ endfunction
 
 function s:skip_func()
   if b:topCol == 1
-    throw 'no match'
+    return {}
   endif
   let b:topCol = col('.')
   if getline('.') =~ '\%<'.b:topCol.'c\/.\{-}\/\|\%>'.b:topCol.'c[''"]\|\\$'
@@ -114,12 +114,10 @@ endfunction
 function s:alternatePair(stop)
   let [pos, pat, l:for] = [getpos('.')[1:2], '[][(){};]', 3]
   while search('\m'.pat,'bW',a:stop)
-    try
-      let not = s:skip_func()
-    catch
+    let not = s:skip_func()
+    if type(not) == type({})
       break
-    endtry
-    if not | continue | endif
+    elseif not | continue | endif
     let idx = stridx('])};',s:looking_at())
     if idx is 3
       if l:for is 1
@@ -389,8 +387,7 @@ function GetJavascriptIndent()
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
     call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [0,0])
   else
-    let [s:looksyn, s:checkIn, top] = [v:lnum - 1, 0, max([s:scriptTag,
-          \ (!indent(l:lnum) && s:syn_at(l:lnum,1) !~? s:syng_str) * l:lnum])]
+    let [s:looksyn, s:checkIn, top] = [v:lnum - 1, 0, 0]
     if idx + 1
       call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000,top)
     elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
