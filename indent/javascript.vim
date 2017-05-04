@@ -92,7 +92,7 @@ function s:parse_cino(f)
 endfunction
 
 function s:skip_func()
-  if s:topCol == 1
+  if s:topCol == 1 || line('.') < s:scriptTag
     return {} " :break, causes E731 in searchpair()
   endif
   let s:topCol = col('.')
