@@ -93,7 +93,7 @@ endfunction
 
 function s:skip_func()
   if s:topCol == 1 || line('.') < s:scriptTag
-    return {} " :break, causes E731 in searchpair()
+    return {} " causes E731, to break from search loops
   endif
   let s:topCol = col('.')
   if getline('.') =~ '\%<'.s:topCol.'c\/.\{-}\/\|\%>'.s:topCol.'c[''"]\|\\$'
@@ -114,10 +114,7 @@ endfunction
 function s:alternatePair()
   let [pos, pat, l:for] = [getpos('.')[1:2], '[][(){};]', 3]
   while search('\m'.pat,'bW')
-    let not = s:skip_func()
-    if type(not) == type({})
-      break
-    elseif not | continue | endif
+    if s:skip_func() | continue | endif
     let idx = stridx('])};',s:looking_at())
     if idx is 3
       if l:for is 1
