@@ -92,7 +92,7 @@ function s:parse_cino(f)
 endfunction
 
 function s:skip_func()
-  if b:topCol = 1
+  if b:topCol == 1
     throw 'no match'
   endif
   let b:topCol = col('.')
