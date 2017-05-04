@@ -93,7 +93,7 @@ endfunction
 
 function s:skip_func()
   if s:topCol == 1 || line('.') < s:scriptTag
-    return {} " :break, causes E731 in searchpair()
+    return {} " :break, causes E731 to break from search loops
   endif
   let s:topCol = col('.')
   if getline('.') =~ '\%<'.s:topCol.'c\/.\{-}\/\|\%>'.s:topCol.'c[''"]\|\\$'
