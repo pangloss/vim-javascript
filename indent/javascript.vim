@@ -93,7 +93,7 @@ endfunction
 
 function s:skip_func()
   if s:topCol == 1 || line('.') < s:scriptTag
-    return {} " causes E728, to break from search loops
+    return {} " causes E731, to break from search loops
   endif
   let s:topCol = col('.')
   if getline('.') =~ '\%<'.s:topCol.'c\/.\{-}\/\|\%>'.s:topCol.'c[''"]\|\\$'
@@ -112,13 +112,13 @@ function s:skip_func()
 endfunction
 
 function s:alternatePair()
-  let [pos, pat, l:for] = [getpos('.')[1:2], '[][(){};]', 3]
+  let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 3]
   while search('\m'.pat,'bW')
     if s:skip_func() | continue | endif
     let idx = stridx('])};',s:looking_at())
     if idx is 3
       if l:for is 1
-        return s:GetPair('{','}','bW','s:skip_func()',2000) > 0 || call('cursor',pos)
+        return s:GetPair('{','}','bW','s:skip_func()',2000) > 0 || setpos('.',l:pos)
       endif
       let [pat, l:for] = ['[{}();]', l:for - 1]
     elseif idx + 1
@@ -129,13 +129,13 @@ function s:alternatePair()
       return
     endif
   endwhile
-  call call('cursor',pos)
+  call setpos('.',l:pos)
 endfunction
 
 function s:save_pos(f,...)
-  let l:pos = getpos('.')[1:2]
+  let l:pos = getpos('.')
   let ret = call(a:f,a:000)
-  call call('cursor',l:pos)
+  call setpos('.',l:pos)
   return ret
 endfunction
 
@@ -152,9 +152,9 @@ function s:token()
 endfunction
 
 function s:previous_token()
-  let l:pos = getpos('.')[1:2]
+  let l:pos = getpos('.')
   if search('\m\k\{1,}\|\S','ebW')
-    if (strpart(getline('.'),col('.')-2,2) == '*/' || line('.') != l:pos[0] &&
+    if (strpart(getline('.'),col('.')-2,2) == '*/' || line('.') != l:pos[1] &&
           \ getline('.')[:col('.')-1] =~ '\/\/') && s:syn_at(line('.'),col('.')) =~? s:syng_com
       while search('\m\S\ze\_s*\/[/*]','bW')
         if s:syn_at(line('.'),col('.')) !~? s:syng_com
@@ -165,7 +165,7 @@ function s:previous_token()
       return s:token()
     endif
   endif
-  call call('cursor',l:pos)
+  call setpos('.',l:pos)
   return ''
 endfunction
 
@@ -223,7 +223,7 @@ endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
 function s:PrevCodeLine(lnum)
-  let [l:pos, l:n] = [getpos('.')[1:2], prevnonblank(a:lnum)]
+  let [l:pos, l:n] = [getpos('.'), prevnonblank(a:lnum)]
   while l:n
     if getline(l:n) =~ '^\s*\/[/*]'
       if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
@@ -239,7 +239,7 @@ function s:PrevCodeLine(lnum)
       break
     endif
   endwhile
-  call call('cursor',l:pos)
+  call setpos('.',l:pos)
   return l:n
 endfunction
 
