@@ -60,11 +60,15 @@ else
 endif
 
 " Regex of syntax group names that are or delimit string or are comments.
-let s:syng_strcom = 'string\|comment\|regex\|special\|doc\|template\%(braces\)\@!'
-let s:syng_str = 'string\|template\|special'
+let b:syng_strcom = get(b:,'syng_strcom','string\|comment\|regex\|special\|doc\|template\%(braces\)\@!')
+let b:syng_str = get(b:,'syng_strcom','string\|template\|special')
+" template strings may want to be excluded when editing graphql.
+" au! Filetype javascript let b:syng_str = '^\%(.*template\)\@!.*string\|special'
+" au! Filetype javascript let b:syng_strcom = '^\%(.*template\)\@!.*string\|comment\|regex\|special\|doc'
+
 let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? '".s:syng_strcom."'"
+let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? b:syng_strcom"
 
 function s:parse_cino(f)
   let [cin, divider, n] = [strridx(&cino,a:f), 0, '']
@@ -227,7 +231,7 @@ function s:PrevCodeLine(lnum)
   while l:n
     if getline(l:n) =~ '^\s*\/[/*]'
       if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
-            \ s:syn_at(l:n,1) =~? s:syng_str
+            \ s:syn_at(l:n,1) =~? b:syng_str
         break
       endif
       let l:n = prevnonblank(l:n-1)
@@ -249,7 +253,7 @@ function s:Balanced(lnum)
   let l:line = getline(a:lnum)
   let pos = match(l:line, '[][(){}]', 0)
   while pos != -1
-    if s:syn_at(a:lnum,pos + 1) !~? s:syng_strcom
+    if s:syn_at(a:lnum,pos + 1) !~? b:syng_strcom
       let l:open += match(' ' . l:line[pos],'[[({]')
       if l:open < 0
         return
@@ -358,7 +362,7 @@ function GetJavascriptIndent()
     elseif l:line !~ '^\s*\/[/*]'
       return -1
     endif
-  elseif syns =~? s:syng_str
+  elseif syns =~? b:syng_str
     if b:js_cache[0] == v:lnum - 1 && s:Balanced(v:lnum-1)
       let b:js_cache[0] = v:lnum
     endif
