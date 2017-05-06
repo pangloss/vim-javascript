@@ -31,7 +31,7 @@ syntax match   jsFuncCall       /\k\+\%(\s*(\)\@=/
 syntax match   jsParensError    /[)}\]]/
 
 " Program Keywords
-syntax keyword jsStorageClass   const var let skipwhite skipempty nextgroup=jsDestructuringBlock,jsDestructuringArray,jsVariableDef
+syntax keyword jsStorageClass   const var let function skipwhite skipempty nextgroup=jsDestructuringBlock,jsDestructuringArray,jsVariableDef
 syntax match   jsVariableDef    contained /\k\+/ skipwhite skipempty nextgroup=jsFlowDefinition
 syntax keyword jsOperator       delete instanceof typeof void new in of skipwhite skipempty nextgroup=@jsExpression
 syntax match   jsOperator       /[\!\|\&\+\-\<\>\=\%\/\*\~\^]\{1}/ skipwhite skipempty nextgroup=@jsExpression
@@ -40,7 +40,7 @@ syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
 
 " Modules
-syntax keyword jsImport                       import skipwhite skipempty nextgroup=jsModuleAsterisk,jsModuleKeyword,jsModuleGroup,jsFlowImportType
+syntax keyword jsImport                       import require skipwhite skipempty nextgroup=jsModuleAsterisk,jsModuleKeyword,jsModuleGroup,jsFlowImportType
 syntax keyword jsExport                       export skipwhite skipempty nextgroup=@jsAll,jsModuleGroup,jsExportDefault,jsModuleAsterisk,jsModuleKeyword
 syntax match   jsModuleKeyword      contained /\k\+/ skipwhite skipempty nextgroup=jsModuleAs,jsFrom,jsModuleComma
 syntax keyword jsExportDefault      contained default skipwhite skipempty nextgroup=@jsExpression
@@ -118,6 +118,7 @@ syntax match   jsSwitchColon   contained /::\@!/       skipwhite skipempty nextg
 
 " Keywords
 syntax keyword jsGlobalObjects      Array Boolean Date Function Iterator Number Object Symbol Map WeakMap Set RegExp String Proxy Promise Buffer ParallelArray ArrayBuffer DataView Float32Array Float64Array Int16Array Int32Array Int8Array Uint16Array Uint32Array Uint8Array Uint8ClampedArray JSON Math console document window Intl Collator DateTimeFormat NumberFormat fetch
+syntax keyword jsGlobalFunctions    setImmediate setInterval setTimeout
 syntax keyword jsGlobalNodeObjects  module exports global process __dirname __filename
 syntax match   jsGlobalNodeObjects  /\<require\>/ containedin=jsFuncCall
 syntax keyword jsExceptions         Error EvalError InternalError RangeError ReferenceError StopIteration SyntaxError TypeError URIError
@@ -330,10 +331,11 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsSwitchBraces         Noise
   HiLink jsSpecial              Special
   HiLink jsTemplateBraces       Noise
-  HiLink jsGlobalObjects        Constant
-  HiLink jsGlobalNodeObjects    Constant
-  HiLink jsExceptions           Constant
-  HiLink jsBuiltins             Constant
+  HiLink jsGlobalObjects        StorageClass
+  HiLink jsGlobalFunctions      Function
+  HiLink jsGlobalNodeObjects    StorageClass
+  HiLink jsExceptions           StorageClass
+  HiLink jsBuiltins             Function
   HiLink jsImport               Include
   HiLink jsExport               Include
   HiLink jsExportDefault        StorageClass
