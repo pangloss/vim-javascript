@@ -62,7 +62,7 @@ endif
 " Regex of syntax group names that are or delimit string or are comments.
 let b:syng_strcom = get(b:,'syng_strcom','string\|comment\|regex\|special\|doc\|template\%(braces\)\@!')
 let b:syng_str = get(b:,'syng_strcom','string\|template\|special')
-" template strings may want to be excluded when editing graphql.
+" template strings may want to be excluded when editing graphql:
 " au! Filetype javascript let b:syng_str = '^\%(.*template\)\@!.*string\|special'
 " au! Filetype javascript let b:syng_strcom = '^\%(.*template\)\@!.*string\|comment\|regex\|special\|doc'
 
@@ -97,7 +97,7 @@ endfunction
 
 function s:skip_func()
   if s:topCol == 1 || line('.') < s:scriptTag
-    return {} " causes E731, to break from search loops
+    return {} " E728, used as limit condition for loops and searchpair()
   endif
   let s:topCol = col('.')
   if getline('.') =~ '\%<'.s:topCol.'c\/.\{-}\/\|\%>'.s:topCol.'c[''"]\|\\$'
