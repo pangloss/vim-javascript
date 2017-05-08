@@ -68,7 +68,17 @@ let b:syng_str = get(b:,'syng_strcom','string\|template\|special')
 
 let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? b:syng_strcom"
+let s:skip_expr = "s:syn_at(line('.'),col('.')) =~? b:syng_strcom"
+
+function s:syn_at(l,c)
+  let pos = join([a:l,a:c],',')
+  if has_key(s:synId_cache,pos) > -1
+    return s:synId_cache[pos]
+  else
+    let s:synId_cache[pos] = synIDattr(synID(a:l,a:c,0),'name')
+    return s:synId_cache[pos]
+  endif
+endfunction
 
 function s:parse_cino(f)
   let [cin, divider, n] = [strridx(&cino,a:f), 0, '']
@@ -141,10 +151,6 @@ function s:save_pos(f,...)
   let ret = call(a:f,a:000)
   call setpos('.',l:pos)
   return ret
-endfunction
-
-function s:syn_at(l,c)
-  return synIDattr(synID(a:l,a:c,0),'name')
 endfunction
 
 function s:looking_at()
@@ -348,6 +354,7 @@ endfunction
 
 function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
+  let s:synId_cache = {}
   " Get the current line.
   call cursor(v:lnum,1)
   let l:line = getline('.')
