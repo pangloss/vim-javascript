@@ -61,7 +61,7 @@ endif
 
 " Regex of syntax group names that are or delimit string or are comments.
 let b:syng_strcom = get(b:,'syng_strcom','string\|comment\|regex\|special\|doc\|template\%(braces\)\@!')
-let b:syng_str = get(b:,'syng_strcom','string\|template\|special')
+let b:syng_str = get(b:,'syng_str','string\|template\|special')
 " template strings may want to be excluded when editing graphql:
 " au! Filetype javascript let b:syng_str = '^\%(.*template\)\@!.*string\|special'
 " au! Filetype javascript let b:syng_strcom = '^\%(.*template\)\@!.*string\|comment\|regex\|special\|doc'
