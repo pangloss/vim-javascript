@@ -74,10 +74,9 @@ function s:syn_at(l,c)
   let pos = join([a:l,a:c],',')
   if has_key(s:synId_cache,pos)
     return s:synId_cache[pos]
-  else
-    let s:synId_cache[pos] = synIDattr(synID(a:l,a:c,0),'name')
-    return s:synId_cache[pos]
   endif
+  let s:synId_cache[pos] = synIDattr(synID(a:l,a:c,0),'name')
+  return s:synId_cache[pos]
 endfunction
 
 function s:parse_cino(f)
