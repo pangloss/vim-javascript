@@ -72,7 +72,7 @@ let s:skip_expr = "s:syn_at(line('.'),col('.')) =~? b:syng_strcom"
 
 function s:syn_at(l,c)
   let pos = join([a:l,a:c],',')
-  if has_key(s:synId_cache,pos) > -1
+  if has_key(s:synId_cache,pos)
     return s:synId_cache[pos]
   else
     let s:synId_cache[pos] = synIDattr(synID(a:l,a:c,0),'name')
