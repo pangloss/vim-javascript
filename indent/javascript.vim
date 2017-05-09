@@ -271,8 +271,8 @@ function s:Balanced(lnum)
   return !l:open
 endfunction
 
-function s:OneScope(lnum,...)
-  let pline = a:0 ? a:1 : s:Trim(a:lnum)
+function s:OneScope(lnum)
+  let pline = s:Trim(a:lnum)
   call cursor(a:lnum,strlen(pline))
   let kw = 'else do'
   if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
@@ -306,13 +306,12 @@ endfunction
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
 " lineNr which encloses the entire context, 'cont' if whether line 'i' + 1 is
 " a continued expression, which could have started in a braceless context
-function s:iscontOne(i,num,cont,cached)
+function s:iscontOne(i,num,cont)
   let [l:i, l:num, bL] = [a:i, a:num + !a:num, 0]
   let pind = a:num ? indent(l:num) + s:W : 0
   let ind = indent(l:i) + (a:cont ? 0 : s:W)
   while l:i >= l:num && (ind > pind || l:i == l:num)
-    if indent(l:i) < ind &&
-          \ call('s:OneScope',[l:i] + (l:i == a:i ? [a:cached] : []))
+    if indent(l:i) < ind && s:OneScope(l:i)
       let bL += s:W
       let l:i = line('.')
     elseif !a:cont || bL || ind < indent(a:i)
