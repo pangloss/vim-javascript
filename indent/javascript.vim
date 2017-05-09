@@ -32,10 +32,6 @@ let b:syng_str = get(b:,'syng_str','string\|template\|special')
 " au! Filetype javascript let b:syng_str = '^\%(.*template\)\@!.*string\|special'
 " au! Filetype javascript let b:syng_strcom = '^\%(.*template\)\@!.*string\|comment\|regex\|special\|doc'
 
-let s:syng_com = 'comment\|doc'
-" Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? b:syng_strcom"
-
 " Only define the function once.
 if exists('*GetJavascriptIndent')
   finish
@@ -58,6 +54,10 @@ endif
 " Performance for forwards search(): start search at pos rather than masking
 " matches before pos.
 let s:z = has('patch-7.4.984') ? 'z' : ''
+
+let s:syng_com = 'comment\|doc'
+" Expression used to check whether we should skip a match with searchpair().
+let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? b:syng_strcom"
 
 " searchpair() wrapper
 if has('reltime')
