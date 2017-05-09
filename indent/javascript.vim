@@ -70,10 +70,6 @@ else
   endfunction
 endif
 
-let s:syng_com = 'comment\|doc'
-" Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "s:syn_at(line('.'),col('.')) =~? b:syng_strcom"
-
 function s:syn_at(l,c)
   let pos = join([a:l,a:c],',')
   if has_key(s:synId_cache,pos)
