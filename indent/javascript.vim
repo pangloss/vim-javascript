@@ -25,6 +25,17 @@ setlocal indentkeys+=0],0)
 
 let b:undo_indent = 'setlocal indentexpr< smartindent< autoindent< indentkeys<'
 
+" Regex of syntax group names that are or delimit string or are comments.
+let b:syng_strcom = get(b:,'syng_strcom','string\|comment\|regex\|special\|doc\|template\%(braces\)\@!')
+let b:syng_str = get(b:,'syng_str','string\|template\|special')
+" template strings may want to be excluded when editing graphql:
+" au! Filetype javascript let b:syng_str = '^\%(.*template\)\@!.*string\|special'
+" au! Filetype javascript let b:syng_strcom = '^\%(.*template\)\@!.*string\|comment\|regex\|special\|doc'
+
+let s:syng_com = 'comment\|doc'
+" Expression used to check whether we should skip a match with searchpair().
+let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? b:syng_strcom"
+
 " Only define the function once.
 if exists('*GetJavascriptIndent')
   finish
@@ -58,17 +69,6 @@ else
     return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)]))
   endfunction
 endif
-
-" Regex of syntax group names that are or delimit string or are comments.
-let b:syng_strcom = get(b:,'syng_strcom','string\|comment\|regex\|special\|doc\|template\%(braces\)\@!')
-let b:syng_str = get(b:,'syng_str','string\|template\|special')
-" template strings may want to be excluded when editing graphql:
-" au! Filetype javascript let b:syng_str = '^\%(.*template\)\@!.*string\|special'
-" au! Filetype javascript let b:syng_strcom = '^\%(.*template\)\@!.*string\|comment\|regex\|special\|doc'
-
-let s:syng_com = 'comment\|doc'
-" Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? b:syng_strcom"
 
 function s:parse_cino(f)
   let [cin, divider, n] = [strridx(&cino,a:f), 0, '']
