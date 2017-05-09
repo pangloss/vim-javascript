@@ -57,7 +57,7 @@ let s:z = has('patch-7.4.984') ? 'z' : ''
 
 let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
-let s:skip_expr = "synIDattr(synID(line('.'),col('.'),0),'name') =~? b:syng_strcom"
+let s:skip_expr = "s:syn_at(line('.'),col('.')) =~? b:syng_strcom"
 
 " searchpair() wrapper
 if has('reltime')
@@ -69,6 +69,15 @@ else
     return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)]))
   endfunction
 endif
+
+function s:syn_at(l,c)
+  let pos = join([a:l,a:c],',')
+  if has_key(s:synId_cache,pos)
+    return s:synId_cache[pos]
+  endif
+  let s:synId_cache[pos] = synIDattr(synID(a:l,a:c,0),'name')
+  return s:synId_cache[pos]
+endfunction
 
 function s:parse_cino(f)
   let [cin, divider, n] = [strridx(&cino,a:f), 0, '']
@@ -141,10 +150,6 @@ function s:save_pos(f,...)
   let ret = call(a:f,a:000)
   call setpos('.',l:pos)
   return ret
-endfunction
-
-function s:syn_at(l,c)
-  return synIDattr(synID(a:l,a:c,0),'name')
 endfunction
 
 function s:looking_at()
@@ -266,8 +271,8 @@ function s:Balanced(lnum)
   return !l:open
 endfunction
 
-function s:OneScope(lnum,...)
-  let pline = a:0 ? a:1 : s:Trim(a:lnum)
+function s:OneScope(lnum)
+  let pline = s:Trim(a:lnum)
   call cursor(a:lnum,strlen(pline))
   let kw = 'else do'
   if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100) > 0
@@ -301,13 +306,12 @@ endfunction
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
 " lineNr which encloses the entire context, 'cont' if whether line 'i' + 1 is
 " a continued expression, which could have started in a braceless context
-function s:iscontOne(i,num,cont,cached)
+function s:iscontOne(i,num,cont)
   let [l:i, l:num, bL] = [a:i, a:num + !a:num, 0]
   let pind = a:num ? indent(l:num) + s:W : 0
   let ind = indent(l:i) + (a:cont ? 0 : s:W)
   while l:i >= l:num && (ind > pind || l:i == l:num)
-    if indent(l:i) < ind &&
-          \ call('s:OneScope',[l:i] + (l:i == a:i ? [a:cached] : []))
+    if indent(l:i) < ind && s:OneScope(l:i)
       let bL += s:W
       let l:i = line('.')
     elseif !a:cont || bL || ind < indent(a:i)
@@ -348,6 +352,7 @@ endfunction
 
 function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
+  let s:synId_cache = {}
   " Get the current line.
   call cursor(v:lnum,1)
   let l:line = getline('.')
@@ -416,7 +421,7 @@ function GetJavascriptIndent()
     endif
     if idx < 0 && pline[-1:] !~ '[{;]'
       let isOp = (l:line =~# s:opfirst || s:continues(l:lnum,pline)) * s:W
-      let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp,pline)
+      let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
   elseif idx < 0 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '('
