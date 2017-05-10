@@ -47,7 +47,7 @@ if exists('*shiftwidth')
   endfunction
 else
   function s:sw()
-    return &l:shiftwidth == 0 ? &l:tabstop : &l:shiftwidth
+    return &l:shiftwidth ? &l:shiftwidth : &l:tabstop
   endfunction
 endif
 
@@ -231,8 +231,8 @@ function s:Trim(ln)
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
-function s:PrevCodeLine(lnum)
-  let [l:pos, l:n] = [getpos('.'), prevnonblank(a:lnum)]
+function s:PrevCodeLine1(lnum)
+  let l:n = prevnonblank(a:lnum)
   while l:n
     if getline(l:n) =~ '^\s*\/[/*]'
       if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
@@ -248,8 +248,11 @@ function s:PrevCodeLine(lnum)
       break
     endif
   endwhile
-  call setpos('.',l:pos)
   return l:n
+endfunction
+
+function s:PrevCodeLine(lnum)
+  return s:save_pos('s:PrevCodeLine1',a:lnum)
 endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
