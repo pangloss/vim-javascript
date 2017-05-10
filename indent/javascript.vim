@@ -230,35 +230,57 @@ function s:Trim(ln)
   return pline
 endfunction
 
-" Find line above 'lnum' that isn't empty or in a comment
-func s:anon()
-  let d = {}
-  function d.pline(lnum)
-    let l:n = prevnonblank(a:lnum)
-    while l:n
-      if getline(l:n) =~ '^\s*\/[/*]'
-        if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
-              \ s:syn_at(l:n,1) =~? b:syng_str
-          break
-        endif
-        let l:n = prevnonblank(l:n-1)
-      elseif stridx(getline(l:n), '*/') + 1 && s:syn_at(l:n,1) =~? s:syng_com
-        call cursor(l:n,1)
-        keepjumps norm! [*
-        let l:n = search('\m\S','nbW')
-      else
-        break
-      endif
-    endwhile
-    return l:n
-  endfunction
-  func d.wrapped(lnum)
-    retu s:save_pos(self.pline,a:lnum)
-  endfunc
-  let s:PrevCodeLine = d.wrapped
+func s:anon(d)
+  let l:d = {}
+  for var in keys(extend(l:d,s:[a:d]))
+    exe "func l:d.".var."w(...)\n"
+       \ ."retu call('s:save_pos',[self['".var."']]+a:000)\n"
+     \ ."endfunc"
+    let s:[var] = l:d[var."w"]
+  endfor
+  unlet s:[a:d]
   retu 'delfunc s:anon'
 endfunc
-exe s:anon()
+
+let s:closures = {}
+" Find line above 'lnum' that isn't empty or in a comment
+function s:closures.PrevCodeLine(lnum)
+  let l:n = prevnonblank(a:lnum)
+  while l:n
+    if getline(l:n) =~ '^\s*\/[/*]'
+      if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
+            \ s:syn_at(l:n,1) =~? b:syng_str
+        break
+      endif
+      let l:n = prevnonblank(l:n-1)
+    elseif stridx(getline(l:n), '*/') + 1 && s:syn_at(l:n,1) =~? s:syng_com
+      call cursor(l:n,1)
+      keepjumps norm! [*
+      let l:n = search('\m\S','nbW')
+    else
+      break
+    endif
+  endwhile
+  return l:n
+endfunction
+
+function s:closures.doWhile()
+  if expand('<cword>') ==# 'while'
+    call search('\m\<','cbW')
+    let bal = 0
+    while bal < 1 && search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
+      if eval(s:skip_expr) | continue | endif
+      " switch (looking_at())
+      exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
+            \  '{': "return",
+            \  'd': "let bal += s:save_pos('s:IsBlock',1)",
+            \  'w': "let bal -= s:save_pos('s:previous_token') != '.'" }[s:looking_at()]
+    endwhile
+    return max([bal,0])
+  endif
+endfunction
+exe s:anon('closures')
+
 
 " Check if line 'lnum' has a balanced amount of parentheses.
 function s:Balanced(lnum)
@@ -292,23 +314,7 @@ function s:OneScope(lnum)
     endif
   endif
   return pline[-2:] == '=>' || index(split(kw),s:token()) + 1 &&
-        \ s:save_pos('s:previous_token') != '.' && !s:save_pos('s:doWhile')
-endfunction
-
-function s:doWhile()
-  if expand('<cword>') ==# 'while'
-    call search('\m\<','cbW')
-    let bal = 0
-    while bal < 1 && search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
-      if eval(s:skip_expr) | continue | endif
-      " switch (looking_at())
-      exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
-            \  '{': "return",
-            \  'd': "let bal += s:save_pos('s:IsBlock',1)",
-            \  'w': "let bal -= s:save_pos('s:previous_token') != '.'" }[s:looking_at()]
-    endwhile
-    return max([bal,0])
-  endif
+        \ s:save_pos('s:previous_token') != '.' && !s:doWhile()
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
