@@ -225,7 +225,7 @@ func s:anon(d)
   retu 'delfunc s:anon'
 endfunc
 
-let s:closures = {'previous_token_is': function('s:previous_token')}
+let s:closures = {'previous_token_is': 's:previous_token', '__IsBlock': 's:IsBlock'}
 
 " Find line above 'lnum' that isn't empty or in a comment
 function s:closures.PrevCodeLine(lnum)
@@ -274,15 +274,12 @@ function s:closures.doWhile()
       " switch (looking_at())
       exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
             \  '{': "return",
-            \  'd': "let bal += s:save_pos('s:IsBlock',1)",
+            \  'd': "let bal += s:__IsBlock(1)",
             \  'w': "let bal -= s:previous_token_is() != '.'" }[s:looking_at()]
     endwhile
     return max([bal,0])
   endif
 endfunction
-
-exe s:anon(remove(s:,'closures'))
-
 
 " Check if line 'lnum' has a balanced amount of parentheses.
 function s:Balanced(lnum)
@@ -365,6 +362,9 @@ function s:IsBlock(...)
           \ (char !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == char)
   endif
 endfunction
+
+exe s:anon(remove(s:,'closures'))
+
 
 function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
