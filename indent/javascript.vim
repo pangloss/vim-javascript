@@ -231,7 +231,7 @@ function s:Trim(ln)
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
-function s:anon()
+func s:anon()
   let d = {}
   function d.pline(lnum)
     let l:n = prevnonblank(a:lnum)
@@ -252,12 +252,11 @@ function s:anon()
     endwhile
     return l:n
   endfunction
-  function d.wrapped(lnum)
-    return s:save_pos(self.pline,a:lnum)
+  func d.wrapped(lnum)
+    retu s:save_pos(self.pline,a:lnum)
   endfunc
-  return d.wrapped
+  retu d.wrapped
 endfunc
-
 let s:PrevCodeLine = s:anon()
 delfunc s:anon
 
