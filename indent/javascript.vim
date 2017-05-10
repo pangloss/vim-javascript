@@ -213,6 +213,7 @@ function s:Trim(ln)
   return pline
 endfunction
 
+" creates partially applied s:save_pos() functions
 func s:anon(d)
   let l:d = {}
   for var in keys(extend(l:d,a:d))
@@ -225,6 +226,7 @@ func s:anon(d)
 endfunc
 
 let s:closures = {'previous_token_is': function('s:previous_token')}
+
 " Find line above 'lnum' that isn't empty or in a comment
 function s:closures.PrevCodeLine(lnum)
   let l:n = prevnonblank(a:lnum)
@@ -278,6 +280,7 @@ function s:closures.doWhile()
     return max([bal,0])
   endif
 endfunction
+
 exe s:anon(remove(s:,'closures'))
 
 
