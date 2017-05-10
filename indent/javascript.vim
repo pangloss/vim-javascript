@@ -178,23 +178,6 @@ function s:previous_token()
   return ''
 endfunction
 
-function s:expr_col()
-  if getline('.')[col('.')-2] == ':'
-    return 1
-  endif
-  let bal = 0
-  while bal < 1 && search('\m[{}?:;]','bW',s:scriptTag)
-    if eval(s:skip_expr) | continue | endif
-    " switch (looking_at())
-    exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
-          \ ';': "return",
-          \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
-          \ ':': "let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'",
-          \ '?': "let bal += 1" }[s:looking_at()]
-  endwhile
-  return max([bal,0])
-endfunction
-
 " configurable regexes that define continuation lines, not including (, {, or [.
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\C\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
@@ -232,17 +215,16 @@ endfunction
 
 func s:anon(d)
   let l:d = {}
-  for var in keys(extend(l:d,s:[a:d]))
+  for var in keys(extend(l:d,a:d))
     exe "func l:d.".var."w(...)\n"
        \ ."retu call('s:save_pos',[self['".var."']]+a:000)\n"
      \ ."endfunc"
     let s:[var] = l:d[var."w"]
   endfor
-  unlet s:[a:d]
   retu 'delfunc s:anon'
 endfunc
 
-let s:closures = {}
+let s:closures = {'previous_token_is': function('s:previous_token')}
 " Find line above 'lnum' that isn't empty or in a comment
 function s:closures.PrevCodeLine(lnum)
   let l:n = prevnonblank(a:lnum)
@@ -264,6 +246,23 @@ function s:closures.PrevCodeLine(lnum)
   return l:n
 endfunction
 
+function s:closures.expr_col()
+  if getline('.')[col('.')-2] == ':'
+    return 1
+  endif
+  let bal = 0
+  while bal < 1 && search('\m[{}?:;]','bW',s:scriptTag)
+    if eval(s:skip_expr) | continue | endif
+    " switch (looking_at())
+    exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
+          \ ';': "return",
+          \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
+          \ ':': "let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'",
+          \ '?': "let bal += 1" }[s:looking_at()]
+  endwhile
+  return max([bal,0])
+endfunction
+
 function s:closures.doWhile()
   if expand('<cword>') ==# 'while'
     call search('\m\<','cbW')
@@ -274,12 +273,12 @@ function s:closures.doWhile()
       exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
             \  '{': "return",
             \  'd': "let bal += s:save_pos('s:IsBlock',1)",
-            \  'w': "let bal -= s:save_pos('s:previous_token') != '.'" }[s:looking_at()]
+            \  'w': "let bal -= s:previous_token_is() != '.'" }[s:looking_at()]
     endwhile
     return max([bal,0])
   endif
 endfunction
-exe s:anon('closures')
+exe s:anon(remove(s:,'closures'))
 
 
 " Check if line 'lnum' has a balanced amount of parentheses.
@@ -314,7 +313,7 @@ function s:OneScope(lnum)
     endif
   endif
   return pline[-2:] == '=>' || index(split(kw),s:token()) + 1 &&
-        \ s:save_pos('s:previous_token') != '.' && !s:doWhile()
+        \ s:previous_token_is() != '.' && !s:doWhile()
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
@@ -346,16 +345,16 @@ function s:IsBlock(...)
       return char != '{'
     elseif char =~ '\k'
       if char ==# 'type'
-        return s:save_pos('s:previous_token') !~# '^\%(im\|ex\)port$'
+        return s:previous_token_is() !~# '^\%(im\|ex\)port$'
       endif
       return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
-            \ ,char) < (line('.') != l:n) || s:save_pos('s:previous_token') == '.'
+            \ ,char) < (line('.') != l:n) || s:previous_token_is() == '.'
     elseif char == '>'
       return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? 'jsflow\|^html'
     elseif char == '*'
-      return s:save_pos('s:previous_token') == ':'
+      return s:previous_token_is() == ':'
     elseif char == ':'
-      return !s:save_pos('s:expr_col')
+      return !s:expr_col()
     elseif char == '/'
       return s:syn_at(line('.'),col('.')) =~? 'regex'
     endif
