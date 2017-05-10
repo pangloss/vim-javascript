@@ -255,10 +255,10 @@ func s:anon()
   func d.wrapped(lnum)
     retu s:save_pos(self.pline,a:lnum)
   endfunc
-  retu d.wrapped
+  let s:PrevCodeLine = d.wrapped
+  retu 'delfunc s:anon'
 endfunc
-let s:PrevCodeLine = s:anon()
-delfunc s:anon
+exe s:anon()
 
 " Check if line 'lnum' has a balanced amount of parentheses.
 function s:Balanced(lnum)
