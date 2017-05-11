@@ -195,17 +195,6 @@ function s:continues(ln,con)
   endif
 endfunction
 
-function s:Trim(ln)
-  let pline = substitute(getline(a:ln),'\s*$','','')
-  let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
-  while l:max != -1 && s:syn_at(a:ln, strlen(pline)) =~? s:syng_com
-    let pline = pline[: l:max]
-    let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
-    let pline = substitute(pline[:-2],'\s*$','','')
-  endwhile
-  return pline
-endfunction
-
 " creates partially applied, (s:) scoped, stationary functions
 func s:anon(d)
   let l:d = {}
@@ -241,6 +230,17 @@ function s:closures.expr_col()
           \ '?': "let bal += 1" }[s:looking_at()]
   endwhile
   return max([bal,0])
+endfunction
+
+function s:Trim(ln)
+  let pline = substitute(getline(a:ln),'\s*$','','')
+  let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
+  while l:max != -1 && s:syn_at(a:ln, strlen(pline)) =~? s:syng_com
+    let pline = pline[: l:max]
+    let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
+    let pline = substitute(pline[:-2],'\s*$','','')
+  endwhile
+  return pline
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
