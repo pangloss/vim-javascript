@@ -186,9 +186,9 @@ func s:anon(d)
   retu 'delfunc s:anon'
 endfunc
 
-let s:closures = {'__previous_token': 's:previous_token', '__IsBlock': 's:IsBlock'}
+let s:__ = {'__previous_token': 's:previous_token', '__IsBlock': 's:IsBlock'}
 
-function s:closures.expr_col()
+function s:__.expr_col()
   if getline('.')[col('.')-2] == ':'
     return 1
   endif
@@ -241,7 +241,7 @@ function s:Trim(ln)
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
-function s:closures.PrevCodeLine(lnum)
+function s:__.PrevCodeLine(lnum)
   let l:n = prevnonblank(a:lnum)
   while l:n
     if getline(l:n) =~ '^\s*\/[/*]'
@@ -296,7 +296,7 @@ function s:OneScope(lnum)
         \ s:__previous_token() != '.' && !s:doWhile()
 endfunction
 
-function s:closures.doWhile()
+function s:__.doWhile()
   if expand('<cword>') ==# 'while'
     call search('\m\<','cbW')
     let bal = 0
@@ -359,7 +359,7 @@ function s:IsBlock(...)
   endif
 endfunction
 
-exe s:anon(remove(s:,'closures'))
+exe s:anon(remove(s:,'__'))
 
 
 function GetJavascriptIndent()
