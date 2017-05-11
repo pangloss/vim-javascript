@@ -104,7 +104,7 @@ function s:parse_cino(f)
   return sign * str2nr(n) / max([str2nr(divider),1])
 endfunction
 
-" Optimized {skip} expr, works only once per GetJavascriptIndent() call
+" Optimized {skip} expr, used only once per GetJavascriptIndent() call
 function s:skip_func()
   if s:topCol == 1 || line('.') < s:scriptTag
     return {} " E728, used as limit condition for loops and searchpair()
