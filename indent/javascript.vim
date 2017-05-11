@@ -171,30 +171,6 @@ function s:previous_token()
   return ''
 endfunction
 
-" configurable regexes that define continuation lines, not including (, {, or [.
-let s:opfirst = '^' . get(g:,'javascript_opfirst',
-      \ '\C\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
-let s:continuation = get(g:,'javascript_continuation',
-      \ '\C\%([-+<>=,.~!?/*^%|&:]\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\)\)') . '$'
-
-function s:continues(ln,con)
-  if !cursor(a:ln, match(' '.a:con,s:continuation))
-    let teol = s:looking_at()
-    if teol == '/'
-      return s:syn_at(line('.'),col('.')) !~? 'regex'
-    elseif teol == '>'
-      return getline('.')[col('.')-2] != '=' && s:syn_at(line('.'),col('.')) !~? 'jsflow\|^html'
-    elseif teol =~ '[-+]'
-      return getline('.')[col('.')-2] != teol
-    elseif teol =~ '\l'
-      return s:previous_token() != '.'
-    elseif teol == ':'
-      return s:expr_col()
-    endif
-    return 1
-  endif
-endfunction
-
 " creates partially applied, (s:) scoped, stationary functions
 func s:anon(d)
   let l:d = {}
@@ -230,6 +206,30 @@ function s:closures.expr_col()
           \ '?': "let bal += 1" }[s:looking_at()]
   endwhile
   return max([bal,0])
+endfunction
+
+" configurable regexes that define continuation lines, not including (, {, or [.
+let s:opfirst = '^' . get(g:,'javascript_opfirst',
+      \ '\C\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
+let s:continuation = get(g:,'javascript_continuation',
+      \ '\C\%([-+<>=,.~!?/*^%|&:]\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\)\)') . '$'
+
+function s:continues(ln,con)
+  if !cursor(a:ln, match(' '.a:con,s:continuation))
+    let teol = s:looking_at()
+    if teol == '/'
+      return s:syn_at(line('.'),col('.')) !~? 'regex'
+    elseif teol == '>'
+      return getline('.')[col('.')-2] != '=' && s:syn_at(line('.'),col('.')) !~? 'jsflow\|^html'
+    elseif teol =~ '[-+]'
+      return getline('.')[col('.')-2] != teol
+    elseif teol =~ '\l'
+      return s:previous_token() != '.'
+    elseif teol == ':'
+      return s:expr_col()
+    endif
+    return 1
+  endif
 endfunction
 
 function s:Trim(ln)
