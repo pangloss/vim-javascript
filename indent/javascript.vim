@@ -180,7 +180,7 @@ func s:anon(d)
         \ "let ret = call(self.".var.",a:000)\n"
         \ "call setpos('.',l:pos)\n"
         \ "retu ret\n"
-     \ ."endfunc"
+      \ "endfunc"
     let s:[var] = l:d[var."w"]
   endfor
   retu 'delfunc s:anon'
