@@ -264,22 +264,6 @@ function s:closures.expr_col()
   return max([bal,0])
 endfunction
 
-function s:closures.doWhile()
-  if expand('<cword>') ==# 'while'
-    call search('\m\<','cbW')
-    let bal = 0
-    while bal < 1 && search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
-      if eval(s:skip_expr) | continue | endif
-      " switch (looking_at())
-      exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
-            \  '{': "return",
-            \  'd': "let bal += s:__IsBlock(1)",
-            \  'w': "let bal -= s:previous_token_is() != '.'" }[s:looking_at()]
-    endwhile
-    return max([bal,0])
-  endif
-endfunction
-
 " Check if line 'lnum' has a balanced amount of parentheses.
 function s:Balanced(lnum)
   let l:open = 0
@@ -313,6 +297,22 @@ function s:OneScope(lnum)
   endif
   return pline[-2:] == '=>' || index(split(kw),s:token()) + 1 &&
         \ s:previous_token_is() != '.' && !s:doWhile()
+endfunction
+
+function s:closures.doWhile()
+  if expand('<cword>') ==# 'while'
+    call search('\m\<','cbW')
+    let bal = 0
+    while bal < 1 && search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
+      if eval(s:skip_expr) | continue | endif
+      " switch (looking_at())
+      exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
+            \  '{': "return",
+            \  'd': "let bal += s:__IsBlock(1)",
+            \  'w': "let bal -= s:previous_token_is() != '.'" }[s:looking_at()]
+    endwhile
+    return max([bal,0])
+  endif
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
