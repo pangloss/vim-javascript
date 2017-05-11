@@ -171,7 +171,7 @@ function s:previous_token()
   return ''
 endfunction
 
-" creates partially applied, (s:) scoped, stationary functions
+" creates (s:) scoped, stationary functions
 func s:anon(d)
   let l:d = {}
   for var in keys(extend(l:d,a:d))
