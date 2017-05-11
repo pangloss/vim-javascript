@@ -226,6 +226,23 @@ endfunc
 
 let s:closures = {'previous_token_is': 's:previous_token', '__IsBlock': 's:IsBlock'}
 
+function s:closures.expr_col()
+  if getline('.')[col('.')-2] == ':'
+    return 1
+  endif
+  let bal = 0
+  while bal < 1 && search('\m[{}?:;]','bW',s:scriptTag)
+    if eval(s:skip_expr) | continue | endif
+    " switch (looking_at())
+    exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
+          \ ';': "return",
+          \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
+          \ ':': "let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'",
+          \ '?': "let bal += 1" }[s:looking_at()]
+  endwhile
+  return max([bal,0])
+endfunction
+
 " Find line above 'lnum' that isn't empty or in a comment
 function s:closures.PrevCodeLine(lnum)
   let l:n = prevnonblank(a:lnum)
@@ -245,23 +262,6 @@ function s:closures.PrevCodeLine(lnum)
     endif
   endwhile
   return l:n
-endfunction
-
-function s:closures.expr_col()
-  if getline('.')[col('.')-2] == ':'
-    return 1
-  endif
-  let bal = 0
-  while bal < 1 && search('\m[{}?:;]','bW',s:scriptTag)
-    if eval(s:skip_expr) | continue | endif
-    " switch (looking_at())
-    exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
-          \ ';': "return",
-          \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
-          \ ':': "let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'",
-          \ '?': "let bal += 1" }[s:looking_at()]
-  endwhile
-  return max([bal,0])
 endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
