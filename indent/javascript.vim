@@ -186,7 +186,7 @@ func s:anon(d)
   retu 'delfunc s:anon'
 endfunc
 
-let s:closures = {'previous_token_is': 's:previous_token', '__IsBlock': 's:IsBlock'}
+let s:closures = {'__previous_token': 's:previous_token', '__IsBlock': 's:IsBlock'}
 
 function s:closures.expr_col()
   if getline('.')[col('.')-2] == ':'
@@ -293,7 +293,7 @@ function s:OneScope(lnum)
     endif
   endif
   return pline[-2:] == '=>' || index(split(kw),s:token()) + 1 &&
-        \ s:previous_token_is() != '.' && !s:doWhile()
+        \ s:__previous_token() != '.' && !s:doWhile()
 endfunction
 
 function s:closures.doWhile()
@@ -306,7 +306,7 @@ function s:closures.doWhile()
       exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
             \  '{': "return",
             \  'd': "let bal += s:__IsBlock(1)",
-            \  'w': "let bal -= s:previous_token_is() != '.'" }[s:looking_at()]
+            \  'w': "let bal -= s:__previous_token() != '.'" }[s:looking_at()]
     endwhile
     return max([bal,0])
   endif
@@ -341,14 +341,14 @@ function s:IsBlock(...)
       return char != '{'
     elseif char =~ '\k'
       if char ==# 'type'
-        return s:previous_token_is() !~# '^\%(im\|ex\)port$'
+        return s:__previous_token() !~# '^\%(im\|ex\)port$'
       endif
       return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
-            \ ,char) < (line('.') != l:n) || s:previous_token_is() == '.'
+            \ ,char) < (line('.') != l:n) || s:__previous_token() == '.'
     elseif char == '>'
       return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? 'jsflow\|^html'
     elseif char == '*'
-      return s:previous_token_is() == ':'
+      return s:__previous_token() == ':'
     elseif char == ':'
       return !s:expr_col()
     elseif char == '/'
