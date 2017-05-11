@@ -174,20 +174,18 @@ endfunction
 
 " creates (s:) scoped, stationary functions
 func s:anon(d)
-  let l:d = {}
-  for var in keys(extend(l:d,a:d))
-    exe "func l:d.".var."w(...)\n"
+  for key in keys(a:d)
+    exe "func s:".key."(...)\n"
         \ "let l:pos = getpos('.')\n"
-        \ "let ret = call(self.".var.",a:000)\n"
+        \ "let ret = call(".(key[:1] == '__' ? ('"s:'.key.'"') : ('s:__.'.key)).",a:000,{})\n"
         \ "call setpos('.',l:pos)\n"
         \ "retu ret\n"
       \ "endfunc"
-    let s:[var] = l:d[var."w"]
   endfor
   retu 'delfunc s:anon'
 endfunc
 
-let s:__ = {'__previous_token': 's:previous_token', '__IsBlock': 's:IsBlock'}
+let s:__ = {'__previous_token': 'previous_token', '__IsBlock': 'IsBlock'}
 
 function s:__.expr_col()
   if getline('.')[col('.')-2] == ':'
@@ -360,7 +358,7 @@ function s:IsBlock(...)
   endif
 endfunction
 
-exe s:anon(remove(s:,'__'))
+exe s:anon(s:__)
 
 
 function GetJavascriptIndent()
