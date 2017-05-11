@@ -176,16 +176,13 @@ func s:anon(d)
   let l:d = {}
   for var in keys(extend(l:d,a:d))
     exe "func l:d.".var."w(...)\n"
-       \ ."retu call(self.save_pos,[self['".var."']]+a:000)\n"
+        \ "let l:pos = getpos('.')\n"
+        \ "let ret = call(self.".var.",a:000)\n"
+        \ "call setpos('.',l:pos)\n"
+        \ "retu ret\n"
      \ ."endfunc"
     let s:[var] = l:d[var."w"]
   endfor
-  func l:d.save_pos(f,...)
-    let l:pos = getpos('.')
-    let ret = call(a:f,a:000)
-    call setpos('.',l:pos)
-    retu ret
-  endfunc
   retu 'delfunc s:anon'
 endfunc
 
