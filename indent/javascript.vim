@@ -145,13 +145,6 @@ function s:alternatePair()
   call setpos('.',l:pos)
 endfunction
 
-function s:save_pos(f,...)
-  let l:pos = getpos('.')
-  let ret = call(a:f,a:000)
-  call setpos('.',l:pos)
-  return ret
-endfunction
-
 function s:looking_at()
   return getline('.')[col('.')-1]
 endfunction
@@ -213,15 +206,21 @@ function s:Trim(ln)
   return pline
 endfunction
 
-" creates partially applied s:save_pos() functions
+" creates partially applied, (s:) scoped, stationary functions
 func s:anon(d)
   let l:d = {}
   for var in keys(extend(l:d,a:d))
     exe "func l:d.".var."w(...)\n"
-       \ ."retu call('s:save_pos',[self['".var."']]+a:000)\n"
+       \ ."retu call(self.save_pos,[self['".var."']]+a:000)\n"
      \ ."endfunc"
     let s:[var] = l:d[var."w"]
   endfor
+  func l:d.save_pos(f,...)
+    let l:pos = getpos('.')
+    let ret = call(a:f,a:000)
+    call setpos('.',l:pos)
+    retu ret
+  endfunc
   retu 'delfunc s:anon'
 endfunc
 
