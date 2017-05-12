@@ -47,7 +47,7 @@ if exists('*shiftwidth')
   endfunction
 else
   function s:sw()
-    return &l:shiftwidth == 0 ? &l:tabstop : &l:shiftwidth
+    return &l:shiftwidth ? &l:shiftwidth : &l:tabstop
   endfunction
 endif
 
@@ -104,6 +104,7 @@ function s:parse_cino(f)
   return sign * str2nr(n) / max([str2nr(divider),1])
 endfunction
 
+" Optimized {skip} expr, used only once per GetJavascriptIndent() call
 function s:skip_func()
   if s:topCol == 1 || line('.') < s:scriptTag
     return {} " E728, used as limit condition for loops and searchpair()
@@ -145,13 +146,6 @@ function s:alternatePair()
   call setpos('.',l:pos)
 endfunction
 
-function s:save_pos(f,...)
-  let l:pos = getpos('.')
-  let ret = call(a:f,a:000)
-  call setpos('.',l:pos)
-  return ret
-endfunction
-
 function s:looking_at()
   return getline('.')[col('.')-1]
 endfunction
@@ -178,7 +172,22 @@ function s:previous_token()
   return ''
 endfunction
 
-function s:expr_col()
+" creates (s:) scoped, stationary functions
+func s:anon(d)
+  for key in keys(a:d)
+    exe "func s:".key."(...)\n"
+        \ "let l:pos = getpos('.')\n"
+        \ "let ret = call(".(key[:1] == '__' ? ('"s:'.key.'"') : ('s:__.'.key)).",a:000,{})\n"
+        \ "call setpos('.',l:pos)\n"
+        \ "retu ret\n"
+      \ "endfunc"
+  endfor
+  retu 'delfunc s:anon'
+endfunc
+
+let s:__ = {'__previous_token': 'previous_token', '__IsBlock': 'IsBlock'}
+
+function s:__.expr_col()
   if getline('.')[col('.')-2] == ':'
     return 1
   endif
@@ -231,8 +240,8 @@ function s:Trim(ln)
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
-function s:PrevCodeLine(lnum)
-  let [l:pos, l:n] = [getpos('.'), prevnonblank(a:lnum)]
+function s:__.PrevCodeLine(lnum)
+  let l:n = prevnonblank(a:lnum)
   while l:n
     if getline(l:n) =~ '^\s*\/[/*]'
       if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
@@ -248,7 +257,6 @@ function s:PrevCodeLine(lnum)
       break
     endif
   endwhile
-  call setpos('.',l:pos)
   return l:n
 endfunction
 
@@ -284,10 +292,10 @@ function s:OneScope(lnum)
     endif
   endif
   return pline[-2:] == '=>' || index(split(kw),s:token()) + 1 &&
-        \ s:save_pos('s:previous_token') != '.' && !s:save_pos('s:doWhile')
+        \ s:__previous_token() != '.' && !s:doWhile()
 endfunction
 
-function s:doWhile()
+function s:__.doWhile()
   if expand('<cword>') ==# 'while'
     call search('\m\<','cbW')
     let bal = 0
@@ -296,8 +304,8 @@ function s:doWhile()
       " switch (looking_at())
       exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
             \  '{': "return",
-            \  'd': "let bal += s:save_pos('s:IsBlock',1)",
-            \  'w': "let bal -= s:save_pos('s:previous_token') != '.'" }[s:looking_at()]
+            \  'd': "let bal += s:__IsBlock(1)",
+            \  'w': "let bal -= s:__previous_token() != '.'" }[s:looking_at()]
     endwhile
     return max([bal,0])
   endif
@@ -332,16 +340,16 @@ function s:IsBlock(...)
       return char != '{'
     elseif char =~ '\k'
       if char ==# 'type'
-        return s:save_pos('s:previous_token') !~# '^\%(im\|ex\)port$'
+        return s:__previous_token() !~# '^\%(im\|ex\)port$'
       endif
       return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
-            \ ,char) < (line('.') != l:n) || s:save_pos('s:previous_token') == '.'
+            \ ,char) < (line('.') != l:n) || s:__previous_token() == '.'
     elseif char == '>'
       return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? 'jsflow\|^html'
     elseif char == '*'
-      return s:save_pos('s:previous_token') == ':'
+      return s:__previous_token() == ':'
     elseif char == ':'
-      return !s:save_pos('s:expr_col')
+      return !s:expr_col()
     elseif char == '/'
       return s:syn_at(line('.'),col('.')) =~? 'regex'
     endif
@@ -349,6 +357,9 @@ function s:IsBlock(...)
           \ (char !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == char)
   endif
 endfunction
+
+exe s:anon(s:__)
+
 
 function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
