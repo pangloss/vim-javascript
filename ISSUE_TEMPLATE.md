@@ -5,5 +5,8 @@ setup and are sourcing this plugin https://github.com/mxw/vim-jsx
 WE DO NOT support JSX automatically, you need another plugin to add get this
 functionality.
 
-Also, if possible, please include a snippet of code that we can easily copy and
-paste that replicates your bug.
+If applicable, include a snippet of code that we can easily copy and paste that
+replicates your bug.
+
+Make sure the bug still exists if you disable all other javascript plugins
+except the one noted above, mxw/vim-jsx
