@@ -177,7 +177,7 @@ func s:anon(d)
   for key in keys(a:d)
     exe "func s:".key."(...)\n"
         \ "let l:pos = getpos('.')\n"
-        \ "let ret = call(".(key[:1] == '__' ? ('"s:'.key.'"') : ('s:__.'.key)).",a:000,{})\n"
+        \ "let ret = call(".(key[:1] == '__' ? ('"s:'.key[2:].'"') : ('s:__.'.key)).",a:000,{})\n"
         \ "call setpos('.',l:pos)\n"
         \ "retu ret\n"
       \ "endfunc"
