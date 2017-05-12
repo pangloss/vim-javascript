@@ -211,7 +211,9 @@ let s:continuation = get(g:,'javascript_continuation',
       \ '\C\%([-+<>=,.~!?/*^%|&:]\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\)\)') . '$'
 
 function s:continues(ln,con)
-  if !cursor(a:ln, match(' '.a:con,s:continuation))
+  let tpos = match(' '.a:con,s:continuation)
+  if tpos > -1
+    call cursor(a:ln,tpos)
     let teol = s:looking_at()
     if teol == '/'
       return s:syn_at(line('.'),col('.')) !~? 'regex'
