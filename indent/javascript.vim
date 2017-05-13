@@ -125,14 +125,16 @@ function s:skip_func()
   return s:checkIn
 endfunction
 
-function s:alternatePair()
-  let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 3]
+let [s:__, s:n0] = [{}, {}]
+
+function s:n0.alternatePair()
+  let [pat, l:for] = ['[][(){};]', 3]
   while search('\m'.pat,'bW')
     if s:skip_func() | continue | endif
     let idx = stridx('])};',s:looking_at())
     if idx is 3
       if l:for is 1
-        return s:GetPair('{','}','bW','s:skip_func()',2000) > 0 || setpos('.',l:pos)
+        return s:GetPair('{','}','bW','s:skip_func()',2000) > 0
       endif
       let [pat, l:for] = ['[{}();]', l:for - 1]
     elseif idx + 1
@@ -140,10 +142,9 @@ function s:alternatePair()
         break
       endif
     else
-      return
+      return 1
     endif
   endwhile
-  call setpos('.',l:pos)
 endfunction
 
 function s:looking_at()
@@ -154,7 +155,7 @@ function s:token()
   return s:looking_at() =~ '\k' ? expand('<cword>') : s:looking_at()
 endfunction
 
-function s:previous_token()
+function s:n0.previous_token()
   let l:pos = getpos('.')
   if search('\m\k\{1,}\|\S','ebW')
     if (strpart(getline('.'),col('.')-2,2) == '*/' || line('.') != l:pos[1] &&
@@ -167,25 +168,24 @@ function s:previous_token()
     else
       return s:token()
     endif
-    call setpos('.',l:pos)
   endif
   return ''
 endfunction
 
 " creates (s:) scoped, stationary functions
 func s:anon(d)
-  for key in keys(a:d)
-    exe "func s:".key."(...)\n"
-        \ "let l:pos = getpos('.')\n"
-        \ "let ret = call(".(key[:1] == '__' ? ('"s:'.a:d[key].'"') : ('s:__.'.key)).",a:000,{})\n"
-        \ "call setpos('.',l:pos)\n"
-        \ "retu ret\n"
-      \ "endfunc"
+  for ob in a:d
+    for key in keys(s:[ob])
+      exe "func s:".key."(...)\n"
+          \ "let l:pos = getpos('.')\n"
+          \ "let ret = call(s:".ob.'.'.key.",a:000,{})\n"
+          \ join(ob == '__' ? ['',''] : ["if ret is 0||ret is ''\n","endif\n"],"call setpos('.',l:pos)\n")
+          \ "retu ret\n"
+        \ "endfunc"
+    endfor
   endfor
   retu 'delfunc s:anon'
 endfunc
-
-let s:__ = {'__previous_token': 'previous_token', '__IsBlock': 'IsBlock'}
 
 function s:__.expr_col()
   if getline('.')[col('.')-2] == ':'
@@ -360,8 +360,8 @@ function s:IsBlock(...)
   endif
 endfunction
 
-exe s:anon(s:__)
-
+call extend(s:__, {'__previous_token': s:n0.previous_token, '__IsBlock': function('s:IsBlock')})
+exe s:anon(['__', 'n0'])
 
 function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
