@@ -167,8 +167,8 @@ function s:previous_token()
     else
       return s:token()
     endif
+    call setpos('.',l:pos)
   endif
-  call setpos('.',l:pos)
   return ''
 endfunction
 
