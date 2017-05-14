@@ -125,6 +125,8 @@ function s:skip_func()
   return s:checkIn
 endfunction
 
+let s:__ = {}
+
 function s:alternatePair()
   let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 3]
   while search('\m'.pat,'bW')
@@ -167,25 +169,32 @@ function s:previous_token()
     else
       return s:token()
     endif
+    call setpos('.',l:pos)
   endif
-  call setpos('.',l:pos)
   return ''
 endfunction
 
+function s:rdr(func)
+  exe '0verbose function s:'.a:func
+endfunction
 " creates (s:) scoped, stationary functions
-func s:anon(d)
-  for key in keys(a:d)
-    exe "func s:".key."(...)\n"
+function s:anon(d)
+  for key in keys(s:[a:d])
+    redir => func
+    silent call s:rdr(key[:1] == '__' ? s:[a:d][key] : (a:d.'.'.key))
+    redir END
+    let body = join(map(filter(split(func,"\n"),'v:val =~ "^\\s*\\d"'),'substitute(v:val,"^\\s*\\d*","","")'),"\n")
+    exe "func s:".key.matchstr(func,'\%^.\{-}\zs(.\{-})')."\n"
         \ "let l:pos = getpos('.')\n"
-        \ "let ret = call(".(key[:1] == '__' ? ('"s:'.a:d[key].'"') : ('s:__.'.key)).",a:000,{})\n"
+        \ "try\n"
+        \ .body."\n"
+        \ "finally\n"
         \ "call setpos('.',l:pos)\n"
-        \ "retu ret\n"
+        \ "endtry\n"
       \ "endfunc"
   endfor
-  retu 'delfunc s:anon'
-endfunc
-
-let s:__ = {'__previous_token': 'previous_token', '__IsBlock': 'IsBlock'}
+  return 'delfunc s:anon | delfunc s:rdr | unlet s:'.a:d
+endfunction
 
 function s:__.expr_col()
   if getline('.')[col('.')-2] == ':'
@@ -360,8 +369,8 @@ function s:IsBlock(...)
   endif
 endfunction
 
-exe s:anon(s:__)
-
+call extend(s:__, {'__previous_token': 'previous_token', '__IsBlock': 'IsBlock'})
+exe s:anon('__')
 
 function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
