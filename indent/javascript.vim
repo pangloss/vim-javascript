@@ -193,7 +193,7 @@ function s:anon(d)
         \ "endtry\n"
       \ "endfunc"
   endfor
-  return 'delfunc s:anon'
+  return 'delfunc s:anon | delfunc s:rdr'
 endfunction
 
 function s:__.expr_col()
