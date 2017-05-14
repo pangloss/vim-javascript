@@ -180,10 +180,10 @@ endfunction
 let s:rand = 0
 " creates (s:) scoped, stationary functions
 func s:anon(d)
-  for [key, Val] in items(s:[a:d])
+  for key in keys(s:[a:d])
     let func = ''
     redir => func
-    silent call s:rdr(type(Val) == type('') ? Val : (a:d.'.'.key))
+    silent call s:rdr(key[:1] == '__' ? s:[a:d][key] : (a:d.'.'.key))
     redir END
     let body = join(map(filter(split(func,"\n"),'v:val =~ "^\\s*\\d"'),'substitute(v:val,"^\\s*\\d*","","")'),"\n")
     exe "func s:".key.matchstr(func,'\%^.\{-}\zs(.\{-})')."\n"
