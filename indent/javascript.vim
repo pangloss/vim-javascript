@@ -188,7 +188,7 @@ func s:anon(d)
     exe "func s:".key.matchstr(func,'\%^.\{-}\zs(.\{-})')."\n"
         \ "let l:pos = getpos('.')\n"
         \ "try\n"
-        \ body."\n"
+        \ .body."\n"
         \ "finally\n"
         \ "call setpos('.',l:pos)\n"
         \ "endtry\n"
