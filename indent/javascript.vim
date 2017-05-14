@@ -180,7 +180,6 @@ endfunction
 " creates (s:) scoped, stationary functions
 func s:anon(d)
   for key in keys(s:[a:d])
-    let func = ''
     redir => func
     silent call s:rdr(key[:1] == '__' ? s:[a:d][key] : (a:d.'.'.key))
     redir END
