@@ -177,7 +177,6 @@ endfunction
 function s:rdr(func)
   exe '0verbose function s:'.a:func
 endfunction
-let s:rand = 0
 " creates (s:) scoped, stationary functions
 func s:anon(d)
   for key in keys(s:[a:d])
