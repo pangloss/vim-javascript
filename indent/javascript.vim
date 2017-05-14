@@ -193,7 +193,7 @@ function s:anon(d)
         \ "endtry\n"
       \ "endfunc"
   endfor
-  return 'delfunc s:anon | delfunc s:rdr'
+  return 'delfunc s:anon | delfunc s:rdr | unlet s:'.a:d
 endfunction
 
 function s:__.expr_col()
@@ -371,7 +371,6 @@ endfunction
 
 call extend(s:__, {'__previous_token': 'previous_token', '__IsBlock': 'IsBlock'})
 exe s:anon('__')
-unlet s:__
 
 function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
