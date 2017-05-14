@@ -178,7 +178,7 @@ function s:rdr(func)
   exe '0verbose function s:'.a:func
 endfunction
 " creates (s:) scoped, stationary functions
-func s:anon(d)
+function s:anon(d)
   for key in keys(s:[a:d])
     redir => func
     silent call s:rdr(key[:1] == '__' ? s:[a:d][key] : (a:d.'.'.key))
@@ -193,8 +193,8 @@ func s:anon(d)
         \ "endtry\n"
       \ "endfunc"
   endfor
-  retu 'delfunc s:anon'
-endfunc
+  return 'delfunc s:anon'
+endfunction
 
 function s:__.expr_col()
   if getline('.')[col('.')-2] == ':'
