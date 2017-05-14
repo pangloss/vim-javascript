@@ -172,20 +172,51 @@ function s:n0.previous_token()
   return ''
 endfunction
 
+" " creates (s:) scoped, stationary functions
+" func s:anon(d)
+"   for ob in a:d
+"     for key in keys(s:[ob])
+"       exe "func s:".key."(...)\n"
+"           \ "let l:pos = getpos('.')\n"
+"           \ "let ret = call(s:".ob.'.'.key.",a:000,{})\n"
+"           \ join(ob == '__' ? ['',''] : ["if ret is 0||ret is ''\n","endif\n"],"call setpos('.',l:pos)\n")
+"           \ "retu ret\n"
+"         \ "endfunc"
+"     endfor
+"   endfor
+"   retu 'delfunc s:anon'
+" endfunc
+
+function s:rdr(ob,key)
+  exe 'function s:'.a:ob.'.'.a:key
+endfunction
+let s:rand = 0
 " creates (s:) scoped, stationary functions
 func s:anon(d)
   for ob in a:d
     for key in keys(s:[ob])
+      let func = ''
+      redir => func
+      silent call s:rdr(ob,key)
+      redir END
+      let body = join(map(filter(split(func,"\n"),'v:val =~ "^\\s*\\d"'),'substitute(v:val,"^\\s*\\d*","","")'),"\n")
       exe "func s:".key."(...)\n"
-          \ "let l:pos = getpos('.')\n"
-          \ "let ret = call(s:".ob.'.'.key.",a:000,{})\n"
-          \ join(ob == '__' ? ['',''] : ["if ret is 0||ret is ''\n","endif\n"],"call setpos('.',l:pos)\n")
-          \ "retu ret\n"
+           \ "let l:pos = getpos('.')\n"
+           \ "let s:rand += 1\n"
+           \ "let l:rand = s:rand\n"
+           \ "func s:inFunc{l:rand}".matchstr(func,'\%^.\{-}\zs(.\{-})')."\n"
+              \ body."\n"
+           \ "endfunc\n"
+           \ "let ret = call('s:inFunc'.l:rand,a:000)\n"
+           \ "delfunc s:inFunc{l:rand}\n"
+           \ join(ob == '__' ? ['',''] : ["if ret is 0||ret is ''\n","endif\n"],"call setpos('.',l:pos)\n")
+           \ "return ret\n"
         \ "endfunc"
     endfor
   endfor
   retu 'delfunc s:anon'
 endfunc
+
 
 function s:__.expr_col()
   if getline('.')[col('.')-2] == ':'
@@ -334,7 +365,7 @@ function s:iscontOne(i,num,cont)
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
-function s:IsBlock(...)
+function s:n0.IsBlock(...)
   if a:0 || s:looking_at() == '{'
     let l:n = line('.')
     let char = s:previous_token()
@@ -360,8 +391,9 @@ function s:IsBlock(...)
   endif
 endfunction
 
-call extend(s:__, {'__previous_token': s:n0.previous_token, '__IsBlock': function('s:IsBlock')})
-exe s:anon(['__', 'n0'])
+call extend(s:__, {'__previous_token': s:n0.previous_token, '__IsBlock': s:n0.IsBlock})
+exe s:anon(['n0', '__'])
+unlet s:__ s:n0
 
 function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
