@@ -125,16 +125,16 @@ function s:skip_func()
   return s:checkIn
 endfunction
 
-let [s:__, s:n0] = [{}, {}]
+let s:__ = {}
 
-function s:n0.alternatePair()
-  let [pat, l:for] = ['[][(){};]', 3]
+function s:alternatePair()
+  let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 3]
   while search('\m'.pat,'bW')
     if s:skip_func() | continue | endif
     let idx = stridx('])};',s:looking_at())
     if idx is 3
       if l:for is 1
-        return s:GetPair('{','}','bW','s:skip_func()',2000) > 0
+        return s:GetPair('{','}','bW','s:skip_func()',2000) > 0 || setpos('.',l:pos)
       endif
       let [pat, l:for] = ['[{}();]', l:for - 1]
     elseif idx + 1
@@ -142,9 +142,10 @@ function s:n0.alternatePair()
         break
       endif
     else
-      return 1
+      return
     endif
   endwhile
+  call setpos('.',l:pos)
 endfunction
 
 function s:looking_at()
@@ -155,7 +156,7 @@ function s:token()
   return s:looking_at() =~ '\k' ? expand('<cword>') : s:looking_at()
 endfunction
 
-function s:n0.previous_token()
+function s:previous_token()
   let l:pos = getpos('.')
   if search('\m\k\{1,}\|\S','ebW')
     if (strpart(getline('.'),col('.')-2,2) == '*/' || line('.') != l:pos[1] &&
@@ -169,20 +170,30 @@ function s:n0.previous_token()
       return s:token()
     endif
   endif
+  call setpos('.',l:pos)
   return ''
 endfunction
 
+function s:rdr(func)
+  exe 'function s:'.a:func
+endfunction
+let s:rand = 0
 " creates (s:) scoped, stationary functions
 func s:anon(d)
-  for ob in a:d
-    for key in keys(s:[ob])
-      exe "func s:".key."(...)\n"
-          \ "let l:pos = getpos('.')\n"
-          \ "let ret = call(s:".ob.'.'.key.",a:000,{})\n"
-          \ join(ob == '__' ? ['',''] : ["if ret is 0||ret is ''\n","endif\n"],"call setpos('.',l:pos)\n")
-          \ "retu ret\n"
-        \ "endfunc"
-    endfor
+  for [key, Val] in items(s:[a:d])
+    let func = ''
+    redir => func
+    silent call s:rdr(type(Val) == type('') ? Val : (a:d.'.'.key))
+    redir END
+    let body = join(map(filter(split(func,"\n"),'v:val =~ "^\\s*\\d"'),'substitute(v:val,"^\\s*\\d*","","")'),"\n")
+    exe "func s:".key.matchstr(func,'\%^.\{-}\zs(.\{-})')."\n"
+        \ "let l:pos = getpos('.')\n"
+        \ "try\n"
+        \ body."\n"
+        \ "finally\n"
+        \ "call setpos('.',l:pos)\n"
+        \ "endtry\n"
+      \ "endfunc"
   endfor
   retu 'delfunc s:anon'
 endfunc
@@ -360,8 +371,9 @@ function s:IsBlock(...)
   endif
 endfunction
 
-call extend(s:__, {'__previous_token': s:n0.previous_token, '__IsBlock': function('s:IsBlock')})
-exe s:anon(['__', 'n0'])
+call extend(s:__, {'__previous_token': 'previous_token', '__IsBlock': 'IsBlock'})
+exe s:anon('__')
+unlet s:__
 
 function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
