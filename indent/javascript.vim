@@ -175,7 +175,7 @@ function s:previous_token()
 endfunction
 
 function s:rdr(func)
-  exe 'function s:'.a:func
+  exe '0verbose function s:'.a:func
 endfunction
 let s:rand = 0
 " creates (s:) scoped, stationary functions
