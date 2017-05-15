@@ -183,7 +183,7 @@ function s:anon(d)
     exe "func s:".key.matchstr(func,'\%^.\{-}\zs(.\{-})')."\n"
         \ "let l:pos = getpos('.')\n"
         \ "try"
-        \ .substitute(func,'\C\%(\n\|\%^\)\s*\%(end\)\=function\>[^\n]*\|\n\zs\s*\d\+','','g')
+        \ substitute(func,'\C\%(\n\|\%^\)\s*\%(end\)\=function\>[^\n]*\|\n\zs\s*\d\+','','g')
         \ "\nfinally\n"
         \ "call setpos('.',l:pos)\n"
         \ "endtry\n"
