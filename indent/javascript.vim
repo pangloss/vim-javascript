@@ -174,14 +174,11 @@ function s:previous_token()
   return ''
 endfunction
 
-function s:rdr(func)
-  exe '0verbose function s:'.a:func
-endfunction
 " creates (s:) scoped, stationary functions
 function s:anon(d)
   for key in keys(s:[a:d])
     redir => func
-    silent call s:rdr(key[:1] == '__' ? s:[a:d][key] : (a:d.'.'.key))
+    exe '0verbose silent function s:'.(key[:1] == '__' ? s:[a:d][key] : (a:d.'.'.key))
     redir END
     let body = join(map(filter(split(func,"\n"),'v:val =~ "^\\s*\\d"'),'substitute(v:val,"^\\s*\\d*","","")'),"\n")
     exe "func s:".key.matchstr(func,'\%^.\{-}\zs(.\{-})')."\n"
@@ -193,7 +190,7 @@ function s:anon(d)
         \ "endtry\n"
       \ "endfunc"
   endfor
-  return 'delfunc s:anon | delfunc s:rdr | unlet s:'.a:d
+  return 'delfunc s:anon | unlet s:'.a:d
 endfunction
 
 function s:__.expr_col()
