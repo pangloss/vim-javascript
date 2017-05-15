@@ -173,8 +173,8 @@ function s:previous_token()
 endfunction
 
 function s:__previous_token()
+  let l:pos = getpos('.')
   try
-    let l:pos = getpos('.')
     return s:previous_token()
   finally
     call setpos('.',l:pos)
@@ -182,8 +182,8 @@ function s:__previous_token()
 endfunction
 
 function s:__IsBlock()
+  let l:pos = getpos('.')
   try
-    let l:pos = getpos('.')
     return s:IsBlock()
   finally
     call setpos('.',l:pos)
@@ -191,8 +191,8 @@ function s:__IsBlock()
 endfunction
 
 function s:expr_col()
+  let l:pos = getpos('.')
   try
-    let l:pos = getpos('.')
     if getline('.')[col('.')-2] == ':'
       return 1
     endif
@@ -251,8 +251,8 @@ endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
 function s:PrevCodeLine(lnum)
+  let l:pos = getpos('.')
   try
-    let l:pos = getpos('.')
     let l:n = prevnonblank(a:lnum)
     while l:n
       if getline(l:n) =~ '^\s*\/[/*]'
@@ -311,8 +311,8 @@ function s:OneScope(lnum)
 endfunction
 
 function s:doWhile()
+  let l:pos = getpos('.')
   try
-    let l:pos = getpos('.')
     if expand('<cword>') ==# 'while'
       call search('\m\<','cbW')
       let bal = 0
