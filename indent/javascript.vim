@@ -125,8 +125,6 @@ function s:skip_func()
   return s:checkIn
 endfunction
 
-let s:__ = {}
-
 function s:alternatePair()
   let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 3]
   while search('\m'.pat,'bW')
@@ -174,43 +172,44 @@ function s:previous_token()
   return ''
 endfunction
 
-function s:rdr(func)
-  exe '0verbose function s:'.a:func
-endfunction
-" creates (s:) scoped, stationary functions
-function s:anon(d)
-  for key in keys(s:[a:d])
-    redir => func
-    silent call s:rdr(key[:1] == '__' ? s:[a:d][key] : (a:d.'.'.key))
-    redir END
-    let body = join(map(filter(split(func,"\n"),'v:val =~ "^\\s*\\d"'),'substitute(v:val,"^\\s*\\d*","","")'),"\n")
-    exe "func s:".key.matchstr(func,'\%^.\{-}\zs(.\{-})')."\n"
-        \ "let l:pos = getpos('.')\n"
-        \ "try\n"
-        \ .body."\n"
-        \ "finally\n"
-        \ "call setpos('.',l:pos)\n"
-        \ "endtry\n"
-      \ "endfunc"
-  endfor
-  return 'delfunc s:anon | delfunc s:rdr | unlet s:'.a:d
+function s:__previous_token()
+  try
+    let l:pos = getpos('.')
+    return s:previous_token()
+  finally
+    call setpos('.',l:pos)
+  endtry
 endfunction
 
-function s:__.expr_col()
-  if getline('.')[col('.')-2] == ':'
-    return 1
-  endif
-  let bal = 0
-  while bal < 1 && search('\m[{}?:;]','bW',s:scriptTag)
-    if eval(s:skip_expr) | continue | endif
-    " switch (looking_at())
-    exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
-          \ ';': "return",
-          \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
-          \ ':': "let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'",
-          \ '?': "let bal += 1" }[s:looking_at()]
-  endwhile
-  return max([bal,0])
+function s:__IsBlock()
+  try
+    let l:pos = getpos('.')
+    return s:IsBlock()
+  finally
+    call setpos('.',l:pos)
+  endtry
+endfunction
+
+function s:expr_col()
+  try
+    let l:pos = getpos('.')
+    if getline('.')[col('.')-2] == ':'
+      return 1
+    endif
+    let bal = 0
+    while bal < 1 && search('\m[{}?:;]','bW',s:scriptTag)
+      if eval(s:skip_expr) | continue | endif
+      " switch (looking_at())
+      exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
+            \ ';': "return",
+            \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
+            \ ':': "let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'",
+            \ '?': "let bal += 1" }[s:looking_at()]
+    endwhile
+    return max([bal,0])
+  finally
+    call setpos('.',l:pos)
+  endtry
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -251,24 +250,29 @@ function s:Trim(ln)
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
-function s:__.PrevCodeLine(lnum)
-  let l:n = prevnonblank(a:lnum)
-  while l:n
-    if getline(l:n) =~ '^\s*\/[/*]'
-      if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
-            \ s:syn_at(l:n,1) =~? b:syng_str
+function s:PrevCodeLine(lnum)
+  try
+    let l:pos = getpos('.')
+    let l:n = prevnonblank(a:lnum)
+    while l:n
+      if getline(l:n) =~ '^\s*\/[/*]'
+        if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
+              \ s:syn_at(l:n,1) =~? b:syng_str
+          break
+        endif
+        let l:n = prevnonblank(l:n-1)
+      elseif stridx(getline(l:n), '*/') + 1 && s:syn_at(l:n,1) =~? s:syng_com
+        call cursor(l:n,1)
+        keepjumps norm! [*
+        let l:n = search('\m\S','nbW')
+      else
         break
       endif
-      let l:n = prevnonblank(l:n-1)
-    elseif stridx(getline(l:n), '*/') + 1 && s:syn_at(l:n,1) =~? s:syng_com
-      call cursor(l:n,1)
-      keepjumps norm! [*
-      let l:n = search('\m\S','nbW')
-    else
-      break
-    endif
-  endwhile
-  return l:n
+    endwhile
+    return l:n
+  finally
+    call setpos('.',l:pos)
+  endtry
 endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
@@ -306,20 +310,25 @@ function s:OneScope(lnum)
         \ s:__previous_token() != '.' && !s:doWhile()
 endfunction
 
-function s:__.doWhile()
-  if expand('<cword>') ==# 'while'
-    call search('\m\<','cbW')
-    let bal = 0
-    while bal < 1 && search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
-      if eval(s:skip_expr) | continue | endif
-      " switch (looking_at())
-      exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
-            \  '{': "return",
-            \  'd': "let bal += s:__IsBlock(1)",
-            \  'w': "let bal -= s:__previous_token() != '.'" }[s:looking_at()]
-    endwhile
-    return max([bal,0])
-  endif
+function s:doWhile()
+  try
+    let l:pos = getpos('.')
+    if expand('<cword>') ==# 'while'
+      call search('\m\<','cbW')
+      let bal = 0
+      while bal < 1 && search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
+        if eval(s:skip_expr) | continue | endif
+        " switch (looking_at())
+        exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
+              \  '{': "return",
+              \  'd': "let bal += s:__IsBlock(1)",
+              \  'w': "let bal -= s:__previous_token() != '.'" }[s:looking_at()]
+      endwhile
+      return max([bal,0])
+    endif
+  finally
+    call setpos('.',l:pos)
+  endtry
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
@@ -369,8 +378,6 @@ function s:IsBlock(...)
   endif
 endfunction
 
-call extend(s:__, {'__previous_token': 'previous_token', '__IsBlock': 'IsBlock'})
-exe s:anon('__')
 
 function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
