@@ -174,19 +174,16 @@ function s:previous_token()
   return ''
 endfunction
 
-function s:rdr(func)
-  exe '0verbose function s:'.a:func
-endfunction
 " creates (s:) scoped, stationary functions
 function s:anon(d)
   for key in keys(s:[a:d])
-    redir => func
-    silent call s:rdr(key[:1] == '__' ? s:[a:d][key] : (a:d.'.'.key))
+    redir => l:func
+    exe '0verbose silent function s:'.(key[:1] == '__' ? s:[a:d][key] : (a:d.'.'.key))
     redir END
-    exe "func s:".key.matchstr(func,'\%^.\{-}\zs(.\{-})')."\n"
+    exe "func s:".key.matchstr(l:func,'\%^.\{-}\zs(.\{-})')."\n"
         \ "let l:pos = getpos('.')\n"
         \ "try"
-        \ substitute(func,'\C\%(\n\|\%^\)\s*\%(end\)\=function\>[^\n]*\|\n\zs\s*\d\+','','g')
+        \ substitute(l:func,'\C\%(\n\|\%^\)\s*\%(end\)\=function\>[[:print:]]*\|\n\zs\s*\d\+\s*','','g')
         \ "\nfinally\n"
         \ "call setpos('.',l:pos)\n"
         \ "endtry\n"
