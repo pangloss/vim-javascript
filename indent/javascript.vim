@@ -184,7 +184,7 @@ function s:anon(d)
         \ "let l:pos = getpos('.')\n"
         \ "try\n"
         \ .substitute(func,'\C\n\=\s*\%(end\)\=function\>[^\n]*\|\n\zs\s*\d\+','','g')
-        \ ."\nfinally\n"
+        \ "\nfinally\n"
         \ "call setpos('.',l:pos)\n"
         \ "endtry\n"
       \ "endfunc"
