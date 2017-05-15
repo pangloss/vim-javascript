@@ -180,12 +180,11 @@ function s:anon(d)
     redir => func
     exe '0verbose silent function s:'.(key[:1] == '__' ? s:[a:d][key] : (a:d.'.'.key))
     redir END
-    let body = join(map(filter(split(func,"\n"),'v:val =~ "^\\s*\\d"'),'substitute(v:val,"^\\s*\\d*","","")'),"\n")
     exe "func s:".key.matchstr(func,'\%^.\{-}\zs(.\{-})')."\n"
         \ "let l:pos = getpos('.')\n"
         \ "try\n"
-        \ .body."\n"
-        \ "finally\n"
+        \ .substitute(func,'\C\n\=\s*\%(end\)\=function\>[^\n]*\|\n\zs\s*\d\+','','g')
+        \ ."\nfinally\n"
         \ "call setpos('.',l:pos)\n"
         \ "endtry\n"
       \ "endfunc"
