@@ -240,28 +240,25 @@ endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
 function s:PrevCodeLine(lnum)
-  let l:pos = getpos('.')
-  try
-    let l:n = prevnonblank(a:lnum)
-    while l:n
-      if getline(l:n) =~ '^\s*\/[/*]'
-        if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
-              \ s:syn_at(l:n,1) =~? b:syng_str
-          break
-        endif
-        let l:n = prevnonblank(l:n-1)
-      elseif stridx(getline(l:n), '*/') + 1 && s:syn_at(l:n,1) =~? s:syng_com
-        call cursor(l:n,1)
-        keepjumps norm! [*
-        let l:n = search('\m\S','nbW')
-      else
+  let l:n = prevnonblank(a:lnum)
+  while l:n
+    if getline(l:n) =~ '^\s*\/[/*]'
+      if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
+            \ s:syn_at(l:n,1) =~? b:syng_str
         break
       endif
-    endwhile
-    return l:n
-  finally
-    call setpos('.',l:pos)
-  endtry
+      let l:n = prevnonblank(l:n-1)
+    elseif stridx(getline(l:n), '*/') + 1 && s:syn_at(l:n,1) =~? s:syng_com
+      let l:pos = getpos('.')
+      call cursor(l:n,1)
+      keepjumps norm! [*
+      let l:n = search('\m\S','nbW')
+      call setpos('.',l:pos)
+    else
+      break
+    endif
+  endwhile
+  return l:n
 endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
