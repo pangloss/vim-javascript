@@ -172,23 +172,16 @@ function s:previous_token()
   return ''
 endfunction
 
-function s:__previous_token()
-  let l:pos = getpos('.')
-  try
-    return s:previous_token()
-  finally
-    call setpos('.',l:pos)
-  endtry
-endfunction
-
-function s:__IsBlock()
-  let l:pos = getpos('.')
-  try
-    return s:IsBlock()
-  finally
-    call setpos('.',l:pos)
-  endtry
-endfunction
+for s:__ in ['__previous_token','__IsBlock']
+  function s:{s:__}()
+    let l:pos = getpos('.')
+    try
+      return s:{matchstr(expand('<sfile>'),'.*__\zs\w\+')}()
+    finally
+      call setpos('.',l:pos)
+    endtry
+  endfunction
+endfor
 
 function s:expr_col()
   let l:pos = getpos('.')
@@ -201,7 +194,6 @@ function s:expr_col()
       if eval(s:skip_expr) | continue | endif
       " switch (looking_at())
       exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
-            \ ';': "return",
             \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
             \ ':': "let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'",
             \ '?': "let bal += 1" }[s:looking_at()]
@@ -320,7 +312,6 @@ function s:doWhile()
         if eval(s:skip_expr) | continue | endif
         " switch (looking_at())
         exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
-              \  '{': "return",
               \  'd': "let bal += s:__IsBlock(1)",
               \  'w': "let bal -= s:__previous_token() != '.'" }[s:looking_at()]
       endwhile
