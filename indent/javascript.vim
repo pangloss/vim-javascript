@@ -184,11 +184,10 @@ for s:__ in ['__previous_token','__IsBlock']
 endfor
 
 function s:expr_col()
-  let l:pos = getpos('.')
   if getline('.')[col('.')-2] == ':'
     return 1
   endif
-  let bal = 0
+  let [bal, l:pos] = [0, getpos('.')]
   while bal < 1 && search('\m[{}?:;]','bW',s:scriptTag)
     if eval(s:skip_expr) | continue | endif
     " switch (looking_at())
@@ -298,9 +297,8 @@ endfunction
 
 function s:doWhile()
   if expand('<cword>') ==# 'while'
-    let l:pos = getpos('.')
+    let [bal, l:pos] = [0, getpos('.')]
     call search('\m\<','cbW')
-    let bal = 0
     while bal < 1 && search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
       if eval(s:skip_expr) | continue | endif
       " switch (looking_at())
