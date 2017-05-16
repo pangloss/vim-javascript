@@ -256,8 +256,7 @@ function s:PrevCodeLine(lnum)
     elseif stridx(getline(l:n), '*/') + 1 && s:syn_at(l:n,1) =~? s:syng_com
       let l:pos = getpos('.')
       call cursor(l:n,1)
-      keepjumps norm! [*
-      let l:n = search('\m\S','nbW')
+      let l:n = search('\m\S\_s*\/\*','nbW')
       call setpos('.',l:pos)
     else
       break
