@@ -173,10 +173,10 @@ function s:previous_token()
 endfunction
 
 for s:__ in ['__previous_token','__IsBlock']
-  function s:{s:__}()
+  function s:{s:__}(...)
     let l:pos = getpos('.')
     try
-      return s:{matchstr(expand('<sfile>'),'.*__\zs\w\+')}()
+      return call('s:'.matchstr(expand('<sfile>'),'.*__\zs\w\+'),a:000)
     finally
       call setpos('.',l:pos)
     endtry
@@ -185,23 +185,20 @@ endfor
 
 function s:expr_col()
   let l:pos = getpos('.')
-  try
-    if getline('.')[col('.')-2] == ':'
-      return 1
-    endif
-    let bal = 0
-    while bal < 1 && search('\m[{}?:;]','bW',s:scriptTag)
-      if eval(s:skip_expr) | continue | endif
-      " switch (looking_at())
-      exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
-            \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
-            \ ':': "let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'",
-            \ '?': "let bal += 1" }[s:looking_at()]
-    endwhile
-    return max([bal,0])
-  finally
-    call setpos('.',l:pos)
-  endtry
+  if getline('.')[col('.')-2] == ':'
+    return 1
+  endif
+  let bal = 0
+  while bal < 1 && search('\m[{}?:;]','bW',s:scriptTag)
+    if eval(s:skip_expr) | continue | endif
+    " switch (looking_at())
+    exe {   '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
+          \ '{': "return getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()",
+          \ ':': "let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'",
+          \ '?': "let bal += 1" }[s:looking_at()]
+  endwhile
+  call setpos('.',l:pos)
+  return max([bal,0])
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -304,22 +301,19 @@ endfunction
 
 function s:doWhile()
   let l:pos = getpos('.')
-  try
-    if expand('<cword>') ==# 'while'
-      call search('\m\<','cbW')
-      let bal = 0
-      while bal < 1 && search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
-        if eval(s:skip_expr) | continue | endif
-        " switch (looking_at())
-        exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
-              \  'd': "let bal += s:__IsBlock(1)",
-              \  'w': "let bal -= s:__previous_token() != '.'" }[s:looking_at()]
-      endwhile
-      return max([bal,0])
-    endif
-  finally
+  if expand('<cword>') ==# 'while'
+    call search('\m\<','cbW')
+    let bal = 0
+    while bal < 1 && search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
+      if eval(s:skip_expr) | continue | endif
+      " switch (looking_at())
+      exe {    '}': "if s:GetPair('{','}','bW',s:skip_expr,200) < 1 | return | endif",
+            \  'd': "let bal += s:__IsBlock(1)",
+            \  'w': "let bal -= s:__previous_token() != '.'" }[s:looking_at()]
+    endwhile
     call setpos('.',l:pos)
-  endtry
+    return max([bal,0])
+  endif
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
