@@ -300,8 +300,8 @@ function s:OneScope(lnum)
 endfunction
 
 function s:doWhile()
-  let l:pos = getpos('.')
   if expand('<cword>') ==# 'while'
+    let l:pos = getpos('.')
     call search('\m\<','cbW')
     let bal = 0
     while bal < 1 && search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
