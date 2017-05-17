@@ -126,22 +126,29 @@ function s:skip_func()
 endfunction
 
 function s:alternatePair()
-  let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 3]
+  let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 2]
   while search('\m'.pat,'bW')
-    if s:skip_func() | continue | endif
-    let idx = stridx('])};',s:looking_at())
-    if idx is 3
-      if l:for is 1
-        return s:GetPair('{','}','bW','s:skip_func()',2000) > 0 || setpos('.',l:pos)
+    if s:skip_func()
+      continue
+    endif
+    let tok = s:looking_at()
+    if tok == ';'
+      if !l:for
+        if s:GetPair('{','}','bW','s:skip_func()',2000) > 0
+          return
+        endif
+      else
+        let [pat, l:for] = ['[{}();]', l:for - 1]
+        continue
       endif
-      let [pat, l:for] = ['[{}();]', l:for - 1]
-    elseif idx + 1
-      if s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000) < 1
-        break
+    elseif tok =~ '[])}]'
+      if s:GetPair(escape(tr(tok,'])}','[({'),'['), tok,'bW','s:skip_func()',2000) > 0
+        continue
       endif
     else
       return
     endif
+    break
   endwhile
   call setpos('.',l:pos)
 endfunction
@@ -185,15 +192,16 @@ for s:__ in ['__previous_token','__IsBlock']
 endfor
 
 function s:expr_col()
-  if getline('.')[col('.')-2] == ':'
-    return 1
-  endif
   let [bal, l:pos] = [0, getpos('.')]
   while bal < 1 && search('\m[{}?:;]','bW',s:scriptTag)
     if eval(s:skip_expr)
       continue
     elseif s:looking_at() == ':'
-      let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'
+      if getpos('.')[1:2] == [l:pos[1],l:pos[2]-1]
+        let bal = 1
+      else
+        let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'
+      endif
     elseif s:looking_at() == '?'
       let bal += 1
     elseif s:looking_at() == '{' && getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()
@@ -213,14 +221,14 @@ let s:continuation = get(g:,'javascript_continuation',
       \ '\C\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\)\)') . '$'
 
 function s:continues(ln,con)
-  let token = matchstr(a:con[-15:],s:continuation)
-  if strlen(token)
+  let tok = matchstr(a:con[-15:],s:continuation)
+  if strlen(tok)
     call cursor(a:ln,strlen(a:con))
-    if token =~ '[/>]'
-      return s:syn_at(a:ln,col('.')) !~? (token == '>' ? 'jsflow\|^html' : 'regex')
-    elseif token =~ '\l'
+    if tok =~ '[/>]'
+      return s:syn_at(a:ln,col('.')) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
+    elseif tok =~ '\l'
       return s:previous_token() != '.'
-    elseif token == ':'
+    elseif tok == ':'
       return s:expr_col()
     endif
     return 1
@@ -339,26 +347,26 @@ endfunction
 function s:IsBlock(...)
   if a:0 || s:looking_at() == '{'
     let l:n = line('.')
-    let char = s:previous_token()
+    let tok = s:previous_token()
     if match(s:stack,'\cxml\|jsx') + 1 && s:syn_at(line('.'),col('.')-1) =~? 'xml\|jsx'
-      return char != '{'
-    elseif char =~ '\k'
-      if char ==# 'type'
+      return tok != '{'
+    elseif tok =~ '\k'
+      if tok ==# 'type'
         return s:__previous_token() !~# '^\%(im\|ex\)port$'
       endif
       return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
-            \ ,char) < (line('.') != l:n) || s:__previous_token() == '.'
-    elseif char == '>'
+            \ ,tok) < (line('.') != l:n) || s:__previous_token() == '.'
+    elseif tok == '>'
       return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? 'jsflow\|^html'
-    elseif char == '*'
+    elseif tok == '*'
       return s:__previous_token() == ':'
-    elseif char == ':'
+    elseif tok == ':'
       return !s:expr_col()
-    elseif char == '/'
+    elseif tok == '/'
       return s:syn_at(line('.'),col('.')) =~? 'regex'
     endif
-    return char !~ '[=~!<,.?^%|&([]' &&
-          \ (char !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == char)
+    return tok !~ '[=~!<,.?^%|&([]' &&
+          \ (tok !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == tok)
   endif
 endfunction
 
