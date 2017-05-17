@@ -192,15 +192,16 @@ for s:__ in ['__previous_token','__IsBlock']
 endfor
 
 function s:expr_col()
-  if getline('.')[col('.')-2] == ':'
-    return 1
-  endif
   let [bal, l:pos] = [0, getpos('.')]
   while bal < 1 && search('\m[{}?:;]','bW',s:scriptTag)
     if eval(s:skip_expr)
       continue
     elseif s:looking_at() == ':'
-      let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'
+      if getpos('.')[1:2] == [l:pos[1],l:pos[2]-1]
+        let bal = 1
+      else
+        let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'
+      endif
     elseif s:looking_at() == '?'
       let bal += 1
     elseif s:looking_at() == '{' && getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()
