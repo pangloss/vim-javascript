@@ -126,12 +126,12 @@ function s:skip_func()
 endfunction
 
 function s:alternatePair()
-  let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 3]
+  let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 2]
   while search('\m'.pat,'bW')
     if s:skip_func() | continue | endif
     let idx = s:looking_at()
     if idx == ';'
-      if l:for == 1
+      if !l:for
         if s:GetPair('{','}','bW','s:skip_func()',2000) > 0
           return
         endif
