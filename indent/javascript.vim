@@ -210,7 +210,7 @@ endfunction
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\C\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
-      \ '\C\%([<>=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\)\)') . '$'
+      \ '\C\%([<>=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\)\)') . '$'
 
 function s:continues(ln,con)
   let token = matchstr(a:con,s:continuation)
@@ -219,7 +219,7 @@ function s:continues(ln,con)
     if token == '/'
       return s:syn_at(line('.'),col('.')) !~? 'regex'
     elseif token == '>'
-      return getline('.')[col('.')-2] != '=' && s:syn_at(line('.'),col('.')) !~? 'jsflow\|^html'
+      return s:syn_at(line('.'),col('.')) !~? 'jsflow\|^html'
     elseif token =~ '\l'
       return s:previous_token() != '.'
     elseif token == ':'
