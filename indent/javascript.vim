@@ -129,19 +129,24 @@ function s:alternatePair()
   let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 3]
   while search('\m'.pat,'bW')
     if s:skip_func() | continue | endif
-    let idx = stridx('])};',s:looking_at())
-    if idx is 3
-      if l:for is 1
-        return s:GetPair('{','}','bW','s:skip_func()',2000) > 0 || setpos('.',l:pos)
+    let idx = s:looking_at()
+    if idx == ';'
+      if l:for == 1
+        if s:GetPair('{','}','bW','s:skip_func()',2000) > 0
+          return
+        endif
+      else
+        let [pat, l:for] = ['[{}();]', l:for - 1]
+        continue
       endif
-      let [pat, l:for] = ['[{}();]', l:for - 1]
-    elseif idx + 1
-      if s:GetPair(['\[','(','{'][idx], '])}'[idx],'bW','s:skip_func()',2000) < 1
-        break
+    elseif idx =~ '[])}]'
+      if s:GetPair(escape(tr(idx,'])}','[({'),'['), idx,'bW','s:skip_func()',2000) > 0
+        continue
       endif
     else
       return
     endif
+    break
   endwhile
   call setpos('.',l:pos)
 endfunction
