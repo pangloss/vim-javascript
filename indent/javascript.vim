@@ -217,7 +217,7 @@ function s:continues(ln,con)
   if strlen(token)
     call cursor(a:ln,strlen(a:con))
     if token =~ '[/>]'
-      return s:syn_at(line('.'),col('.')) !~? (token == '>' ? 'jsflow\|^html' : 'regex')
+      return s:syn_at(a:ln,col('.')) !~? (token == '>' ? 'jsflow\|^html' : 'regex')
     elseif token =~ '\l'
       return s:previous_token() != '.'
     elseif token == ':'
