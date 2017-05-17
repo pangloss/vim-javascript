@@ -210,22 +210,17 @@ endfunction
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
       \ '\C\%([<>=,?^%|*/&]\|\([-.:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
-      \ '\C\%([-+<>=,.~!?/*^%|&:]\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\)\)') . '$'
+      \ '\C\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\)\)') . '$'
 
 function s:continues(ln,con)
-  let tpos = match(' '.a:con,s:continuation)
-  if tpos > -1
-    call cursor(a:ln,tpos)
-    let teol = s:looking_at()
-    if teol == '/'
-      return s:syn_at(line('.'),col('.')) !~? 'regex'
-    elseif teol == '>'
-      return getline('.')[col('.')-2] != '=' && s:syn_at(line('.'),col('.')) !~? 'jsflow\|^html'
-    elseif teol =~ '[-+]'
-      return getline('.')[col('.')-2] != teol
-    elseif teol =~ '\l'
+  let token = matchstr(a:con[-15:],s:continuation)
+  if strlen(token)
+    call cursor(a:ln,strlen(a:con))
+    if token =~ '[/>]'
+      return s:syn_at(a:ln,col('.')) !~? (token == '>' ? 'jsflow\|^html' : 'regex')
+    elseif token =~ '\l'
       return s:previous_token() != '.'
-    elseif teol == ':'
+    elseif token == ':'
       return s:expr_col()
     endif
     return 1
