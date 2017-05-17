@@ -226,7 +226,7 @@ function s:continues(ln,con)
     if tok =~ '[/>]'
       return s:syn_at(a:ln,col('.')) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
     elseif tok =~ '\l'
-      return s:previous_tok() != '.'
+      return s:previous_token() != '.'
     elseif tok == ':'
       return s:expr_col()
     endif
