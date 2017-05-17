@@ -128,9 +128,11 @@ endfunction
 function s:alternatePair()
   let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 2]
   while search('\m'.pat,'bW')
-    if s:skip_func() | continue | endif
-    let idx = s:looking_at()
-    if idx == ';'
+    if s:skip_func()
+      continue
+    endif
+    let tok = s:looking_at()
+    if tok == ';'
       if !l:for
         if s:GetPair('{','}','bW','s:skip_func()',2000) > 0
           return
@@ -139,8 +141,8 @@ function s:alternatePair()
         let [pat, l:for] = ['[{}();]', l:for - 1]
         continue
       endif
-    elseif idx =~ '[])}]'
-      if s:GetPair(escape(tr(idx,'])}','[({'),'['), idx,'bW','s:skip_func()',2000) > 0
+    elseif tok =~ '[])}]'
+      if s:GetPair(escape(tr(tok,'])}','[({'),'['), tok,'bW','s:skip_func()',2000) > 0
         continue
       endif
     else
