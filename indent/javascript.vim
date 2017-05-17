@@ -216,10 +216,8 @@ function s:continues(ln,con)
   let token = matchstr(a:con[-15:],s:continuation)
   if strlen(token)
     call cursor(a:ln,strlen(a:con))
-    if token == '/'
-      return s:syn_at(line('.'),col('.')) !~? 'regex'
-    elseif token == '>'
-      return s:syn_at(line('.'),col('.')) !~? 'jsflow\|^html'
+    if token =~ '[/>]'
+      return s:syn_at(line('.'),col('.')) !~? (token == '>' ? 'jsflow\|^html' : 'regex')
     elseif token =~ '\l'
       return s:previous_token() != '.'
     elseif token == ':'
