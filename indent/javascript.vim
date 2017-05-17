@@ -213,7 +213,7 @@ let s:continuation = get(g:,'javascript_continuation',
       \ '\C\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\)\)') . '$'
 
 function s:continues(ln,con)
-  let token = matchstr(a:con[-12:],s:continuation)
+  let token = matchstr(a:con[-15:],s:continuation)
   if strlen(token)
     call cursor(a:ln,strlen(a:con))
     if token == '/'
