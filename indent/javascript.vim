@@ -128,11 +128,10 @@ endfunction
 function s:alternatePair()
   let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 2]
   while search('\m'.pat,'bW')
-    if s:skip_func()
+    let tok = s:skip_func() ? '' : s:looking_at()
+    if tok is ''
       continue
-    endif
-    let tok = s:looking_at()
-    if tok == ';'
+    elseif tok == ';'
       if !l:for
         if s:GetPair('{','}','bW','s:skip_func()',2000) > 0
           return
@@ -194,19 +193,20 @@ endfor
 function s:expr_col()
   let [bal, l:pos] = [0, getpos('.')]
   while bal < 1 && search('\m[{}?:;]','bW',s:scriptTag)
-    if eval(s:skip_expr)
+    let tok = eval(s:skip_expr) ? '' : s:looking_at()
+    if tok is ''
       continue
-    elseif s:looking_at() == ':'
+    elseif tok == ':'
       if getpos('.')[1:2] == [l:pos[1],l:pos[2]-1]
         let bal = 1
       else
         let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'
       endif
-    elseif s:looking_at() == '?'
+    elseif tok == '?'
       let bal += 1
-    elseif s:looking_at() == '{' && getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()
+    elseif tok == '{' && getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()
       let bal = 1
-    elseif s:looking_at() != '}' || s:GetPair('{','}','bW',s:skip_expr,200) < 1
+    elseif tok != '}' || s:GetPair('{','}','bW',s:skip_expr,200) < 1
       break
     endif
   endwhile
@@ -308,13 +308,14 @@ function s:doWhile()
     let [bal, l:pos] = [0, getpos('.')]
     call search('\m\<','cbW')
     while bal < 1 && search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
-      if eval(s:skip_expr)
+      let tok = eval(s:skip_expr) ? '' : s:looking_at()
+      if tok is ''
         continue
-      elseif s:looking_at() ==# 'd'
+      elseif tok ==# 'd'
         let bal += s:__IsBlock(1)
-      elseif s:looking_at() ==# 'w'
+      elseif tok ==# 'w'
         let bal -= s:__previous_token() != '.'
-      elseif s:looking_at() != '}' || s:GetPair('{','}','bW',s:skip_expr,200) < 1
+      elseif tok != '}' || s:GetPair('{','}','bW',s:skip_expr,200) < 1
         break
       endif
     endwhile
