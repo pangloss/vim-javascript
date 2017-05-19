@@ -222,7 +222,7 @@ let s:continuation = get(g:,'javascript_continuation',
 
 function s:continues(ln,con)
   let tok = matchstr(a:con[-15:],s:continuation)
-  if isnot ''
+  if tok isnot ''
     call cursor(a:ln,strlen(a:con))
     if tok =~ '[/>]'
       return s:syn_at(a:ln,col('.')) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
