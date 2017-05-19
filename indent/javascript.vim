@@ -222,7 +222,7 @@ let s:continuation = get(g:,'javascript_continuation',
 
 function s:continues(ln,con)
   let tok = matchstr(a:con[-15:],s:continuation)
-  if strlen(tok)
+  if isnot ''
     call cursor(a:ln,strlen(a:con))
     if tok =~ '[/>]'
       return s:syn_at(a:ln,col('.')) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
@@ -430,10 +430,11 @@ function GetJavascriptIndent()
 
   let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
   if !b:js_cache[2] || s:IsBlock()
-    let ilnum = line('.')
-    let pline = s:Trim(l:lnum)
+    let [ilnum, pline] = [line('.'), s:Trim(l:lnum)]
     if b:js_cache[2] && s:looking_at() == ')' && s:GetPair('(',')','bW',s:skip_expr,100) > 0
-      let num = ilnum == num ? line('.') : num
+      if ilnum == num
+        let num = line('.')
+      endif
       if idx < 0 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
         let switch_offset = &cino !~ ':' ? s:W : max([-indent(num),s:parse_cino(':')])
         if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
