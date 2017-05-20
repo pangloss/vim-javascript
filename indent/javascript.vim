@@ -436,9 +436,10 @@ function GetJavascriptIndent()
         let num = line('.')
       endif
       if idx < 0 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
-        let switch_offset = &cino !~ ':' ? s:W : max([-indent(num),s:parse_cino(':')])
+        let switch_offset = &cino !~ ':' ? s:W : s:parse_cino(':')
+        let case_offset = s:parse_cino('=')
         if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
-          return indent(num) + switch_offset
+          return max([indent(num) + switch_offset, 0])
         endif
       endif
     endif
@@ -458,7 +459,7 @@ function GetJavascriptIndent()
   if l:line =~ '^[])}]\|^|}'
     return max([indent(num),0])
   elseif num
-    return indent(num) + s:W + switch_offset + bL + isOp
+    return max([indent(num) + get(l:,'case_offset',s:W) + switch_offset + bL + isOp, 0])
   endif
   return bL + isOp
 endfunction
