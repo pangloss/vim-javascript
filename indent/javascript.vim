@@ -453,7 +453,7 @@ function GetJavascriptIndent()
     let pval = s:parse_cino('(')
     return !pval || !search('\m\S','nbW',num) && !s:parse_cino('U') ?
           \ (s:parse_cino('w') ? 0 : -!!search('\m\S','W'.s:z,num)) + virtcol('.') :
-          \ max([indent('.') + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:W,0])
+          \ max([numInd + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:W,0])
   endif
 
   " main return
