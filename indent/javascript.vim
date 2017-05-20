@@ -428,7 +428,7 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [s:scriptTag,0] : getpos('.')[1:2])
   let num = b:js_cache[1]
 
-  let [s:W, numInD, isOp, bL, l:switch_offset] = [s:sw(), max([indent(num),0]),0,0,0]
+  let [s:W, numInd, isOp, bL, l:switch_offset] = [s:sw(), max([indent(num),0]),0,0,0]
   if !b:js_cache[2] || s:IsBlock()
     let [ilnum, pline] = [line('.'), s:Trim(l:lnum)]
     if b:js_cache[2] && s:looking_at() == ')' && s:GetPair('(',')','bW',s:skip_expr,100) > 0
@@ -457,7 +457,7 @@ function GetJavascriptIndent()
 
   " main return
   if l:line =~ '^[])}]\|^|}'
-    return max([numInd,0])
+    return numInd
   elseif num
     return max([numInd + get(l:,'case_offset',s:W) + l:switch_offset + bL + isOp, 0])
   endif
