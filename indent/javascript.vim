@@ -84,9 +84,9 @@ function s:parse_cino(f)
   if cin == -1
     return
   endif
-  let [sign, cstr] = &cino[cin+1] ==# '-' ? [-1, &cino[cin+2:]] : [1, &cino[cin+1:]]
+  let [sign, cstr] = &cino[cin+1] == '-' ? [-1, &cino[cin+2:]] : [1, &cino[cin+1:]]
   for c in split(cstr,'\zs')
-    if c ==# '.' && !divider
+    if c == '.' && !divider
       let divider = 1
     elseif c ==# 's'
       if n is ''
@@ -204,7 +204,7 @@ function s:expr_col()
       endif
     elseif tok == '?'
       let bal += 1
-    elseif tok == '{' && getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()
+    elseif tok == '{' && !s:IsBlock()
       let bal = 1
     elseif tok != '}' || s:GetPair('{','}','bW',s:skip_expr,200) < 1
       break
@@ -222,7 +222,7 @@ let s:continuation = get(g:,'javascript_continuation',
 
 function s:continues(ln,con)
   let tok = matchstr(a:con[-15:],s:continuation)
-  if strlen(tok)
+  if tok isnot ''
     call cursor(a:ln,strlen(a:con))
     if tok =~ '[/>]'
       return s:syn_at(a:ln,col('.')) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
@@ -428,16 +428,19 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [s:scriptTag,0] : getpos('.')[1:2])
   let num = b:js_cache[1]
 
-  let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
+  let [s:W, numInd, isOp, bL, l:switch_offset] = [s:sw(), max([indent(num),0]),0,0,0]
   if !b:js_cache[2] || s:IsBlock()
-    let ilnum = line('.')
-    let pline = s:Trim(l:lnum)
+    let [ilnum, pline] = [line('.'), s:Trim(l:lnum)]
     if b:js_cache[2] && s:looking_at() == ')' && s:GetPair('(',')','bW',s:skip_expr,100) > 0
-      let num = ilnum == num ? line('.') : num
+      if ilnum == num
+        let [num, numInd] = [line('.'), indent('.')]
+      endif
       if idx < 0 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
-        let switch_offset = &cino !~ ':' ? s:W : max([-indent(num),s:parse_cino(':')])
+        let l:switch_offset = &cino !~ ':' ? s:W : s:parse_cino(':')
         if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
-          return indent(num) + switch_offset
+          return max([numInd + l:switch_offset, 0])
+        elseif &cino =~ '='
+          let l:case_offset = s:parse_cino('=')
         endif
       endif
     endif
@@ -450,14 +453,14 @@ function GetJavascriptIndent()
     let pval = s:parse_cino('(')
     return !pval || !search('\m\S','nbW',num) && !s:parse_cino('U') ?
           \ (s:parse_cino('w') ? 0 : -!!search('\m\S','W'.s:z,num)) + virtcol('.') :
-          \ max([indent('.') + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:W,0])
+          \ max([numInd + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:W,0])
   endif
 
   " main return
   if l:line =~ '^[])}]\|^|}'
-    return max([indent(num),0])
+    return numInd
   elseif num
-    return indent(num) + s:W + switch_offset + bL + isOp
+    return max([numInd + get(l:,'case_offset',s:W) + l:switch_offset + bL + isOp, 0])
   endif
   return bL + isOp
 endfunction
