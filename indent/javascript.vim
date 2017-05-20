@@ -84,9 +84,9 @@ function s:parse_cino(f)
   if cin == -1
     return
   endif
-  let [sign, cstr] = &cino[cin+1] ==# '-' ? [-1, &cino[cin+2:]] : [1, &cino[cin+1:]]
+  let [sign, cstr] = &cino[cin+1] == '-' ? [-1, &cino[cin+2:]] : [1, &cino[cin+1:]]
   for c in split(cstr,'\zs')
-    if c ==# '.' && !divider
+    if c == '.' && !divider
       let divider = 1
     elseif c ==# 's'
       if n is ''
