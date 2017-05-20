@@ -436,8 +436,14 @@ function GetJavascriptIndent()
       let num = ilnum == num ? line('.') : num
       if idx < 0 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
         let switch_offset = &cino !~ ':' ? s:W : max([-indent(num),s:parse_cino(':')])
+        let case_offset   = &cino !~ '=' ? s:W : max([-indent(num),s:parse_cino('=')])
         if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
           return indent(num) + switch_offset
+        elseif pline[-1:] != '.'
+            return indent(num) + switch_offset + case_offset
+        else
+            " previous line finish with a .
+            return indent(num) + s:W + switch_offset + case_offset
         endif
       endif
     endif
