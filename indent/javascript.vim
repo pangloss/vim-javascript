@@ -428,18 +428,18 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [s:scriptTag,0] : getpos('.')[1:2])
   let num = b:js_cache[1]
 
-  let [s:W, isOp, bL, switch_offset] = [s:sw(),0,0,0]
+  let [s:W, numInD, isOp, bL, l:switch_offset] = [s:sw(), max([indent(num),0]),0,0,0]
   if !b:js_cache[2] || s:IsBlock()
     let [ilnum, pline] = [line('.'), s:Trim(l:lnum)]
     if b:js_cache[2] && s:looking_at() == ')' && s:GetPair('(',')','bW',s:skip_expr,100) > 0
       if ilnum == num
-        let num = line('.')
+        let [num, numInd] = [line('.'), indent('.')]
       endif
       if idx < 0 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
-        let switch_offset = &cino !~ ':' ? s:W : s:parse_cino(':')
-        let case_offset = &cino !~ '=' ? s:W : s:parse_cino('=')
+        let l:switch_offset = &cino !~ ':' ? s:W : s:parse_cino(':')
+        let l:case_offset = &cino !~ '=' ? s:W : s:parse_cino('=')
         if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
-          return max([indent(num) + switch_offset, 0])
+          return max([numInd + l:switch_offset, 0])
         endif
       endif
     endif
@@ -457,9 +457,9 @@ function GetJavascriptIndent()
 
   " main return
   if l:line =~ '^[])}]\|^|}'
-    return max([indent(num),0])
+    return max([numInd,0])
   elseif num
-    return max([indent(num) + get(l:,'case_offset',s:W) + switch_offset + bL + isOp, 0])
+    return max([numInd + get(l:,'case_offset',s:W) + l:switch_offset + bL + isOp, 0])
   endif
   return bL + isOp
 endfunction
