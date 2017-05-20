@@ -204,7 +204,7 @@ function s:expr_col()
       endif
     elseif tok == '?'
       let bal += 1
-    elseif tok == '{' && getpos('.')[1:2] != b:js_cache[1:] && !s:IsBlock()
+    elseif tok == '{' && !s:IsBlock()
       let bal = 1
     elseif tok != '}' || s:GetPair('{','}','bW',s:skip_expr,200) < 1
       break
