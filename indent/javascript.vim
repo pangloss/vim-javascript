@@ -437,10 +437,10 @@ function GetJavascriptIndent()
       endif
       if idx < 0 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
         let l:switch_offset = &cino !~ ':' ? s:W : s:parse_cino(':')
-        let l:case_offset = &cino !~ '=' ? s:W : s:parse_cino('=')
         if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
           return max([numInd + l:switch_offset, 0])
         endif
+        let l:case_offset = &cino !~ '=' ? s:W : s:parse_cino('=')
       endif
     endif
     if idx < 0 && pline[-1:] !~ '[{;]'
