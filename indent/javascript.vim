@@ -178,17 +178,12 @@ function s:previous_token()
   return ''
 endfunction
 
-for s:__ in ['__previous_token','__IsBlock']
-  function s:{s:__}(...)
-    let l:pos = getpos('.')
-    try
-      return call('s:'.matchstr(expand('<sfile>'),'.*__\zs\w\+'),a:000)
-    catch
-    finally
-      call setpos('.',l:pos)
-    endtry
-  endfunction
-endfor
+function s:__previous_token()
+  let l:pos = getpos('.')
+  let ret = s:previous_token()
+  call setpos('.',l:pos)
+  return ret
+endfunction
 
 function s:expr_col()
   let [bal, l:pos] = [0, getpos('.')]
@@ -369,6 +364,13 @@ function s:IsBlock(...)
     return tok !~ '[=~!<,.?^%|&([]' &&
           \ (tok !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == tok)
   endif
+endfunction
+
+function s:__IsBlock(...)
+  let l:pos = getpos('.')
+  let ret = call('s:IsBlock',a:000)
+  call setpos('.',l:pos)
+  return ret
 endfunction
 
 
