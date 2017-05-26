@@ -303,7 +303,7 @@ function s:doWhile()
     let l:pos = searchpos('\m\<','cbW')
     while search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
       let tok = ? '' : s:looking_at()
-      if eval(s:skip_expr) || s:looking_at() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) < 1
+      if eval(s:skip_expr) || s:looking_at() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) > 0
         continue
       elseif tok ==# 'd' && s:IsBlock()
         return 1
