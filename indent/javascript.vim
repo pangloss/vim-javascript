@@ -302,10 +302,9 @@ function s:doWhile()
   if expand('<cword>') ==# 'while'
     let l:pos = searchpos('\m\<','cbW')
     while search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
-      let tok = ? '' : s:looking_at()
-      if eval(s:skip_expr) || s:looking_at() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) > 0
+      if eval(s:skip_expr) || s:looking_at() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) < 1
         continue
-      elseif tok ==# 'd' && s:IsBlock()
+      elseif s:looking_at() ==# 'd' && s:IsBlock()
         return 1
       endif
       break
