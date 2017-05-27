@@ -300,22 +300,17 @@ endfunction
 
 function s:doWhile()
   if expand('<cword>') ==# 'while'
-    let [bal, l:pos] = [0, getpos('.')]
-    call search('\m\<','cbW')
-    while bal < 1 && search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
-      let tok = eval(s:skip_expr) ? '' : s:looking_at()
-      if tok is ''
-        continue
-      elseif tok ==# 'd'
-        let bal += s:__IsBlock(1)
-      elseif tok ==# 'w'
-        let bal -= s:__previous_token() != '.'
-      elseif tok != '}' || s:GetPair('{','}','bW',s:skip_expr,200) < 1
+    let l:pos = searchpos('\m\<','cbW')
+    while search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
+      if !eval(s:skip_expr)
+        if (s:looking_at() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) > 0 ?
+              \ s:previous_token() : s:token()) ==# 'do' && s:IsBlock()
+          return 1
+        endif
         break
       endif
     endwhile
     call setpos('.',l:pos)
-    return max([bal,0])
   endif
 endfunction
 
@@ -340,39 +335,29 @@ function s:iscontOne(i,num,cont)
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
-function s:IsBlock(...)
-  if a:0 || s:looking_at() == '{'
-    let l:n = line('.')
-    let tok = s:previous_token()
-    if match(s:stack,'\cxml\|jsx') + 1 && s:syn_at(line('.'),col('.')-1) =~? 'xml\|jsx'
-      return tok != '{'
-    elseif tok =~ '\k'
-      if tok ==# 'type'
-        return s:__previous_token() !~# '^\%(im\|ex\)port$'
-      endif
-      return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
-            \ ,tok) < (line('.') != l:n) || s:__previous_token() == '.'
-    elseif tok == '>'
-      return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? 'jsflow\|^html'
-    elseif tok == '*'
-      return s:__previous_token() == ':'
-    elseif tok == ':'
-      return !s:expr_col()
-    elseif tok == '/'
-      return s:syn_at(line('.'),col('.')) =~? 'regex'
+function s:IsBlock()
+  let l:n = line('.')
+  let tok = s:previous_token()
+  if match(s:stack,'\cxml\|jsx') + 1 && s:syn_at(line('.'),col('.')-1) =~? 'xml\|jsx'
+    return tok != '{'
+  elseif tok =~ '\k'
+    if tok ==# 'type'
+      return s:__previous_token() !~# '^\%(im\|ex\)port$'
     endif
-    return tok !~ '[=~!<,.?^%|&([]' &&
-          \ (tok !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == tok)
+    return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
+          \ ,tok) < (line('.') != l:n) || s:__previous_token() == '.'
+  elseif tok == '>'
+    return getline('.')[col('.')-2] == '=' || s:syn_at(line('.'),col('.')) =~? 'jsflow\|^html'
+  elseif tok == '*'
+    return s:__previous_token() == ':'
+  elseif tok == ':'
+    return !s:expr_col()
+  elseif tok == '/'
+    return s:syn_at(line('.'),col('.')) =~? 'regex'
   endif
+  return tok !~ '[=~!<,.?^%|&([]' &&
+        \ (tok !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == tok)
 endfunction
-
-function s:__IsBlock(...)
-  let l:pos = getpos('.')
-  let ret = call('s:IsBlock',a:000)
-  call setpos('.',l:pos)
-  return ret
-endfunction
-
 
 function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
@@ -431,7 +416,7 @@ function GetJavascriptIndent()
   let num = b:js_cache[1]
 
   let [s:W, numInd, isOp, bL, l:switch_offset] = [s:sw(), max([indent(num),0]),0,0,0]
-  if !b:js_cache[2] || s:IsBlock()
+  if !b:js_cache[2] || s:looking_at() == '{' && s:IsBlock()
     let [ilnum, pline] = [line('.'), s:Trim(l:lnum)]
     if b:js_cache[2] && s:looking_at() == ')' && s:GetPair('(',')','bW',s:skip_expr,100) > 0
       if ilnum == num
