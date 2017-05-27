@@ -246,12 +246,12 @@ function s:PrevCodeLine(lnum)
   let l:n = prevnonblank(a:lnum)
   while l:n
     if getline(l:n) =~ '^\s*\/[/*]'
-      if (stridx(getline(l:n),'`') > 0 || getline(l:n-1)[-1:] == '\') &&
+      if (stridx(getline(l:n),'`') != -1 || getline(l:n-1)[-1:] == '\') &&
             \ s:syn_at(l:n,1) =~? b:syng_str
         break
       endif
       let l:n = prevnonblank(l:n-1)
-    elseif stridx(getline(l:n), '*/') + 1 && s:syn_at(l:n,1) =~? s:syng_com
+    elseif stridx(getline(l:n), '*/') != -1 && s:syn_at(l:n,1) =~? s:syng_com
       let l:pos = getpos('.')
       call cursor(l:n,1)
       let l:n = search('\m\S\_s*\/\*','nbW')
@@ -294,7 +294,7 @@ function s:OneScope(lnum)
       let kw = 'for if let while with'
     endif
   endif
-  return pline[-2:] == '=>' || index(split(kw),s:token()) + 1 &&
+  return pline[-2:] == '=>' || index(split(kw),s:token()) != -1 &&
         \ s:__previous_token() != '.' && !s:doWhile()
 endfunction
 
@@ -338,7 +338,7 @@ endfunction
 function s:IsBlock()
   let l:n = line('.')
   let tok = s:previous_token()
-  if match(s:stack,'\cxml\|jsx') + 1 && s:syn_at(line('.'),col('.')-1) =~? 'xml\|jsx'
+  if match(s:stack,'\cxml\|jsx') != -1 && s:syn_at(line('.'),col('.')-1) =~? 'xml\|jsx'
     return tok != '{'
   elseif tok =~ '\k'
     if tok ==# 'type'
@@ -403,7 +403,7 @@ function GetJavascriptIndent()
     call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [0,0])
   else
     let [s:looksyn, s:checkIn, s:topCol] = [v:lnum - 1, 0, 0]
-    if idx + 1
+    if idx != -1
       call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000)
     elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
       call s:GetPair('{','}','bW','s:skip_func()',2000)
