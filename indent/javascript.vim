@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: May 16, 2017
+" Last Change: May 27, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -363,8 +363,7 @@ function GetJavascriptIndent()
   let b:js_cache = get(b:,'js_cache',[0,0,0])
   let s:synId_cache = {}
   " Get the current line.
-  call cursor(v:lnum,1)
-  let l:line = getline('.')
+  let l:line = getline(v:lnum)
   " use synstack as it validates syn state and works in an empty line
   let s:stack = map(synstack(v:lnum,1),"synIDattr(v:val,'name')")
   let syns = get(s:stack,-1,'')
@@ -400,8 +399,9 @@ function GetJavascriptIndent()
         \ index([']',')','}'],l:line[0]) ]
   if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
         \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
-    call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [0,0])
+    call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [v:lnum,1])
   else
+    call cursor(v:lnum,1)
     let [s:looksyn, s:checkIn, s:topCol] = [v:lnum - 1, 0, 0]
     if idx != -1
       call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:skip_func()',2000)
@@ -422,7 +422,7 @@ function GetJavascriptIndent()
       if ilnum == num
         let [num, numInd] = [line('.'), indent('.')]
       endif
-      if idx < 0 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
+      if idx == -1 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
         let l:switch_offset = &cino !~ ':' ? s:W : s:parse_cino(':')
         if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
           return max([numInd + l:switch_offset, 0])
@@ -431,12 +431,12 @@ function GetJavascriptIndent()
         endif
       endif
     endif
-    if idx < 0 && pline[-1:] !~ '[{;]'
+    if idx == -1 && pline[-1:] !~ '[{;]'
       let isOp = (l:line =~# s:opfirst || s:continues(l:lnum,pline)) * s:W
       let bL = s:iscontOne(l:lnum,b:js_cache[1],isOp)
       let bL -= (bL && l:line[0] == '{') * s:W
     endif
-  elseif idx < 0 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '('
+  elseif idx == -1 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '('
     let pval = s:parse_cino('(')
     return !pval || !search('\m\S','nbW',num) && !s:parse_cino('U') ?
           \ (s:parse_cino('w') ? 0 : -!!search('\m\S','W'.s:z,num)) + virtcol('.') :
