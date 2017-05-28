@@ -252,8 +252,8 @@ function s:PrevCodeLine(lnum)
       endif
       let l:n = prevnonblank(l:n-1)
     elseif stridx(getline(l:n), '*/') != -1 && s:syn_at(l:n,1) =~? s:syng_com
-      let l:n = max([byte2line(strridx(join(getline(max([l:n-71,1]), l:n-1)),'/*') +
-            \ max([line2byte(l:n - 71),0])), 0])
+      let star_comm = strridx(join(getline(max([l:n-71,1]), l:n-1)),'/*')
+      let l:n = star_comm > 0 ? byte2line(line2byte(max([l:n-72,0])) + star_comm) : 0
     else
       break
     endif
