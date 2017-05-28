@@ -253,7 +253,7 @@ function s:PrevCodeLine(lnum)
       let l:n = prevnonblank(l:n-1)
     elseif stridx(getline(l:n), '*/') != -1 && s:syn_at(l:n,1) =~? s:syng_com
       for l:n in reverse(range(max([l:n-71,0],l:n-1)))
-        if stridx(getline(star),'/*') != -1
+        if stridx(getline(l:n),'/*') != -1
           break
         endif
       endfor
