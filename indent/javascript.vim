@@ -79,7 +79,12 @@ function s:syn_at(l,c)
   return s:synId_cache[pos]
 endfunction
 
+let s:cino_cache = {'set': &cino,'sw': s:sw()}
 function s:parse_cino(f)
+  if &cino ==# s:cino_cache.set && has_key(s:cino_cache,a:f) && s:W ==# s:cino_cache.sw
+    return s:cino_cache[a:f]
+  endif
+  call extend(s:cino_cache,{'set': &cino, a:f: 0, 'sw': s:W})
   let [cin, divider, n] = [strridx(&cino,a:f), 0, '']
   if cin == -1
     return
@@ -101,7 +106,7 @@ function s:parse_cino(f)
       break
     endif
   endfor
-  return sign * str2nr(n) / max([str2nr(divider),1])
+  return extend(s:cino_cache,{a:f: sign * str2nr(n) / max([str2nr(divider),1])})[a:f]
 endfunction
 
 " Optimized {skip} expr, used only once per GetJavascriptIndent() call
@@ -368,6 +373,7 @@ function GetJavascriptIndent()
   " use synstack as it validates syn state and works in an empty line
   let s:stack = map(synstack(v:lnum,1),"synIDattr(v:val,'name')")
   let syns = get(s:stack,-1,'')
+  let s:W = s:sw()
 
   " start with strings,comments,etc.
   if syns =~? s:syng_com
@@ -416,7 +422,7 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [s:scriptTag,0] : getpos('.')[1:2])
   let num = b:js_cache[1]
 
-  let [s:W, numInd, isOp, bL, l:switch_offset] = [s:sw(), max([indent(num),0]),0,0,0]
+  let [numInd, isOp, bL, l:switch_offset] = [max([indent(num),0]),0,0,0]
   if !b:js_cache[2] || s:looking_at() == '{' && s:IsBlock()
     let [ilnum, pline] = [line('.'), s:Trim(l:lnum)]
     if b:js_cache[2] && s:looking_at() == ')' && s:GetPair('(',')','bW',s:skip_expr,100) > 0
