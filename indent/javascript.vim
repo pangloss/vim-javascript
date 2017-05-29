@@ -79,12 +79,12 @@ function s:syn_at(l,c)
   return s:synId_cache[pos]
 endfunction
 
-let s:cino_cache = {'set': &cino,'sw': s:sw()}
+let s:cino_cache = {'set': &cino}
 function s:parse_cino(f)
-  if &cino ==# s:cino_cache.set && has_key(s:cino_cache,a:f) && s:W ==# s:cino_cache.sw
-    return s:cino_cache[a:f]
+  if &cino ==# s:cino_cache.set && has_key(s:cino_cache,a:f)
+    return eval(s:cino_cache[a:f])
   endif
-  call extend(s:cino_cache,{'set': &cino, a:f: 0, 'sw': s:W})
+  call extend(s:cino_cache,{'set': &cino, a:f: 0})
   let [cin, divider, n] = [strridx(&cino,a:f), 0, '']
   if cin == -1
     return
@@ -95,9 +95,9 @@ function s:parse_cino(f)
       let divider = 1
     elseif c ==# 's'
       if n is ''
-        let n = s:W
+        let n = 's:W'
       else
-        let n = str2nr(n) * s:W
+        let n = str2nr(n).' * s:W'
       endif
       break
     elseif c =~ '\d'
@@ -106,7 +106,7 @@ function s:parse_cino(f)
       break
     endif
   endfor
-  return extend(s:cino_cache,{a:f: sign * str2nr(n) / max([str2nr(divider),1])})[a:f]
+  return eval(extend(s:cino_cache,{a:f: sign.'*str2nr('.n.')/'.max([str2nr(divider),1])})[a:f])
 endfunction
 
 " Optimized {skip} expr, used only once per GetJavascriptIndent() call
