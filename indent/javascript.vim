@@ -156,6 +156,10 @@ function s:mvx(...)
   return max(a:000)
 endfunction
 
+function s:Nat(...)
+  return max(a:000+[0])
+endfunction
+
 function s:looking_at()
   return getline('.')[col('.')-1]
 endfunction
@@ -210,7 +214,7 @@ function s:expr_col()
     endif
   endwhile
   call setpos('.',l:pos)
-  return s:mvx(bal,0)
+  return s:Nat(bal)
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -256,7 +260,7 @@ function s:PrevCodeLine(lnum)
       endif
       let l:n = prevnonblank(l:n-1)
     elseif stridx(getline(l:n), '*/') != -1 && s:syn_at(l:n,1) =~? s:syng_com
-      for l:n in range(l:n-1, s:mvx(l:n-(&cino =~ '\*' ? s:parse_cino('*') : 70)-1,0), -1)
+      for l:n in range(l:n-1, s:Nat(l:n-(&cino =~ '\*' ? s:parse_cino('*') : 70)-1), -1)
         if stridx(getline(l:n),'/*') != -1
           break
         endif
@@ -420,7 +424,7 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [s:scriptTag,0] : getpos('.')[1:2])
   let num = b:js_cache[1]
 
-  let [numInd, isOp, bL, l:switch_offset] = [s:mvx(indent(num),0),0,0,0]
+  let [numInd, isOp, bL, l:switch_offset] = [s:Nat(indent(num)),0,0,0]
   if !b:js_cache[2] || s:looking_at() == '{' && s:IsBlock()
     let [ilnum, pline] = [line('.'), s:Trim(l:lnum)]
     if b:js_cache[2] && s:looking_at() == ')' && s:GetPair('(',')','bW',s:skip_expr,100) > 0
@@ -430,7 +434,7 @@ function GetJavascriptIndent()
       if idx == -1 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
         let l:switch_offset = &cino !~ ':' ? s:sw() : s:parse_cino(':')
         if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
-          return s:mvx(numInd + l:switch_offset, 0)
+          return s:Nat(numInd + l:switch_offset)
         elseif &cino =~ '='
           let l:case_offset = s:parse_cino('=')
         endif
@@ -445,14 +449,14 @@ function GetJavascriptIndent()
     let pval = s:parse_cino('(')
     return !pval || !search('\m\S','nbW',num) && !s:parse_cino('U') ?
           \ (s:parse_cino('w') ? 0 : -!!search('\m\S','W'.s:z,num)) + virtcol('.') :
-          \ s:mvx(numInd + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:sw(),0)
+          \ s:Nat(numInd + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:sw())
   endif
 
   " main return
   if l:line =~ '^[])}]\|^|}'
     return numInd
   elseif num
-    return s:mvx(numInd + get(l:,'case_offset',s:sw()) + l:switch_offset + bL + isOp, 0)
+    return s:Nat(numInd + get(l:,'case_offset',s:sw()) + l:switch_offset + bL + isOp)
   endif
   return bL + isOp
 endfunction
