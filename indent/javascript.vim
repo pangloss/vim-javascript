@@ -152,8 +152,8 @@ function s:alternatePair()
   call setpos('.',l:pos)
 endfunction
 
-function s:Nat(...)
-  return max(a:000+[0])
+function s:Nat(int)
+  return max([a:int]+[0])
 endfunction
 
 function s:looking_at()
