@@ -62,11 +62,11 @@ let s:skip_expr = "s:syn_at(line('.'),col('.')) =~? b:syng_strcom"
 " searchpair() wrapper
 if has('reltime')
   function s:GetPair(start,end,flags,skip,time,...)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:mvx(prevnonblank(v:lnum) - 2000,get(a:000,0)),a:time)
   endfunction
 else
   function s:GetPair(start,end,flags,skip,...)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)]))
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:mvx(prevnonblank(v:lnum) - 1000,get(a:000,1)))
   endfunction
 endif
 
@@ -101,7 +101,7 @@ function s:parse_cino(f)
       break
     endif
   endfor
-  return sign * str2nr(n) / max([str2nr(divider),1])
+  return sign * str2nr(n) / s:mvx(str2nr(divider),1)
 endfunction
 
 " Optimized {skip} expr, used only once per GetJavascriptIndent() call
@@ -150,6 +150,10 @@ function s:alternatePair()
     break
   endwhile
   call setpos('.',l:pos)
+endfunction
+
+function s:mvx(...)
+  return max(a:000)
 endfunction
 
 function s:looking_at()
@@ -206,7 +210,7 @@ function s:expr_col()
     endif
   endwhile
   call setpos('.',l:pos)
-  return max([bal,0])
+  return s:mvx(bal,0)
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
@@ -232,10 +236,10 @@ endfunction
 
 function s:Trim(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
-  let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
+  let l:max = s:mvx(strridx(pline,'//'), strridx(pline,'/*'))
   while l:max != -1 && s:syn_at(a:ln, strlen(pline)) =~? s:syng_com
     let pline = pline[: l:max]
-    let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
+    let l:max = s:mvx(strridx(pline,'//'), strridx(pline,'/*'))
     let pline = substitute(pline[:-2],'\s*$','','')
   endwhile
   return pline
@@ -252,7 +256,7 @@ function s:PrevCodeLine(lnum)
       endif
       let l:n = prevnonblank(l:n-1)
     elseif stridx(getline(l:n), '*/') != -1 && s:syn_at(l:n,1) =~? s:syng_com
-      for l:n in range(l:n-1,max([l:n-(&cino =~ '\*' ? s:parse_cino('*') : 70)-1,0]),-1)
+      for l:n in range(l:n-1, s:mvx(l:n-(&cino =~ '\*' ? s:parse_cino('*') : 70)-1,0), -1)
         if stridx(getline(l:n),'/*') != -1
           break
         endif
@@ -416,7 +420,7 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [s:scriptTag,0] : getpos('.')[1:2])
   let num = b:js_cache[1]
 
-  let [numInd, isOp, bL, l:switch_offset] = [max([indent(num),0]),0,0,0]
+  let [numInd, isOp, bL, l:switch_offset] = [s:mvx(indent(num),0),0,0,0]
   if !b:js_cache[2] || s:looking_at() == '{' && s:IsBlock()
     let [ilnum, pline] = [line('.'), s:Trim(l:lnum)]
     if b:js_cache[2] && s:looking_at() == ')' && s:GetPair('(',')','bW',s:skip_expr,100) > 0
@@ -426,7 +430,7 @@ function GetJavascriptIndent()
       if idx == -1 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
         let l:switch_offset = &cino !~ ':' ? s:sw() : s:parse_cino(':')
         if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
-          return max([numInd + l:switch_offset, 0])
+          return s:mvx(numInd + l:switch_offset, 0)
         elseif &cino =~ '='
           let l:case_offset = s:parse_cino('=')
         endif
@@ -441,14 +445,14 @@ function GetJavascriptIndent()
     let pval = s:parse_cino('(')
     return !pval || !search('\m\S','nbW',num) && !s:parse_cino('U') ?
           \ (s:parse_cino('w') ? 0 : -!!search('\m\S','W'.s:z,num)) + virtcol('.') :
-          \ max([numInd + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:sw(),0])
+          \ s:mvx(numInd + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:sw(),0)
   endif
 
   " main return
   if l:line =~ '^[])}]\|^|}'
     return numInd
   elseif num
-    return max([numInd + get(l:,'case_offset',s:sw()) + l:switch_offset + bL + isOp, 0])
+    return s:mvx(numInd + get(l:,'case_offset',s:sw()) + l:switch_offset + bL + isOp, 0)
   endif
   return bL + isOp
 endfunction
