@@ -62,11 +62,11 @@ let s:skip_expr = "s:syn_at(line('.'),col('.')) =~? b:syng_strcom"
 " searchpair() wrapper
 if has('reltime')
   function s:GetPair(start,end,flags,skip,time,...)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:mvx(prevnonblank(v:lnum) - 2000,get(a:000,0)),a:time)
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
   endfunction
 else
   function s:GetPair(start,end,flags,skip,...)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:mvx(prevnonblank(v:lnum) - 1000,get(a:000,1)))
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)]))
   endfunction
 endif
 
@@ -101,7 +101,7 @@ function s:parse_cino(f)
       break
     endif
   endfor
-  return sign * str2nr(n) / s:mvx(str2nr(divider),1)
+  return sign * str2nr(n) / max([str2nr(divider),1])
 endfunction
 
 " Optimized {skip} expr, used only once per GetJavascriptIndent() call
@@ -150,10 +150,6 @@ function s:alternatePair()
     break
   endwhile
   call setpos('.',l:pos)
-endfunction
-
-function s:mvx(...)
-  return max(a:000)
 endfunction
 
 function s:Nat(...)
@@ -240,10 +236,10 @@ endfunction
 
 function s:Trim(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
-  let l:max = s:mvx(strridx(pline,'//'), strridx(pline,'/*'))
+  let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
   while l:max != -1 && s:syn_at(a:ln, strlen(pline)) =~? s:syng_com
     let pline = pline[: l:max]
-    let l:max = s:mvx(strridx(pline,'//'), strridx(pline,'/*'))
+    let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
     let pline = substitute(pline[:-2],'\s*$','','')
   endwhile
   return pline
