@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: May 27, 2017
+" Last Change: May 30, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -153,7 +153,7 @@ function s:alternatePair()
 endfunction
 
 function s:Nat(int)
-  return max([a:int]+[0])
+  return max([a:int,0])
 endfunction
 
 function s:looking_at()
