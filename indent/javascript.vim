@@ -106,7 +106,8 @@ function s:parse_cino(f)
       break
     endif
   endfor
-  return eval(extend(s:cino_cache,{a:f: sign.'*str2nr('.n.')/'.max([str2nr(divider),1])})[a:f])
+  return eval(extend(s:cino_cache,{a:f: printf('%d*str2nr(%s)/%d', sign, n,
+        \ max([str2nr(divider),1])) })[a:f])
 endfunction
 
 " Optimized {skip} expr, used only once per GetJavascriptIndent() call
