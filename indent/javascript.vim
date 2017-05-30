@@ -90,9 +90,9 @@ function s:parse_cino(f)
       let divider = 1
     elseif c ==# 's'
       if n is ''
-        let n = s:W
+        let n = s:sw()
       else
-        let n = str2nr(n) * s:W
+        let n = str2nr(n) * s:sw()
       endif
       break
     elseif c =~ '\d'
@@ -252,7 +252,7 @@ function s:PrevCodeLine(lnum)
       endif
       let l:n = prevnonblank(l:n-1)
     elseif stridx(getline(l:n), '*/') != -1 && s:syn_at(l:n,1) =~? s:syng_com
-      for l:n in reverse(range(max([l:n-71,0]),l:n-1))
+      for l:n in reverse(range(max([l:n-(&cino =~ '\*' ? s:parse_cino('*') : 70)-1,0]),l:n-1))
         if stridx(getline(l:n),'/*') != -1
           break
         endif
@@ -320,11 +320,11 @@ endfunction
 " a continued expression, which could have started in a braceless context
 function s:iscontOne(i,num,cont)
   let [l:i, l:num, bL] = [a:i, a:num + !a:num, 0]
-  let pind = a:num ? indent(l:num) + s:W : 0
-  let ind = indent(l:i) + (a:cont ? 0 : s:W)
+  let pind = a:num ? indent(l:num) + s:sw() : 0
+  let ind = indent(l:i) + (a:cont ? 0 : s:sw())
   while l:i >= l:num && (ind > pind || l:i == l:num)
     if indent(l:i) < ind && s:OneScope(l:i)
-      let bL += s:W
+      let bL += s:sw()
       let l:i = line('.')
     elseif !a:cont || bL || ind < indent(a:i)
       break
