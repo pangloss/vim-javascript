@@ -79,7 +79,12 @@ function s:syn_at(l,c)
   return s:synId_cache[pos]
 endfunction
 
+let s:cino_cache = {'set': &cino}
 function s:parse_cino(f)
+  if &cino ==# s:cino_cache.set && has_key(s:cino_cache,a:f)
+    return eval(s:cino_cache[a:f])
+  endif
+  call extend(s:cino_cache,{'set': &cino, a:f: 0})
   let [cin, divider, n] = [strridx(&cino,a:f), 0, '']
   if cin == -1
     return
@@ -90,9 +95,9 @@ function s:parse_cino(f)
       let divider = 1
     elseif c ==# 's'
       if n is ''
-        let n = s:W
+        let n = 's:W'
       else
-        let n = str2nr(n) * s:W
+        let n = str2nr(n).' * s:W'
       endif
       break
     elseif c =~ '\d'
@@ -101,7 +106,8 @@ function s:parse_cino(f)
       break
     endif
   endfor
-  return sign * str2nr(n) / max([str2nr(divider),1])
+  return eval(extend(s:cino_cache,{a:f: printf('%d*str2nr(%s)/%d', sign, n,
+        \ max([str2nr(divider),1])) })[a:f])
 endfunction
 
 " Optimized {skip} expr, used only once per GetJavascriptIndent() call
@@ -252,7 +258,7 @@ function s:PrevCodeLine(lnum)
       endif
       let l:n = prevnonblank(l:n-1)
     elseif stridx(getline(l:n), '*/') != -1 && s:syn_at(l:n,1) =~? s:syng_com
-      for l:n in reverse(range(max([l:n-71,0]),l:n-1))
+      for l:n in reverse(range(max([l:n-(&cino =~ '\*' ? s:parse_cino('*') : 70)-1,0]),l:n-1))
         if stridx(getline(l:n),'/*') != -1
           break
         endif
@@ -368,6 +374,7 @@ function GetJavascriptIndent()
   " use synstack as it validates syn state and works in an empty line
   let s:stack = map(synstack(v:lnum,1),"synIDattr(v:val,'name')")
   let syns = get(s:stack,-1,'')
+  let s:W = s:sw()
 
   " start with strings,comments,etc.
   if syns =~? s:syng_com
@@ -416,7 +423,7 @@ function GetJavascriptIndent()
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [s:scriptTag,0] : getpos('.')[1:2])
   let num = b:js_cache[1]
 
-  let [s:W, numInd, isOp, bL, l:switch_offset] = [s:sw(), max([indent(num),0]),0,0,0]
+  let [numInd, isOp, bL, l:switch_offset] = [max([indent(num),0]),0,0,0]
   if !b:js_cache[2] || s:looking_at() == '{' && s:IsBlock()
     let [ilnum, pline] = [line('.'), s:Trim(l:lnum)]
     if b:js_cache[2] && s:looking_at() == ')' && s:GetPair('(',')','bW',s:skip_expr,100) > 0
