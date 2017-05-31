@@ -138,7 +138,7 @@ function s:alternatePair()
           return
         endif
       else
-        let [pat, l:for] = [substitute(pat,'][','',''), l:for - 1]
+        let [pat, l:for] = ['[{}();]', l:for - 1]
         continue
       endif
     elseif tok =~ '[])}]'
