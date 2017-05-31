@@ -146,6 +146,7 @@ function s:alternatePair()
         continue
       endif
     elseif tok =~ '\a' && s:previous_token() != '.'
+      " keyword or ({if:1}) property
       if s:GetPair('{','}','cbW','s:skip_func()',2000) > 0
         return
       endif
