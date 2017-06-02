@@ -437,7 +437,7 @@ function GetJavascriptIndent()
       endif
     endif
     if idx == -1 && pline[-1:] !~ '[{;]'
-      if l:line[0] == '*' && pline[-1:] == '}'
+      if l:line =~# '^\%(in\%(stanceof\)\=\>\|\*\)' && pline[-1:] == '}'
         call cursor(l:lnum,strlen(pline))
         if s:GetPair('{','}','bW',s:skip_expr,200) && s:IsBlock()
           return numInd + s:sw()
