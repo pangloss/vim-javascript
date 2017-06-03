@@ -456,7 +456,7 @@ function GetJavascriptIndent()
 
   " main return
   if l:line =~ '^[])}]\|^|}'
-    if idx == 1 && &cino =~# '.*M\@>[^,0]'
+    if idx == 1 && s:parse_cino('M')
       return indent(l:lnum)
     endif
     return numInd
