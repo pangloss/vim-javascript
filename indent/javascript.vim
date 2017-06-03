@@ -456,6 +456,10 @@ function GetJavascriptIndent()
 
   " main return
   if l:line =~ '^[])}]\|^|}'
+    let mat = idx == 1 ? match(&cino, '\c.*\zsm\@>[^,0]') : -1
+    if mat != -1
+      return indent(&cino[mat] ==# 'm' ? num : l:lnum)
+    endif
     return numInd
   elseif num
     return s:Nat(numInd + get(l:,'case_offset',s:sw()) + l:switch_offset + bL + isOp)
