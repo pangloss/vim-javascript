@@ -392,6 +392,7 @@ function GetJavascriptIndent()
   endif
 
   let l:line = substitute(l:line,'^\s*','','')
+  let l:lineRaw = l:line
   if l:line[:1] == '/*'
     let l:line = substitute(l:line,'^\%(\/\*.\{-}\*\/\s*\)*','','')
   endif
@@ -456,7 +457,7 @@ function GetJavascriptIndent()
 
   " main return
   if l:line =~ '^[])}]\|^|}'
-    if getline(v:lnum) =~ '^\s*)'
+    if l:lineRaw[0] == ')'
       if s:parse_cino('M')
         return indent(l:lnum)
       elseif &cino =~# 'm' && !s:parse_cino('m')
