@@ -340,9 +340,9 @@ function s:iscontOne(i,num,cont)
 endfunction
 
 function s:isSwitch()
-  if s:previous_token() != '.'
-    if s:GetPair('{','}','cbW',s:skip_expr,100) > 0
-      let tok = s:previous_token()
+  if s:previous_token() !~ '[.*]'
+    if s:GetPair('{','}','cbW',s:skip_expr,100) > 0 && s:IsBlock()
+      let tok = s:token()
       if tok == '}' && s:GetPair('{','}','bW',s:skip_expr,100) > 0 || tok =~ '\K\k*'
         return s:IsBlock()
       endif
