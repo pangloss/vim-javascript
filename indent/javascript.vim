@@ -450,7 +450,7 @@ function GetJavascriptIndent()
     endif
   elseif idx < 0 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~# '[(k]'
     let k = s:parse_cino('k')
-    if k && search('\S','bW',num) && index(split('if for while'),s:token()) != -1 &&
+    if k && search('\m\S','bW',num) && index(split('if for while'),s:token()) != -1 &&
           \ s:previous_token() != '.'
       return s:Nat(numInd + k)
     elseif &cino =~ '('
