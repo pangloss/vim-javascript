@@ -339,6 +339,18 @@ function s:iscontOne(i,num,cont)
   return bL
 endfunction
 
+function s:isSwitch()
+  if s:previous_token() != '.'
+    if s:GetPair('{','}','cbW',s:skip_expr,100) > 0
+      let tok = s:previous_token()
+      if tok == '}' && s:GetPair('{','}','bW',s:skip_expr,100) > 0 || tok =~ '\K\k*'
+        return s:IsBlock()
+      endif
+    endif
+    return 1
+  endif
+endfunction
+
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
   let l:n = line('.')
@@ -428,7 +440,7 @@ function GetJavascriptIndent()
       if ilnum == num
         let [num, numInd] = [line('.'), indent('.')]
       endif
-      if idx == -1 && s:previous_token() ==# 'switch' && s:previous_token() != '.'
+      if idx == -1 && s:previous_token() ==# 'switch' && s:isSwitch()
         let l:switch_offset = &cino !~ ':' ? s:sw() : s:parse_cino(':')
         if pline[-1:] != '.' && l:line =~# '^\%(default\|case\)\>'
           return s:Nat(numInd + l:switch_offset)
