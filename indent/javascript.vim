@@ -126,7 +126,8 @@ function s:skip_func()
 endfunction
 
 function s:alternatePair()
-  let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 2]
+  let [l:pos, l:for, pat] = [getpos('.'), 2,
+        \ '[][(){};]\|\C\<\%(if\|return\|else\|for\|while\|var\|break\)\>']
   while search('\m'.pat,'bW')
     let tok = s:skip_func() ? '' : s:looking_at()
     if tok is ''
@@ -143,6 +144,11 @@ function s:alternatePair()
     elseif tok =~ '[])}]'
       if s:GetPair(escape(tr(tok,'])}','[({'),'['), tok,'bW','s:skip_func()',2000) > 0
         continue
+      endif
+    elseif tok =~ '\a' && s:previous_token() != '.'
+      " keyword or ({if:1}) property
+      if s:GetPair('{','}','cbW','s:skip_func()',2000) > 0
+        return
       endif
     else
       return
