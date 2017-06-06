@@ -91,14 +91,7 @@ OR if you wish to toggle concealing you may wish to bind a command such as the f
 
 ## Indentation Specific
 
-* `:h cino-:`
-* `:h cino-=`
-* `:h cino-star`
-* `:h cino-(`
-* `:h cino-w`
-* `:h cino-U`
-* `:h cino-m`
-* `:h cino-M`
+* `:h cinoptions-values`
 * `:h 'indentkeys'`
 
 ## Contributing
