@@ -107,7 +107,7 @@ endfunction
 " Optimized {skip} expr, used only once per GetJavascriptIndent() call
 function s:SkipFunc()
   if s:top_col == 1 || line('.') < s:script_tag
-    return {} " E728, used as limit condition for loops and searchpair()
+    throw "leave"
   endif
   let s:top_col = col('.')
   if getline('.') =~ '\%<'.s:top_col.'c\/.\{-}\/\|\%>'.s:top_col.'c[''"]\|\\$'
@@ -425,13 +425,16 @@ function GetJavascriptIndent()
   else
     call cursor(v:lnum,1)
     let [s:looksyn, s:check_in, s:top_col] = [v:lnum - 1, 0, 0]
-    if idx != -1
-      call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()',2000)
-    elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
-      call s:GetPair('{','}','bW','s:SkipFunc()',2000)
-    else
-      call s:AlternatePair()
-    endif
+    try
+      if idx != -1
+        call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()',2000)
+      elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
+        call s:GetPair('{','}','bW','s:SkipFunc()',2000)
+      else
+        call s:AlternatePair()
+      endif
+    catch
+    endtry
   endif
 
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [s:script_tag,0] : getpos('.')[1:2])
