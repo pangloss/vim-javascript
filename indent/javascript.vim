@@ -434,7 +434,7 @@ function GetJavascriptIndent()
         call s:AlternatePair()
       endif
     catch /E728/
-      " DEBUG: set debug=throw ; message sentinel exception
+      " DEBUG: set debug=throw ; sentinel exception
       call cursor(v:lnum,1)
       echom v:throwpoint
     endtry
