@@ -135,7 +135,7 @@ function s:AlternatePair()
       elseif tok == ';'
         if !l:for
           if s:GetPair('{','}','bW','s:SkipFunc()',2000) < 1
-            throw "leave"
+            break
           endif
         else
           let [pat, l:for] = ['[{}();]', l:for - 1]
@@ -143,12 +143,13 @@ function s:AlternatePair()
         endif
       elseif tok =~ '[])}]'
         if s:GetPair(escape(tr(tok,'])}','[({'),'['), tok,'bW','s:SkipFunc()',2000) < 1
-          throw "leave"
+          break
         endif
         continue
       endif
       return
     endwhile
+    throw "leave"
   catch /^\Cleave$/
     call setpos('.',l:pos)
     throw v:exception
