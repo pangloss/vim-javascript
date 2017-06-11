@@ -128,26 +128,29 @@ endfunction
 function s:AlternatePair()
   let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 2]
   while search('\m'.pat,'bW')
-    let tok = s:SkipFunc() ? '' : s:LookingAt()
-    if tok is ''
-      continue
-    elseif tok == ';'
-      if !l:for
-        if s:GetPair('{','}','bW','s:SkipFunc()',2000) > 0
-          return
+    try
+      let tok = s:SkipFunc() ? '' : s:LookingAt()
+      if tok is ''
+        continue
+      elseif tok == ';'
+        if !l:for
+          if s:GetPair('{','}','bW','s:SkipFunc()',2000) < 1
+            throw "leave"
+          endif
+        else
+          let [pat, l:for] = ['[{}();]', l:for - 1]
+          continue
         endif
-      else
-        let [pat, l:for] = ['[{}();]', l:for - 1]
+      elseif tok =~ '[])}]'
+        if s:GetPair(escape(tr(tok,'])}','[({'),'['), tok,'bW','s:SkipFunc()',2000) < 1
+          throw "leave"
+        endif
         continue
       endif
-    elseif tok =~ '[])}]'
-      if s:GetPair(escape(tr(tok,'])}','[({'),'['), tok,'bW','s:SkipFunc()',2000) > 0
-        continue
-      endif
-    else
       return
-    endif
-    break
+    catch /^\Cleave$/
+      break
+    endtry
   endwhile
   call setpos('.',l:pos)
 endfunction
@@ -434,6 +437,7 @@ function GetJavascriptIndent()
         call s:AlternatePair()
       endif
     catch /^\Cleave$/
+      " echom v:throwpoint
     endtry
   endif
 
