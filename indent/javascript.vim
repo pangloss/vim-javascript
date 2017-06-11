@@ -433,7 +433,7 @@ function GetJavascriptIndent()
       else
         call s:AlternatePair()
       endif
-    catch
+    catch /^\Cleave$/
     endtry
   endif
 
