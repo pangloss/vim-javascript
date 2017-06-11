@@ -127,8 +127,8 @@ endfunction
 
 function s:AlternatePair()
   let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 2]
-  while search('\m'.pat,'bW')
-    try
+  try
+    while search('\m'.pat,'bW')
       let tok = s:SkipFunc() ? '' : s:LookingAt()
       if tok is ''
         continue
@@ -148,11 +148,11 @@ function s:AlternatePair()
         continue
       endif
       return
-    catch /^\Cleave$/
-      break
-    endtry
-  endwhile
-  call setpos('.',l:pos)
+    endwhile
+  catch /^\Cleave$/
+    call setpos('.',l:pos)
+    throw v:exception
+  endtry
 endfunction
 
 function s:Nat(int)
