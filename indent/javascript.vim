@@ -107,7 +107,7 @@ endfunction
 " Optimized {skip} expr, used only once per GetJavascriptIndent() call
 function s:SkipFunc()
   if s:top_col == 1 || line('.') < s:script_tag
-    throw "leave"
+    return {} " E728, used as limit condition for loops and searchpair()
   endif
   let s:top_col = col('.')
   if getline('.') =~ '\%<'.s:top_col.'c\/.\{-}\/\|\%>'.s:top_col.'c[''"]\|\\$'
@@ -127,33 +127,29 @@ endfunction
 
 function s:AlternatePair()
   let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 2]
-  try
-    while search('\m'.pat,'bW')
-      let tok = s:SkipFunc() ? '' : s:LookingAt()
-      if tok is ''
-        continue
-      elseif tok == ';'
-        if !l:for
-          if s:GetPair('{','}','bW','s:SkipFunc()',2000) < 1
-            break
-          endif
-        else
-          let [pat, l:for] = ['[{}();]', l:for - 1]
-          continue
+  while search('\m'.pat,'bW')
+    let tok = s:SkipFunc() ? '' : s:LookingAt()
+    if tok is ''
+      continue
+    elseif tok == ';'
+      if !l:for
+        if s:GetPair('{','}','bW','s:SkipFunc()',2000) > 0
+          return
         endif
-      elseif tok =~ '[])}]'
-        if s:GetPair(escape(tr(tok,'])}','[({'),'['), tok,'bW','s:SkipFunc()',2000) < 1
-          break
-        endif
+      else
+        let [pat, l:for] = ['[{}();]', l:for - 1]
         continue
       endif
+    elseif tok =~ '[])}]'
+      if s:GetPair(escape(tr(tok,'])}','[({'),'['), tok,'bW','s:SkipFunc()',2000) > 0
+        continue
+      endif
+    else
       return
-    endwhile
-    throw "leave"
-  catch /^\Cleave$/
-    call setpos('.',l:pos)
-    throw v:exception
-  endtry
+    endif
+    break
+  endwhile
+  call setpos('.',l:pos)
 endfunction
 
 function s:Nat(int)
@@ -437,8 +433,10 @@ function GetJavascriptIndent()
       else
         call s:AlternatePair()
       endif
-    catch /^\Cleave$/
-      " echom v:throwpoint
+    catch /E728/
+      " DEBUG: set debug=throw ; message sentinel exception
+      call cursor(v:lnum,1)
+      echom v:throwpoint
     endtry
   endif
 
