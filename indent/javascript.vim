@@ -256,11 +256,11 @@ function s:PrevCodeLine(lnum)
       endif
       let l:n = prevnonblank(l:n-1)
     elseif stridx(getline(l:n), '*/') != -1 && s:SynAt(l:n,1) =~? s:syng_com
-      for l:n in range(l:n-1, s:Nat(l:n-(&cino =~ '\*' ? s:ParseCino('*') : 70)-1), -1)
-        if stridx(getline(l:n),'/*') != -1
-          break
-        endif
-      endfor
+      let l:pos = getpos('.')
+      call cursor(l:n,1)
+      keepjumps norm! [*
+      let l:n = line('.') % l:n
+      call setpos('.',l:pos)
     else
       break
     endif
