@@ -376,7 +376,7 @@ function s:IsBlock()
   elseif tok == '/'
     return s:SynAt(line('.'),col('.')) =~? 'regex'
   endif
-  return tok !~ '[=~!<,.*?^%|&([]' &&
+  return tok !~ '[=~!<,.?^%|&([]' &&
         \ (tok !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == tok)
 endfunction
 
