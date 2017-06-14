@@ -344,7 +344,7 @@ function s:IsSwitch()
     if s:GetPair('{','}','cbW',s:skip_expr,100)
       if s:IsBlock()
         let tok = s:Token()
-        if tok == '}' && s:GetPair('{','}','bW',s:skip_expr,100) > 0 || tok =~ '\K\k*'
+        if tok == '}' && s:GetPair('{','}','bW',s:skip_expr,100) || tok =~ '\K\k*'
           return s:IsBlock() && (tok == '}' || s:Token() !=# 'class' || s:PreviousToken() == '.')
         endif
       else
