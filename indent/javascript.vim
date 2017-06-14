@@ -362,14 +362,14 @@ function s:IsBlock()
   if match(s:stack,'\cxml\|jsx') != -1 && s:SynAt(line('.'),col('.')-1) =~? 'xml\|jsx'
     return tok != '{'
   elseif tok =~ '\k'
-    if tok ==# 'type'
+    if tok ==# 'type' && hlexists('jsFlowGroup')
       return s:__PreviousToken() !~# '^\%(im\|ex\)port$'
     endif
     return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
           \ ,tok) < (line('.') != l:n) || s:__PreviousToken() == '.'
   elseif tok == '>'
     return getline('.')[col('.')-2] == '=' || s:SynAt(line('.'),col('.')) =~? 'jsflow\|^html'
-  elseif tok == '*'
+  elseif tok == '*' && hlexists('jsFlowGroup')
     return s:__PreviousToken() == ':'
   elseif tok == ':'
     return !s:ExprCol()
