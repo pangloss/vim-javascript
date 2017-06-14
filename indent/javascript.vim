@@ -369,7 +369,7 @@ function s:IsBlock()
           \ ,tok) < (line('.') != l:n) || s:__PreviousToken() == '.'
   elseif tok == '>'
     return getline('.')[col('.')-2] == '=' || s:SynAt(line('.'),col('.')) =~? 'jsflow\|^html'
-  elseif tok == '*' && hlexists('jsFlowGroup')
+  elseif tok == '*'
     return s:__PreviousToken() == ':'
   elseif tok == ':'
     return !s:ExprCol()
