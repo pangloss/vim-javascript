@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: May 30, 2017
+" Last Change: June 15, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -70,10 +70,10 @@ else
   endfunction
 endif
 
-function s:SynAt(...)
-  let pos = join(a:000,',')
+function s:SynAt(l,c)
+  let pos = a:l.','.a:c
   if !has_key(s:synid_cache,pos)
-    let s:synid_cache[pos] = synIDattr(synID(a:1,a:2,0),'name')
+    let s:synid_cache[pos] = synIDattr(synID(a:l,a:c,0),'name')
   endif
   return s:synid_cache[pos]
 endfunction
@@ -361,8 +361,8 @@ function s:IsBlock()
   if match(s:stack,'\cxml\|jsx') != -1 && s:SynAt(line('.'),col('.')-1) =~? 'xml\|jsx'
     return tok != '{'
   elseif tok =~ '\k'
-    if tok ==# 'type' && hlexists('jsFlowImportType')
-      return s:__PreviousToken() !~# '^\%(im\|ex\)port$'
+    if tok ==# 'type'
+      return hlexists('jsFlowImportType') && s:__PreviousToken() !~# '^\%(im\|ex\)port$'
     endif
     return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
           \ ,tok) < (line('.') != l:n) || s:__PreviousToken() == '.'
