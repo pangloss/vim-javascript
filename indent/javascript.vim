@@ -70,12 +70,11 @@ else
   endfunction
 endif
 
-function s:SynAt(l,c)
-  let pos = join([a:l,a:c],',')
-  if has_key(s:synid_cache,pos)
-    return s:synid_cache[pos]
+function s:SynAt(...)
+  let pos = join(a:000,',')
+  if !has_key(s:synid_cache,pos)
+    let s:synid_cache[pos] = synIDattr(synID(a:1,a:2,0),'name')
   endif
-  let s:synid_cache[pos] = synIDattr(synID(a:l,a:c,0),'name')
   return s:synid_cache[pos]
 endfunction
 
