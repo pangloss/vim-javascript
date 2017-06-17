@@ -362,7 +362,12 @@ function s:IsBlock()
     return tok != '{'
   elseif tok =~ '\k'
     if tok ==# 'type'
-      return !hlexists('jsFlowImportType') || s:__PreviousToken() !~# '^\%(im\|ex\)port$'
+      let l:pos = getpos('.')
+      try
+        return s:PreviousToken() !~# '^\%(im\|ex\)port$' || s:PreviousToken() == '.'
+      finally
+        call setpos('.',l:pos)
+      endtry
     endif
     return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
           \ ,tok) < (line('.') != l:n) || s:__PreviousToken() == '.'
