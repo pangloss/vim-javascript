@@ -235,13 +235,11 @@ endfunction
 
 function s:Trim(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
-  let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
-  while l:max != -1 && s:SynAt(a:ln, strlen(pline)) =~? s:syng_com
-    let pline = pline[: l:max]
-    let l:max = max([strridx(pline,'//'), strridx(pline,'/*')])
-    let pline = substitute(pline[:-2],'\s*$','','')
+  let [l:max, last] = [match(pline,'^.*\S\zs\s*\/[/*]'), strlen(pline)]
+  while l:max != -1 && s:SynAt(a:ln, last) =~? s:syng_com
+    let [l:max, last] = [match(pline[: l:max],'^.*\S\zs\s*\/[/*]'), l:max]
   endwhile
-  return pline
+  return pline[:last-1]
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
