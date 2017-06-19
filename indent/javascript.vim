@@ -152,7 +152,7 @@ function s:AlternatePair()
 endfunction
 
 function s:Nat(int)
-  return max([a:int,0])
+  return a:int * (a:int > 0)
 endfunction
 
 function s:LookingAt()
@@ -327,7 +327,7 @@ function s:IsContOne(i,num,cont)
   let ind = indent(l:i) + (a:cont ? 0 : s:sw())
   while l:i >= l:num && (ind > pind || l:i == l:num)
     if indent(l:i) < ind && s:OneScope(l:i)
-      let b_l += s:sw()
+      let b_l += 1
       let l:i = line('.')
     elseif !a:cont || b_l || ind < indent(a:i)
       break
@@ -471,8 +471,7 @@ function GetJavascriptIndent()
         endif
       endif
       let is_op = (l:line =~# s:opfirst || s:Continues(l:lnum,pline)) * s:sw()
-      let b_l = s:IsContOne(l:lnum,b:js_cache[1],is_op)
-      let b_l -= (b_l && l:line[0] == '{') * s:sw()
+      let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) - (l:line =~ '^{')) * s:sw()
     endif
   elseif idx == -1 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '('
     let pval = s:ParseCino('(')
