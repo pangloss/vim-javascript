@@ -62,11 +62,13 @@ let s:skip_expr = "s:SynAt(line('.'),col('.')) =~? b:syng_strcom"
 " searchpair() wrapper
 if has('reltime')
   function s:GetPair(start,end,flags,skip,time,...)
-    return max([searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time),0])
+    return s:Nat(searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
+          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time))
   endfunction
 else
   function s:GetPair(start,end,flags,skip,...)
-    return max([searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)])),0])
+    return s:Nat(searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
+          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)])))
   endfunction
 endif
 
@@ -140,7 +142,7 @@ function s:AlternatePair()
         continue
       endif
     elseif tok =~ '[])}]'
-      if s:GetPair(escape(tr(tok,'])}','[({'),'['), tok,'bW','s:SkipFunc()',2000)
+      if s:GetPair(tr(tok,'])}','[({'), tok,'bW','s:SkipFunc()',2000)
         continue
       endif
     else
@@ -431,7 +433,7 @@ function GetJavascriptIndent()
     let [s:looksyn, s:check_in, s:top_col] = [v:lnum - 1, 0, 0]
     try
       if idx != -1
-        call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()',2000)
+        call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
       elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
         call s:GetPair('{','}','bW','s:SkipFunc()',2000)
       else
