@@ -162,7 +162,7 @@ syntax region  jsBlock                        matchgroup=jsBraces              s
 syntax region  jsModuleGroup        contained matchgroup=jsModuleBraces        start=/{/ end=/}/   contains=jsModuleKeyword,jsModuleComma,jsModuleAs,jsComment skipwhite skipempty nextgroup=jsFrom
 syntax region  jsSpreadExpression   contained matchgroup=jsSpreadOperator      start=/\.\.\./ end=/[,}\]]\@=/ contains=@jsExpression
 syntax region  jsRestExpression     contained matchgroup=jsRestOperator        start=/\.\.\./ end=/[,)]\@=/
-exe 'syntax region jsTernaryIf matchgroup=jsTernaryIfOperator start=/'.(get(g:,'javascript_plugin_flow') ? '\%(:\_s*\)\@<!' : '').'?/ end=/\%(:\|[\}]\@=\)/ contains=@jsExpression extend skipwhite skipempty nextgroup=@jsExpression'
+exe 'syntax region jsTernaryIf matchgroup=jsTernaryIfOperator start=/'.(get(g:,'javascript_plugin_flow') ? '[^:=[:space:]]\@<=\_s*\zs' : '').'?/ end=/\%(:\|[\}]\@=\)/ contains=@jsExpression extend skipwhite skipempty nextgroup=@jsExpression'
 
 syntax match   jsGenerator            contained /\*/ skipwhite skipempty nextgroup=jsFuncName,jsFuncArgs
 syntax match   jsFuncName             contained /\<[a-zA-Z_$][0-9a-zA-Z_$]*\>/ skipwhite skipempty nextgroup=jsFuncArgs,jsFlowFunctionGroup
