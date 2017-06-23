@@ -192,7 +192,7 @@ endfunction
 
 function s:ExprCol()
   let [bal, l:pos] = [0, getpos('.')]
-  while bal < 1 && search('\m[{}?:;]','bW',s:script_tag)
+  while bal < 1 && search('\m[{}?:]','bW',s:script_tag)
     let tok = eval(s:skip_expr) ? '' : s:LookingAt()
     if tok is ''
       continue
@@ -206,7 +206,7 @@ function s:ExprCol()
       let bal += 1
     elseif tok == '{' && !s:IsBlock()
       let bal = 1
-    elseif tok != '}' || !s:GetPair('{','}','bW',s:skip_expr,200)
+    elseif !s:GetPair('{','}','bW',s:skip_expr,200)
       break
     endif
   endwhile
