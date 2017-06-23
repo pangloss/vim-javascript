@@ -281,9 +281,9 @@ function s:Balanced(lnum)
         return
       endif
     endif
-    let pos = match(l:line, (l:open ?
+    let pos = match(l:line, l:open ?
           \ matchstr(['[][]','[()]','[{}]'],l:line[pos]) :
-          \ '[][(){}]'), pos + 1)
+          \ '[][(){}]', pos + 1)
   endwhile
   return !l:open
 endfunction
