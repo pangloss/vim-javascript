@@ -365,11 +365,9 @@ function s:IsBlock()
   elseif tok =~ '\k'
     if tok ==# 'type'
       let l:pos = getpos('.')
-      try
-        return s:PreviousToken() !~# '^\%(im\|ex\)port$' || s:PreviousToken() == '.'
-      finally
-        call setpos('.',l:pos)
-      endtry
+      let mod = s:PreviousToken() =~# '^\%(im\|ex\)port$' && s:PreviousToken() != '.'
+      call setpos('.',l:pos)
+      return !mod
     endif
     return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
           \ ,tok) < (line('.') != l:n) || s:__PreviousToken() == '.'
@@ -431,19 +429,13 @@ function GetJavascriptIndent()
   else
     call cursor(v:lnum,1)
     let [s:looksyn, s:check_in, s:top_col] = [v:lnum - 1, 0, 0]
-    try
-      if idx != -1
-        call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
-      elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
-        call s:GetPair('{','}','bW','s:SkipFunc()',2000)
-      else
-        call s:AlternatePair()
-      endif
-    catch /E728/
-      " DEBUG: set debug=throw ; sentinel exception
-      call cursor(v:lnum,1)
-      echom v:throwpoint
-    endtry
+    if idx != -1
+      call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
+    elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
+      call s:GetPair('{','}','bW','s:SkipFunc()',2000)
+    else
+      call s:AlternatePair()
+    endif
   endif
 
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [s:script_tag,0] : getpos('.')[1:2])
