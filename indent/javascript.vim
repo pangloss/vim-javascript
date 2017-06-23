@@ -365,9 +365,11 @@ function s:IsBlock()
   elseif tok =~ '\k'
     if tok ==# 'type'
       let l:pos = getpos('.')
-      let mod = s:PreviousToken() =~# '^\%(im\|ex\)port$' && s:PreviousToken() != '.'
-      call setpos('.',l:pos)
-      return !mod
+      try
+        return s:PreviousToken() !~# '^\%(im\|ex\)port$' || s:PreviousToken() == '.'
+      finally
+        call setpos('.',l:pos)
+      endtry
     endif
     return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
           \ ,tok) < (line('.') != l:n) || s:__PreviousToken() == '.'
