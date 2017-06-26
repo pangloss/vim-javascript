@@ -323,9 +323,9 @@ endfunction
 " lineNr which encloses the entire context, 'cont' if whether line 'i' + 1 is
 " a continued expression, which could have started in a braceless context
 function s:IsContOne(i,num,cont)
-  let [l:i, l:num, b_l, pind, ind] = [a:i, a:num + !a:num, 0,
-        \ a:num ? indent(a:num) + s:sw() : 0,
-        \ indent(a:i) + (a:cont ? 0 : s:sw())]
+  let [l:i, l:num, b_l] = [a:i, a:num + !a:num, 0]
+  let pind = a:num ? indent(a:num) + s:sw() : 0
+  let ind = indent(a:i) + (a:cont ? 0 : s:sw())
   while l:i >= l:num && (ind > pind || l:i == l:num)
     if indent(l:i) < ind && s:OneScope(l:i)
       let b_l += 1
@@ -386,11 +386,12 @@ function s:IsBlock()
 endfunction
 
 function GetJavascriptIndent()
-  let [b:js_cache, s:synid_cache, l:line, s:stack] =
-        \ [get(b:,'js_cache',[0,0,0]),
+  let [b:js_cache, s:synid_cache, l:line, s:stack] = [
+        \ get(b:,'js_cache',[0,0,0]),
         \ {},
         \ getline(v:lnum),
-        \ map(synstack(v:lnum,1),"synIDattr(v:val,'name')")]
+        \ map(synstack(v:lnum,1),"synIDattr(v:val,'name')")
+        \ ]
   " use synstack as it validates syn state and works in an empty line
   let syns = get(s:stack,-1,'')
 
