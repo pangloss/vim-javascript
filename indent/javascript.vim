@@ -204,9 +204,10 @@ function s:ExprCol()
       endif
     elseif tok == '?'
       let bal += 1
-    elseif tok == '{' && !s:IsBlock()
-      let bal = 1
-    elseif tok != '}' || !s:GetPair('{','}','bW',s:skip_expr,200)
+    elseif tok == '{'
+      let bal = !s:IsBlock()
+      break
+    elseif !s:GetPair('{','}','bW',s:skip_expr,200)
       break
     endif
   endwhile
