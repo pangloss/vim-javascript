@@ -2,7 +2,7 @@
 " Language: Javascript
 " Maintainer: Chris Paul ( https://github.com/bounceme )
 " URL: https://github.com/pangloss/vim-javascript
-" Last Change: June 15, 2017
+" Last Change: June 27, 2017
 
 " Only load this indent file when no other was loaded.
 if exists('b:did_indent')
@@ -390,7 +390,7 @@ function GetJavascriptIndent()
         \ get(b:,'js_cache',[0,0,0]),
         \ {},
         \ getline(v:lnum),
-        \ map(synstack(v:lnum,1),"synIDattr(v:val,'name')")
+        \ map(synstack(v:lnum,1),"synIDattr(v:val,'name')"),
         \ ]
   " use synstack as it validates syn state and works in an empty line
   let syns = get(s:stack,-1,'')
