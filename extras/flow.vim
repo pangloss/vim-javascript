@@ -32,7 +32,7 @@ syntax region  jsFlowClassGroup     contained matchgroup=jsFlowNoise start=/</ e
 
 syntax region  jsFlowTypeStatement                                   start=/type\%(\s\+\k\)\@=/    end=/=\@=/ contains=jsFlowTypeOperator oneline skipwhite skipempty nextgroup=jsFlowTypeValue keepend
 syntax region  jsFlowTypeValue      contained                        start=/=/       end=/[;\n]/ contains=@jsFlowCluster,jsFlowGroup,jsFlowMaybe
-syntax match   jsOperator           contained /=/ containedin=jsFlowTypeValue
+syntax match   jsFlowTypeOperator   contained /=/ containedin=jsFlowTypeValue
 syntax match   jsFlowTypeOperator   contained /=/
 syntax keyword jsFlowTypeKeyword    contained type
 
@@ -86,7 +86,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFlowReturnArrow        PreProc
   HiLink jsFlowTypeStatement      PreProc
   HiLink jsFlowTypeKeyword        PreProc
-  HiLink jsFlowTypeOperator       PreProc
+  HiLink jsFlowTypeOperator       Operator
   HiLink jsFlowMaybe              PreProc
   HiLink jsFlowReturnMaybe        PreProc
   HiLink jsFlowClassProperty      jsClassProperty
