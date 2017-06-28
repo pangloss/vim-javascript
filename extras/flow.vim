@@ -1,8 +1,8 @@
 syntax region  jsFlowDefinition     contained                        start=/:/    end=/\%(\s*[,=;)\n]\)\@=/ contains=@jsFlowCluster containedin=jsParen
 syntax region  jsFlowArgumentDef    contained                        start=/:/    end=/\%(\s*[,)]\|=>\@!\)\@=/ contains=@jsFlowCluster
-syntax region  jsFlowArray          contained matchgroup=jsFlowNoise start=/\[/   end=/\]/        contains=@jsFlowCluster
-syntax region  jsFlowObject         contained matchgroup=jsFlowNoise start=/{/    end=/}/         contains=@jsFlowCluster
-syntax region  jsFlowExactObject    contained matchgroup=jsFlowNoise start=/{|/   end=/|}/       contains=@jsFlowCluster
+syntax region  jsFlowArray          contained matchgroup=jsFlowNoise start=/\[/   end=/\]/        contains=@jsFlowCluster,jsComment
+syntax region  jsFlowObject         contained matchgroup=jsFlowNoise start=/{/    end=/}/         contains=@jsFlowCluster,jsComment
+syntax region  jsFlowExactObject    contained matchgroup=jsFlowNoise start=/{|/   end=/|}/       contains=@jsFlowCluster,jsComment
 syntax region  jsFlowParens         contained matchgroup=jsFlowNoise start=/(/  end=/)/ contains=@jsFlowCluster keepend
 syntax match   jsFlowNoise          contained /[:;,<>]/
 syntax keyword jsFlowType           contained boolean number string null void any mixed JSON array Function object array bool class
@@ -30,8 +30,8 @@ syntax match   jsFlowWildcardReturn contained /*/ skipwhite skipempty nextgroup=
 syntax region  jsFlowFunctionGroup  contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncArgs
 syntax region  jsFlowClassGroup     contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsClassBlock
 
-syntax region  jsFlowTypeStatement                                   start=/type\%(\s\+\k\)\@=/    end=/=\@=/ contains=jsFlowTypeOperator skipwhite skipempty nextgroup=jsFlowTypeValue keepend
-syntax region  jsFlowTypeValue      contained                        start=/=/       end=/;/ contains=@jsFlowCluster,jsFlowGroup,jsFlowMaybe
+syntax region  jsFlowTypeStatement                                   start=/type\%(\s\+\k\)\@=/    end=/=\@=/ contains=jsFlowTypeOperator oneline skipwhite skipempty nextgroup=jsFlowTypeValue keepend
+syntax region  jsFlowTypeValue      contained     matchgroup=jsFlowNoise start=/=/       end=/;/ contains=@jsFlowCluster,jsFlowGroup,jsFlowMaybe
 syntax match   jsFlowTypeOperator   contained /=/ containedin=jsFlowTypeValue
 syntax match   jsFlowTypeOperator   contained /=/
 syntax keyword jsFlowTypeKeyword    contained type
