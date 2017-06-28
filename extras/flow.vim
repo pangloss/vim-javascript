@@ -50,7 +50,7 @@ syntax region  jsFlowDeclareBlock   contained matchgroup=jsFlowNoise start=/{/ e
 syntax match   jsFlowMaybe          contained /?/
 syntax region  jsFlowInterfaceBlock contained matchgroup=jsFlowNoise start=/{/ end=/}/ contains=jsObjectKey,jsObjectKeyString,jsObjectKeyComputed,jsObjectSeparator,jsObjectFuncName,jsObjectMethodType,jsGenerator,jsComment,jsObjectStringKey,jsSpreadExpression,jsFlowNoise keepend
 
-syntax region  jsFlowParenAnnotation contained start=/:/ end=/)\@=/ containedin=jsParen contains=@jsFlowCluster
+syntax region  jsFlowParenAnnotation contained start=/:/ end=/[,=)]\@=/ containedin=jsParen contains=@jsFlowCluster
 
 syntax cluster jsFlowReturnCluster            contains=jsFlowNoise,jsFlowReturnObject,jsFlowReturnArray,jsFlowReturnKeyword,jsFlowReturnGroup,jsFlowReturnMaybe,jsFlowReturnOrOp,jsFlowWildcardReturn,jsFlowReturnArrow
 syntax cluster jsFlowCluster                  contains=jsFlowArray,jsFlowObject,jsFlowExactObject,jsFlowNoise,jsFlowTypeof,jsFlowType,jsFlowGroup,jsFlowArrowArguments,jsFlowMaybe,jsFlowParens,jsFlowOrOperator,jsFlowWildcard
@@ -99,5 +99,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFlowReturnOrOp         jsFlowOrOperator
   HiLink jsFlowWildcard           PreProc
   HiLink jsFlowWildcardReturn     PreProc
+  HiLink jsFlowImportType         PreProc
+  HiLink jsFlowTypeValue          PreProc
   delcommand HiLink
 endif
