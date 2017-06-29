@@ -260,8 +260,7 @@ function s:PrevCodeLine(lnum)
     elseif stridx(getline(l:n), '*/') != -1 && s:SynAt(l:n,1) =~? s:syng_com
       let l:pos = getpos('.')
       call cursor(l:n,1)
-      keepjumps norm! [*
-      let l:n = line('.') % l:n
+      let l:n = search('\/\*','nbW')
       call setpos('.',l:pos)
     else
       break
