@@ -265,9 +265,9 @@ function s:PrevCodeLine(lnum)
         if [] == filter(range(line('.'),l:n),
               \ 's:SynAt(v:val,v:val == line(".") ? col(".") : 1) !~? s:syng_com && {}')
           let l:n = line('.')
-        else
-          break
+          continue
         endif
+        break
       endwhile
       call setpos('.',l:pos)
     else
