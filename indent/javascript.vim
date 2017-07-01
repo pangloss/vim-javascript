@@ -252,15 +252,28 @@ function s:PrevCodeLine(lnum)
   let l:n = prevnonblank(a:lnum)
   while l:n
     if getline(l:n) =~ '^\s*\/[/*]'
-      if (stridx(getline(l:n),'`') != -1 || getline(l:n-1)[-1:] == '\') &&
+      if (getline(l:n) =~ '`' || getline(l:n-1)[-1:] == '\') &&
             \ s:SynAt(l:n,1) =~? b:syng_str
         break
       endif
       let l:n = prevnonblank(l:n-1)
-    elseif stridx(getline(l:n), '*/') != -1 && s:SynAt(l:n,1) =~? s:syng_com
+    elseif getline(l:n) =~ '\*\/' && s:SynAt(l:n,1) =~? s:syng_com
       let l:pos = getpos('.')
       call cursor(l:n,1)
-      let l:n = search('\/\*','nbW')
+      let l:n = search('\/\*','bW')
+      while search('\/\*\|\(\*\/\)','bWp') == 1
+        let br = 0
+        for l:i in range(l:n,line('.'),-1)
+          if s:SynAt(l:i,l:i == line('.') ? col('.') : 1) !~? s:syng_com
+            let br = 1
+            break
+          endif
+        endfor
+        if br
+          break
+        endif
+        let l:n = line('.')
+      endwhile
       call setpos('.',l:pos)
     else
       break
