@@ -263,8 +263,8 @@ function s:PrevCodeLine(lnum)
       let l:n = search('\/\*','bW')
       while search('\/\*\|\(\*\/\)','bWp') == 1
         let br = 0
-        for i in range(l:n,line('.'),-1)
-          if s:SynAt(i,i == line('.') ? col('.') : 1) !~? s:syng_com
+        for l:i in range(l:n,line('.'),-1)
+          if s:SynAt(l:i,l:i == line('.') ? col('.') : 1) !~? s:syng_com
             let br = 1
             break
           endif
