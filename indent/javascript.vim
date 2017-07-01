@@ -262,7 +262,7 @@ function s:PrevCodeLine(lnum)
       call cursor(l:n,1)
       let l:n = search('\/\*','bW')
       while search('\/\*\|\(\*\/\)','bWp') == 1
-        if [] == filter(reverse(range(line('.'),l:n)),
+        if [] == filter(range(l:n,line('.'),-1),
               \ 's:SynAt(v:val,v:val == line(".") ? col(".") : 1) !~? s:syng_com && {}')
           let l:n = line('.')
           continue
