@@ -260,8 +260,8 @@ function s:PrevCodeLine(lnum)
     elseif getline(l:n) =~ '\*\/' && s:SynAt(l:n,1) =~? s:syng_com
       let l:pos = getpos('.')
       call cursor(l:n,1)
-      let l:n = search('\/\*','bW')
-      while search('\/\*\|\(\*\/\)','bWp') == 1
+      let l:n = search('\m\/\*','bW')
+      while search('\m\/\*\|\(\*\/\)','bWp') == 1
         let br = 0
         for l:i in range(l:n,line('.'),-1)
           if s:SynAt(l:i,l:i == line('.') ? col('.') : 1) !~? s:syng_com
