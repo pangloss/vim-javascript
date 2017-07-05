@@ -478,10 +478,14 @@ function GetJavascriptIndent()
   elseif idx == -1 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '(' &&
         \ (search('\m\S','nbW',num) || s:ParseCino('U'))
     let pval = s:ParseCino('(')
-    let Wval = !pval ? s:ParseCino('W') : 0
-    return !pval ? (s:ParseCino('w') ? 0 : search('\m\S','W',num) ?
-          \ -1 : (!!Wval * num_ind - !!Wval * virtcol('.') + Wval)) + virtcol('.') :
-          \ s:Nat(num_ind + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:sw())
+    if !pval
+      let Wval = s:ParseCino('W')
+      let vcol = virtcol('.')
+      let nextC = search('\m\S','W',num)
+      let wval = nextC && s:ParseCino('w')
+      return nextC ? wval ? vcol : virtcol('.') - 1 : Wval ? num_ind + Wval : vcol
+    endif
+    return s:Nat(num_ind + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:sw())
   endif
 
   " main return
