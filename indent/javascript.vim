@@ -479,11 +479,11 @@ function GetJavascriptIndent()
         \ (search('\m\S','nbW',num) || s:ParseCino('U'))
     let pval = s:ParseCino('(')
     if !pval
-      let Wval = s:ParseCino('W')
-      let vcol = virtcol('.')
-      let nextC = search('\m\S','W',num)
-      return nextC ? s:ParseCino('w') ? vcol : virtcol('.') - 1 :
-            \ Wval ? s:Nat(num_ind + Wval) : vcol
+      let [Wval, vcol] = [s:ParseCino('W'), virtcol('.')]
+      if search('\m\S','W',num)
+        return s:ParseCino('w') ? vcol : virtcol('.')-1
+      endif
+      return Wval ? s:Nat(num_ind + Wval) : vcol
     endif
     return s:Nat(num_ind + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:sw())
   endif
