@@ -480,7 +480,7 @@ function GetJavascriptIndent()
     let pval = s:ParseCino('(')
     let Wval = !pval ? s:ParseCino('W') : 0
     return !pval ? (s:ParseCino('w') ? 0 : search('\m\S','W',num) ?
-          \ -1 : Wval ? Wval + num_ind - virtcol('.') : 0) + virtcol('.') :
+          \ -1 : (!!Wval * num_ind - !!Wval * virtcol('.'))) + virtcol('.') :
           \ s:Nat(num_ind + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:sw())
   endif
 
