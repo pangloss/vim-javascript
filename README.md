@@ -96,6 +96,7 @@ OR if you wish to toggle concealing you may wish to bind a command such as the f
 * `:h cino-star`
 * `:h cino-(`
 * `:h cino-w`
+* `:h cino-W`
 * `:h cino-U`
 * `:h cino-m`
 * `:h cino-M`
