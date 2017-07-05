@@ -475,11 +475,17 @@ function GetJavascriptIndent()
       let is_op = (l:line =~# s:opfirst || s:Continues(l:lnum,pline)) * s:sw()
       let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) - (l:line =~ '^{')) * s:sw()
     endif
-  elseif idx == -1 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '('
+  elseif idx == -1 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '(' &&
+        \ (search('\m\S','nbW',num) || s:ParseCino('U'))
     let pval = s:ParseCino('(')
-    return !pval || !search('\m\S','nbW',num) && !s:ParseCino('U') ?
-          \ (s:ParseCino('w') ? 0 : -!!search('\m\S','W'.s:z,num)) + virtcol('.') :
-          \ s:Nat(num_ind + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:sw())
+    if !pval
+      let [Wval, vcol] = [s:ParseCino('W'), virtcol('.')]
+      if search('\m\S','W',num)
+        return s:ParseCino('w') ? vcol : virtcol('.')-1
+      endif
+      return Wval ? s:Nat(num_ind + Wval) : vcol
+    endif
+    return s:Nat(num_ind + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:sw())
   endif
 
   " main return
