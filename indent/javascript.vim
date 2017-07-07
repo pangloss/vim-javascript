@@ -191,20 +191,21 @@ function s:__PreviousToken()
 endfunction
 
 function s:ExprCol()
+  if getline('.')[col('.')-2] == ':'
+    return 1
+  endif
   let [bal, l:pos] = [0, getpos('.')]
-  while bal < 1 && search('\m[{}?:]','bW',s:script_tag)
-    let tok = eval(s:skip_expr) ? '' : s:LookingAt()
-    if tok is ''
+  while search('\m[{}?:]','bW',s:script_tag)
+    if eval(s:skip_expr)
       continue
-    elseif tok == ':'
-      if getpos('.')[1:2] == [l:pos[1],l:pos[2]-1]
-        let bal = 1
-      else
-        let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'
-      endif
-    elseif tok == '?'
+    elseif s:LookingAt() == ':'
+      let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'
+    elseif s:LookingAt() == '?'
       let bal += 1
-    elseif tok == '{'
+      if bal == 1
+        break
+      endif
+    elseif s:LookingAt() == '{'
       let bal = !s:IsBlock()
       break
     elseif !s:GetPair('{','}','bW',s:skip_expr,200)
