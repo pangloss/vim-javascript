@@ -136,19 +136,18 @@ function s:AlternatePair()
         if s:GetPair('{','}','bW','s:SkipFunc()',2000)
           return
         endif
+        break
       else
         let [pat, l:for] = ['[{}();]', l:for - 1]
-        continue
       endif
     else
       let idx = index([']',')','}'],s:LookingAt())
       if idx == -1
         return
-      elseif s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
-        continue
+      elseif !s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
+        break
       endif
     endif
-    break
   endwhile
   call setpos('.',l:pos)
 endfunction
