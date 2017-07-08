@@ -312,7 +312,7 @@ function s:OneScope(lnum)
       let kw = 'for if let while with'
     endif
   endif
-  return pline[-2:] == '=>' || index(split(kw),s:Token()) != -1 &&
+  return pline[-2:] == '=>' || count(split(kw),s:Token()) &&
         \ s:__PreviousToken() != '.' && !s:DoWhile()
 endfunction
 
@@ -507,3 +507,5 @@ endfunction
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
+
+a      elseif &cino =~# 'm' && !s:ParseCino('m')
