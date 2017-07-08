@@ -339,7 +339,7 @@ function s:IsContOne(i,num,cont)
   let [l:i, l:num, b_l] = [a:i, a:num + !a:num, 0]
   let pind = a:num ? indent(a:num) + s:sw() : 0
   let ind = indent(a:i) + (a:cont ? 0 : s:sw())
-  while l:i >= l:num && (ind > pind || l:i == l:num)
+  while l:i > l:num && ind > pind || l:i == l:num
     if indent(l:i) < ind && s:OneScope(l:i)
       let b_l += 1
       let l:i = line('.')
@@ -432,8 +432,8 @@ function GetJavascriptIndent()
   " the containing paren, bracket, or curly. Many hacks for performance
   let [ s:script_tag, idx ] = [ get(get(b:,'hi_indent',{}),'blocklnr'),
         \ index([']',')','}'],l:line[0]) ]
-  if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
-        \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
+  if b:js_cache[0] > l:lnum && b:js_cache[0] < v:lnum ||
+        \ b:js_cache[0] == l:lnum && s:Balanced(l:lnum)
     call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [v:lnum,1])
   else
     call cursor(v:lnum,1)
