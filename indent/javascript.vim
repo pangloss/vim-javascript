@@ -129,10 +129,9 @@ endfunction
 function s:AlternatePair()
   let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 2]
   while search('\m'.pat,'bW')
-    let tok = s:SkipFunc() ? '' : s:LookingAt()
-    if tok is ''
+    if s:SkipFunc()
       continue
-    elseif tok == ';'
+    elseif s:LookingAt() == ';'
       if !l:for
         if s:GetPair('{','}','bW','s:SkipFunc()',2000)
           return
@@ -141,12 +140,13 @@ function s:AlternatePair()
         let [pat, l:for] = ['[{}();]', l:for - 1]
         continue
       endif
-    elseif tok =~ '[])}]'
-      if s:GetPair(tr(tok,'])}','[({'), tok,'bW','s:SkipFunc()',2000)
+    else
+      let idx = index([']',')','}'],s:LookingAt())
+      if idx == -1
+        return
+      elseif s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
         continue
       endif
-    else
-      return
     endif
     break
   endwhile
@@ -507,5 +507,3 @@ endfunction
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
-
-a      elseif &cino =~# 'm' && !s:ParseCino('m')
