@@ -31,7 +31,7 @@ syntax region  jsFlowFunctionGroup  contained matchgroup=jsFlowNoise start=/</ e
 syntax region  jsFlowClassGroup     contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsClassBlock
 
 syntax region  jsFlowTypeStatement                                   start=/type\%(\s\+\k\)\@=/    end=/=\@=/ contains=jsFlowTypeOperator oneline skipwhite skipempty nextgroup=jsFlowTypeValue keepend
-syntax region  jsFlowTypeValue      contained     matchgroup=jsFlowNoise start=/=/       end=/;/ contains=@jsFlowCluster,jsFlowGroup,jsFlowMaybe
+syntax region  jsFlowTypeValue      contained     matchgroup=jsFlowNoise start=/=/       end=/[\n;]/ contains=@jsFlowCluster,jsFlowGroup,jsFlowMaybe
 syntax match   jsFlowTypeOperator   contained /=/ containedin=jsFlowTypeValue
 syntax match   jsFlowTypeOperator   contained /=/
 syntax keyword jsFlowTypeKeyword    contained type
