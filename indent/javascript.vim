@@ -68,7 +68,7 @@ if has('reltime')
 else
   function s:GetPair(start,end,flags,skip,...)
     return s:Nat(searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
-          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)])))
+          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,0,get(a:000,1)])))
   endfunction
 endif
 
@@ -107,7 +107,7 @@ endfunction
 
 " Optimized {skip} expr, used only once per GetJavascriptIndent() call
 function s:SkipFunc()
-  if s:top_col == 1 || line('.') < s:script_tag
+  if s:top_col == 1
     return {} " E728, used as limit condition for loops and searchpair()
   endif
   let s:top_col = col('.')
@@ -128,12 +128,12 @@ endfunction
 
 function s:AlternatePair()
   let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 2]
-  while search('\m'.pat,'bW')
+  while search('\m'.pat,'bW',s:script_tag)
     if s:SkipFunc()
       continue
     elseif s:LookingAt() == ';'
       if !l:for
-        if s:GetPair('{','}','bW','s:SkipFunc()',2000)
+        if s:GetPair('{','}','bW','s:SkipFunc()',2000,s:script_tag)
           return
         endif
         break
@@ -144,7 +144,7 @@ function s:AlternatePair()
       let idx = index([']',')','}'],s:LookingAt())
       if idx == -1
         return
-      elseif !s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
+      elseif !s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,s:script_tag)
         break
       endif
     endif
@@ -438,9 +438,9 @@ function GetJavascriptIndent()
     call cursor(v:lnum,1)
     let [s:looksyn, s:check_in, s:top_col] = [v:lnum - 1, 0, 0]
     if idx != -1
-      call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
+      call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,s:script_tag)
     elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
-      call s:GetPair('{','}','bW','s:SkipFunc()',2000)
+      call s:GetPair('{','}','bW','s:SkipFunc()',2000,s:script_tag)
     else
       call s:AlternatePair()
     endif
