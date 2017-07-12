@@ -141,7 +141,7 @@ function s:AlternatePair()
         let [pat, l:for] = ['[{}();]', l:for - 1]
       endif
     else
-      let idx = index([']',')','}'],s:LookingAt())
+      let idx = stridx('])}',s:LookingAt())
       if idx == -1
         return
       elseif !s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,s:script_tag)
