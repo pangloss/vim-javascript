@@ -68,7 +68,7 @@ if has('reltime')
 else
   function s:GetPair(start,end,flags,skip,...)
     return s:Nat(searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
-          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,get(a:000,1)])))
+          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,0,get(a:000,1)])))
   endfunction
 endif
 
@@ -107,7 +107,7 @@ endfunction
 
 " Optimized {skip} expr, used only once per GetJavascriptIndent() call
 function s:SkipFunc()
-  if s:top_col == 1 || line('.') < s:script_tag
+  if s:top_col == 1
     return {} " E728, used as limit condition for loops and searchpair()
   endif
   let s:top_col = col('.')
@@ -128,27 +128,26 @@ endfunction
 
 function s:AlternatePair()
   let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 2]
-  while search('\m'.pat,'bW')
-    let tok = s:SkipFunc() ? '' : s:LookingAt()
-    if tok is ''
+  while search('\m'.pat,'bW',s:script_tag)
+    if s:SkipFunc()
       continue
-    elseif tok == ';'
+    elseif s:LookingAt() == ';'
       if !l:for
-        if s:GetPair('{','}','bW','s:SkipFunc()',2000)
+        if s:GetPair('{','}','bW','s:SkipFunc()',2000,s:script_tag)
           return
         endif
+        break
       else
         let [pat, l:for] = ['[{}();]', l:for - 1]
-        continue
-      endif
-    elseif tok =~ '[])}]'
-      if s:GetPair(tr(tok,'])}','[({'), tok,'bW','s:SkipFunc()',2000)
-        continue
       endif
     else
-      return
+      let idx = stridx('])}',s:LookingAt())
+      if idx == -1
+        return
+      elseif !s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,s:script_tag)
+        break
+      endif
     endif
-    break
   endwhile
   call setpos('.',l:pos)
 endfunction
@@ -191,20 +190,21 @@ function s:__PreviousToken()
 endfunction
 
 function s:ExprCol()
+  if getline('.')[col('.')-2] == ':'
+    return 1
+  endif
   let [bal, l:pos] = [0, getpos('.')]
-  while bal < 1 && search('\m[{}?:]','bW',s:script_tag)
-    let tok = eval(s:skip_expr) ? '' : s:LookingAt()
-    if tok is ''
+  while search('\m[{}?:]','bW',s:script_tag)
+    if eval(s:skip_expr)
       continue
-    elseif tok == ':'
-      if getpos('.')[1:2] == [l:pos[1],l:pos[2]-1]
-        let bal = 1
-      else
-        let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'
-      endif
-    elseif tok == '?'
+    elseif s:LookingAt() == ':'
+      let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'
+    elseif s:LookingAt() == '?'
       let bal += 1
-    elseif tok == '{'
+      if bal == 1
+        break
+      endif
+    elseif s:LookingAt() == '{'
       let bal = !s:IsBlock()
       break
     elseif !s:GetPair('{','}','bW',s:skip_expr,200)
@@ -311,7 +311,7 @@ function s:OneScope(lnum)
       let kw = 'for if let while with'
     endif
   endif
-  return pline[-2:] == '=>' || index(split(kw),s:Token()) != -1 &&
+  return pline[-2:] == '=>' || count(split(kw),s:Token()) &&
         \ s:__PreviousToken() != '.' && !s:DoWhile()
 endfunction
 
@@ -338,7 +338,7 @@ function s:IsContOne(i,num,cont)
   let [l:i, l:num, b_l] = [a:i, a:num + !a:num, 0]
   let pind = a:num ? indent(a:num) + s:sw() : 0
   let ind = indent(a:i) + (a:cont ? 0 : s:sw())
-  while l:i >= l:num && (ind > pind || l:i == l:num)
+  while l:i > l:num && ind > pind || l:i == l:num
     if indent(l:i) < ind && s:OneScope(l:i)
       let b_l += 1
       let l:i = line('.')
@@ -354,8 +354,8 @@ endfunction
 function s:IsSwitch()
   if s:PreviousToken() !~ '[.*]'
     if s:GetPair('{','}','cbW',s:skip_expr,100)
-      return s:IsBlock() && (s:Token() !~ '^\K\k*$' || expand('<cword>') !=# 'class'
-            \ && s:PreviousToken() !~# '^class$\|^extends$' || s:PreviousToken() == '.')
+      return s:IsBlock() && (s:Token() !~ '^\K\k*$' || expand('<cword>') !=# 'class' &&
+            \ s:PreviousToken() !~# '^class$\|^extends$' || s:PreviousToken() == '.')
     endif
     return 1
   endif
@@ -431,16 +431,16 @@ function GetJavascriptIndent()
   " the containing paren, bracket, or curly. Many hacks for performance
   let [ s:script_tag, idx ] = [ get(get(b:,'hi_indent',{}),'blocklnr'),
         \ index([']',')','}'],l:line[0]) ]
-  if b:js_cache[0] >= l:lnum && b:js_cache[0] < v:lnum &&
-        \ (b:js_cache[0] > l:lnum || s:Balanced(l:lnum))
+  if b:js_cache[0] > l:lnum && b:js_cache[0] < v:lnum ||
+        \ b:js_cache[0] == l:lnum && s:Balanced(l:lnum)
     call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [v:lnum,1])
   else
     call cursor(v:lnum,1)
     let [s:looksyn, s:check_in, s:top_col] = [v:lnum - 1, 0, 0]
     if idx != -1
-      call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
+      call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,s:script_tag)
     elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
-      call s:GetPair('{','}','bW','s:SkipFunc()',2000)
+      call s:GetPair('{','}','bW','s:SkipFunc()',2000,s:script_tag)
     else
       call s:AlternatePair()
     endif
