@@ -310,8 +310,10 @@ function s:OneScope(lnum)
     else
       let kw = 'for if let while with'
     endif
+  elseif pline[-2:] == '=>'
+    return 1
   endif
-  return pline[-2:] == '=>' || count(split(kw),s:Token()) &&
+  return count(split(kw),s:Token()) &&
         \ s:__PreviousToken() != '.' && !s:DoWhile()
 endfunction
 
