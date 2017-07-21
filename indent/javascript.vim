@@ -73,11 +73,13 @@ else
 endif
 
 function s:SynAt(l,c)
-  let pos = a:l.','.a:c
-  if !has_key(s:synid_cache,pos)
-    let s:synid_cache[pos] = synIDattr(synID(a:l,a:c,0),'name')
+  let byte = line2byte(a:l) + a:c - 1
+  let pos = index(s:synid_cache[0], byte)
+  if pos != -1
+    return synIDattr(s:synid_cache[1][pos], 'name')
   endif
-  return s:synid_cache[pos]
+  call insert(s:synid_cache[0], byte)
+  return synIDattr(insert(s:synid_cache[1], synID(a:l, a:c, 0))[0], 'name')
 endfunction
 
 function s:ParseCino(f)
@@ -396,7 +398,7 @@ endfunction
 function GetJavascriptIndent()
   let [b:js_cache, s:synid_cache, l:line, s:stack] = [
         \ get(b:,'js_cache',[0,0,0]),
-        \ {},
+        \ [[],[]],
         \ getline(v:lnum),
         \ map(synstack(v:lnum,1),"synIDattr(v:val,'name')"),
         \ ]
