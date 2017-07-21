@@ -78,8 +78,8 @@ function s:SynAt(l,c)
   if pos != -1
     return s:synid_cache[1][pos]
   endif
-  call add(s:synid_cache[0], byte)
-  return add(s:synid_cache[1], synIDattr(synID(a:l, a:c, 0), 'name'))[-1]
+  let [s:synid_cache[0], s:synid_cache[1]] += [[byte], [synIDattr(synID(a:l, a:c, 0), 'name')]]
+  return s:synid_cache[1][-1]
 endfunction
 
 function s:ParseCino(f)
