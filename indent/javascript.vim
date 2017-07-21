@@ -75,11 +75,10 @@ endif
 function s:SynAt(l,c)
   let byte = line2byte(a:l) + a:c - 1
   let pos = index(s:synid_cache[0], byte)
-  if pos != -1
-    return s:synid_cache[1][pos]
+  if pos == -1
+    let [s:synid_cache[0], s:synid_cache[1]] += [[byte], [synIDattr(synID(a:l, a:c, 0), 'name')]]
   endif
-  let [s:synid_cache[0], s:synid_cache[1]] += [[byte], [synIDattr(synID(a:l, a:c, 0), 'name')]]
-  return s:synid_cache[1][-1]
+  return s:synid_cache[1][pos]
 endfunction
 
 function s:ParseCino(f)
