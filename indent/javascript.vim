@@ -262,19 +262,17 @@ function s:PrevCodeLine(lnum)
       let l:pos = getpos('.')
       call cursor(l:n,1)
       let l:n = search('\m\/\*','bW')
-      while search('\m\/\*\|\(\*\/\)','bWp') == 1
-        let br = 0
-        for l:i in range(l:n,line('.'),-1)
-          if s:SynAt(l:i,l:i == line('.') ? col('.') : 1) !~? s:syng_com
-            let br = 1
-            break
-          endif
-        endfor
-        if br
-          break
-        endif
-        let l:n = line('.')
-      endwhile
+      try
+        while search('\m\/\*\|\(\*\/\)','bWp') == 1
+          for l:i in range(l:n,line('.'),-1)
+            if s:SynAt(l:i,l:i == line('.') ? col('.') : 1) !~? s:syng_com
+              throw 'to main loop'
+            endif
+          endfor
+          let l:n = line('.')
+        endwhile
+      catch
+      endtry
       call setpos('.',l:pos)
     else
       break
