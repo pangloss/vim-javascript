@@ -469,7 +469,7 @@ function GetJavascriptIndent()
     if idx == -1 && pline[-1:] !~ '[{;]'
       let operator = matchstr(l:line,s:opfirst)
       if strlen(operator)
-        if operator =~# '^\%(in\%(stanceof\)\=\|\*\*\@!\)$' && pline[-1:] == '}'
+        if operator =~# '^\%(in\%(stanceof\)\=\|\*\)$' && pline[-1:] == '}'
           call cursor(l:lnum,strlen(pline))
           if s:GetPair('{','}','bW',s:skip_expr,200) && s:IsBlock()
             return num_ind + s:sw()
