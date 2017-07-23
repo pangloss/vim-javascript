@@ -226,10 +226,10 @@ function s:Continues(ln,con)
   let tok = matchstr(a:con[-15:],s:continuation)
   if tok isnot ''
     call cursor(a:ln,strlen(a:con))
-    if tok =~ '[/>]'
-      return s:SynAt(a:ln,col('.')) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
-    elseif tok =~ '\l'
+    if tok =~ '\l'
       return s:PreviousToken() != '.'
+    elseif tok =~ '[/>]'
+      return s:SynAt(a:ln,col('.')) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
     elseif tok == ':'
       return s:ExprCol()
     endif
@@ -469,14 +469,19 @@ function GetJavascriptIndent()
       endif
     endif
     if idx == -1 && pline[-1:] !~ '[{;]'
-      if l:line =~# '^\%(in\%(stanceof\)\=\>\|\*\*\@!\)' && pline[-1:] == '}'
-        call cursor(l:lnum,strlen(pline))
-        if s:GetPair('{','}','bW',s:skip_expr,200) && s:IsBlock()
-          return num_ind + s:sw()
+      let operator = matchstr(l:line,s:opfirst)
+      if strlen(operator)
+        if (operator =~# '^in\%(stanceof\)\=$' || l:line =~ '^\*\*\@!') && pline[-1:] == '}'
+          call cursor(l:lnum,strlen(pline))
+          if s:GetPair('{','}','bW',s:skip_expr,200) && s:IsBlock()
+            return num_ind + s:sw()
+          endif
         endif
+        let is_op = s:sw()
+      elseif s:Continues(l:lnum,pline)
+        let is_op = s:sw()
       endif
-      let is_op = (l:line =~# s:opfirst || s:Continues(l:lnum,pline)) * s:sw()
-      let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) - (l:line =~ '^{')) * s:sw()
+      let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) - (!is_op && l:line =~ '^{')) * s:sw()
     endif
   elseif idx == -1 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '(' &&
         \ (search('\m\S','nbW',num) || s:ParseCino('U'))
