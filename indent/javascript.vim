@@ -463,16 +463,14 @@ function GetJavascriptIndent()
       endif
     endif
     if idx == -1 && pline[-1:] !~ '[{;]'
-      let operator = matchstr(l:line,s:opfirst)
-      if strlen(operator)
-        if operator =~# '^\%(in\%(stanceof\)\=\|\*\)$' && pline[-1:] == '}'
-          call cursor(l:lnum,strlen(pline))
-          if s:GetPair('{','}','bW',s:skip_expr,200) && s:IsBlock()
-            return num_ind + s:sw()
-          endif
+      let sol = matchstr(l:line,s:opfirst)
+      if sol =~# '^\%(in\%(stanceof\)\=\|\*\)$'
+        call cursor(l:lnum,strlen(pline))
+        if pline[-1:] == '}' && s:GetPair('{','}','bW',s:skip_expr,200) && s:IsBlock()
+          return num_ind + s:sw()
         endif
         let is_op = s:sw()
-      elseif s:Continues(l:lnum,pline)
+      elseif sol isnot '' || s:Continues(l:lnum,pline)
         let is_op = s:sw()
       endif
       let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) -
