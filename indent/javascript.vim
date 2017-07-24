@@ -224,17 +224,13 @@ let s:continuation = get(g:,'javascript_continuation',
 
 function s:Continues(ln,con)
   let tok = matchstr(a:con[-15:],s:continuation)
-  if tok isnot ''
+  if tok =~ '[a-z:]'
     call cursor(a:ln,strlen(a:con))
-    if tok =~ '\l'
-      return s:PreviousToken() != '.'
-    elseif tok =~ '[/>]'
-      return s:SynAt(a:ln,col('.')) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
-    elseif tok == ':'
-      return s:ExprCol()
-    endif
-    return 1
+    return tok == ':' ? s:ExprCol() : s:PreviousToken() != '.'
+  elseif tok !~ '[/>]'
+    return tok isnot ''
   endif
+  return s:SynAt(a:ln,strlen(a:con)) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
 endfunction
 
 function s:Trim(ln)
@@ -479,7 +475,8 @@ function GetJavascriptIndent()
       elseif s:Continues(l:lnum,pline)
         let is_op = s:sw()
       endif
-      let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) - (!is_op && l:line =~ '^{')) * s:sw()
+      let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) -
+            \ (!is_op && l:line =~ '^{')) * s:sw()
     endif
   elseif idx == -1 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '(' &&
         \ (search('\m\S','nbW',num) || s:ParseCino('U'))
