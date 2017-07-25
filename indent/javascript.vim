@@ -268,8 +268,9 @@ function s:PrevCodeLine(lnum)
           let l:n = line('.')
         endwhile
       catch
+      finally
+        call setpos('.',l:pos)
       endtry
-      call setpos('.',l:pos)
     else
       break
     endif
