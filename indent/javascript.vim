@@ -62,13 +62,13 @@ let s:skip_expr = "s:SynAt(line('.'),col('.')) =~? b:syng_strcom"
 " searchpair() wrapper
 if has('reltime')
   function s:GetPair(start,end,flags,skip,time,...)
-    return s:Nat(searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
-          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time))
+    return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
+          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
   endfunction
 else
   function s:GetPair(start,end,flags,skip,...)
-    return s:Nat(searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
-          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,0,get(a:000,1)])))
+    return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
+          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,0,get(a:000,1)]))
   endfunction
 endif
 
@@ -109,7 +109,7 @@ endfunction
 " Optimized {skip} expr, used only once per GetJavascriptIndent() call
 function s:SkipFunc()
   if s:top_col == 1
-    return {} " E728, used as limit condition for loops and searchpair()
+    throw 'out of bounds'
   endif
   let s:top_col = col('.')
   if getline('.') =~ '\%<'.s:top_col.'c\/.\{-}\/\|\%>'.s:top_col.'c[''"]\|\\$'
@@ -128,7 +128,7 @@ function s:SkipFunc()
 endfunction
 
 function s:AlternatePair()
-  let [l:pos, pat, l:for] = [getpos('.'), '[][(){};]', 2]
+  let [pat, l:for] = ['[][(){};]', 2]
   while search('\m'.pat,'bW',s:script_tag)
     if s:SkipFunc()
       continue
@@ -150,7 +150,7 @@ function s:AlternatePair()
       endif
     endif
   endwhile
-  call setpos('.',l:pos)
+  throw 'out of bounds'
 endfunction
 
 function s:Nat(int)
@@ -218,23 +218,19 @@ endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
 let s:opfirst = '^' . get(g:,'javascript_opfirst',
-      \ '\C\%([<>=,.?^%|*/&]\|\([-:+]\)\1\@!\|!=\|in\%(stanceof\)\=\>\)')
+      \ '\C\%([<>=,.?^%|/&]\|\([-:+]\)\1\@!\|\*\+\|!=\|in\%(stanceof\)\=\>\)')
 let s:continuation = get(g:,'javascript_continuation',
       \ '\C\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\)\)') . '$'
 
 function s:Continues(ln,con)
   let tok = matchstr(a:con[-15:],s:continuation)
-  if tok isnot ''
+  if tok =~ '[a-z:]'
     call cursor(a:ln,strlen(a:con))
-    if tok =~ '[/>]'
-      return s:SynAt(a:ln,col('.')) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
-    elseif tok =~ '\l'
-      return s:PreviousToken() != '.'
-    elseif tok == ':'
-      return s:ExprCol()
-    endif
-    return 1
+    return tok == ':' ? s:ExprCol() : s:PreviousToken() != '.'
+  elseif tok !~ '[/>]'
+    return tok isnot ''
   endif
+  return s:SynAt(a:ln,strlen(a:con)) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
 endfunction
 
 function s:Trim(ln)
@@ -262,19 +258,17 @@ function s:PrevCodeLine(lnum)
       let l:pos = getpos('.')
       call cursor(l:n,1)
       let l:n = search('\m\/\*','bW')
-      while search('\m\/\*\|\(\*\/\)','bWp') == 1
-        let br = 0
-        for l:i in range(l:n,line('.'),-1)
-          if s:SynAt(l:i,l:i == line('.') ? col('.') : 1) !~? s:syng_com
-            let br = 1
-            break
-          endif
-        endfor
-        if br
-          break
-        endif
-        let l:n = line('.')
-      endwhile
+      try
+        while search('\m\/\*\|\(\*\/\)','bWp') == 1
+          for l:i in range(l:n,line('.'),-1)
+            if s:SynAt(l:i,l:i == line('.') ? col('.') : 1) !~? s:syng_com
+              throw 'to main loop'
+            endif
+          endfor
+          let l:n = line('.')
+        endwhile
+      catch
+      endtry
       call setpos('.',l:pos)
     else
       break
@@ -440,13 +434,17 @@ function GetJavascriptIndent()
   else
     call cursor(v:lnum,1)
     let [s:looksyn, s:check_in, s:top_col] = [v:lnum - 1, 0, 0]
-    if idx != -1
-      call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,s:script_tag)
-    elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
-      call s:GetPair('{','}','bW','s:SkipFunc()',2000,s:script_tag)
-    else
-      call s:AlternatePair()
-    endif
+    try
+      if idx != -1
+        call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,s:script_tag)
+      elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
+        call s:GetPair('{','}','bW','s:SkipFunc()',2000,s:script_tag)
+      else
+        call s:AlternatePair()
+      endif
+    catch
+      call cursor(v:lnum,1)
+    endtry
   endif
 
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [s:script_tag,0] : getpos('.')[1:2])
@@ -469,14 +467,18 @@ function GetJavascriptIndent()
       endif
     endif
     if idx == -1 && pline[-1:] !~ '[{;]'
-      if l:line =~# '^\%(in\%(stanceof\)\=\>\|\*\*\@!\)' && pline[-1:] == '}'
+      let sol = matchstr(l:line,s:opfirst)
+      if sol =~# '^\%(in\%(stanceof\)\=\|\*\)$'
         call cursor(l:lnum,strlen(pline))
-        if s:GetPair('{','}','bW',s:skip_expr,200) && s:IsBlock()
+        if pline[-1:] == '}' && s:GetPair('{','}','bW',s:skip_expr,200) && s:IsBlock()
           return num_ind + s:sw()
         endif
+        let is_op = s:sw()
+      elseif sol isnot '' || s:Continues(l:lnum,pline)
+        let is_op = s:sw()
       endif
-      let is_op = (l:line =~# s:opfirst || s:Continues(l:lnum,pline)) * s:sw()
-      let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) - (l:line =~ '^{')) * s:sw()
+      let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) -
+            \ (!is_op && l:line =~ '^{')) * s:sw()
     endif
   elseif idx == -1 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '(' &&
         \ (search('\m\S','nbW',num) || s:ParseCino('U'))
