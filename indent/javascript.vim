@@ -261,7 +261,7 @@ function s:PrevCodeLine(lnum)
       while search('\m\/\*\|\(\*\/\)','bWp') == 1
         if [] != filter(range(l:n,line('.'),-1),
               \ 's:SynAt(v:val,v:val == line(".") ? col(".") : 1) !~? s:syng_com && {}')
-          break
+          break "type-error, break filter leaving non-empty list
         endif
         let l:n = line('.')
       endwhile
