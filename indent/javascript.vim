@@ -258,11 +258,11 @@ function s:PrevCodeLine(lnum)
       let l:pos = getpos('.')
       call cursor(l:n,1)
       let l:n = search('\m\/\*','bW')
-      while search('\m\/\*\|\(\*\/\)','bWp') == 1 && empty(filter(range(l:n,line('.'),-1),
-            \ '!empty(getline(v:val)) && s:SynAt(v:val,v:val == line(".") ? col(".") : 1)'.
-            \ '!~? s:syng_com && {}'))
+      while search('\m\/\*\|\*\/','bW') && s:LookingAt() == '/'
         " /*\n/*\n */ comment region
-        let l:n = line('.')
+        let l:n = filter(range(l:n,line('.'),-1),
+            \ 'v:val == line(".") || !empty(getline(v:val)) &&'.
+            \ 's:SynAt(v:val,1) !~? s:syng_com && {}')[0]
       endwhile
       call setpos('.',l:pos)
     else
