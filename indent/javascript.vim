@@ -259,8 +259,9 @@ function s:PrevCodeLine(lnum)
       call cursor(l:n,1)
       let l:n = search('\m\/\*','bW')
       while search('\m\/\*\|\(\*\/\)','bWp') == 1 && empty(filter(range(l:n,line('.'),-1),
-            \ 's:SynAt(v:val,v:val == line(".") ? col(".") : 1) !~? s:syng_com && {}'))
-        "type-error, break filter leaving non-empty list
+            \ '!empty(getline(v:val)) && s:SynAt(v:val,v:val == line(".") ? col(".") : 1)'.
+            \ '!~? s:syng_com && {}'))
+        " /*\n/*\n */ comment region
         let l:n = line('.')
       endwhile
       call setpos('.',l:pos)
