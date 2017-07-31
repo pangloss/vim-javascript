@@ -258,7 +258,7 @@ function s:PrevCodeLine(lnum)
       let l:pos = getpos('.')
       call cursor(l:n,1)
       let l:n = search('\m\/\*','bW')
-      while search('\m\/\*\|\*\/','bW') && s:LookingAt() == '/'
+      while l:n == line('.') && search('\m\/\*\|\(\*\/\)','bWp') == 1
         " /*\n/*\n */ comment region
         let l:n = filter(range(l:n,line('.'),-1),
             \ 'v:val == line(".") || !empty(getline(v:val)) &&'.
