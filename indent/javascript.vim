@@ -260,7 +260,7 @@ function s:PrevCodeLine(lnum)
       let l:n = search('\m\/\*','bW')
       while l:n == line('.') && search('\m\/\*\|\(\*\/\)','bWp') == 1
         " /*\n/*\n */ comment region
-        let l:n = filter(range(l:n,line('.'),-1),
+        let l:n = filter(range(l:n, line('.'), -1),
             \ 'v:val == line(".") || !empty(getline(v:val)) &&'.
             \ 's:SynAt(v:val,1) !~? s:syng_com && {}')[0]
       endwhile
