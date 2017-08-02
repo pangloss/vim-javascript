@@ -246,29 +246,23 @@ endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
 function s:PrevCodeLine(lnum)
-  let l:n = prevnonblank(a:lnum)
+  let [l:multi, l:n, l:pos] = [0, prevnonblank(a:lnum), getpos('.')]
   while l:n
-    if getline(l:n) =~ '^\s*\/[/*]'
-      if (getline(l:n) =~ '`' || getline(l:n-1)[-1:] == '\') &&
-            \ s:SynAt(l:n,1) =~? b:syng_str
+    if getline(l:n) =~ '^\s*\/[/*]' && (getline(l:n) !~ '`' && getline(l:n-1)[-1:] != '\' ||
+          \ s:SynAt(l:n,1) !~? b:syng_str)
+      let l:n = prevnonblank(l:n-1)
+    elseif multi || getline(l:n) =~ '\*\/'
+      call cursor(l:n,1)
+      if search('\m\/\*\|\(\*\/\)','bWp') == 1 && s:SynAt(l:n,1) =~? s:syng_com
+        let [l:multi, l:n] = [1, line('.')]
+      else
         break
       endif
-      let l:n = prevnonblank(l:n-1)
-    elseif getline(l:n) =~ '\*\/' && s:SynAt(l:n,1) =~? s:syng_com
-      let l:pos = getpos('.')
-      call cursor(l:n,1)
-      let l:n = search('\m\/\*','bW')
-      while l:n == line('.') && search('\m\/\*\|\(\*\/\)','bWp') == 1
-        " /*\n/*\n */ comment region
-        let l:n = filter(range(l:n, line('.'), -1),
-            \ 'v:val == line(".") || !empty(getline(v:val)) &&'.
-            \ 's:SynAt(v:val,1) !~? s:syng_com && {}')[0]
-      endwhile
-      call setpos('.',l:pos)
     else
       break
     endif
   endwhile
+  call setpos('.',l:pos)
   return l:n
 endfunction
 
