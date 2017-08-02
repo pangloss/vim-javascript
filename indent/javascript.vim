@@ -251,16 +251,15 @@ function s:PrevCodeLine(lnum)
     if getline(l:n) =~ '^\s*\/[/*]' && (getline(l:n) !~ '`' && getline(l:n-1)[-1:] != '\' ||
           \ s:SynAt(l:n,1) !~? b:syng_str)
       let l:n = prevnonblank(l:n-1)
+      continue
     elseif l:multi || getline(l:n) =~ '\*\/'
       call cursor(l:n,1)
       if search('\m\/\*\|\(\*\/\)','bWp') == 1 && s:SynAt(l:n,1) =~? s:syng_com
         let [l:multi, l:n] = [1, line('.')]
-      else
-        break
+        continue
       endif
-    else
-      break
     endif
+    break
   endwhile
   call setpos('.',l:pos)
   return l:n
