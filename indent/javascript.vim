@@ -248,8 +248,8 @@ endfunction
 function s:PrevCodeLine(lnum)
   let [l:multi, l:n, l:pos] = [0, prevnonblank(a:lnum), getpos('.')]
   while l:n
-    if getline(l:n) =~ '^\s*\/[/*]' && (getline(l:n) !~ '`' && getline(l:n-1)[-1:] != '\' ||
-          \ s:SynAt(l:n,1) !~? b:syng_str)
+    if getline(l:n) =~ '^\s*\/[/*]' && (getline(l:n) !~ '`' &&
+          \ getline(l:n-1)[-1:] != '\' || s:SynAt(l:n,1) !~? b:syng_str)
       let l:n = prevnonblank(l:n-1)
       continue
     elseif l:multi || getline(l:n) =~ '\*\/'
