@@ -106,25 +106,28 @@ function s:ParseCino(f)
   return sign * str2nr(n) / max([str2nr(divider),1])
 endfunction
 
-" Optimized {skip} expr, used only once per GetJavascriptIndent() call
+" Optimized {skip} expr, only callable from the search loop which
+" GetJavascriptIndent does to find the containing [[{(] (relies on s:vars)
 function s:SkipFunc()
   if s:top_col == 1
     throw 'out of bounds'
   endif
-  let s:top_col = col('.')
-  if getline('.') =~ '\%<'.s:top_col.'c\/.\{-}\/\|\%>'.s:top_col.'c[''"]\|\\$'
+  let s:top_col = 0
+  if s:check_in
     if eval(s:skip_expr)
-      let s:top_col = 0
+      return 1
     endif
-    return !s:top_col
-  elseif s:check_in || search('\m`\|\${\|\*\/','nW'.s:z,s:looksyn)
-    let s:check_in = eval(s:skip_expr)
-    if s:check_in
-      let s:top_col = 0
+    let s:check_in = 0
+  elseif getline('.') =~ '\%<'.col('.').'c\/.\{-}\/\|\%>'.col('.').'c[''"]\|\\$'
+    if eval(s:skip_expr)
+      let s:looksyn = line('.')
+      return 1
     endif
+  elseif search('\m`\|\${\|\*\/','nW'.s:z,s:looksyn) && eval(s:skip_expr)
+    let s:check_in = 1
+    return 1
   endif
-  let s:looksyn = line('.')
-  return s:check_in
+  let [s:looksyn, s:top_col] = getpos('.')[1:2]
 endfunction
 
 function s:AlternatePair()
