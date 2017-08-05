@@ -106,7 +106,8 @@ function s:ParseCino(f)
   return sign * str2nr(n) / max([str2nr(divider),1])
 endfunction
 
-" Optimized {skip} expr, used only once per GetJavascriptIndent() call
+" Optimized {skip} expr, only callable from the search loop which
+" GetJavascriptIndent does to find the containing [[{(] (relies on s:vars)
 function s:SkipFunc()
   if s:top_col == 1
     throw 'out of bounds'
