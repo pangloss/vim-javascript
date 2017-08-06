@@ -153,7 +153,7 @@ function s:AlternatePair()
       endif
     endif
   endwhile
-  throw 'out of bounds'
+  throw 'left AlternatePair, no match'
 endfunction
 
 function s:Nat(int)
@@ -308,8 +308,8 @@ function s:DoWhile()
     let cpos = searchpos('\m\<','cbW')
     while search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
       if !eval(s:skip_expr)
-        if (s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) ?
-              \ s:PreviousToken() : s:Token()) ==# 'do' && s:IsBlock()
+        if s:{s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) ?
+              \ 'Previous' : ''}Token() ==# 'do' && s:IsBlock()
           return 1
         endif
         break
@@ -425,17 +425,20 @@ function GetJavascriptIndent()
   else
     call cursor(v:lnum,1)
     let [s:looksyn, s:check_in, s:top_col] = [v:lnum - 1, 0, 0]
-    try
-      if idx != -1
-        call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,s:script_tag)
-      elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
-        call s:GetPair('{','}','bW','s:SkipFunc()',2000,s:script_tag)
-      else
+    if idx != -1
+      call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,s:script_tag)
+    elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
+      call s:GetPair('{','}','bW','s:SkipFunc()',2000,s:script_tag)
+    else
+      let [sdebug, &debug] = [&debug, 'msg']
+      try
         call s:AlternatePair()
-      endif
-    catch
-      call cursor(v:lnum,1)
-    endtry
+      catch
+        call cursor(v:lnum,1)
+      finally
+        let &debug=sdebug
+      endtry
+    endif
   endif
 
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [s:script_tag,0] : getpos('.')[1:2])
