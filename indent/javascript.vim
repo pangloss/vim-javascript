@@ -153,7 +153,7 @@ function s:AlternatePair()
       endif
     endif
   endwhile
-  throw 'left AlternatePair, no match'
+  throw 'out of bounds'
 endfunction
 
 function s:Nat(int)
@@ -358,11 +358,9 @@ function s:IsBlock()
   elseif tok =~ '\k'
     if tok ==# 'type'
       let l:pos = getpos('.')
-      try
-        return s:PreviousToken() !~# '^\%(im\|ex\)port$' || s:PreviousToken() == '.'
-      finally
-        call setpos('.',l:pos)
-      endtry
+      let ret = s:PreviousToken() !~# '^\%(im\|ex\)port$' || s:PreviousToken() == '.'
+      call setpos('.',l:pos)
+      return ret
     endif
     return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
           \ ,tok) < (line('.') != l:n) || s:__PreviousToken() == '.'
@@ -374,9 +372,9 @@ function s:IsBlock()
     return !s:ExprCol()
   elseif tok == '/'
     return s:SynAt(line('.'),col('.')) =~? 'regex'
+  elseif tok !~ '[=~!<,.?^%|&([]'
+    return tok !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == tok
   endif
-  return tok !~ '[=~!<,.?^%|&([]' &&
-        \ (tok !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == tok)
 endfunction
 
 function GetJavascriptIndent()
@@ -425,20 +423,17 @@ function GetJavascriptIndent()
   else
     call cursor(v:lnum,1)
     let [s:looksyn, s:check_in, s:top_col] = [v:lnum - 1, 0, 0]
-    if idx != -1
-      call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,s:script_tag)
-    elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
-      call s:GetPair('{','}','bW','s:SkipFunc()',2000,s:script_tag)
-    else
-      let [sdebug, &debug] = [&debug, 'msg']
-      try
+    try
+      if idx != -1
+        call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,s:script_tag)
+      elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
+        call s:GetPair('{','}','bW','s:SkipFunc()',2000,s:script_tag)
+      else
         call s:AlternatePair()
-      catch
-        call cursor(v:lnum,1)
-      finally
-        let &debug=sdebug
-      endtry
-    endif
+      endif
+    catch
+      call cursor(v:lnum,1)
+    endtry
   endif
 
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [s:script_tag,0] : getpos('.')[1:2])
