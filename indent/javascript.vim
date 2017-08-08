@@ -186,9 +186,9 @@ function s:PreviousToken()
   return ''
 endfunction
 
-function s:__PreviousToken()
+function s:SavePos(f,...)
   let l:pos = getpos('.')
-  let ret = s:PreviousToken()
+  let ret = call(a:f,a:000)
   call setpos('.',l:pos)
   return ret
 endfunction
@@ -249,22 +249,21 @@ endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
 function s:PrevCodeLine(lnum)
-  let [l:multi, l:n, l:pos] = [0, prevnonblank(a:lnum), getpos('.')]
+  let [l:multi, l:n] = [0, prevnonblank(a:lnum)]
   while l:n
     if getline(l:n) =~ '^\s*\/[/*]' && (getline(l:n) !~ '`' &&
           \ getline(l:n-1)[-1:] != '\' || s:SynAt(l:n,1) !~? b:syng_str)
       let l:n = prevnonblank(l:n-1)
       continue
     elseif l:multi || getline(l:n) =~ '\*\/'
-      call cursor(l:n,1)
-      if search('\m\/\*\|\(\*\/\)','bWp') == 1 && s:SynAt(l:n,1) =~? s:syng_com
+      if s:SavePos('eval',"cursor(".l:n.",1)%0 ||".
+            \ "search('\\m\\/\\*\\|\\(\\*\\/\\)','bWp') == 1 && s:SynAt(l:n,1) =~? s:syng_com")
         let [l:multi, l:n] = [1, line('.')]
         continue
       endif
     endif
     break
   endwhile
-  call setpos('.',l:pos)
   return l:n
 endfunction
 
@@ -300,7 +299,7 @@ function s:OneScope(lnum)
     return 1
   endif
   return count(split(kw),s:Token()) &&
-        \ s:__PreviousToken() != '.' && !s:DoWhile()
+        \ s:SavePos('s:PreviousToken') != '.' && !s:DoWhile()
 endfunction
 
 function s:DoWhile()
@@ -357,17 +356,14 @@ function s:IsBlock()
     return tok != '{'
   elseif tok =~ '\k'
     if tok ==# 'type'
-      let l:pos = getpos('.')
-      let ret = s:PreviousToken() !~# '^\%(im\|ex\)port$' || s:PreviousToken() == '.'
-      call setpos('.',l:pos)
-      return ret
+      return s:SavePos('eval',"s:PreviousToken() !~# '^\\%(im\\|ex\\)port$' || s:PreviousToken() == '.'")
     endif
     return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
-          \ ,tok) < (line('.') != l:n) || s:__PreviousToken() == '.'
+          \ ,tok) < (line('.') != l:n) || s:SavePos('s:PreviousToken') == '.'
   elseif tok == '>'
     return getline('.')[col('.')-2] == '=' || s:SynAt(line('.'),col('.')) =~? 'jsflow\|^html'
   elseif tok == '*'
-    return s:__PreviousToken() == ':'
+    return s:SavePos('s:PreviousToken') == ':'
   elseif tok == ':'
     return !s:ExprCol()
   elseif tok == '/'
