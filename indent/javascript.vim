@@ -186,7 +186,7 @@ function s:PreviousToken()
   return ''
 endfunction
 
-function s:SavePos(f,...)
+function s:Pure(f,...)
   let l:pos = getpos('.')
   let ret = call(a:f,a:000)
   call setpos('.',l:pos)
@@ -300,7 +300,7 @@ function s:OneScope(lnum)
     return 1
   endif
   return count(split(kw),s:Token()) &&
-        \ s:SavePos('s:PreviousToken') != '.' && !s:DoWhile()
+        \ s:Pure('s:PreviousToken') != '.' && !s:DoWhile()
 endfunction
 
 function s:DoWhile()
@@ -357,14 +357,14 @@ function s:IsBlock()
     return tok != '{'
   elseif tok =~ '\k'
     if tok ==# 'type'
-      return s:SavePos('eval',"s:PreviousToken() !~# '^\\%(im\\|ex\\)port$' || s:PreviousToken() == '.'")
+      return s:Pure('eval',"s:PreviousToken() !~# '^\\%(im\\|ex\\)port$' || s:PreviousToken() == '.'")
     endif
     return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
-          \ ,tok) < (line('.') != l:n) || s:SavePos('s:PreviousToken') == '.'
+          \ ,tok) < (line('.') != l:n) || s:Pure('s:PreviousToken') == '.'
   elseif tok == '>'
     return getline('.')[col('.')-2] == '=' || s:SynAt(line('.'),col('.')) =~? 'jsflow\|^html'
   elseif tok == '*'
-    return s:SavePos('s:PreviousToken') == ':'
+    return s:Pure('s:PreviousToken') == ':'
   elseif tok == ':'
     return !s:ExprCol()
   elseif tok == '/'
