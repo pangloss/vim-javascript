@@ -310,10 +310,10 @@ function s:OneScope(lnum)
 endfunction
 
 function s:DoWhile()
-  return expand('<cword>') ==# 'while' &&
-        \ s:SearchLoop('\m\C[{}]\|\<\%(do\|while\)\>','bW',s:skip_expr) &&
-        \ s:{s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) ?
-        \ 'Previous' : ''}Token() ==# 'do' && s:IsBlock()
+  return s:Pure('eval', "expand('<cword>') ==# 'while' && search('\\m\\<','cbW') &&".
+        \ "s:SearchLoop('\\m\\C[{}]\\|\\<\\%(do\\|while\\)\\>','bW',s:skip_expr) &&".
+        \ "s:{s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) ?".
+        \ "'Previous' : ''}Token() ==# 'do' && s:IsBlock()")
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
