@@ -132,10 +132,8 @@ endfunction
 
 function s:AlternatePair()
   let [pat, l:for] = ['[][(){};]', 2]
-  while search('\m'.pat,'bW',s:script_tag)
-    if s:SkipFunc()
-      continue
-    elseif s:LookingAt() == ';'
+  while s:SearchLoop('\m'.pat,'bW',s:script_tag,'s:SkipFunc()')
+    if s:LookingAt() == ';'
       if !l:for
         if s:GetPair('{','}','bW','s:SkipFunc()',2000,s:script_tag)
           return
@@ -173,15 +171,13 @@ function s:PreviousToken()
   if search('\m\k\{1,}\|\S','ebW')
     if (strpart(getline('.'),col('.')-2,2) == '*/' || line('.') != l:pos[1] &&
           \ getline('.')[:col('.')-1] =~ '\/\/') && s:SynAt(line('.'),col('.')) =~? s:syng_com
-      while search('\m\S\ze\_s*\/[/*]','bW')
-        if s:SynAt(line('.'),col('.')) !~? s:syng_com
-          return s:Token()
-        endif
-      endwhile
+      if s:SearchLoop('\m\S\ze\_s*\/[/*]','bW',"s:SynAt(line('.'),col('.')) =~? s:syng_com")
+        return s:Token()
+      endif
+      call setpos('.',l:pos)
     else
       return s:Token()
     endif
-    call setpos('.',l:pos)
   endif
   return ''
 endfunction
@@ -193,15 +189,25 @@ function s:Pure(f,...)
   return ret
 endfunction
 
+function s:SearchLoop(...)
+  if a:2 !~ '[ncp]'
+    let l:pos = getpos('.')
+    while call('search',a:000[:-2])
+      if !eval(a:000[-1])
+        return line('.')
+      endif
+    endwhile
+    call setpos('.',l:pos)
+  endif
+endfunction
+
 function s:ExprCol()
   if getline('.')[col('.')-2] == ':'
     return 1
   endif
   let [bal, l:pos] = [0, getpos('.')]
-  while search('\m[{}?:]','bW',s:script_tag)
-    if eval(s:skip_expr)
-      continue
-    elseif s:LookingAt() == ':'
+  while s:SearchLoop('\m[{}?:]','bW',s:script_tag,s:skip_expr)
+    if s:LookingAt() == ':'
       let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'
     elseif s:LookingAt() == '?'
       let bal += 1
@@ -304,19 +310,10 @@ function s:OneScope(lnum)
 endfunction
 
 function s:DoWhile()
-  if expand('<cword>') ==# 'while'
-    let cpos = searchpos('\m\<','cbW')
-    while search('\m\C[{}]\|\<\%(do\|while\)\>','bW')
-      if !eval(s:skip_expr)
-        if s:{s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) ?
-              \ 'Previous' : ''}Token() ==# 'do' && s:IsBlock()
-          return 1
-        endif
-        break
-      endif
-    endwhile
-    call call('cursor',cpos)
-  endif
+  return expand('<cword>') ==# 'while' &&
+        \ s:SearchLoop('\m\C[{}]\|\<\%(do\|while\)\>','bW',s:skip_expr) &&
+        \ s:{s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) ?
+        \ 'Previous' : ''}Token() ==# 'do' && s:IsBlock()
 endfunction
 
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
