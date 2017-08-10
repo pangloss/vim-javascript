@@ -190,15 +190,13 @@ function s:Pure(f,...)
 endfunction
 
 function s:SearchLoop(...)
-  if a:2 !~ '[ncp]'
-    let l:pos = getpos('.')
-    while call('search',a:000[:-2])
-      if !eval(a:000[-1])
-        return line('.')
-      endif
-    endwhile
-    call setpos('.',l:pos)
-  endif
+  let l:pos = getpos('.')
+  while call('search',a:000[:-2])
+    if !eval(a:000[-1])
+      return line('.')
+    endif
+  endwhile
+  call setpos('.',l:pos)
 endfunction
 
 function s:ExprCol()
