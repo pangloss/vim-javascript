@@ -1,4 +1,4 @@
-au BufNewFile,BufRead *.{js,jsm,es,es6},Jakefile setf javascript
+au BufNewFile,BufRead *.{js,mjs,jsm,es,es6},Jakefile setf javascript
 
 fun! s:SourceFlowSyntax()
   if !exists('javascript_plugin_flow') && !exists('b:flow_active') &&
