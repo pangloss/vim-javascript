@@ -191,7 +191,7 @@ endfunction
 
 function s:SearchLoop(...)
   let l:pos = getpos('.')
-  while call('search',a:000[:-2])
+  while call('search',a:000[:-2]) " search flags [^npc]
     if !eval(a:000[-1])
       return line('.')
     endif
