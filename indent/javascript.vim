@@ -294,27 +294,23 @@ function s:OneScope(lnum)
   call cursor(a:lnum,strlen(s:Trim(a:lnum)))
   if s:LookingAt() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100)
     let tok = s:PreviousToken()
-    if tok =~# '^\%(for\|if\|let\|while\|with\)$' ||
-          \ tok =~# '^await$\|^each$' && s:PreviousToken() ==# 'for'
-      return s:Pure('s:PreviousToken') != '.' && !s:DoWhile()
-    endif
-  elseif strpart(getline('.'),col('.')-2,2) == '=>'
-    return 1
+    return (tok =~# '^\%(for\|if\|let\|while\|with\)$' ||
+          \ tok =~# '^await$\|^each$' && s:PreviousToken() ==# 'for') &&
+          \ s:Pure('s:PreviousToken') != '.' && !(tok == 'while' && s:DoWhile())
   elseif s:Token() =~# '^else$\|^do$'
     return s:Pure('s:PreviousToken') != '.'
   endif
+  return strpart(getline('.'),col('.')-2,2) == '=>'
 endfunction
 
 function s:DoWhile()
-  if expand('<cword>') ==# 'while'
-    let cpos = searchpos('\m\<','cbW')
-    if s:SearchLoop('\m\C[{}]\|\<\%(do\|while\)\>','bW',s:skip_expr)
-      if s:{s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) ?
-            \ 'Previous' : ''}Token() ==# 'do' && s:IsBlock()
-        return 1
-      endif
-      call call('cursor',cpos)
+  let cpos = searchpos('\m\<','cbW')
+  if s:SearchLoop('\m\C[{}]\|\<\%(do\|while\)\>','bW',s:skip_expr)
+    if s:{s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) ?
+          \ 'Previous' : ''}Token() ==# 'do' && s:IsBlock()
+      return 1
     endif
+    call call('cursor',cpos)
   endif
 endfunction
 
