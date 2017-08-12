@@ -291,20 +291,18 @@ function s:Balanced(lnum)
 endfunction
 
 function s:OneScope(lnum)
-  let [pline, kw] = [s:Trim(a:lnum), 'else do']
-  call cursor(a:lnum,strlen(pline))
-  if pline[-1:] == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100)
-    if s:PreviousToken() =~# '^\%(await\|each\)$'
-      call s:PreviousToken()
-      let kw = 'for'
-    else
-      let kw = 'for if let while with'
+  call cursor(a:lnum,strlen(s:Trim(a:lnum)))
+  if s:LookingAt() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100)
+    let tok = s:PreviousToken()
+    if tok =~# '^\%(for\|if\|let\|while\|with\)$' ||
+          \ tok =~# '^await$\|^each$' && s:PreviousToken() ==# 'for'
+      return s:Pure('s:PreviousToken') != '.' && !s:DoWhile()
     endif
-  elseif pline[-2:] == '=>'
+  elseif strpart(getline('.'),col('.')-2,2) == '=>'
     return 1
+  elseif s:Token() =~# '^else$\|^do$'
+    return s:Pure('s:PreviousToken') != '.'
   endif
-  return count(split(kw),s:Token()) &&
-        \ s:Pure('s:PreviousToken') != '.' && !s:DoWhile()
 endfunction
 
 function s:DoWhile()
