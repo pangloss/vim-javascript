@@ -242,8 +242,8 @@ endfunction
 function s:Trim(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
   while 1
-    let temp = substitute(pline,'^\(.*\S\)\(\s*\/[/*].\{-}\)$',
-          \ '\=submatch(s:SynAt('.a:ln.', strlen(submatch(0))) =~? s:syng_com)','')
+    let temp = substitute(pline,'^\(.*\S\)\s*\/[/*].\{-}$',
+          \ '\=submatch(s:SynAt(a:ln, strlen(submatch(0))) =~? s:syng_com)','')
     if temp ==# pline
       return pline
     endif
