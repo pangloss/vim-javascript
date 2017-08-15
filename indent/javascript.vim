@@ -183,7 +183,8 @@ function s:PreviousToken()
 endfunction
 
 function s:Pure(f,...)
-  let [l:pos, ret] = [getpos('.'), call(a:f,a:000)]
+  let l:pos = getpos('.')
+  let ret = call(a:f,a:000)
   call setpos('.',l:pos)
   return ret
 endfunction
@@ -241,14 +242,12 @@ endfunction
 
 function s:Trim(ln)
   let pline = substitute(getline(a:ln),'\s*$','','')
-  while 1
-    let temp = substitute(pline,'^\(.*\S\)\s*\/[/*].\{-}$',
-          \ '\=submatch(s:SynAt(a:ln, strlen(pline)) =~? s:syng_com)','')
-    if temp ==# pline
-      return pline
-    endif
-    let pline = temp
+  let [temp, and] = (matchlist(pline,'^\(.*\S\)\s*\/\ze[/*]') + [0,0])[:1]
+  while and isnot 0 && s:SynAt(a:ln, strlen(pline)) =~? s:syng_com
+    let pline = and
+    let [temp, and] = (matchlist(temp,'^\(.*\S\)\s*\/\ze[/*]') + [0,0])[:1]
   endwhile
+  return pline
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
