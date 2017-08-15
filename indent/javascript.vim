@@ -241,10 +241,16 @@ function s:Continues(ln,con)
 endfunction
 
 function s:Trim(ln)
-  let pline = substitute(getline(a:ln),'\s*$','','')
-  let [temp, and] = (matchlist(pline,'^\(.*\S\)\s*\/\ze[/*]') + [0,0])[:1]
-  while and isnot 0 && s:SynAt(a:ln, strlen(pline)) =~? s:syng_com
+  let [temp, and, tail] = matchlist(getline(a:ln),'^\(.*\S\)\s*\/\ze\([/*].*\S\)\|\s*$')[:2]
+  if and is ''
+    return getline(a:ln)[:-1-strlen(temp)]
+  endif
+  let pline = temp . tail
+  while s:SynAt(a:ln, strlen(pline)) =~? s:syng_com
     let [pline, temp, and] = ([and] + matchlist(temp,'^\(.*\S\)\s*\/\ze[/*]') + [0,0])[:2]
+    if and is 0
+      break
+    endif
   endwhile
   return pline
 endfunction
