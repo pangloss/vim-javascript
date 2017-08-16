@@ -241,12 +241,14 @@ function s:Continues(ln,con)
 endfunction
 
 function s:Trim(ln)
-  let pline = substitute(getline(a:ln),'\s*$','','')
-  let [temp; and] = (matchlist(pline,'^\(.*\S\)\s*\/\ze[/*]') + [0])[:1]
-  while and != [] && s:SynAt(a:ln, strlen(pline)) =~? s:syng_com
-    let [pline, temp; and] = (and + matchlist(temp,'^\(.*\S\)\s*\/\ze[/*]') + [0])[:2]
+  let divi = split(getline(a:ln),'\%(\S\zs\ze\s*\/[/*].\{-}$\|\S\zs\s*$\)')
+  while len(divi) > 1
+    if s:SynAt(a:ln, strlen(join(divi,''))) !~? s:syng_com
+      break
+    endif
+    let divi = divi[: -(divi[-2] =~ '\S' ? 2 : 3)] 
   endwhile
-  return pline
+  return join(divi,'')
 endfunction
 
 " Find line above 'lnum' that isn't empty or in a comment
