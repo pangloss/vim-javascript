@@ -242,10 +242,7 @@ endfunction
 
 function s:Trim(ln)
   let divi = split(getline(a:ln),'\%(\S\zs\ze\s*\/[/*].\{-}$\|\S\zs\s*$\)')
-  while len(divi) > 1
-    if s:SynAt(a:ln, strlen(join(divi,''))) !~? s:syng_com
-      break
-    endif
+  while len(divi) > 1 && s:SynAt(a:ln, strlen(join(divi,''))) =~? s:syng_com
     let divi = divi[: -(divi[-2] =~ '\S' ? 2 : 3)] 
   endwhile
   return join(divi,'')
