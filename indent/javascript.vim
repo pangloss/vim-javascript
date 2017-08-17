@@ -232,17 +232,17 @@ let s:continuation = get(g:,'javascript_continuation',
 function s:Continues(ln,con)
   let tok = matchstr(a:con[-15:],s:continuation)
   if tok =~ '[a-z:]'
-    call cursor(a:ln,strlen(a:con))
+    call cursor(a:ln, len(a:con))
     return tok == ':' ? s:ExprCol() : s:PreviousToken() != '.'
   elseif tok !~ '[/>]'
     return tok isnot ''
   endif
-  return s:SynAt(a:ln,strlen(a:con)) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
+  return s:SynAt(a:ln, len(a:con)) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
 endfunction
 
 function s:Trim(ln)
   let divi = split(getline(a:ln),'\s\+$\|\S\zs\ze\s*\/[/*]')
-  while len(divi) > 1 && s:SynAt(a:ln, strlen(join(divi,''))) =~? s:syng_com
+  while len(divi) > 1 && s:SynAt(a:ln, len(join(divi,''))) =~? s:syng_com
     call remove(divi,-1)
   endwhile
   return join(divi,'')
@@ -288,7 +288,7 @@ function s:Balanced(lnum)
 endfunction
 
 function s:OneScope(lnum)
-  call cursor(a:lnum,strlen(s:Trim(a:lnum)))
+  call cursor(a:lnum, len(s:Trim(a:lnum)))
   if s:LookingAt() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100)
     let tok = s:PreviousToken()
     return (tok =~# '^\%(for\|if\|let\|while\|with\)$' ||
@@ -444,7 +444,7 @@ function GetJavascriptIndent()
     if idx == -1 && pline[-1:] !~ '[{;]'
       let sol = matchstr(l:line,s:opfirst)
       if sol =~# '^\%(in\%(stanceof\)\=\|\*\)$'
-        call cursor(l:lnum,strlen(pline))
+        call cursor(l:lnum, len(pline))
         if pline[-1:] == '}' && s:GetPair('{','}','bW',s:skip_expr,200) && s:IsBlock()
           return num_ind + s:sw()
         endif
