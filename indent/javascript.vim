@@ -449,7 +449,9 @@ function GetJavascriptIndent()
           return num_ind + s:sw()
         endif
         let is_op = s:sw()
-      elseif sol isnot '' || s:Continues(l:lnum,pline)
+      elseif sol == '/' && s:SynAt(v:lnum,
+            \ 1 + len(getline(v:lnum)) - len(l:line)) !~? 'regex' ||
+            \ sol isnot '' || s:Continues(l:lnum,pline)
         let is_op = s:sw()
       endif
       let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) -
