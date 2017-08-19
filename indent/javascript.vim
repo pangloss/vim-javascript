@@ -240,11 +240,6 @@ function s:Continues(ln,con)
   return s:SynAt(a:ln, len(a:con)) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
 endfunction
 
-function s:Divide(ln,con)
-  return a:con[0] == '/' && s:SynAt(a:ln,
-        \ 1 + len(getline(a:ln)) - len(a:con)) !~? 'regex'
-endfunction
-
 function s:Trim(ln)
   let divi = split(getline(a:ln),'\s\+$\|\S\zs\ze\s*\/[/*]')
   while len(divi) > 1 && s:SynAt(a:ln, len(join(divi,''))) =~? s:syng_com
@@ -336,11 +331,14 @@ function s:IsContOne(i,num,cont)
   return b_l
 endfunction
 
+function s:Reserved(keyword)
+  return a:keyword !~ '^\K\k*$' || expand('<cword>') !=# 'class' &&
+        \ s:PreviousToken() !~# '^class$\|^extends$' || s:PreviousToken() == '.'
+endfunction
+
 function s:IsSwitch()
   return s:PreviousToken() !~ '[.*]' &&
-        \ (!s:GetPair('{','}','cbW',s:skip_expr,100) || s:IsBlock() &&
-        \ (s:Token() !~ '^\K\k*$' || expand('<cword>') !=# 'class' &&
-        \ s:PreviousToken() !~# '^class$\|^extends$' || s:PreviousToken() == '.'))
+        \ (!s:GetPair('{','}','cbW',s:skip_expr,100) || s:IsBlock() && s:Reserved(s:Token()))
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
@@ -448,13 +446,14 @@ function GetJavascriptIndent()
     endif
     if idx == -1 && pline[-1:] !~ '[{;]'
       let sol = matchstr(l:line,s:opfirst)
-      if sol =~# '^\%(in\%(stanceof\)\=\|\*\)$'
-        call cursor(l:lnum, len(pline))
-        if pline[-1:] == '}' && s:GetPair('{','}','bW',s:skip_expr,200) && s:IsBlock()
+      if b:js_cache[2] && sol =~# '^\%(in\%(stanceof\)\=\|\*\)$'
+        call call('cursor',b:js_cache[1:])
+        if !s:Reserved(s:PreviousToken())
           return num_ind + s:sw()
         endif
         let is_op = s:sw()
-      elseif sol =~ '[^/]' || s:Divide(v:lnum,l:line) || s:Continues(l:lnum,pline)
+      elseif (sol == '/' ? s:SynAt(v:lnum,1 + len(getline(v:lnum)) - len(l:line)) !~? 'regex' :
+            \ len(sol)) || s:Continues(l:lnum,pline)
         let is_op = s:sw()
       endif
       let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) -
