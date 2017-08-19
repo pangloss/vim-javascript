@@ -240,6 +240,11 @@ function s:Continues(ln,con)
   return s:SynAt(a:ln, len(a:con)) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
 endfunction
 
+function s:Divide(ln,con)
+  return a:con[0] == '/' && s:SynAt(a:ln,
+        \ 1 + len(getline(a:ln)) - len(a:con)) !~? 'regex'
+endfunction
+
 function s:Trim(ln)
   let divi = split(getline(a:ln),'\s\+$\|\S\zs\ze\s*\/[/*]')
   while len(divi) > 1 && s:SynAt(a:ln, len(join(divi,''))) =~? s:syng_com
@@ -449,9 +454,7 @@ function GetJavascriptIndent()
           return num_ind + s:sw()
         endif
         let is_op = s:sw()
-      elseif sol == '/' && s:SynAt(v:lnum,
-            \ 1 + len(getline(v:lnum)) - len(l:line)) !~? 'regex' ||
-            \ sol isnot '' || s:Continues(l:lnum,pline)
+      elseif sol =~ '[^/]' || s:Divide(v:lnum,l:line) || s:Continues(l:lnum,pline)
         let is_op = s:sw()
       endif
       let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) -
