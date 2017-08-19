@@ -446,14 +446,18 @@ function GetJavascriptIndent()
     endif
     if idx == -1 && pline[-1:] !~ '[{;]'
       let sol = matchstr(l:line,s:opfirst)
-      if b:js_cache[2] && sol =~# '^\%(in\%(stanceof\)\=\|\*\)$'
+      if sol is '' || sol == '/' && s:SynAt(v:lnum,
+            \ 1 + len(getline(v:lnum)) - len(l:line)) =~? 'regex'
+        if s:Continues(l:lnum,pline)
+          let is_op = s:sw()
+        endif
+      elseif b:js_cache[2] && sol =~# '^\%(in\%(stanceof\)\=\|\*\)$'
         call call('cursor',b:js_cache[1:])
         if !s:Reserved(s:PreviousToken())
           return num_ind + s:sw()
         endif
         let is_op = s:sw()
-      elseif (sol == '/' ? s:SynAt(v:lnum,1 + len(getline(v:lnum)) - len(l:line)) !~? 'regex' :
-            \ len(sol)) || s:Continues(l:lnum,pline)
+      else
         let is_op = s:sw()
       endif
       let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) -
