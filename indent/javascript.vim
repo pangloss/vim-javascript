@@ -453,8 +453,7 @@ function GetJavascriptIndent()
         endif
       elseif b:js_cache[2] && sol =~# '^\%(in\%(stanceof\)\=\|\*\)$'
         call call('cursor',b:js_cache[1:])
-        call s:PreviousToken()
-        if s:Class()
+        if s:PreviousToken() =~ '\k' && s:Class()
           return num_ind + s:sw()
         endif
         let is_op = s:sw()
