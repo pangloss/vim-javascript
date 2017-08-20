@@ -331,14 +331,14 @@ function s:IsContOne(i,num,cont)
   return b_l
 endfunction
 
-function s:Reserved(keyword)
-  return a:keyword !~ '^\K\k*$' || expand('<cword>') !=# 'class' &&
-        \ s:PreviousToken() !~# '^class$\|^extends$' || s:PreviousToken() == '.'
+function s:Class()
+  return (s:Token() ==# 'class' || s:PreviousToken() =~# '^class$\|^extends$') &&
+        \ s:PreviousToken() != '.'
 endfunction
 
 function s:IsSwitch()
   return s:PreviousToken() !~ '[.*]' &&
-        \ (!s:GetPair('{','}','cbW',s:skip_expr,100) || s:IsBlock() && s:Reserved(s:Token()))
+        \ (!s:GetPair('{','}','cbW',s:skip_expr,100) || s:IsBlock() && !s:Class())
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
@@ -453,7 +453,8 @@ function GetJavascriptIndent()
         endif
       elseif b:js_cache[2] && sol =~# '^\%(in\%(stanceof\)\=\|\*\)$'
         call call('cursor',b:js_cache[1:])
-        if !s:Reserved(s:PreviousToken())
+        call s:PreviousToken()
+        if s:Class()
           return num_ind + s:sw()
         endif
         let is_op = s:sw()
