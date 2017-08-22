@@ -331,11 +331,14 @@ function s:IsContOne(i,num,cont)
   return b_l
 endfunction
 
+function s:Class()
+  return (s:Token() ==# 'class' || s:PreviousToken() =~# '^class$\|^extends$') &&
+        \ s:PreviousToken() != '.'
+endfunction
+
 function s:IsSwitch()
   return s:PreviousToken() !~ '[.*]' &&
-        \ (!s:GetPair('{','}','cbW',s:skip_expr,100) || s:IsBlock() &&
-        \ (s:Token() !~ '^\K\k*$' || expand('<cword>') !=# 'class' &&
-        \ s:PreviousToken() !~# '^class$\|^extends$' || s:PreviousToken() == '.'))
+        \ (!s:GetPair('{','}','cbW',s:skip_expr,100) || s:IsBlock() && !s:Class())
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
@@ -443,13 +446,18 @@ function GetJavascriptIndent()
     endif
     if idx == -1 && pline[-1:] !~ '[{;]'
       let sol = matchstr(l:line,s:opfirst)
-      if sol =~# '^\%(in\%(stanceof\)\=\|\*\)$'
-        call cursor(l:lnum, len(pline))
-        if pline[-1:] == '}' && s:GetPair('{','}','bW',s:skip_expr,200) && s:IsBlock()
+      if sol is '' || sol == '/' && s:SynAt(v:lnum,
+            \ 1 + len(getline(v:lnum)) - len(l:line)) =~? 'regex'
+        if s:Continues(l:lnum,pline)
+          let is_op = s:sw()
+        endif
+      elseif b:js_cache[2] && sol =~# '^\%(in\%(stanceof\)\=\|\*\)$'
+        call call('cursor',b:js_cache[1:])
+        if s:PreviousToken() =~ '\k' && s:Class()
           return num_ind + s:sw()
         endif
         let is_op = s:sw()
-      elseif sol isnot '' || s:Continues(l:lnum,pline)
+      else
         let is_op = s:sw()
       endif
       let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) -
