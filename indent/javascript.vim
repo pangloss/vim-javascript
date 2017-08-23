@@ -384,12 +384,10 @@ function GetJavascriptIndent()
     endif
     return -1
   endif
-  call cursor(v:lnum,1)
-  if s:PreviousToken() is ''
+  let l:lnum = s:PrevCodeLine(v:lnum - 1)
+  if !l:lnum
     return
   endif
-  let l:lnum = line('.')
-  let pline = getline('.')[:col('.')-1]
 
   let l:line = substitute(l:line,'^\s*','','')
   let l:line_raw = l:line
@@ -427,7 +425,7 @@ function GetJavascriptIndent()
 
   let [num_ind, is_op, b_l, l:switch_offset] = [s:Nat(indent(num)),0,0,0]
   if !b:js_cache[2] || s:LookingAt() == '{' && s:IsBlock()
-    let ilnum = line('.')
+    let [ilnum, pline] = [line('.'), s:Trim(l:lnum)]
     if b:js_cache[2] && s:LookingAt() == ')' && s:GetPair('(',')','bW',s:skip_expr,100)
       if ilnum == num
         let [num, num_ind] = [line('.'), indent('.')]
@@ -457,7 +455,6 @@ function GetJavascriptIndent()
       else
         let is_op = s:sw()
       endif
-      call cursor(l:lnum, len(pline))
       let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) -
             \ (!is_op && l:line =~ '^{')) * s:sw()
     endif
