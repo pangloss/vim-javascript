@@ -190,8 +190,8 @@ function s:Pure(f,...)
 endfunction
 
 function s:SearchLoop(pat,flags,top,...)
-  return call('s:GetPair',[a:pat, '\_$.', a:flags] + (a:0 ? [a:1, 200, a:top] : [a:top, 200]))
-  "                                ^ HACK: use GetPair(), only searching for {start}
+  let pair = insert([a:pat,a:flags], '\_$.', a:flags =~# 'b')
+  return call('s:GetPair',pair + (a:0 ? [a:1, 200, a:top] : [a:top, 200]))
 endfunction
 
 function s:ExprCol()
