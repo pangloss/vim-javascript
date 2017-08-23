@@ -191,7 +191,7 @@ endfunction
 
 function s:SearchLoop(pat,flags,top,...)
   return call('s:GetPair',[a:pat, '\_$.', a:flags] + (a:0 ? [a:1, 200, a:top] : [a:top, 200]))
-  "                                ^ HACK: s:GetPair() with an unfindable end pattern
+  "                                ^ HACK: use GetPair(), only searching for {start}
 endfunction
 
 function s:ExprCol()
@@ -283,6 +283,7 @@ function s:Balanced(lnum)
 endfunction
 
 function s:OneScope(lnum)
+  call cursor(a:lnum, len(s:Trim(a:lnum)))
   if s:LookingAt() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100)
     let tok = s:PreviousToken()
     return (tok =~# '^\%(for\|if\|let\|while\|with\)$' ||
@@ -321,8 +322,6 @@ function s:IsContOne(i,num,cont)
     endif
     let ind = min([ind, indent(l:i)])
     let l:i = s:PrevCodeLine(l:i - 1)
-    " move to eol: l:i
-    call cursor(l:i, len(s:Trim(l:i)))
   endwhile
   return b_l
 endfunction
