@@ -62,12 +62,12 @@ let s:skip_expr = "s:SynAt(line('.'),col('.')) =~? b:syng_strcom"
 " searchpair() wrapper
 if has('reltime')
   function s:GetPair(start,end,flags,skip,time,...)
-    return searchpair('\m\%<200c'.(a:start == '[' ? '\[' : a:start),'','\m\%<200c'.a:end,
+    return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
           \ a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
   endfunction
 else
   function s:GetPair(start,end,flags,skip,...)
-    return searchpair('\m\%<200c'.(a:start == '[' ? '\[' : a:start),'','\m\%<200c'.a:end,
+    return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
           \ a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,0,get(a:000,1)]))
   endfunction
 endif
