@@ -67,7 +67,7 @@ if has('reltime')
   endfunction
 else
   function s:GetPair(start,end,flags,skip,...)
-    return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
+    return searchpair('\m\%<200c'.(a:start == '[' ? '\[' : a:start),'','\m\%<200c'.a:end,
           \ a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,0,get(a:000,1)]))
   endfunction
 endif
@@ -282,7 +282,6 @@ function s:Balanced(lnum)
 endfunction
 
 function s:OneScope(lnum)
-  call cursor(a:lnum, len(s:Trim(a:lnum)))
   if s:LookingAt() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100)
     let tok = s:PreviousToken()
     return (tok =~# '^\%(for\|if\|let\|while\|with\)$' ||
@@ -321,6 +320,8 @@ function s:IsContOne(i,num,cont)
     endif
     let ind = min([ind, indent(l:i)])
     let l:i = s:PrevCodeLine(l:i - 1)
+    " move to eol: l:i
+    call cursor(l:i, len(s:Trim(l:i)))
   endwhile
   return b_l
 endfunction
@@ -456,6 +457,7 @@ function GetJavascriptIndent()
       else
         let is_op = s:sw()
       endif
+      call cursor(l:lnum, len(pline))
       let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) -
             \ (!is_op && l:line =~ '^{')) * s:sw()
     endif
