@@ -191,6 +191,7 @@ endfunction
 
 function s:SearchLoop(pat,flags,top,...)
   return call('s:GetPair',[a:pat, '\%$', a:flags] + (a:0 ? [a:1, 200, a:top] : [a:top, 200]))
+  "                                ^ HACK: s:GetPair() with an unfindable end pattern
 endfunction
 
 function s:ExprCol()
