@@ -235,35 +235,6 @@ function s:Continues(ln,con)
   return s:SynAt(a:ln, len(a:con)) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
 endfunction
 
-function s:Trim(ln)
-  let divi = split(getline(a:ln),'\s\+$\|\S\zs\ze\s*\/[/*]')
-  while len(divi) > 1 && s:SynAt(a:ln, len(join(divi,''))) =~? s:syng_com
-    call remove(divi,-1)
-  endwhile
-  return join(divi,'')
-endfunction
-
-" Find line above 'lnum' that isn't empty or in a comment
-function s:PrevCodeLine(lnum)
-  let [l:multi, l:n, l:pos] = [0, prevnonblank(a:lnum), getpos('.')]
-  while l:n
-    if getline(l:n) =~ '^\s*\/[/*]' && (getline(l:n) !~ '`' &&
-          \ getline(l:n-1)[-1:] != '\' || s:SynAt(l:n,1) !~? b:syng_str)
-      let l:n = prevnonblank(l:n-1)
-      continue
-    elseif l:multi || getline(l:n) =~ '\*\/'
-      call cursor(l:n,1)
-      if search('\m\/\*\|\(\*\/\)','bWp') == 1 && s:SynAt(l:n,1) =~? s:syng_com
-        let [l:multi, l:n] = [1, line('.')]
-        continue
-      endif
-    endif
-    break
-  endwhile
-  call setpos('.',l:pos)
-  return l:n
-endfunction
-
 " Check if line 'lnum' has a balanced amount of parentheses.
 function s:Balanced(lnum)
   let [l:open, l:line] = [0, getline(a:lnum)]
@@ -282,8 +253,7 @@ function s:Balanced(lnum)
   return !l:open
 endfunction
 
-function s:OneScope(lnum)
-  call cursor(a:lnum, len(s:Trim(a:lnum)))
+function s:OneScope()
   if s:LookingAt() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100)
     let tok = s:PreviousToken()
     return (tok =~# '^\%(for\|if\|let\|while\|with\)$' ||
@@ -314,14 +284,18 @@ function s:IsContOne(i,num,cont)
   let pind = a:num ? indent(a:num) + s:sw() : 0
   let ind = indent(a:i) + (a:cont ? 0 : s:sw())
   while l:i > l:num && ind > pind || l:i == l:num
-    if indent(l:i) < ind && s:OneScope(l:i)
+    if indent(l:i) < ind && s:OneScope()
       let b_l += 1
       let l:i = line('.')
     elseif !a:cont || b_l || ind < indent(a:i)
       break
     endif
     let ind = min([ind, indent(l:i)])
-    let l:i = s:PrevCodeLine(l:i - 1)
+    call search('^\%'.l:i.'l\s*\%(\/\*.\{-}\*\/\s*\)\=\S','eb')
+    if s:PreviousToken() is ''
+      break
+    endif
+    let l:i = line('.')
   endwhile
   return b_l
 endfunction
@@ -384,10 +358,12 @@ function GetJavascriptIndent()
     endif
     return -1
   endif
-  let l:lnum = s:PrevCodeLine(v:lnum - 1)
-  if !l:lnum
+  call cursor(v:lnum,1)
+  if s:PreviousToken() is ''
     return
   endif
+  let l:lnum = line('.')
+  let pline = getline('.')[:col('.')-1]
 
   let l:line = substitute(l:line,'^\s*','','')
   let l:line_raw = l:line
@@ -425,7 +401,7 @@ function GetJavascriptIndent()
 
   let [num_ind, is_op, b_l, l:switch_offset] = [s:Nat(indent(num)),0,0,0]
   if !b:js_cache[2] || s:LookingAt() == '{' && s:IsBlock()
-    let [ilnum, pline] = [line('.'), s:Trim(l:lnum)]
+    let ilnum = line('.')
     if b:js_cache[2] && s:LookingAt() == ')' && s:GetPair('(',')','bW',s:skip_expr,100)
       if ilnum == num
         let [num, num_ind] = [line('.'), indent('.')]
@@ -455,6 +431,7 @@ function GetJavascriptIndent()
       else
         let is_op = s:sw()
       endif
+      call cursor(l:lnum, len(pline))
       let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) -
             \ (!is_op && l:line =~ '^{')) * s:sw()
     endif
