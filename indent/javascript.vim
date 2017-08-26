@@ -107,7 +107,7 @@ function s:ParseCino(f)
 endfunction
 
 " Optimized {skip} expr, only callable from the search loop which
-" GetJavascriptIndent does to find the containing [[{(] (relies on s:vars)
+" GetJavascriptIndent does to find the containing [[{(] (side-effects)
 function s:SkipFunc()
   if s:top_col == 1
     throw 'out of bounds'
@@ -291,7 +291,7 @@ function s:IsContOne(i,num,cont)
       break
     endif
     let ind = min([ind, indent(l:i)])
-    call search('^\%'.l:i.'l\s*\%(\/\*.\{-}\*\/\s*\)\=\S','eb')
+    call search('^\%'.l:i.'l\s*\%(\%(\/\*.\{-}\)\=\*\/\s*\)\=\S','eb',l:i)
     if s:PreviousToken() is ''
       break
     endif
