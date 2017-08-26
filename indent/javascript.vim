@@ -262,7 +262,10 @@ function s:OneScope()
   elseif s:Token() =~# '^else$\|^do$'
     return s:Pure('s:PreviousToken') != '.'
   endif
-  return strpart(getline('.'),col('.')-2,2) == '=>'
+  if strpart(getline('.'),col('.')-2,2) == '=>'
+    call cursor(0,col('.')-1)
+    return 1
+  endif
 endfunction
 
 function s:DoWhile()
@@ -286,16 +289,15 @@ function s:IsContOne(i,num,cont)
   while l:i > l:num && ind > pind || l:i == l:num
     if indent(l:i) < ind && s:OneScope()
       let b_l += 1
-      let l:i = line('.')
     elseif !a:cont || b_l || ind < indent(a:i)
       break
+    else
+      call cursor(l:i,1)
     endif
-    let ind = min([ind, indent(l:i)])
-    call search('^\%'.l:i.'l\s*\%(\%(\/\*.\{-}\)\=\*\/\s*\)\=\S','eWb',l:i)
     if s:PreviousToken() is ''
       break
     endif
-    let l:i = line('.')
+    let [ind, l:i] = [min([ind, indent('.')]), line('.')]
   endwhile
   return b_l
 endfunction
