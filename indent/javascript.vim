@@ -282,22 +282,22 @@ endfunction
 " returns braceless levels started by 'i' and above lines * &sw. 'num' is the
 " lineNr which encloses the entire context, 'cont' if whether line 'i' + 1 is
 " a continued expression, which could have started in a braceless context
-function s:IsContOne(i,num,cont)
-  let [l:i, l:num, b_l] = [a:i, a:num + !a:num, 0]
+function s:IsContOne(num,cont)
+  let [l:startline, l:num, b_l] = [line('.'), a:num + !a:num, 0]
   let pind = a:num ? indent(a:num) + s:sw() : 0
-  let ind = indent(a:i) + (a:cont ? 0 : s:sw())
-  while l:i > l:num && ind > pind || l:i == l:num
-    if indent(l:i) < ind && s:OneScope()
+  let ind = indent('.') + (a:cont ? 0 : s:sw())
+  while line('.') > l:num && ind > pind || line('.') == l:num
+    if indent('.') < ind && s:OneScope()
       let b_l += 1
-    elseif !a:cont || b_l || ind < indent(a:i)
+    elseif !a:cont || b_l || ind < indent(l:startline)
       break
     else
-      call cursor(l:i,1)
+      call cursor(0,1)
     endif
     if s:PreviousToken() is ''
       break
     endif
-    let [ind, l:i] = [min([ind, indent('.')]), line('.')]
+    let ind = min([ind, indent('.')])
   endwhile
   return b_l
 endfunction
@@ -435,7 +435,7 @@ function GetJavascriptIndent()
         let is_op = s:sw()
       endif
       call cursor(l:lnum, len(pline))
-      let b_l = s:Nat(s:IsContOne(l:lnum,b:js_cache[1],is_op) -
+      let b_l = s:Nat(s:IsContOne(b:js_cache[1],is_op) -
             \ (!is_op && l:line =~ '^{')) * s:sw()
     endif
   elseif idx == -1 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '(' &&
