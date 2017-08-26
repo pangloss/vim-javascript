@@ -262,10 +262,7 @@ function s:OneScope()
   elseif s:Token() =~# '^else$\|^do$'
     return s:Pure('s:PreviousToken') != '.'
   endif
-  if strpart(getline('.'),col('.')-2,2) == '=>'
-    call cursor(0,col('.')-1)
-    return 1
-  endif
+  return strpart(getline('.'),col('.')-2,2) == '=>'
 endfunction
 
 function s:DoWhile()
