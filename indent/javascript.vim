@@ -62,13 +62,13 @@ let s:skip_expr = "s:SynAt(line('.'),col('.')) =~? b:syng_strcom"
 " searchpair() wrapper
 if has('reltime')
   function s:GetPair(start,end,flags,skip,time,...)
-    return s:Nat(searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,a:flags,
-          \ 'col(".") > 300 ? {} :'.a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time))
+    return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
+          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
   endfunction
 else
   function s:GetPair(start,end,flags,skip,...)
-    return s:Nat(searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,a:flags,
-          \ 'col(".") > 300 ? {} :'.a:skip,max([prevnonblank(v:lnum) - 1000,0,get(a:000,1)])))
+    return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
+          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,0,get(a:000,1)]))
   endfunction
 endif
 
@@ -130,12 +130,12 @@ function s:SkipFunc()
   let [s:looksyn, s:top_col] = getpos('.')[1:2]
 endfunction
 
-function s:AlternatePair()
+function s:AlternatePair(top)
   let [pat, l:for] = ['[][(){};]', 2]
-  while s:SearchLoop(pat,'bW',s:script_tag,'s:SkipFunc()')
+  while s:SearchLoop(pat,'bW',a:top,'s:SkipFunc()')
     if s:LookingAt() == ';'
       if !l:for
-        if s:GetPair('{','}','bW','s:SkipFunc()',2000,s:script_tag)
+        if s:GetPair('{','}','bW','s:SkipFunc()',2000,a:top)
           return
         endif
         break
@@ -146,7 +146,7 @@ function s:AlternatePair()
       let idx = stridx('])}',s:LookingAt())
       if idx == -1
         return
-      elseif !s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,s:script_tag)
+      elseif !s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,a:top)
         break
       endif
     endif
@@ -291,7 +291,7 @@ function s:IsContOne(i,num,cont)
       break
     endif
     let ind = min([ind, indent(l:i)])
-    call search('^\%'.l:i.'l\s*\%(\%(\/\*.\{-}\)\=\*\/\s*\)\=\S','eb',l:i)
+    call search('^\%'.l:i.'l\s*\%(\%(\/\*.\{-}\)\=\*\/\s*\)\=\S','eWb',l:i)
     if s:PreviousToken() is ''
       break
     endif
@@ -382,14 +382,15 @@ function GetJavascriptIndent()
     call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [v:lnum,1])
   else
     call cursor(v:lnum,1)
-    let [s:looksyn, s:check_in, s:top_col] = [v:lnum - 1, 0, 0]
+    let [l:actual_top, s:looksyn, s:check_in, s:top_col] =
+          \ [max([s:script_tag, search('^.\{400,}','nbW',s:script_tag) + 1]), v:lnum - 1,0,0]
     try
       if idx != -1
-        call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,s:script_tag)
+        call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,l:actual_top)
       elseif getline(v:lnum) !~ '^\S' && syns =~? 'block'
-        call s:GetPair('{','}','bW','s:SkipFunc()',2000,s:script_tag)
+        call s:GetPair('{','}','bW','s:SkipFunc()',2000,l:actual_top)
       else
-        call s:AlternatePair()
+        call s:AlternatePair(l:actual_top)
       endif
     catch
       call cursor(v:lnum,1)
@@ -397,7 +398,7 @@ function GetJavascriptIndent()
   endif
 
   let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [s:script_tag,0] : getpos('.')[1:2])
-  let num = b:js_cache[1]
+  let [num, s:script_tag] = [b:js_cache[1], get(l:,'actual_top',s:script_tag)]
 
   let [num_ind, is_op, b_l, l:switch_offset] = [s:Nat(indent(num)),0,0,0]
   if !b:js_cache[2] || s:LookingAt() == '{' && s:IsBlock()
