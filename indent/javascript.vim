@@ -278,7 +278,7 @@ endfunction
 
 function s:IsContOne(num,cont)
   if a:cont
-    if !search('^\(\s*\)\@>\%<'.indent('.').'v','bW',a:num + 1)
+    if !search('\m^\%(\s*\)\@>\%<'.(indent('.')+1).'v\S','bW',a:num + 1)
       return
     endif
     call cursor(line('.')+1, 0)
@@ -372,7 +372,7 @@ function GetJavascriptIndent()
   else
     call cursor(v:lnum,1)
     let [l:actual_top, s:looksyn, s:check_in, s:top_col] =
-          \ [max([s:script_tag, search('^.\{400,}','nbW',s:script_tag) + 1]), v:lnum - 1,0,0]
+          \ [max([s:script_tag, search('\m^.\{400,}','nbW',s:script_tag) + 1]), v:lnum - 1,0,0]
     try
       if idx != -1
         call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,l:actual_top)
