@@ -276,27 +276,10 @@ function s:DoWhile()
   endif
 endfunction
 
-" returns braceless levels started by 'i' and above lines * &sw. 'num' is the
-" lineNr which encloses the entire context, 'cont' if whether line 'i' + 1 is
-" a continued expression, which could have started in a braceless context
 function s:IsContOne(num,cont)
-  let [l:startline, l:num, b_l] = [line('.'), a:num + !a:num, 0]
-  let pind = a:num ? indent(a:num) + s:sw() : 0
-  let ind = indent('.') + (a:cont ? 0 : s:sw())
-  while line('.') > l:num && ind > pind || line('.') == l:num
-    if indent('.') < ind && s:OneScope()
-      let b_l += 1
-    elseif !a:cont || b_l || ind < indent(l:startline)
-      break
-    else
-      call cursor(0,1)
-    endif
-    if s:PreviousToken() is ''
-      break
-    endif
-    let ind = min([ind, indent('.')])
-  endwhile
-  return b_l
+  if a:cont || s:OneScope()
+    return (indent('.') - (a:num ? indent(a:num) : s:sw())) / s:sw() - a:cont
+  endif
 endfunction
 
 function s:Class()
