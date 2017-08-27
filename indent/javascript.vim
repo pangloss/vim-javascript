@@ -291,10 +291,10 @@ function s:IsContOne(num,cont)
     else
       call cursor(0,1)
     endif
+    let ind = min([ind, indent('.')])
     if s:PreviousToken() is ''
       break
     endif
-    let ind = min([ind, indent('.')])
   endwhile
   return b_l
 endfunction
