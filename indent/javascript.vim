@@ -285,7 +285,7 @@ function s:IsContOne(num,cont)
     call s:PreviousToken()
   endif
   if s:OneScope()
-    return max([(indent('.') - (a:num ? indent(a:num) : 0)) / s:sw(), 1])
+    return max([(indent('.') - s:Nat(indent(a:num))) / s:sw(), 1])
   endif
 endfunction
 
