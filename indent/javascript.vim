@@ -277,8 +277,15 @@ function s:DoWhile()
 endfunction
 
 function s:IsContOne(num,cont)
-  if a:cont || s:OneScope()
-    return (indent('.') - (a:num ? indent(a:num) : s:sw())) / s:sw() - a:cont
+  if a:cont
+    if !search('^\(\s*\)\@>\%<'.indent('.').'v','bW',a:num + 1)
+      return
+    endif
+    call cursor(line('.')+1, 0)
+    call s:PreviousToken()
+  endif
+  if s:OneScope()
+    return max([(indent('.') - (a:num ? indent(a:num) : 0)) / s:sw(), 1])
   endif
 endfunction
 
