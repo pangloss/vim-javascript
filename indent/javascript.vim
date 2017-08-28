@@ -282,7 +282,7 @@ endfunction
 function s:IsContOne(num,cont)
   let [l:startline, l:num, b_l] = [line('.'), a:num + !a:num, 0]
   let pind = a:num ? indent(a:num) + s:sw() : 0
-  let ind = indent('.') + (a:cont ? 0 : s:sw())
+  let ind = indent('.') + !a:cont
   while line('.') > l:num && ind > pind || line('.') == l:num
     if indent('.') < ind && s:OneScope()
       let b_l += 1
@@ -381,8 +381,8 @@ function GetJavascriptIndent()
     call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [v:lnum,1])
   else
     call cursor(v:lnum,1)
-    let [l:actual_top, s:looksyn, s:check_in, s:top_col] =
-          \ [max([s:script_tag, search('\m^.\{400,}','nbW',s:script_tag) + 1]), v:lnum - 1,0,0]
+    let [s:looksyn, s:top_col, s:check_in, l:actual_top] = [v:lnum - 1,0,0,
+          \ max([s:script_tag, search('\m^.\{400,}','nbW',s:script_tag) + 1])]
     try
       if idx != -1
         call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,l:actual_top)
