@@ -183,10 +183,7 @@ function s:PreviousToken()
 endfunction
 
 function s:Pure(f,...)
-  let l:pos = getpos('.')
-  let ret = call(a:f,a:000)
-  call setpos('.',l:pos)
-  return ret
+  exe 'let l:r = call(a:f,a:000) | call setpos(".",'.string(getpos('.')).') | return l:r'
 endfunction
 
 function s:SearchLoop(pat,flags,top,...)
@@ -357,12 +354,12 @@ function GetJavascriptIndent()
     endif
     return -1
   endif
+
   call cursor(v:lnum,1)
   if s:PreviousToken() is ''
     return
   endif
-  let l:lnum = line('.')
-  let pline = getline('.')[:col('.')-1]
+  let [l:lnum, pline] = [line('.'), getline('.')[:col('.')-1]]
 
   let l:line = substitute(l:line,'^\s*','','')
   let l:line_raw = l:line
