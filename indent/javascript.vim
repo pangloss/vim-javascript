@@ -183,7 +183,9 @@ function s:PreviousToken()
 endfunction
 
 function s:Pure(f,...)
-  exe 'let l:r = call(a:f,a:000) | call setpos(".",'.string(getpos('.')).') | return l:r'
+  let [l:pos, l:v] = [getpos('.'), call(a:f,a:000)]
+  call setpos('.',l:pos)
+  return l:v
 endfunction
 
 function s:SearchLoop(pat,flags,top,...)
