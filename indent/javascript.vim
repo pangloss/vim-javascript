@@ -388,7 +388,7 @@ function GetJavascriptIndent()
       else
         call s:AlternatePair(l:actual_top)
       endif
-    catch
+    catch /^\Cout of bounds$/
       call cursor(v:lnum,1)
     endtry
   endif
