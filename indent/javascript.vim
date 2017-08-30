@@ -325,7 +325,7 @@ function s:IsBlock()
   elseif tok == '*'
     return s:Pure('s:PreviousToken') == ':'
   elseif tok == ':'
-    return !s:ExprCol()
+    return s:Pure('s:PreviousToken') =~ '^\K\k*$' && !s:ExprCol()
   elseif tok == '/'
     return s:SynAt(line('.'),col('.')) =~? 'regex'
   elseif tok !~ '[=~!<,.?^%|&([]'
