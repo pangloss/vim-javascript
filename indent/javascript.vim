@@ -194,13 +194,10 @@ function s:SearchLoop(pat,flags,top,...)
 endfunction
 
 function s:ExprCol()
-  if getline('.')[col('.')-2] == ':'
-    return 1
-  endif
-  let [bal, l:pos] = [0, getpos('.')]
-  while s:SearchLoop('[{}?:]','bW',s:script_tag,s:skip_expr)
+  let bal = 0
+  while s:SearchLoop('[{}?]\|\_[^:]\zs::\@!','bW',s:script_tag,s:skip_expr)
     if s:LookingAt() == ':'
-      let bal -= strpart(getline('.'),col('.')-2,3) !~ '::'
+      let bal -= 1
     elseif s:LookingAt() == '?'
       let bal += 1
       if bal == 1
@@ -213,7 +210,6 @@ function s:ExprCol()
       break
     endif
   endwhile
-  call setpos('.',l:pos)
   return s:Nat(bal)
 endfunction
 
@@ -325,7 +321,7 @@ function s:IsBlock()
   elseif tok == '*'
     return s:Pure('s:PreviousToken') == ':'
   elseif tok == ':'
-    return s:Pure('s:PreviousToken') =~ '^\K\k*$' && !s:ExprCol()
+    return s:Pure('eval','s:PreviousToken() =~ "^\\K\\k*$" && !s:ExprCol()')
   elseif tok == '/'
     return s:SynAt(line('.'),col('.')) =~? 'regex'
   elseif tok !~ '[=~!<,.?^%|&([]'
