@@ -183,9 +183,7 @@ function s:PreviousToken()
 endfunction
 
 function s:Pure(f,...)
-  let [l:pos, l:v] = [getpos('.'), call(a:f,a:000)]
-  call setpos('.',l:pos)
-  return l:v
+  exe 'return [call(a:f,a:000), cursor(' line('.') ',' col('.') ')][0]'
 endfunction
 
 function s:SearchLoop(pat,flags,top,...)
