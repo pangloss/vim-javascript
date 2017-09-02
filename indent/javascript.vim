@@ -183,7 +183,7 @@ function s:PreviousToken()
 endfunction
 
 function s:Pure(f,...)
-  exe 'return [call(a:f,a:000),cursor(a:firstline,' col('.') ')][0]'
+  exe 'return [call(a:f,a:000),cursor(a:firstline,'.col('.').')][0]'
 endfunction
 
 function s:SearchLoop(pat,flags,top,...)
@@ -322,7 +322,7 @@ function s:IsBlock()
   elseif tok == '/'
     return s:SynAt(line('.'),col('.')) =~? 'regex'
   elseif tok !~ '[=~!<,.?^%|&([]'
-    return tok !~ '[-+]' || a:firstline != line('.') && getline('.')[col('.')-2] == tok
+    return tok !~ '[-+]' || line('.') != a:firstline && getline('.')[col('.')-2] == tok
   endif
 endfunction
 
