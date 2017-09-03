@@ -120,7 +120,7 @@ function s:SkipFunc()
     let s:check_in = 0
   elseif getline('.') =~ '\%<'.col('.').'c\/.\{-}\/\|\%>'.col('.').'c[''"]\|\\$'
     if eval(s:skip_expr)
-      let s:looksyn = line('.')
+      let s:looksyn = a:firstline
       return 1
     endif
   elseif search('\m`\|\${\|\*\/','nW'.s:z,s:looksyn) && eval(s:skip_expr)
@@ -167,14 +167,14 @@ function s:Token()
 endfunction
 
 function s:PreviousToken()
-  let l:pos = getpos('.')
+  let l:col = col('.')
   if search('\m\k\{1,}\|\S','ebW')
-    if (strpart(getline('.'),col('.')-2,2) == '*/' || line('.') != l:pos[1] &&
+    if (strpart(getline('.'),col('.')-2,2) == '*/' || line('.') != a:firstline &&
           \ getline('.')[:col('.')-1] =~ '\/\/') && s:SynAt(line('.'),col('.')) =~? s:syng_com
       if s:SearchLoop('\S\ze\_s*\/[/*]','bW',"s:SynAt(line('.'),col('.')) =~? s:syng_com")
         return s:Token()
       endif
-      call setpos('.',l:pos)
+      call cursor(a:firstline, l:col)
     else
       return s:Token()
     endif
@@ -183,9 +183,7 @@ function s:PreviousToken()
 endfunction
 
 function s:Pure(f,...)
-  let [l:pos, l:v] = [getpos('.'), call(a:f,a:000)]
-  call setpos('.',l:pos)
-  return l:v
+  return eval('[call(a:f,a:000),cursor(a:firstline,'.col('.').')][0]')
 endfunction
 
 function s:SearchLoop(pat,flags,top,...)
@@ -241,9 +239,9 @@ function s:Balanced(lnum)
         return
       endif
     endif
-    let pos = match(l:line, l:open ?
-          \ matchstr(['[][]','[()]','[{}]'],l:line[pos]) :
-          \ '[][(){}]', pos + 1)
+    let pos = match(l:line, '['.(l:open ?
+          \ strpart('][(){}', stridx('[({])}', l:line[pos]) % 3 * 2, 2) :
+          \ '][(){}').']', pos + 1)
   endwhile
   return !l:open
 endfunction
@@ -275,13 +273,13 @@ endfunction
 " lineNr which encloses the entire context, 'cont' if whether line 'i' + 1 is
 " a continued expression, which could have started in a braceless context
 function s:IsContOne(num,cont)
-  let [l:startline, l:num, b_l] = [line('.'), a:num + !a:num, 0]
+  let [l:num, b_l] = [a:num + !a:num, 0]
   let pind = a:num ? indent(a:num) + s:sw() : 0
   let ind = indent('.') + !a:cont
   while line('.') > l:num && ind > pind || line('.') == l:num
     if indent('.') < ind && s:OneScope()
       let b_l += 1
-    elseif !a:cont || b_l || ind < indent(l:startline)
+    elseif !a:cont || b_l || ind < indent(a:firstline)
       break
     else
       call cursor(0,1)
@@ -306,7 +304,6 @@ endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
-  let l:n = line('.')
   let tok = s:PreviousToken()
   if match(s:stack,'\cxml\|jsx') != -1 && s:SynAt(line('.'),col('.')-1) =~? 'xml\|jsx'
     return tok != '{'
@@ -315,7 +312,7 @@ function s:IsBlock()
       return s:Pure('eval',"s:PreviousToken() !~# '^\\%(im\\|ex\\)port$' || s:PreviousToken() == '.'")
     endif
     return index(split('return const let import export extends yield default delete var await void typeof throw case new of in instanceof')
-          \ ,tok) < (line('.') != l:n) || s:Pure('s:PreviousToken') == '.'
+          \ ,tok) < (line('.') != a:firstline) || s:Pure('s:PreviousToken') == '.'
   elseif tok == '>'
     return getline('.')[col('.')-2] == '=' || s:SynAt(line('.'),col('.')) =~? 'jsflow\|^html'
   elseif tok == '*'
@@ -325,7 +322,7 @@ function s:IsBlock()
   elseif tok == '/'
     return s:SynAt(line('.'),col('.')) =~? 'regex'
   elseif tok !~ '[=~!<,.?^%|&([]'
-    return tok !~ '[-+]' || l:n != line('.') && getline('.')[col('.')-2] == tok
+    return tok !~ '[-+]' || line('.') != a:firstline && getline('.')[col('.')-2] == tok
   endif
 endfunction
 
