@@ -183,7 +183,7 @@ function s:PreviousToken()
 endfunction
 
 function s:Pure(f,...)
-  exe 'return [call(a:f,a:000),cursor(a:firstline,'.col('.').')][0]'
+  return eval('[call(a:f,a:000),cursor(a:firstline,'.col('.').')][0]')
 endfunction
 
 function s:SearchLoop(pat,flags,top,...)
