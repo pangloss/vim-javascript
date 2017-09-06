@@ -183,7 +183,7 @@ function s:PreviousToken()
 endfunction
 
 function s:Pure(f,...)
-  return eval('[call(a:f,a:000),cursor(a:firstline,'.col('.').')][0]')
+  return eval("[call(a:f,a:000),cursor(a:firstline,".col('.').")][0]")
 endfunction
 
 function s:SearchLoop(pat,flags,top,...)
@@ -249,7 +249,7 @@ endfunction
 function s:OneScope()
   if s:LookingAt() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100)
     let tok = s:PreviousToken()
-    return (tok =~# '^\%(for\|if\|let\|while\|with\)$' ||
+    return (count(split('for if let while with'),tok) ||
           \ tok =~# '^await$\|^each$' && s:PreviousToken() ==# 'for') &&
           \ s:Pure('s:PreviousToken') != '.' && !(tok == 'while' && s:DoWhile())
   elseif s:Token() =~# '^else$\|^do$'
@@ -318,7 +318,7 @@ function s:IsBlock()
   elseif tok == '*'
     return s:Pure('s:PreviousToken') == ':'
   elseif tok == ':'
-    return s:Pure('eval','s:PreviousToken() =~ "^\\K\\k*$" && !s:ExprCol()')
+    return s:Pure('eval',"s:PreviousToken() =~ '^\\K\\k*$' && !s:ExprCol()")
   elseif tok == '/'
     return s:SynAt(line('.'),col('.')) =~? 'regex'
   elseif tok !~ '[=~!<,.?^%|&([]'
