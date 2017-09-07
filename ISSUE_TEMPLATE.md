@@ -1,4 +1,4 @@
-**Mandatory:** *Included minimal reproducible example, as plain text :*
+*Requisite minimal reproducible example, formatted as plain text :*
 
 <hr>
 
