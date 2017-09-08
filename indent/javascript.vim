@@ -61,14 +61,16 @@ let s:skip_expr = "s:SynAt(line('.'),col('.')) =~? b:syng_strcom"
 
 " searchpair() wrapper
 if has('reltime')
+  let s:rel = 1
   function s:GetPair(start,end,flags,skip,time,...)
     return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
-          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 2000,0] + a:000),a:time)
+          \ a:flags,a:skip,s:script_tag,a:time)
   endfunction
 else
+  let s:rel = 0
   function s:GetPair(start,end,flags,skip,...)
     return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
-          \ a:flags,a:skip,max([prevnonblank(v:lnum) - 1000,0,get(a:000,1)]))
+          \ a:flags,a:skip,s:script_tag)
   endfunction
 endif
 
@@ -350,7 +352,8 @@ function GetJavascriptIndent()
     return -1
   endif
 
-  let s:script_tag = get(get(b:,'hi_indent',{}),'blocklnr')
+  let s:script_tag = max([prevnonblank(v:lnum) - (s:rel ? 2000 : 1000),0,
+        \ get(get(b:,'hi_indent',{}),'blocklnr')])
   call cursor(v:lnum,1)
   if s:PreviousToken() is ''
     return
@@ -375,8 +378,7 @@ function GetJavascriptIndent()
     let b:js_cache[1] = s:script_tag
     call cursor(v:lnum,1)
     let [s:looksyn, s:top_col, s:check_in, s:script_tag] = [v:lnum - 1,0,0,
-          \ max([s:script_tag, &smc ? search('\m^.\{'.&smc.',}','nbW',
-          \ max([s:script_tag + 1, prevnonblank(v:lnum) - s:maxoff])) + 1 : 0])]
+          \ max([s:script_tag, &smc ? search('\m^.\{'.&smc.',}','nbW',s:script_tag + 1) + 1 : 0])]
     try
       if idx != -1
         call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
