@@ -64,12 +64,12 @@ let s:rel = has('reltime')
 if s:rel
   function s:GetPair(start,end,flags,skip,time,...)
     return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
-          \ a:flags,a:skip,s:script_tag,a:time)
+          \ a:flags,a:skip,max([s:script_tag]+a:000),a:time)
   endfunction
 else
   function s:GetPair(start,end,flags,skip,...)
     return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
-          \ a:flags,a:skip,s:script_tag)
+          \ a:flags,a:skip,max([s:script_tag,get(a:000,1)]))
   endfunction
 endif
 
