@@ -440,7 +440,7 @@ function GetJavascriptIndent()
       endif
       return Wval ? s:Nat(num_ind + Wval) : vcol
     endif
-    return s:Nat(num_ind + pval + searchpair('(','',')','nbrmW',s:skip_expr,num) * s:sw())
+    return s:Nat(num_ind + pval + searchpair('\m(','','\m)','nbrmW',s:skip_expr,num) * s:sw())
   endif
 
   " main return
