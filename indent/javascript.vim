@@ -62,14 +62,14 @@ let s:skip_expr = "s:SynAt(line('.'),col('.')) =~? b:syng_strcom"
 let s:rel = has('reltime')
 " searchpair() wrapper
 if s:rel
-  function s:GetPair(start,end,flags,skip,time,...)
+  function s:GetPair(start,end,flags,skip,time)
     return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
-          \ a:flags,a:skip,max([s:script_tag]+a:000),a:time)
+          \ a:flags,a:skip,s:l1,a:time)
   endfunction
 else
   function s:GetPair(start,end,flags,skip,...)
     return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
-          \ a:flags,a:skip,max([s:script_tag,get(a:000,1)]))
+          \ a:flags,a:skip,s:l1)
   endfunction
 endif
 
@@ -351,7 +351,7 @@ function GetJavascriptIndent()
     return -1
   endif
 
-  let s:script_tag = max([prevnonblank(v:lnum) - (s:rel ? 2000 : 1000),0,
+  let s:l1 = max([0,prevnonblank(v:lnum) - (s:rel ? 2000 : 1000),
         \ get(get(b:,'hi_indent',{}),'blocklnr')])
   call cursor(v:lnum,1)
   if s:PreviousToken() is ''
@@ -374,10 +374,10 @@ function GetJavascriptIndent()
         \ b:js_cache[0] == l:lnum && s:Balanced(l:lnum)
     call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [v:lnum,1])
   else
-    let b:js_cache[1] = s:script_tag
+    let b:js_cache[1] = s:l1
     call cursor(v:lnum,1)
-    let [s:looksyn, s:top_col, s:check_in, s:script_tag] = [v:lnum - 1,0,0,
-          \ max([s:script_tag, &smc ? search('\m^.\{'.&smc.',}','nbW',s:script_tag + 1) + 1 : 0])]
+    let [s:looksyn, s:top_col, s:check_in, s:l1] = [v:lnum - 1,0,0,
+          \ max([s:l1, &smc ? search('\m^.\{'.&smc.',}','nbW',s:l1 + 1) + 1 : 0])]
     try
       if idx != -1
         call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
@@ -440,7 +440,8 @@ function GetJavascriptIndent()
       endif
       return Wval ? s:Nat(num_ind + Wval) : vcol
     endif
-    return s:Nat(num_ind + pval + s:GetPair('(',')','nbrmW',s:skip_expr,100,num) * s:sw())
+    return s:Nat(num_ind + pval + eval("searchpair('(','',')','nbrmW',s:skip_expr,num,"
+          \ .(s:rel ? ",100)" : ")")) * s:sw())
   endif
 
   " main return
