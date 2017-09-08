@@ -59,15 +59,14 @@ let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "s:SynAt(line('.'),col('.')) =~? b:syng_strcom"
 
+let s:rel = has('reltime')
 " searchpair() wrapper
-if has('reltime')
-  let s:rel = 1
+if s:rel
   function s:GetPair(start,end,flags,skip,time,...)
     return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
           \ a:flags,a:skip,s:script_tag,a:time)
   endfunction
 else
-  let s:rel = 0
   function s:GetPair(start,end,flags,skip,...)
     return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
           \ a:flags,a:skip,s:script_tag)
