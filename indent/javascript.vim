@@ -63,13 +63,11 @@ let s:rel = has('reltime')
 " searchpair() wrapper
 if s:rel
   function s:GetPair(start,end,flags,skip,time)
-    return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
-          \ a:flags,a:skip,s:l1,a:time)
+    return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,a:flags,a:skip,s:l1,a:time)
   endfunction
 else
   function s:GetPair(start,end,flags,skip,...)
-    return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,
-          \ a:flags,a:skip,s:l1)
+    return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,a:flags,a:skip,s:l1)
   endfunction
 endif
 
