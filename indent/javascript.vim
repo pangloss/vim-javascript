@@ -374,7 +374,7 @@ function GetJavascriptIndent()
   else
     call cursor(v:lnum,1)
     let [s:looksyn, s:top_col, s:check_in, l:actual_top] = [v:lnum - 1,0,0,
-          \ max([s:script_tag, search('\m^.\{400,}','nbW',s:script_tag + 1) + 1])]
+          \ max([s:script_tag, search('\m^.\{4000,}','nbW',s:script_tag + 1) + 1])]
     try
       if idx != -1
         call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000,l:actual_top)
