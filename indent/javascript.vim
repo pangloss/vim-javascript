@@ -372,7 +372,6 @@ function GetJavascriptIndent()
         \ b:js_cache[0] == l:lnum && s:Balanced(l:lnum)
     call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [v:lnum,1])
   else
-    let b:js_cache[1] = s:l1
     call cursor(v:lnum,1)
     let [s:looksyn, s:top_col, s:check_in, s:l1] = [v:lnum - 1,0,0,
           \ max([s:l1, &smc ? search('\m^.\{'.&smc.',}','nbW',s:l1 + 1) + 1 : 0])]
@@ -389,7 +388,7 @@ function GetJavascriptIndent()
     endtry
   endif
 
-  let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [b:js_cache[1],0] : getpos('.')[1:2])
+  let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : getpos('.')[1:2])
   let num = b:js_cache[1]
 
   let [num_ind, is_op, b_l, l:switch_offset] = [s:Nat(indent(num)),0,0,0]
@@ -428,7 +427,7 @@ function GetJavascriptIndent()
       let b_l = s:Nat(s:IsContOne(b:js_cache[1],is_op) -
             \ (!is_op && l:line =~ '^{')) * s:sw()
     endif
-  elseif idx == -1 && getline(b:js_cache[1])[b:js_cache[2]-1] == '(' && &cino =~ '(' &&
+  elseif idx == -1 && getline(num)[b:js_cache[2]-1] == '(' && &cino =~ '(' &&
         \ (search('\m\S','nbW',num) || s:ParseCino('U'))
     let pval = s:ParseCino('(')
     if !pval
@@ -443,7 +442,7 @@ function GetJavascriptIndent()
 
   " main return
   if l:line =~ '^[])}]\|^|}'
-    if l:line_raw[0] == ')' && getline(b:js_cache[1])[b:js_cache[2]-1] == '('
+    if l:line_raw[0] == ')' && getline(num)[b:js_cache[2]-1] == '('
       if s:ParseCino('M')
         return indent(l:lnum)
       elseif &cino =~# 'm' && !s:ParseCino('m')
