@@ -186,7 +186,7 @@ function s:Pure(f,...)
 endfunction
 
 function s:SearchLoop(pat,flags,expr)
-  let pair = insert([a:pat,a:flags], '\_$.', a:flags =~# 'b')
+  let pair = insert([a:pat], '\_$.', a:flags =~# 'b')
   return s:GetPair(pair[0],pair[1],a:flags,a:expr,200)
 endfunction
 
