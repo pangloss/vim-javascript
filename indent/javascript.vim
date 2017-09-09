@@ -87,7 +87,7 @@ function s:ParseCino(f)
     if c == '.' && !divider
       let divider = 1
     elseif c ==# 's'
-      if n is '' || n is '-'
+      if n !~ '\d'
         return n . s:sw()
       endif
       let n = str2nr(n) * s:sw()
