@@ -81,11 +81,8 @@ function s:SynAt(l,c)
 endfunction
 
 function s:ParseCino(f)
-  let [cin, divider] = [strridx(&cino,a:f), 0]
-  if cin == -1
-    return
-  endif
-  let [n, cstr] = matchlist(&cino[cin+1:],'^-\=\ze\(.*\)')[:1]
+  let [divider, n, cstr] = [0] +
+        \ ((matchlist(&cino,'\C\V\.\*'.a:f.'\zs-\=\ze\(\.\*\)')+['',''])[:1])
   for c in split(cstr,'\zs')
     if c == '.' && !divider
       let divider = 1
