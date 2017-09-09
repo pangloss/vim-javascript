@@ -85,7 +85,7 @@ function s:ParseCino(f)
   if cin == -1
     return
   endif
-  let [sign, cstr] = &cino[cin+1] == '-' ? [-1, &cino[cin+2:]] : [1, &cino[cin+1:]]
+  let [sign, cstr] = matchlist(&cino[cin+1:],'^-\=\ze\(.*\)')[:1]
   for c in split(cstr,'\zs')
     if c == '.' && !divider
       let divider = 1
@@ -102,7 +102,7 @@ function s:ParseCino(f)
       break
     endif
   endfor
-  return sign * str2nr(n) / max([str2nr(divider),1])
+  return str2nr(sign.n) / max([str2nr(divider),1])
 endfunction
 
 " Optimized {skip} expr, only callable from the search loop which
