@@ -82,7 +82,7 @@ endfunction
 
 function s:ParseCino(f)
   let [divider, n, cstr] = [0] +
-        \ (matchlist(&cino,'\C\V\.\*'.a:f.'\zs-\=\ze\(\[.s0-9]\*\)')+[0,''])[:1]
+        \ matchlist(&cino,'\v%(.*,)=%(%d'.char2nr(a:f).'(-)=([.s0-9]*))=')[1:2]
   for c in split(cstr,'\zs')
     if c == '.' && !divider
       let divider = 1
