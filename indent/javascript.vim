@@ -82,7 +82,7 @@ endfunction
 
 function s:ParseCino(f)
   let [divider, n, cstr] = [0] +
-        \ ((matchlist(&cino,'\C\V\.\*'.a:f.'\zs-\=\ze\(\.\*\)')+[0,''])[:1])
+        \ (matchlist(&cino,'\C\V\.\*'.a:f.'\zs-\=\ze\(\.\*\)')+[0,''])[:1]
   for c in split(cstr,'\zs')
     if c == '.' && !divider
       let divider = 1
@@ -299,7 +299,7 @@ endfunction
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
   let tok = s:PreviousToken()
-  if match(s:stack,'\cxml\|jsx') != -1 && s:SynAt(line('.'),col('.')-1) =~? 'xml\|jsx'
+  if join(s:stack) =~? 'xml\|jsx' && s:SynAt(line('.'),col('.')-1) =~? 'xml\|jsx'
     return tok != '{'
   elseif tok =~ '\k'
     if tok ==# 'type'
@@ -321,23 +321,20 @@ function s:IsBlock()
 endfunction
 
 function GetJavascriptIndent()
-  let [b:js_cache, s:synid_cache, l:line, s:stack] = [
-        \ get(b:,'js_cache',[0,0,0]),
-        \ [[],[]],
-        \ getline(v:lnum),
-        \ map(synstack(v:lnum,1),"synIDattr(v:val,'name')"),
-        \ ]
+  let b:js_cache = get(b:,'js_cache',[0,0,0])
+  let s:synid_cache = [[],[]]
+  let l:line = getline(v:lnum)
   " use synstack as it validates syn state and works in an empty line
-  let syns = get(s:stack,-1,'')
+  let s:stack = [''] + map(synstack(v:lnum,1),"synIDattr(v:val,'name')")
 
   " start with strings,comments,etc.
-  if syns =~? s:syng_com
+  if s:stack[-1] =~? s:syng_com
     if l:line =~ '^\s*\*'
       return cindent(v:lnum)
     elseif l:line !~ '^\s*\/[/*]'
       return -1
     endif
-  elseif syns =~? b:syng_str
+  elseif s:stack[-1] =~? b:syng_str
     if b:js_cache[0] == v:lnum - 1 && s:Balanced(v:lnum-1)
       let b:js_cache[0] = v:lnum
     endif
@@ -373,7 +370,7 @@ function GetJavascriptIndent()
     try
       if idx != -1
         call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
-      elseif getline(v:lnum) !~ '^\S' && syns =~? 'block\|^jsobject$'
+      elseif getline(v:lnum) !~ '^\S' && s:stack[-1] =~? 'block\|^jsobject$'
         call s:GetPair('{','}','bW','s:SkipFunc()',2000)
       else
         call s:AlternatePair()
