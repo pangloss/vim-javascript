@@ -82,7 +82,7 @@ endfunction
 
 function s:ParseCino(f)
   let [divider, n, cstr] = [0] +
-        \ (matchlist(&cino,'\C\V\.\*'.a:f.'\zs-\=\ze\(\.\*\)')+[0,''])[:1]
+        \ (matchlist(&cino,'\C\V\.\*'.a:f.'\zs-\=\ze\(\[.s0-9]\*\)')+[0,''])[:1]
   for c in split(cstr,'\zs')
     if c == '.' && !divider
       let divider = 1
@@ -92,10 +92,8 @@ function s:ParseCino(f)
       endif
       let n = str2nr(n) * s:sw()
       break
-    elseif c =~ '\d'
-      let [n, divider] .= [c, 0]
     else
-      break
+      let [n, divider] .= [c, 0]
     endif
   endfor
   return str2nr(n) / max([str2nr(divider),1])
