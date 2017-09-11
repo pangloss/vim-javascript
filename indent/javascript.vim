@@ -63,11 +63,11 @@ let s:rel = has('reltime')
 " searchpair() wrapper
 if s:rel
   function s:GetPair(start,end,flags,skip,time)
-    return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,a:flags,a:skip,s:l1,a:time)
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,a:time)
   endfunction
 else
   function s:GetPair(start,end,flags,skip,...)
-    return searchpair('\m'.(a:start == '[' ? '\[' : a:start),'','\m'.a:end,a:flags,a:skip,s:l1)
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1)
   endfunction
 endif
 
@@ -139,7 +139,7 @@ function s:AlternatePair()
       let idx = stridx('])}',s:LookingAt())
       if idx == -1
         return
-      elseif !s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
+      elseif !s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()',2000)
         break
       endif
     endif
@@ -366,7 +366,7 @@ function GetJavascriptIndent()
           \ max([s:l1, &smc ? search('\m^.\{'.&smc.',}','nbW',s:l1 + 1) + 1 : 0])]
     try
       if idx != -1
-        call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
+        call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()',2000)
       elseif getline(v:lnum) !~ '^\S' && s:stack[-1] =~? 'block\|^jsobject$'
         call s:GetPair('{','}','bW','s:SkipFunc()',2000)
       else
