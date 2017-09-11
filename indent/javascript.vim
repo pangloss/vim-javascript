@@ -81,8 +81,8 @@ function s:SynAt(l,c)
 endfunction
 
 function s:ParseCino(f)
-  let [divider, n, cstr] = [0] +
-        \ matchlist(&cino,'\v%(.*,)=%(%d'.char2nr(a:f).'(-)=([.s0-9]*))=')[1:2]
+  let [divider, n, cstr] = [0] + matchlist(&cino,
+        \ '\%(.*,\)\=\%(\%d'.char2nr(a:f).'\(-\)\=\([.s0-9]*\)\)\=')[1:2]
   for c in split(cstr,'\zs')
     if c == '.' && !divider
       let divider = 1
@@ -413,8 +413,7 @@ function GetJavascriptIndent()
         let is_op = s:sw()
       endif
       call cursor(l:lnum, len(pline))
-      let b_l = s:Nat(s:IsContOne(b:js_cache[1],is_op) -
-            \ (!is_op && l:line =~ '^{')) * s:sw()
+      let b_l = s:Nat(s:IsContOne(b:js_cache[1],is_op) - (!is_op && l:line =~ '^{')) * s:sw()
     endif
   elseif idx == -1 && getline(num)[b:js_cache[2]-1] == '(' && &cino =~ '(' &&
         \ (search('\m\S','nbW',num) || s:ParseCino('U'))
