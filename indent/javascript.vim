@@ -81,28 +81,22 @@ function s:SynAt(l,c)
 endfunction
 
 function s:ParseCino(f)
-  let [cin, divider, n] = [strridx(&cino,a:f), 0, '']
-  if cin == -1
-    return
-  endif
-  let [sign, cstr] = &cino[cin+1] == '-' ? [-1, &cino[cin+2:]] : [1, &cino[cin+1:]]
+  let [divider, n, cstr] = [0] +
+        \ matchlist(&cino,'\v%(.*,)=%(%d'.char2nr(a:f).'(-)=([.s0-9]*))=')[1:2]
   for c in split(cstr,'\zs')
     if c == '.' && !divider
       let divider = 1
     elseif c ==# 's'
-      if n is ''
-        let n = s:sw()
-      else
-        let n = str2nr(n) * s:sw()
+      if n !~ '\d'
+        return n . s:sw()
       endif
+      let n = str2nr(n) * s:sw()
       break
-    elseif c =~ '\d'
-      let [n, divider] .= [c, 0]
     else
-      break
+      let [n, divider] .= [c, 0]
     endif
   endfor
-  return sign * str2nr(n) / max([str2nr(divider),1])
+  return str2nr(n) / max([str2nr(divider),1])
 endfunction
 
 " Optimized {skip} expr, only callable from the search loop which
@@ -186,8 +180,7 @@ function s:Pure(f,...)
 endfunction
 
 function s:SearchLoop(pat,flags,expr)
-  let pair = insert([a:pat,a:flags], '\_$.', a:flags =~# 'b')
-  return s:GetPair(pair[0],pair[1],a:flags,a:expr,200)
+  return call('s:GetPair',insert([a:pat,a:flags,a:expr,200], '\_$.', a:flags =~# 'b'))
 endfunction
 
 function s:ExprCol()
@@ -238,9 +231,8 @@ function s:Balanced(lnum)
         return
       endif
     endif
-    let pos = match(l:line, '['.(l:open ?
-          \ strpart('][(){}', stridx('[({])}', l:line[pos]) % 3 * 2, 2) :
-          \ '][(){}').']', pos + 1)
+    let pos = match(l:line, !l:open ? '[][(){}]' : '()' =~ l:line[pos] ?
+          \ '[()]' : '{}' =~ l:line[pos] ? '[{}]' : '[][]', pos + 1)
   endwhile
   return !l:open
 endfunction
@@ -304,7 +296,7 @@ endfunction
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
 function s:IsBlock()
   let tok = s:PreviousToken()
-  if match(s:stack,'\cxml\|jsx') != -1 && s:SynAt(line('.'),col('.')-1) =~? 'xml\|jsx'
+  if join(s:stack) =~? 'xml\|jsx' && s:SynAt(line('.'),col('.')-1) =~? 'xml\|jsx'
     return tok != '{'
   elseif tok =~ '\k'
     if tok ==# 'type'
@@ -326,23 +318,20 @@ function s:IsBlock()
 endfunction
 
 function GetJavascriptIndent()
-  let [b:js_cache, s:synid_cache, l:line, s:stack] = [
-        \ get(b:,'js_cache',[0,0,0]),
-        \ [[],[]],
-        \ getline(v:lnum),
-        \ map(synstack(v:lnum,1),"synIDattr(v:val,'name')"),
-        \ ]
+  let b:js_cache = get(b:,'js_cache',[0,0,0])
+  let s:synid_cache = [[],[]]
+  let l:line = getline(v:lnum)
   " use synstack as it validates syn state and works in an empty line
-  let syns = get(s:stack,-1,'')
+  let s:stack = [''] + map(synstack(v:lnum,1),"synIDattr(v:val,'name')")
 
   " start with strings,comments,etc.
-  if syns =~? s:syng_com
+  if s:stack[-1] =~? s:syng_com
     if l:line =~ '^\s*\*'
       return cindent(v:lnum)
     elseif l:line !~ '^\s*\/[/*]'
       return -1
     endif
-  elseif syns =~? b:syng_str
+  elseif s:stack[-1] =~? b:syng_str
     if b:js_cache[0] == v:lnum - 1 && s:Balanced(v:lnum-1)
       let b:js_cache[0] = v:lnum
     endif
@@ -378,7 +367,7 @@ function GetJavascriptIndent()
     try
       if idx != -1
         call s:GetPair('[({'[idx],'])}'[idx],'bW','s:SkipFunc()',2000)
-      elseif getline(v:lnum) !~ '^\S' && syns =~? 'block\|^jsobject$'
+      elseif getline(v:lnum) !~ '^\S' && s:stack[-1] =~? 'block\|^jsobject$'
         call s:GetPair('{','}','bW','s:SkipFunc()',2000)
       else
         call s:AlternatePair()
