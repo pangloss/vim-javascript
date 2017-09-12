@@ -61,15 +61,9 @@ let s:skip_expr = "s:SynAt(line('.'),col('.')) =~? b:syng_strcom"
 
 let s:rel = has('reltime')
 " searchpair() wrapper
-if s:rel
-  function s:GetPair(start,end,flags,skip,time)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,a:time)
-  endfunction
-else
-  function s:GetPair(start,end,flags,skip,...)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1)
-  endfunction
-endif
+function s:GetPair(start,end,flags,skip,time)
+  return call('searchpair',['\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,a:time][:-2+s:rel])
+endfunction
 
 function s:SynAt(l,c)
   let byte = line2byte(a:l) + a:c - 1
