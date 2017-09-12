@@ -167,8 +167,8 @@ function s:Pure(f,...)
   return eval("[call(a:f,a:000),cursor(a:firstline,".col('.').")][0]")
 endfunction
 
-function s:SearchLoop(...)
-  return call('s:GetPair',insert(copy(a:000)+[200], '\_$.', a:2 =~# 'b'))
+function s:SearchLoop(pat,flags,expr)
+  return call('s:GetPair',insert([a:pat,a:flags,a:expr,200], '\_$.', a:flags =~# 'b'))
 endfunction
 
 function s:ExprCol()
