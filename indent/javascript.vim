@@ -60,10 +60,9 @@ let s:syng_com = 'comment\|doc'
 let s:skip_expr = "s:SynAt(line('.'),col('.')) =~? b:syng_strcom"
 
 let s:rel = has('reltime')
-" searchpair() wrapper
-function s:GetPair(start,end,flags,skip,time)
-  return call('searchpair',['\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,a:time][:-2+s:rel])
-endfunction
+let s:str = "searchpair('\\m'.a:start,'','\\m'.a:end,a:flags,a:skip,s:l1".(s:rel ? ',a:time)' : ')')
+" the searchpair wrapper
+exe "function s:GetPair(start,end,flags,skip,time)\nreturn" s:str."\nendfunction" | unlet! s:str
 
 function s:SynAt(l,c)
   let byte = line2byte(a:l) + a:c - 1
