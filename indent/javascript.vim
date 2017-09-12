@@ -41,15 +41,9 @@ let s:cpo_save = &cpo
 set cpo&vim
 
 " Get shiftwidth value
-if exists('*shiftwidth')
-  function s:sw()
-    return shiftwidth()
-  endfunction
-else
-  function s:sw()
-    return &l:shiftwidth ? &l:shiftwidth : &l:tabstop
-  endfunction
-endif
+exe "function s:sw()\n".
+    \ "return" (exists('*shiftwidth') ? "shiftwidth()\n" : "&sw ? &sw : &ts\n").
+  \ "endfunction"
 
 " Performance for forwards search(): start search at pos rather than masking
 " matches before pos.
