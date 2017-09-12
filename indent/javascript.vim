@@ -54,7 +54,7 @@ let s:syng_com = 'comment\|doc'
 let s:skip_expr = "s:SynAt(line('.'),col('.')) =~? b:syng_strcom"
 
 let s:rel = has('reltime')
-" searchpair wrapper
+" searchpair() wrapper
 exe "function s:GetPair(start,end,flags,skip,time)\n".
     \ "return searchpair('\\m'.a:start,'','\\m'.a:end,a:flags,a:skip,s:l1".(s:rel ? ',a:time' : '').")\n".
   \ "endfunction"
