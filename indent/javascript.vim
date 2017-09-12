@@ -415,7 +415,7 @@ function GetJavascriptIndent()
       call cursor(l:lnum, len(pline))
       let b_l = s:Nat(s:IsContOne(b:js_cache[1],is_op) - (!is_op && l:line =~ '^{')) * s:sw()
     endif
-  elseif idx == -1 && s:LookingAt() == '(' && &cino =~ '(' && (search('\m\S','nbW',num) || s:ParseCino('U'))
+  elseif idx.s:LookingAt().&cino =~ '^-1(.*(' && (search('\m\S','nbW',num) || s:ParseCino('U'))
     let pval = s:ParseCino('(')
     if !pval
       let [Wval, vcol] = [s:ParseCino('W'), virtcol('.')]
