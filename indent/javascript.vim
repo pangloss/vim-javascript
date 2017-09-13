@@ -52,6 +52,7 @@ let s:z = has('patch-7.4.984') ? 'z' : ''
 let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "s:SynAt(line('.'),col('.')) =~? b:syng_strcom"
+let s:in_comm = s:skip_expr[:-14] . "s:syng_com"
 
 let s:rel = has('reltime')
 " searchpair() wrapper
@@ -150,9 +151,8 @@ endfunction
 function s:PreviousToken()
   let l:col = col('.')
   if search('\m\k\{1,}\|\S','ebW')
-    if search('\m\*\%#\/\|\/\/\%<'.a:firstline.'l','nbW',line('.')) &&
-          \ s:SynAt(line('.'),col('.')) =~? s:syng_com
-      if s:SearchLoop('\S\ze\_s*\/[/*]','bW',"s:SynAt(line('.'),col('.')) =~? s:syng_com")
+    if search('\m\*\%#\/\|\/\/\%<'.a:firstline.'l','nbW',line('.')) && eval(s:in_comm)
+      if s:SearchLoop('\S\ze\_s*\/[/*]','bW',s:in_comm)
         return s:Token()
       endif
       call cursor(a:firstline, l:col)
