@@ -55,10 +55,9 @@ endif
 " matches before pos.
 let s:z = has('patch-7.4.984') ? 'z' : ''
 
-let s:syng_com = 'comment\|doc'
 " Expression used to check whether we should skip a match with searchpair().
 let s:skip_expr = "s:SynAt(line('.'),col('.')) =~? b:syng_strcom"
-let s:in_comm = s:skip_expr[:-14] . "s:syng_com"
+let s:in_comm = s:skip_expr[:-14] . "'comment\\|doc'"
 
 let s:rel = has('reltime')
 " searchpair() wrapper
@@ -325,7 +324,7 @@ function GetJavascriptIndent()
   let s:stack = [''] + map(synstack(v:lnum,1),"synIDattr(v:val,'name')")
 
   " start with strings,comments,etc.
-  if s:stack[-1] =~? s:syng_com
+  if s:stack[-1] =~? 'comment\|doc'
     if l:line =~ '^\s*\*'
       return cindent(v:lnum)
     elseif l:line !~ '^\s*\/[/*]'
