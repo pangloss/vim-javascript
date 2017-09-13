@@ -41,9 +41,15 @@ let s:cpo_save = &cpo
 set cpo&vim
 
 " Get shiftwidth value
-exe "function s:sw()\n".
-    \ "return" (exists('*shiftwidth') ? "shiftwidth()\n" : "&sw ? &sw : &ts\n").
-  \ "endfunction"
+if exists('*shiftwidth')
+  function s:sw()
+    return shiftwidth()
+  endfunction
+else
+  function s:sw()
+    return &l:shiftwidth ? &l:shiftwidth : &l:tabstop
+  endfunction
+endif
 
 " Performance for forwards search(): start search at pos rather than masking
 " matches before pos.
@@ -56,9 +62,15 @@ let s:in_comm = s:skip_expr[:-14] . "s:syng_com"
 
 let s:rel = has('reltime')
 " searchpair() wrapper
-exe "function s:GetPair(start,end,flags,skip,time)\n".
-    \ "return searchpair('\\m'.a:start,'','\\m'.a:end,a:flags,a:skip,s:l1".(s:rel ? ',a:time' : '').")\n".
-  \ "endfunction"
+if s:rel
+  function s:GetPair(start,end,flags,skip,time)
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,a:time)
+  endfunction
+else
+  function s:GetPair(start,end,flags,skip,...)
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1)
+  endfunction
+endif
 
 function s:SynAt(l,c)
   let byte = line2byte(a:l) + a:c - 1
