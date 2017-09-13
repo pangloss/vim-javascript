@@ -150,8 +150,8 @@ endfunction
 function s:PreviousToken()
   let l:col = col('.')
   if search('\m\k\{1,}\|\S','ebW')
-    if (strpart(getline('.'),col('.')-2,2) == '*/' || line('.') != a:firstline &&
-          \ getline('.')[:col('.')-1] =~ '\/\/') && s:SynAt(line('.'),col('.')) =~? s:syng_com
+    if search('\m\*\%#\/\|\/\/\%<'.a:firstline.'l','nbW',line('.')) &&
+          \ s:SynAt(line('.'),col('.')) =~? s:syng_com
       if s:SearchLoop('\S\ze\_s*\/[/*]','bW',"s:SynAt(line('.'),col('.')) =~? s:syng_com")
         return s:Token()
       endif
