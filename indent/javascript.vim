@@ -62,11 +62,11 @@ let s:in_comm = s:skip_expr[:-14] . "'comment\\|doc'"
 let s:rel = has('reltime')
 " searchpair() wrapper
 if s:rel
-  function s:GetPair(start,end,flags,skip,time)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,a:time)
+  function s:GetPair(start,end,flags,skip)
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,a:skip ==# 's:SkipFunc()' ? 2000 : 200)
   endfunction
 else
-  function s:GetPair(start,end,flags,skip,...)
+  function s:GetPair(start,end,flags,skip)
     return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1)
   endfunction
 endif
@@ -128,7 +128,7 @@ function s:AlternatePair()
   while s:SearchLoop(pat,'bW','s:SkipFunc()')
     if s:LookingAt() == ';'
       if !l:for
-        if s:GetPair('{','}','bW','s:SkipFunc()',2000)
+        if s:GetPair('{','}','bW','s:SkipFunc()')
           return
         endif
         break
@@ -139,7 +139,7 @@ function s:AlternatePair()
       let idx = stridx('])}',s:LookingAt())
       if idx == -1
         return
-      elseif !s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()',2000)
+      elseif !s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()')
         break
       endif
     endif
@@ -179,7 +179,7 @@ function s:Pure(f,...)
 endfunction
 
 function s:SearchLoop(pat,flags,expr)
-  return call('s:GetPair',insert([a:pat,a:flags,a:expr,200], '\_$.', a:flags =~# 'b'))
+  return s:GetPair(a:pat,'\_$.',a:flags,a:expr)
 endfunction
 
 function s:ExprCol()
@@ -195,7 +195,7 @@ function s:ExprCol()
     elseif s:LookingAt() == '{'
       let bal = !s:IsBlock()
       break
-    elseif !s:GetPair('{','}','bW',s:skip_expr,200)
+    elseif !s:GetPair('{','}','bW',s:skip_expr)
       break
     endif
   endwhile
@@ -237,7 +237,7 @@ function s:Balanced(lnum)
 endfunction
 
 function s:OneScope()
-  if s:LookingAt() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr, 100)
+  if s:LookingAt() == ')' && s:GetPair('(', ')', 'bW', s:skip_expr)
     let tok = s:PreviousToken()
     return (count(split('for if let while with'),tok) ||
           \ tok =~# '^await$\|^each$' && s:PreviousToken() ==# 'for') &&
@@ -251,7 +251,7 @@ endfunction
 function s:DoWhile()
   let cpos = searchpos('\m\<','cbW')
   if s:SearchLoop('\C[{}]\|\<\%(do\|while\)\>','bW',s:skip_expr)
-    if s:{s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr,200) ?
+    if s:{s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr) ?
           \ 'Previous' : ''}Token() ==# 'do' && s:IsBlock()
       return 1
     endif
@@ -289,7 +289,7 @@ endfunction
 
 function s:IsSwitch()
   return s:PreviousToken() !~ '[.*]' &&
-        \ (!s:GetPair('{','}','cbW',s:skip_expr,100) || s:IsBlock() && !s:Class())
+        \ (!s:GetPair('{','}','cbW',s:skip_expr) || s:IsBlock() && !s:Class())
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
@@ -301,7 +301,7 @@ function s:IsBlock()
     if tok ==# 'type'
       return s:Pure('eval',"s:PreviousToken() !~# '^\\%(im\\|ex\\)port$' || s:PreviousToken() == '.'")
     elseif tok ==# 'of'
-      return s:Pure('eval',"!s:GetPair('[[({]','[])}]','bW',s:skip_expr,200) || s:LookingAt() != '(' ||"
+      return s:Pure('eval',"!s:GetPair('[[({]','[])}]','bW',s:skip_expr) || s:LookingAt() != '(' ||"
             \ ."s:{s:PreviousToken() ==# 'await' ? 'Previous' : ''}Token() !=# 'for' || s:PreviousToken() == '.'")
     endif
     return index(split('return const let import export extends yield default delete var await void typeof throw case new in instanceof')
@@ -368,9 +368,9 @@ function GetJavascriptIndent()
           \ max([s:l1, &smc ? search('\m^.\{'.&smc.',}','nbW',s:l1 + 1) + 1 : 0])]
     try
       if idx != -1
-        call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()',2000)
+        call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()')
       elseif getline(v:lnum) !~ '^\S' && s:stack[-1] =~? 'block\|^jsobject$'
-        call s:GetPair('{','}','bW','s:SkipFunc()',2000)
+        call s:GetPair('{','}','bW','s:SkipFunc()')
       else
         call s:AlternatePair()
       endif
@@ -385,7 +385,7 @@ function GetJavascriptIndent()
   let [num_ind, is_op, b_l, l:switch_offset] = [s:Nat(indent(num)),0,0,0]
   if !b:js_cache[2] || s:LookingAt() == '{' && s:IsBlock()
     let ilnum = line('.')
-    if b:js_cache[2] && s:LookingAt() == ')' && s:GetPair('(',')','bW',s:skip_expr,100)
+    if b:js_cache[2] && s:LookingAt() == ')' && s:GetPair('(',')','bW',s:skip_expr)
       if ilnum == num
         let [num, num_ind] = [line('.'), indent('.')]
       endif
