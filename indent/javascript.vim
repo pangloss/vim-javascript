@@ -377,10 +377,10 @@ function GetJavascriptIndent()
     catch /^\Cout of bounds$/
       call cursor(v:lnum,1)
     endtry
+    let b:js_cache[1:] = line('.') == v:lnum ? [0,0] : getpos('.')[1:2]
   endif
 
-  let b:js_cache = [v:lnum] + (line('.') == v:lnum ? [0,0] : getpos('.')[1:2])
-  let num = b:js_cache[1]
+  let [b:js_cache[0], num] = [v:lnum, b:js_cache[1]]
 
   let [num_ind, is_op, b_l, l:switch_offset] = [s:Nat(indent(num)),0,0,0]
   if !b:js_cache[2] || s:LookingAt() == '{' && s:IsBlock()
