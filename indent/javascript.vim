@@ -88,7 +88,7 @@ function s:ParseCino(f)
       let divider = 1
     elseif c ==# 's'
       if n !~ '\d'
-        return n . s:sw()
+        return n . s:sw() + 0
       endif
       let n = str2nr(n) * s:sw()
       break
@@ -358,12 +358,12 @@ function GetJavascriptIndent()
   endif
 
   " the containing paren, bracket, or curly. Many hacks for performance
+  call cursor(v:lnum,1)
   let idx = index([']',')','}'],l:line[0])
   if b:js_cache[0] > l:lnum && b:js_cache[0] < v:lnum ||
         \ b:js_cache[0] == l:lnum && s:Balanced(l:lnum)
-    call call('cursor',b:js_cache[2] ? b:js_cache[1:] : [v:lnum,1])
+    call call('cursor',b:js_cache[1:])
   else
-    call cursor(v:lnum,1)
     let [s:looksyn, s:top_col, s:check_in, s:l1] = [v:lnum - 1,0,0,
           \ max([s:l1, &smc ? search('\m^.\{'.&smc.',}','nbW',s:l1 + 1) + 1 : 0])]
     try
