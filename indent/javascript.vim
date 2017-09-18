@@ -259,9 +259,9 @@ function s:DoWhile()
   endif
 endfunction
 
-" returns braceless levels started by 'i' and above lines * &sw. 'num' is the
-" lineNr which encloses the entire context, 'cont' if whether line 'i' + 1 is
-" a continued expression, which could have started in a braceless context
+" returns total offset from braceless contexts. 'num' is the lineNr which
+" encloses the entire context, 'cont' if whether a:firstline is a continued
+" expression, which could have started in a braceless context
 function s:IsContOne(num,cont)
   let [l:num, b_l] = [a:num + !a:num, 0]
   let pind = a:num ? indent(a:num) + s:sw() : 0
