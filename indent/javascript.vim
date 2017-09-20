@@ -126,7 +126,7 @@ endfunction
 function s:AlternatePair()
   let [starttime, pat, l:for] = [localtime(), '[][(){};]', 2]
   while s:SearchLoop(pat,'bW','s:SkipFunc()')
-    let s:TO = s:Nat(s:TO - (localtime() - starttime))
+    let s:TO = s:Nat(s:TO - (localtime() - starttime) * 1000)
     let starttime = localtime()
     if s:LookingAt() == ';'
       if !s:TO
