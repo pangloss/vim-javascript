@@ -126,8 +126,8 @@ endfunction
 function s:AlternatePair()
   let [starttime, pat, l:for] = [reltime(), '[][(){};]', 2]
   while s:SearchLoop(pat,'bW','s:SkipFunc()')
-    let [big, dif] = split(reltimestr(reltime(starttime)),'\.')
-    let s:TO -= min([s:TO, big * 1000 + str2nr((dif . '0000')[:4])])
+    let dif = substitute(printf('%.4f',reltimefloat(reltime(starttime))),'\(\d\+\)\.\(...\)','\1\2','')
+    let s:TO -= min([s:TO, str2nr(dif)])
     let starttime = reltime()
     if s:LookingAt() == ';'
       if !s:TO
