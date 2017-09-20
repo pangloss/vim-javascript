@@ -124,10 +124,11 @@ function s:SkipFunc()
 endfunction
 
 function s:AlternatePair()
-  let [starttime, pat, l:for] = [localtime(), '[][(){};]', 2]
+  let [starttime, pat, l:for] = [reltime(), '[][(){};]', 2]
   while s:SearchLoop(pat,'bW','s:SkipFunc()')
-    let s:TO = s:Nat(s:TO - (localtime() - starttime) * 1000)
-    let starttime = localtime()
+    let [big, dif] = split(reltimestr(reltime(starttime)),'\.')
+    let s:TO -= min([s:TO, big * 1000 + str2nr((dif . '0000')[:4])])
+    let starttime = reltime()
     if s:LookingAt() == ';'
       if !s:TO
         break
