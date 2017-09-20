@@ -63,7 +63,7 @@ let s:rel = has('reltime')
 " searchpair() wrapper
 if s:rel
   function s:GetPair(start,end,flags,skip)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,a:skip ==# 's:SkipFunc()' ? 2000 : 200)
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,a:skip ==# 's:SkipFunc()' ? s:TO : 200)
   endfunction
 else
   function s:GetPair(start,end,flags,skip)
@@ -124,10 +124,14 @@ function s:SkipFunc()
 endfunction
 
 function s:AlternatePair()
-  let [pat, l:for] = ['[][(){};]', 2]
+  let [starttime, pat, l:for] = [localtime(), '[][(){};]', 2]
   while s:SearchLoop(pat,'bW','s:SkipFunc()')
+    let s:TO = s:Nat(s:TO - (localtime() - starttime))
+    let starttime = localtime()
     if s:LookingAt() == ';'
-      if !l:for
+      if !s:TO
+        break
+      elseif !l:for
         if s:GetPair('{','}','bW','s:SkipFunc()')
           return
         endif
@@ -139,7 +143,7 @@ function s:AlternatePair()
       let idx = stridx('])}',s:LookingAt())
       if idx == -1
         return
-      elseif !s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()')
+      elseif !s:TO || !s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()')
         break
       endif
     endif
@@ -364,7 +368,7 @@ function GetJavascriptIndent()
         \ b:js_cache[0] == l:lnum && s:Balanced(l:lnum)
     call call('cursor',b:js_cache[1:])
   else
-    let [s:looksyn, s:top_col, s:check_in, s:l1] = [v:lnum - 1,0,0,
+    let [s:TO, s:looksyn, s:top_col, s:check_in, s:l1] = [2000,v:lnum - 1,0,0,
           \ max([s:l1, &smc ? search('\m^.\{'.&smc.',}','nbW',s:l1 + 1) + 1 : 0])]
     try
       if idx != -1
