@@ -392,10 +392,9 @@ function GetJavascriptIndent()
       call cursor(v:lnum,1)
     endtry
     let b:js_cache[1:] = line('.') == v:lnum ? [0,0] : getpos('.')[1:2]
-    let s:TO = 200
   endif
 
-  let [b:js_cache[0], num] = [v:lnum, b:js_cache[1]]
+  let [s:TO, b:js_cache[0], num] = [200, v:lnum, b:js_cache[1]]
 
   let [num_ind, is_op, b_l, l:switch_offset] = [s:Nat(indent(num)),0,0,0]
   if !num || s:LookingAt() == '{' && s:IsBlock()
