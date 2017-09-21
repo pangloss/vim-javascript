@@ -63,7 +63,7 @@ let s:rel = has('reltime')
 " searchpair() wrapper
 if s:rel
   function s:GetPair(start,end,flags,skip)
-    if expand('<sfile>') =~# 'AlternatePair'
+    if expand('<sfile>') =~# '\(<SNR>\d\+_\)AlternatePair.*\1GetPair$'
       let s:TO -= min([s:TO, str2nr(substitute(reltimestr(
             \ reltime(s:starttime)),'\(\d\+\)\.\(\d\{3}\).*','\1\2',''))])
       if !s:TO
