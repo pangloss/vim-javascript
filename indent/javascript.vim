@@ -63,7 +63,15 @@ let s:rel = has('reltime')
 " searchpair() wrapper
 if s:rel
   function s:GetPair(start,end,flags,skip)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,a:skip ==# 's:SkipFunc()' ? 2000 : 200)
+    if expand('<sfile>') =~# '\(<SNR>\d\+_\)AlternatePair.*\1GetPair$'
+      let s:TO -= min([s:TO, str2nr(substitute(reltimestr(
+            \ reltime(s:starttime)),'^\s*\(\d\+\)\.\(\d\{3}\).*','\1\2',''))])
+      if !s:TO
+        return
+      endif
+      let s:starttime = reltime()
+    endif
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,s:TO)
   endfunction
 else
   function s:GetPair(start,end,flags,skip)
@@ -340,8 +348,14 @@ function GetJavascriptIndent()
     return -1
   endif
 
-  let s:l1 = max([0,prevnonblank(v:lnum) - (s:rel ? 2000 : 1000),
-        \ get(get(b:,'hi_indent',{}),'blocklnr')])
+  if s:rel
+    let s:l1 = max([0,prevnonblank(v:lnum) - 2000,
+          \ get(get(b:,'hi_indent',{}),'blocklnr')])
+    let s:starttime = reltime()
+  else
+    let s:l1 = max([0,prevnonblank(v:lnum) - 1000,
+          \ get(get(b:,'hi_indent',{}),'blocklnr')])
+  endif
   call cursor(v:lnum,1)
   if s:PreviousToken() is ''
     return
@@ -364,7 +378,7 @@ function GetJavascriptIndent()
         \ b:js_cache[0] == l:lnum && s:Balanced(l:lnum)
     call call('cursor',b:js_cache[1:])
   else
-    let [s:looksyn, s:top_col, s:check_in, s:l1] = [v:lnum - 1,0,0,
+    let [s:TO, s:looksyn, s:top_col, s:check_in, s:l1] = [2000,v:lnum - 1,0,0,
           \ max([s:l1, &smc ? search('\m^.\{'.&smc.',}','nbW',s:l1 + 1) + 1 : 0])]
     try
       if idx != -1
@@ -380,7 +394,7 @@ function GetJavascriptIndent()
     let b:js_cache[1:] = line('.') == v:lnum ? [0,0] : getpos('.')[1:2]
   endif
 
-  let [b:js_cache[0], num] = [v:lnum, b:js_cache[1]]
+  let [s:TO, b:js_cache[0], num] = [200, v:lnum, b:js_cache[1]]
 
   let [num_ind, is_op, b_l, l:switch_offset] = [s:Nat(indent(num)),0,0,0]
   if !num || s:LookingAt() == '{' && s:IsBlock()
