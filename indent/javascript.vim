@@ -392,6 +392,7 @@ function GetJavascriptIndent()
       call cursor(v:lnum,1)
     endtry
     let b:js_cache[1:] = line('.') == v:lnum ? [0,0] : getpos('.')[1:2]
+    let s:TO = 200
   endif
 
   let [b:js_cache[0], num] = [v:lnum, b:js_cache[1]]
