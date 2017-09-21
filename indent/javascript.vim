@@ -60,22 +60,18 @@ let s:skip_expr = "s:SynAt(line('.'),col('.')) =~? b:syng_strcom"
 let s:in_comm = s:skip_expr[:-14] . "'comment\\|doc'"
 
 let s:rel = has('reltime')
-let s:float = has('float')
 " searchpair() wrapper
 if s:rel
   function s:GetPair(start,end,flags,skip)
-    if a:skip ==# 's:SkipFunc()'
-      if s:float
-        let s:TO -= min([s:TO, str2nr(substitute(printf('%.4f',
-              \ reltimefloat(reltime(s:starttime))),'\(\d\+\)\.\(...\)','\1\2',''))])
-        if !s:TO
-          return
-        endif
-        let s:starttime = reltime()
+    if expand('<sfile>') =~# 'AlternatePair'
+      let s:TO -= min([s:TO, str2nr(substitute(reltimestr(
+            \ reltime(s:starttime)),'\(\d\+\)\.\(\d\{3}\)','\1\2',''))])
+      if !s:TO
+        return
       endif
-      return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,s:TO)
+      let s:starttime = reltime()
     endif
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,200)
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,s:TO)
   endfunction
 else
   function s:GetPair(start,end,flags,skip)
@@ -355,7 +351,7 @@ function GetJavascriptIndent()
   if s:rel
     let s:l1 = max([0,prevnonblank(v:lnum) - 2000,
           \ get(get(b:,'hi_indent',{}),'blocklnr')])
-    silent! let s:starttime = reltime()
+    let s:starttime = reltime()
   else
     let s:l1 = max([0,prevnonblank(v:lnum) - 1000,
           \ get(get(b:,'hi_indent',{}),'blocklnr')])
