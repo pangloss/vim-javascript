@@ -63,7 +63,16 @@ let s:rel = has('reltime')
 " searchpair() wrapper
 if s:rel
   function s:GetPair(start,end,flags,skip)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,a:skip ==# 's:SkipFunc()' ? s:TO : 200)
+    if a:skip ==# 's:SkipFunc()'
+      let s:TO -= min([s:TO, str2nr(substitute(printf('%.4f',
+            \ reltimefloat(reltime(s:starttime))),'\(\d\+\)\.\(...\)','\1\2',''))])
+      if !s:TO
+        return
+      endif
+      let s:starttime = reltime()
+      return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,s:TO)
+    endif
+    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,200)
   endfunction
 else
   function s:GetPair(start,end,flags,skip)
@@ -124,15 +133,10 @@ function s:SkipFunc()
 endfunction
 
 function s:AlternatePair()
-  let [starttime, pat, l:for] = [reltime(), '[][(){};]', 2]
+  let [pat, l:for] = ['[][(){};]', 2]
   while s:SearchLoop(pat,'bW','s:SkipFunc()')
-    let dif = substitute(printf('%.4f',reltimefloat(reltime(starttime))),'\(\d\+\)\.\(...\)','\1\2','')
-    let s:TO -= min([s:TO, str2nr(dif)])
-    let starttime = reltime()
     if s:LookingAt() == ';'
-      if !s:TO
-        break
-      elseif !l:for
+      if !l:for
         if s:GetPair('{','}','bW','s:SkipFunc()')
           return
         endif
@@ -144,7 +148,7 @@ function s:AlternatePair()
       let idx = stridx('])}',s:LookingAt())
       if idx == -1
         return
-      elseif !s:TO || !s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()')
+      elseif !s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()')
         break
       endif
     endif
@@ -345,8 +349,14 @@ function GetJavascriptIndent()
     return -1
   endif
 
-  let s:l1 = max([0,prevnonblank(v:lnum) - (s:rel ? 2000 : 1000),
-        \ get(get(b:,'hi_indent',{}),'blocklnr')])
+  if s:rel
+    let s:l1 = max([0,prevnonblank(v:lnum) - 2000,
+          \ get(get(b:,'hi_indent',{}),'blocklnr')])
+    let s:starttime = reltime()
+  else
+    let s:l1 = max([0,prevnonblank(v:lnum) - 1000,
+          \ get(get(b:,'hi_indent',{}),'blocklnr')])
+  endif
   call cursor(v:lnum,1)
   if s:PreviousToken() is ''
     return
