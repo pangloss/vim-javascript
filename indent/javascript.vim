@@ -282,9 +282,6 @@ function s:IsContOne(num,cont)
   return b_l
 endfunction
 
-function s:Class()
-endfunction
-
 function s:IsSwitch()
   return s:PreviousToken() !~ '[.*]' &&
         \ (!s:GetPair('{','}','cbW',s:skip_expr) || s:IsBlock() &&
