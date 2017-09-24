@@ -283,13 +283,13 @@ function s:IsContOne(num,cont)
 endfunction
 
 function s:Class()
-  return (s:Token() ==# 'class' || s:PreviousToken() =~# '^class$\|^extends$') &&
-        \ s:PreviousToken() != '.'
 endfunction
 
 function s:IsSwitch()
   return s:PreviousToken() !~ '[.*]' &&
-        \ (!s:GetPair('{','}','cbW',s:skip_expr) || s:IsBlock() && !s:Class())
+        \ (!s:GetPair('{','}','cbW',s:skip_expr) || s:IsBlock() &&
+        \ (s:Token() !=# 'class' && s:PreviousToken() !~# '^class$\|^extends$' ||
+        \ s:PreviousToken() == '.'))
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
