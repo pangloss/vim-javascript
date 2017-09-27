@@ -119,6 +119,7 @@ function s:SkipFunc()
     let s:check_in = 1
     return 1
   endif
+  let s:synid_cache[:] += [[line2byte('.') + col('.') - 1], ['']]
   let [s:looksyn, s:top_col] = getpos('.')[1:2]
 endfunction
 
