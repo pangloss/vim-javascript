@@ -184,7 +184,7 @@ endfunction
 
 function s:ExprCol()
   let bal = 0
-  while s:SearchLoop('[{}?]\|\_[^:]\zs::\@!','bW',s:skip_expr)
+  while s:SearchLoop('[{}]\|?\%(\.\d\@!\)\@!\|\_[^:]\zs::\@!','bW',s:skip_expr)
     if s:LookingAt() == ':'
       let bal -= 1
     elseif s:LookingAt() == '?'
