@@ -183,6 +183,9 @@ function s:SearchLoop(pat,flags,expr)
 endfunction
 
 function s:ExprCol()
+  if getline('.')[col('.')-2] == ':'
+    return 1
+  endif
   let bal = 0
   while s:SearchLoop('[{}?:]','bW',s:skip_expr)
     if s:LookingAt() == ':'
