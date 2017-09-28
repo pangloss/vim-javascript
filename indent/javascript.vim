@@ -184,22 +184,26 @@ endfunction
 
 function s:ExprCol()
   let bal = 0
-  while s:SearchLoop('[{}]\|?\%(\.\d\@!\)\@!\|\_[^:]\zs::\@!','bW',s:skip_expr)
+  while s:SearchLoop('[{}?:]','bW',s:skip_expr)
     if s:LookingAt() == ':'
+      if getline('.')[col('.')-2] == ':'
+        call cursor(0,col('.')-1)
+        continue
+      endif
       let bal -= 1
     elseif s:LookingAt() == '?'
-      let bal += 1
-      if bal == 1
-        break
+      if getline('.')[col('.'):col('.')+1] !~ '\.\d'
+        if !bal
+          return 1
+        endif
+        let bal += 1
       endif
     elseif s:LookingAt() == '{'
-      let bal = !s:IsBlock()
-      break
+      return !s:IsBlock()
     elseif !s:GetPair('{','}','bW',s:skip_expr)
       break
     endif
   endwhile
-  return s:Nat(bal)
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
