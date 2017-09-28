@@ -192,12 +192,12 @@ function s:ExprCol()
       endif
       let bal -= 1
     elseif s:LookingAt() == '?'
-      if getline('.')[col('.'):col('.')+1] !~ '\.\D'
-        if !bal
-          return 1
-        endif
-        let bal += 1
+      if getline('.')[col('.'):col('.')+1] =~ '\.\D'
+        continue
+      elseif !bal
+        return 1
       endif
+      let bal += 1
     elseif s:LookingAt() == '{'
       return !s:IsBlock()
     elseif !s:GetPair('{','}','bW',s:skip_expr)
