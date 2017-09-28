@@ -21,9 +21,14 @@ Add the plugin to your plugin list inside ~/.vimrc right after you load your Vun
 Plugin 'pangloss/vim-javascript'
 ```
 
-Now install by either running from:
-* The terminal: `vim +PluginInstall +qall`
-* Inside VIM: :PluginInstall
+Now install from either your terminal:
+```
+vim +PluginInstall +qall
+```
+or from inside VIM:
+```
+:PluginInstall
+```
 
 
 ## Configuration Variables
