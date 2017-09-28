@@ -13,6 +13,24 @@ improved indentation.
 alternatively, use a package manager like [vim-plug](https://github.com/junegunn/vim-plug)
 
 
+### Install with [vundle](https://github.com/VundleVim/Vundle.vim)
+
+Add the plugin to your plugin list inside ~/.vimrc right after you load your Vundle plugin and before `call vundle#end()`:
+
+```
+Plugin 'pangloss/vim-javascript'
+```
+
+Now install from either your terminal:
+```
+vim +PluginInstall +qall
+```
+or from inside VIM:
+```
+:PluginInstall
+```
+
+
 ## Configuration Variables
 
 The following variables control certain syntax highlighting plugins. You can
