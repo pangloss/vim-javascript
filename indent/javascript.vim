@@ -192,7 +192,7 @@ function s:ExprCol()
       endif
       let bal -= 1
     elseif s:LookingAt() == '?'
-      if getline('.')[col('.'):col('.')+1] =~ '\.\D'
+      if getline('.')[col('.'):col('.')+1] =~ '\.\_D'
         continue
       elseif !bal
         return 1
