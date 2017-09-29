@@ -174,6 +174,15 @@ exe 'syntax match jsFunction /\<function\>/ skipwhite skipempty nextgroup=jsGene
 exe 'syntax match jsArrowFunction /=>/      skipwhite skipempty nextgroup=jsFuncBlock,jsCommentFunction                                   '.(exists('g:javascript_conceal_arrow_function') ? 'conceal cchar='.g:javascript_conceal_arrow_function : '')
 exe 'syntax match jsArrowFunction /()\ze\s*=>/   skipwhite skipempty nextgroup=jsArrowFunction                                        '.(exists('g:javascript_conceal_noarg_arrow_function') ? 'conceal cchar='.g:javascript_conceal_noarg_arrow_function : '')
 exe 'syntax match jsArrowFunction /_\ze\s*=>/    skipwhite skipempty nextgroup=jsArrowFunction                                        '.(exists('g:javascript_conceal_underscore_arrow_function') ? 'conceal cchar='.g:javascript_conceal_underscore_arrow_function : '')
+exe 'syntax match jsComparison /==/ skipwhite skipempty containedin=jsParenIfElse '.(exists('g:javascript_conceal_double_equal') ? 'conceal cchar=' . g:javascript_conceal_double_equal : '')
+exe 'syntax match jsComparison /===/ skipwhite skipempty containedin=jsParenIfElse '.(exists('g:javascript_conceal_triple_equal') ? 'conceal cchar=' . g:javascript_conceal_triple_equal : '')
+exe 'syntax match jsComparison /||/ skipwhite skipempty containedin=jsParenIfElse '.(exists('g:javascript_conceal_or_comparison') ? 'conceal cchar=' . g:javascript_conceal_or_operator : '')
+exe 'syntax match jsComparison /&&/ skipwhite skipempty containedin=jsParenIfElse '.(exists('g:javascript_conceal_and_comparison') ? 'conceal cchar=' . g:javascript_conceal_and_operator : '')
+exe 'syntax match jsComparison /!/ skipwhite skipempty containedin=jsParenIfElse '.(exists('g:javascript_conceal_and_comparison') ? 'conceal cchar=' . g:javascript_conceal_not_operator : '')
+exe 'syntax match jsComparison />=/ skipwhite skipempty containedin=jsParenIfElse '.(exists('g:javascript_conceal_greater_equal_operator') ? 'conceal cchar=' . g:javascript_conceal_greater_equal_operator : '')
+exe 'syntax match jsComparison /<=/ skipwhite skipempty containedin=jsParenIfElse '.(exists('g:javascript_conceal_less_equal_operator') ? 'conceal cchar=' . g:javascript_conceal_less_equal_operator : '')
+exe 'syntax match jsComparison /!=/ skipwhite skipempty containedin=jsParenIfElse '.(exists('g:javascript_conceal_not_equal_operator') ? 'conceal cchar=' . g:javascript_conceal_not_equal_operator : '')
+exe 'syntax match jsComparison /!==/ skipwhite skipempty containedin=jsParenIfElse '.(exists('g:javascript_conceal_not_strict_equal_operator') ? 'conceal cchar=' . g:javascript_conceal_not_strict_equal_operator : '')
 
 " Classes
 syntax keyword jsClassKeyword           contained class
