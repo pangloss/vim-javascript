@@ -82,7 +82,7 @@ syntax match   jsObjectSeparator   contained /,/
 syntax region  jsObjectValue       contained matchgroup=jsNoise start=/:/ end=/[,}]\@=/ contains=@jsExpression extend
 syntax match   jsObjectFuncName    contained /\<\K\k*\ze\_s*(/ skipwhite skipempty nextgroup=jsFuncArgs
 syntax match   jsFunctionKey       contained /\<\K\k*\ze\s*:\s*function\>/
-syntax match   jsObjectMethodType  contained /\<\%(get\|set\)\ze\s\+\K\k*/ skipwhite skipempty nextgroup=jsObjectFuncName
+syntax match   jsObjectMethodType  contained /\<[gs]et\ze\s\+\K\k*/ skipwhite skipempty nextgroup=jsObjectFuncName
 syntax region  jsObjectStringKey   contained start=+"+  skip=+\\\_["]+  end=+\_["]+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs,jsObjectValue
 syntax region  jsObjectStringKey   contained start=+'+  skip=+\\\_[']+  end=+\_[']+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs,jsObjectValue
 
@@ -181,7 +181,7 @@ exe 'syntax match jsArrowFunction /_\ze\s*=>/    skipwhite skipempty nextgroup=j
 syntax keyword jsClassKeyword           contained class
 syntax keyword jsExtendsKeyword         contained extends skipwhite skipempty nextgroup=@jsExpression
 syntax match   jsClassNoise             contained /\./
-syntax match   jsClassMethodType        contained /\<\%(get\|set\|static\)\ze\s\+\K\k*/ skipwhite skipempty nextgroup=jsAsyncKeyword,jsFuncName,jsClassProperty
+syntax match   jsClassMethodType        contained /\<\%([gs]et\|static\)\ze\s\+\K\k*/ skipwhite skipempty nextgroup=jsAsyncKeyword,jsFuncName,jsClassProperty
 syntax region  jsClassDefinition                  start=/\<class\>/ end=/\(\<extends\>\s\+\)\@<!{\@=/ contains=jsClassKeyword,jsExtendsKeyword,jsClassNoise,@jsExpression,jsFlowClassGroup skipwhite skipempty nextgroup=jsCommentClass,jsClassBlock,jsFlowClassGroup
 syntax match   jsClassProperty          contained /\<\K\k*\ze\s*=/ skipwhite skipempty nextgroup=jsClassValue,jsFlowClassDef
 syntax region  jsClassValue             contained start=/=/ end=/\_[;}]\@=/ contains=@jsExpression
