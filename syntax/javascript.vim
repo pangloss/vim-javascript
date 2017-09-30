@@ -219,7 +219,7 @@ syntax region  jsCommentRepeat      contained start=+/\*+ end=+\*/+ contains=jsC
 
 " Decorators
 syntax match   jsDecorator                    /^\s*@/ nextgroup=jsDecoratorFunction
-syntax match   jsDecoratorFunction  contained /[a-zA-Z_][a-zA-Z0-9_.]*/ nextgroup=jsParenDecorator
+syntax match   jsDecoratorFunction  contained /\h[a-zA-Z0-9_.]*/ nextgroup=jsParenDecorator
 
 if exists("javascript_plugin_jsdoc")
   runtime extras/jsdoc.vim
