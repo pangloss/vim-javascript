@@ -72,7 +72,6 @@ syntax region  jsRegexpGroup        contained start="[^\\]("lc=1 skip="\\.\|\[\(
 syntax region  jsRegexpString   start=+\%(\%(\<return\|\<case\|\_[^)\]'"[:blank:][:alnum:]]\)\s*\)\@<=/\ze[^*/]+ skip=+\\.\|\[[^]]\{1,}\]+ end=+/[gimyu]\{,5}+ contains=jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial oneline keepend extend
 syntax cluster jsRegexpSpecial    contains=jsSpecial,jsRegexpBoundary,jsRegexpBackRef,jsRegexpQuantifier,jsRegexpOr,jsRegexpMod
 
-
 " Objects
 syntax match   jsObjectKey         contained /\<\k*\>\ze\s*:/ contains=jsFunctionKey skipwhite skipempty nextgroup=jsObjectValue
 syntax match   jsObjectColon       contained /:/ skipwhite skipempty
