@@ -68,7 +68,7 @@ syntax match   jsRegexpBackRef      contained "\v\\[1-9]\d*"
 syntax match   jsRegexpQuantifier   contained "\v\\@<!%([?*+]|\{\d+%(,\d*)?})\??"
 syntax match   jsRegexpOr           contained "|"
 syntax match   jsRegexpMod          contained "\v\(@<=\?[:=!>]"
-syntax region  jsRegexpGroup        contained start="\\\@<!(" skip="\\.\|\[\(\\.\|[^]]\{1,}\)\]" end=")" contains=jsRegexpCharClass,@jsRegexpSpecial keepend
+syntax region  jsRegexpGroup        contained start="[^\\]("lc=1 skip="\\.\|\[\(\\.\|[^]]\+\)\]" end=")" contains=jsRegexpCharClass,@jsRegexpSpecial keepend
 syntax region  jsRegexpString   start=+\%(\_[^)\]'"[:blank:]]\s*\)\@<=/\ze[^*/]+ skip=+\\.\|\[[^]]\{1,}\]+ end=+/[gimyu]\{,5}+ contains=jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial oneline keepend extend
 syntax cluster jsRegexpSpecial    contains=jsSpecial,jsRegexpBoundary,jsRegexpBackRef,jsRegexpQuantifier,jsRegexpOr,jsRegexpMod
 
