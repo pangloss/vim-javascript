@@ -51,8 +51,7 @@ syntax keyword jsFrom               contained from skipwhite skipempty nextgroup
 syntax match   jsModuleComma        contained /,/ skipwhite skipempty nextgroup=jsModuleKeyword,jsModuleAsterisk,jsModuleGroup,jsFlowTypeKeyword
 
 " Strings, Templates, Numbers
-syntax region  jsString           start=+"+  skip=+\\\_["]+  end=+\_["]+  contains=jsSpecial,@Spell extend
-syntax region  jsString           start=+'+  skip=+\\\_[']+  end=+\_[']+  contains=jsSpecial,@Spell extend
+syntax region  jsString           start=+\z(["']\)+  skip=+\\\%(\z1\|$\)+  end=+\z1\|$+  contains=jsSpecial,@Spell extend
 syntax region  jsTemplateString   start=+`+  skip=+\\`+  end=+`+     contains=jsTemplateExpression,jsSpecial,@Spell extend
 syntax match   jsTaggedTemplate   /\<\K\k*\ze`/ nextgroup=jsTemplateString
 syntax match   jsNumber           /\c\<\%(\d\+\%(e[+-]\=\d\+\)\=\|0b[01]\+\|0o\o\+\|0x\x\+\)\>/
@@ -75,16 +74,14 @@ syntax cluster jsRegexpSpecial    contains=jsSpecial,jsRegexpBoundary,jsRegexpBa
 " Objects
 syntax match   jsObjectKey         contained /\<\K\k*\ze\s*:/ contains=jsFunctionKey skipwhite skipempty nextgroup=jsObjectValue
 syntax match   jsObjectColon       contained /:/ skipwhite skipempty
-syntax region  jsObjectKeyString   contained start=+"+  skip=+\\\_["]+  end=+\_["]+  contains=jsSpecial,@Spell skipwhite skipempty nextgroup=jsObjectValue
-syntax region  jsObjectKeyString   contained start=+'+  skip=+\\\_[']+  end=+\_[']+  contains=jsSpecial,@Spell skipwhite skipempty nextgroup=jsObjectValue
+syntax region  jsObjectKeyString   contained start=+\z(["']\)+  skip=+\\\%(\z1\|$\)+  end=+\z1\|$+  contains=jsSpecial,@Spell skipwhite skipempty nextgroup=jsObjectValue
 syntax region  jsObjectKeyComputed contained matchgroup=jsBrackets start=/\[/ end=/]/ contains=@jsExpression skipwhite skipempty nextgroup=jsObjectValue,jsFuncArgs extend
 syntax match   jsObjectSeparator   contained /,/
 syntax region  jsObjectValue       contained matchgroup=jsNoise start=/:/ end=/[,}]\@=/ contains=@jsExpression extend
 syntax match   jsObjectFuncName    contained /\<\K\k*\ze\_s*(/ skipwhite skipempty nextgroup=jsFuncArgs
 syntax match   jsFunctionKey       contained /\<\K\k*\ze\s*:\s*function\>/
 syntax match   jsObjectMethodType  contained /\<[gs]et\ze\s\+\K\k*/ skipwhite skipempty nextgroup=jsObjectFuncName
-syntax region  jsObjectStringKey   contained start=+"+  skip=+\\\_["]+  end=+\_["]+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs,jsObjectValue
-syntax region  jsObjectStringKey   contained start=+'+  skip=+\\\_[']+  end=+\_[']+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs,jsObjectValue
+syntax region  jsObjectStringKey   contained start=+\z(["']\)+  skip=+\\\%(\z1\|$\)+  end=+\z1\|$+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs,jsObjectValue
 
 exe 'syntax keyword jsNull      null             '.(exists('g:javascript_conceal_null')      ? 'conceal cchar='.g:javascript_conceal_null       : '')
 exe 'syntax keyword jsReturn    return contained '.(exists('g:javascript_conceal_return')    ? 'conceal cchar='.g:javascript_conceal_return     : '').' skipwhite skipempty nextgroup=@jsExpression'
@@ -187,8 +184,7 @@ syntax match   jsClassProperty          contained /\<\K\k*\ze\s*=/ skipwhite ski
 syntax region  jsClassValue             contained start=/=/ end=/\_[;}]\@=/ contains=@jsExpression
 syntax region  jsClassPropertyComputed  contained matchgroup=jsBrackets start=/\[/ end=/]/ contains=@jsExpression skipwhite skipempty nextgroup=jsFuncArgs,jsClassValue extend
 syntax match   jsClassFuncName          contained /\<\K\k*\ze\s*(/ skipwhite skipempty nextgroup=jsFuncArgs
-syntax region  jsClassStringKey         contained start=+"+  skip=+\\\_["]+  end=+\_["]+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs
-syntax region  jsClassStringKey         contained start=+'+  skip=+\\\_[']+  end=+\_[']+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs
+syntax region  jsClassStringKey         contained start=+\z(["']\)+  skip=+\\\%(\z1\|$\)+  end=+\z1\|$+  contains=jsSpecial,@Spell extend skipwhite skipempty nextgroup=jsFuncArgs
 
 " Destructuring
 syntax match   jsDestructuringPropertyValue     contained /\k\+/
