@@ -34,7 +34,7 @@ syntax match   jsParensError    /[)}\]]/
 syntax keyword jsStorageClass   const var let skipwhite skipempty nextgroup=jsDestructuringBlock,jsDestructuringArray,jsVariableDef
 syntax match   jsVariableDef    contained /\k\+/ skipwhite skipempty nextgroup=jsFlowDefinition
 syntax keyword jsOperator       delete instanceof typeof void new in of skipwhite skipempty nextgroup=@jsExpression
-syntax match   jsOperator       /[-!|&+<>=%/*~^]/ skipwhite skipempty nextgroup=@jsExpression
+syntax match   jsOperator       "[-!|&+<>=%/*~^]" skipwhite skipempty nextgroup=@jsExpression
 syntax match   jsOperator       /::/ skipwhite skipempty nextgroup=@jsExpression
 syntax keyword jsBooleanTrue    true
 syntax keyword jsBooleanFalse   false
@@ -63,14 +63,15 @@ syntax match   jsFloat            /\c\<\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%(e[+-]\=
 syntax match   jsSpecial            contained "\v\\%(x\x\x|u%(\x{4}|\{\x{4}})|c\u|.)"
 syntax region  jsTemplateExpression contained matchgroup=jsTemplateBraces start=+${+ end=+}+ contains=@jsExpression keepend
 syntax region  jsRegexpCharClass    contained start=+\[+ skip=+\\.+ end=+\]+
-syntax match   jsRegexpBoundary     contained "\v\c[\^$]|\\b"
+syntax match   jsRegexpBoundary     contained "\v\c[$^]|\\b"
 syntax match   jsRegexpBackRef      contained "\v\\[1-9]\d*"
 syntax match   jsRegexpQuantifier   contained "\v\\@<!%([?*+]|\{\d+%(,\d*)?})\??"
-syntax match   jsRegexpOr           contained "\v\|"
-syntax match   jsRegexpMod          contained "\v\(\zs\?[:=!>]"
-syntax region  jsRegexpGroup        contained start="[^\\]\zs(" skip="\\.\|\[\(\\.\|[^]]\)*\]" end="[^\\]\zs)" contains=jsRegexpCharClass,@jsRegexpSpecial keepend
-syntax region  jsRegexpString   start=+\%(\<\%(return\|case\)\s\+\|\_[^)\]'"]\)\zs/\ze[^*/]+ skip=+\\.\|\[\%(\\.\|[^]]\)*\]+ end=+/[gimyu]\{,5}+ contains=jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial oneline keepend extend
+syntax match   jsRegexpOr           contained "|"
+syntax match   jsRegexpMod          contained "\v\(@<=\?[:=!>]"
+syntax region  jsRegexpGroup        contained start="\\\@<!(" skip="\\.\|\[\(\\.\|[^]]\{1,}\)\]" end=")" contains=jsRegexpCharClass,@jsRegexpSpecial keepend
+syntax region  jsRegexpString   start=+\%(\_[^)\]'"[:blank:]]\s*\)\@<=/\ze[^*/]+ skip=+\\.\|\[[^]]\{1,}\]+ end=+/[gimyu]\{,5}+ contains=jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial oneline keepend extend
 syntax cluster jsRegexpSpecial    contains=jsSpecial,jsRegexpBoundary,jsRegexpBackRef,jsRegexpQuantifier,jsRegexpOr,jsRegexpMod
+
 
 " Objects
 syntax match   jsObjectKey         contained /\<\k*\>\ze\s*:/ contains=jsFunctionKey skipwhite skipempty nextgroup=jsObjectValue
@@ -201,21 +202,21 @@ syntax region  jsDestructuringPropertyComputed  contained matchgroup=jsBrackets 
 
 " Comments
 syntax keyword jsCommentTodo    contained TODO FIXME XXX TBD
-syntax region  jsComment        start=/\/\// end=/$/ contains=jsCommentTodo,@Spell extend keepend
-syntax region  jsComment        start=/\/\*/  end=/\*\// contains=jsCommentTodo,@Spell fold extend keepend
+syntax region  jsComment        start=+//+ end=/$/ contains=jsCommentTodo,@Spell extend keepend
+syntax region  jsComment        start=+/\*+  end=+\*/+ contains=jsCommentTodo,@Spell fold extend keepend
 syntax region  jsEnvComment     start=/\%^#!/ end=/$/ display
 
 " Specialized Comments - These are special comment regexes that are used in
 " odd places that maintain the proper nextgroup functionality. It sucks we
 " can't make jsComment a skippable type of group for nextgroup
-syntax region  jsCommentFunction    contained start=/\/\// end=/$/    contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturn extend keepend
-syntax region  jsCommentFunction    contained start=/\/\*/ end=/\*\// contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturn fold extend keepend
-syntax region  jsCommentClass       contained start=/\/\// end=/$/    contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsClassBlock,jsFlowClassGroup extend keepend
-syntax region  jsCommentClass       contained start=/\/\*/ end=/\*\// contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsClassBlock,jsFlowClassGroup fold extend keepend
-syntax region  jsCommentIfElse      contained start=/\/\// end=/$/    contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsIfElseBlock extend keepend
-syntax region  jsCommentIfElse      contained start=/\/\*/ end=/\*\// contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsIfElseBlock fold extend keepend
-syntax region  jsCommentRepeat      contained start=/\/\// end=/$/    contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsRepeatBlock extend keepend
-syntax region  jsCommentRepeat      contained start=/\/\*/ end=/\*\// contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsRepeatBlock fold extend keepend
+syntax region  jsCommentFunction    contained start=+//+ end=/$/    contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturn extend keepend
+syntax region  jsCommentFunction    contained start=+/\*+ end=+\*/+ contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturn fold extend keepend
+syntax region  jsCommentClass       contained start=+//+ end=/$/    contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsClassBlock,jsFlowClassGroup extend keepend
+syntax region  jsCommentClass       contained start=+/\*+ end=+\*/+ contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsClassBlock,jsFlowClassGroup fold extend keepend
+syntax region  jsCommentIfElse      contained start=+//+ end=/$/    contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsIfElseBlock extend keepend
+syntax region  jsCommentIfElse      contained start=+/\*+ end=+\*/+ contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsIfElseBlock fold extend keepend
+syntax region  jsCommentRepeat      contained start=+//+ end=/$/    contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsRepeatBlock extend keepend
+syntax region  jsCommentRepeat      contained start=+/\*+ end=+\*/+ contains=jsCommentTodo,@Spell skipwhite skipempty nextgroup=jsRepeatBlock fold extend keepend
 
 " Decorators
 syntax match   jsDecorator                    /^\s*@/ nextgroup=jsDecoratorFunction
