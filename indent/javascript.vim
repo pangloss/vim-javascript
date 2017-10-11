@@ -119,6 +119,7 @@ function s:SkipFunc()
     let s:check_in = 1
     return 1
   endif
+  let s:synid_cache[:] += [[line2byte('.') + col('.') - 1], ['']]
   let [s:looksyn, s:top_col] = getpos('.')[1:2]
 endfunction
 
@@ -182,23 +183,30 @@ function s:SearchLoop(pat,flags,expr)
 endfunction
 
 function s:ExprCol()
+  if getline('.')[col('.')-2] == ':'
+    return 1
+  endif
   let bal = 0
-  while s:SearchLoop('[{}?]\|\_[^:]\zs::\@!','bW',s:skip_expr)
+  while s:SearchLoop('[{}?:]','bW',s:skip_expr)
     if s:LookingAt() == ':'
+      if getline('.')[col('.')-2] == ':'
+        call cursor(0,col('.')-1)
+        continue
+      endif
       let bal -= 1
     elseif s:LookingAt() == '?'
-      let bal += 1
-      if bal == 1
-        break
+      if getline('.')[col('.'):col('.')+1] =~ '^\.\d\@!'
+        continue
+      elseif !bal
+        return 1
       endif
+      let bal += 1
     elseif s:LookingAt() == '{'
-      let bal = !s:IsBlock()
-      break
+      return !s:IsBlock()
     elseif !s:GetPair('{','}','bW',s:skip_expr)
       break
     endif
   endwhile
-  return s:Nat(bal)
 endfunction
 
 " configurable regexes that define continuation lines, not including (, {, or [.
