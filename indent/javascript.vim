@@ -218,7 +218,6 @@ let s:continuation = get(g:,'javascript_continuation',
 function s:Continues(ln,con)
   let tok = matchstr(a:con[-15:],s:continuation)
   if tok =~ '[a-z:]'
-    call cursor(a:ln, len(a:con))
     return tok == ':' ? s:ExprCol() : s:PreviousToken() != '.'
   elseif tok !~ '[/>]'
     return tok isnot ''
@@ -401,21 +400,19 @@ function GetJavascriptIndent()
       endif
     endif
     if idx == -1 && pline[-1:] !~ '[{;]'
+      call cursor(l:lnum, len(pline))
       let sol = matchstr(l:line,s:opfirst)
       if sol is '' || sol == '/' && s:SynAt(v:lnum,
             \ 1 + len(getline(v:lnum)) - len(l:line)) =~? 'regex'
         if s:Continues(l:lnum,pline)
           let is_op = s:sw()
         endif
-      elseif num && sol =~# '^\%(in\%(stanceof\)\=\|\*\)$'
-        call cursor(l:lnum, len(pline))
-        if s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr) &&
-              \ s:PreviousToken() == ')' && s:GetPair('(',')','bW',s:skip_expr) &&
-              \ (s:PreviousToken() == ']' || s:Token() =~ '\k' &&
-              \ s:{s:PreviousToken() == '*' ? 'Previous' : ''}Token() !=# 'function')
-          return num_ind + s:sw()
-        endif
-        let is_op = s:sw()
+      elseif num && sol =~# '^\%(in\%(stanceof\)\=\|\*\)$' && s:LookingAt() == '}' &&
+            \ s:GetPair('{','}','bW',s:skip_expr) &&
+            \ s:PreviousToken() == ')' && s:GetPair('(',')','bW',s:skip_expr) &&
+            \ (s:PreviousToken() == ']' || s:Token() =~ '\k' &&
+            \ s:{s:PreviousToken() == '*' ? 'Previous' : ''}Token() !=# 'function')
+        return num_ind + s:sw()
       else
         let is_op = s:sw()
       endif
