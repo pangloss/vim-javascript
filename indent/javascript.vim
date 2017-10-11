@@ -410,8 +410,8 @@ function GetJavascriptIndent()
       elseif num && sol =~# '^\%(in\%(stanceof\)\=\|\*\)$' &&
             \ s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr) &&
             \ s:PreviousToken() == ')' && s:GetPair('(',')','bW',s:skip_expr) &&
-            \ s:PreviousToken() =~ ']\|\k' && s:{s:PreviousToken() == '*' ?
-            \ 'Previous' : ''}Token() !=# 'function'
+            \ (s:PreviousToken() == ']' || s:LookingAt() =~ '\k' &&
+            \ s:{s:PreviousToken() == '*' ? 'Previous' : ''}Token() !=# 'function')
         return num_ind + s:sw()
       else
         let is_op = s:sw()
