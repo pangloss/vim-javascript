@@ -215,15 +215,14 @@ let s:opfirst = '^' . get(g:,'javascript_opfirst',
 let s:continuation = get(g:,'javascript_continuation',
       \ '\C\%([<=,.~!?/*^%|&:]\|+\@<!+\|-\@<!-\|=\@<!>\|\<\%(typeof\|new\|delete\|void\|in\|instanceof\|await\)\)') . '$'
 
-function s:Continues(ln,con)
-  let tok = matchstr(a:con[-15:],s:continuation)
+function s:Continues()
+  let tok = matchstr(strpart(getline('.'),col('.')-15,15),s:continuation)
   if tok =~ '[a-z:]'
-    call cursor(a:ln, len(a:con))
     return tok == ':' ? s:ExprCol() : s:PreviousToken() != '.'
   elseif tok !~ '[/>]'
     return tok isnot ''
   endif
-  return s:SynAt(a:ln, len(a:con)) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
+  return s:SynAt(line('.'),col('.')) !~? (tok == '>' ? 'jsflow\|^html' : 'regex')
 endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
@@ -269,9 +268,9 @@ endfunction
 " returns total offset from braceless contexts. 'num' is the lineNr which
 " encloses the entire context, 'cont' if whether a:firstline is a continued
 " expression, which could have started in a braceless context
-function s:IsContOne(num,cont)
-  let [l:num, b_l] = [a:num + !a:num, 0]
-  let pind = a:num ? indent(a:num) + s:sw() : 0
+function s:IsContOne(cont)
+  let [l:num, b_l] = [b:js_cache[1] + !b:js_cache[1], 0]
+  let pind = b:js_cache[1] ? indent(b:js_cache[1]) + s:sw() : 0
   let ind = indent('.') + !a:cont
   while line('.') > l:num && ind > pind || line('.') == l:num
     if indent('.') < ind && s:OneScope()
@@ -401,26 +400,24 @@ function GetJavascriptIndent()
       endif
     endif
     if idx == -1 && pline[-1:] !~ '[{;]'
+      call cursor(l:lnum, len(pline))
       let sol = matchstr(l:line,s:opfirst)
       if sol is '' || sol == '/' && s:SynAt(v:lnum,
             \ 1 + len(getline(v:lnum)) - len(l:line)) =~? 'regex'
-        if s:Continues(l:lnum,pline)
+        if s:Continues()
           let is_op = s:sw()
         endif
-      elseif num && sol =~# '^\%(in\%(stanceof\)\=\|\*\)$'
-        call cursor(l:lnum, len(pline))
-        if s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr) &&
-              \ s:PreviousToken() == ')' && s:GetPair('(',')','bW',s:skip_expr) &&
-              \ (s:PreviousToken() == ']' || s:Token() =~ '\k' &&
-              \ s:{s:PreviousToken() == '*' ? 'Previous' : ''}Token() !=# 'function')
-          return num_ind + s:sw()
-        endif
-        let is_op = s:sw()
+      elseif num && sol =~# '^\%(in\%(stanceof\)\=\|\*\)$' &&
+            \ s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr) &&
+            \ s:PreviousToken() == ')' && s:GetPair('(',')','bW',s:skip_expr) &&
+            \ (s:PreviousToken() == ']' || s:LookingAt() =~ '\k' &&
+            \ s:{s:PreviousToken() == '*' ? 'Previous' : ''}Token() !=# 'function')
+        return num_ind + s:sw()
       else
         let is_op = s:sw()
       endif
       call cursor(l:lnum, len(pline))
-      let b_l = s:Nat(s:IsContOne(b:js_cache[1],is_op) - (!is_op && l:line =~ '^{')) * s:sw()
+      let b_l = s:Nat(s:IsContOne(is_op) - (!is_op && l:line =~ '^{')) * s:sw()
     endif
   elseif idx.s:LookingAt().&cino =~ '^-1(.*(' && (search('\m\S','nbW',num) || s:ParseCino('U'))
     let pval = s:ParseCino('(')
