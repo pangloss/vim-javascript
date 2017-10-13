@@ -51,8 +51,11 @@ Default Value: 0
 
 -----------------
 
-```
-autocmd FileType javascript setlocal foldmethod=syntax
+```vim
+augroup java_folding
+    au!
+    au FileType javascript setlocal foldmethod=syntax
+augroup END
 ```
 
 Enables code folding for javascript based on our syntax file.
