@@ -258,7 +258,7 @@ function s:DoWhile()
   let cpos = searchpos('\m\<','cbW')
   while s:SearchLoop('\C[{}]\|\<\%(do\|while\)\>','bW',s:skip_expr)
     if s:LookingAt() =~ '\a'
-      if s:IsBlock()
+      if s:Pure('s:IsBlock')
         if s:LookingAt() ==# 'd'
           return 1
         endif
