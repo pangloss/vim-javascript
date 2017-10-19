@@ -256,13 +256,19 @@ endfunction
 
 function s:DoWhile()
   let cpos = searchpos('\m\<','cbW')
-  if s:SearchLoop('\C[{}]\|\<\%(do\|while\)\>','bW',s:skip_expr)
-    if s:{s:LookingAt() == '}' && s:GetPair('{','}','bW',s:skip_expr) ?
-          \ 'Previous' : ''}Token() ==# 'do' && s:IsBlock()
-      return 1
+  while s:SearchLoop('\C[{}]\|\<\%(do\|while\)\>','bW',s:skip_expr)
+    if s:LookingAt() =~ '\a'
+      if s:Pure('s:IsBlock')
+        if s:LookingAt() ==# 'd'
+          return 1
+        endif
+        break
+      endif
+    elseif s:LookingAt() != '}' || !s:GetPair('{','}','bW',s:skip_expr)
+      break
     endif
-    call call('cursor',cpos)
-  endif
+  endwhile
+  call call('cursor',cpos)
 endfunction
 
 " returns total offset from braceless contexts. 'num' is the lineNr which
