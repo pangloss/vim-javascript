@@ -311,8 +311,8 @@ function s:IsBlock()
       return s:Pure('eval',"!s:GetPair('[[({]','[])}]','bW',s:skip_expr) || s:LookingAt() != '(' ||"
             \ ."s:{s:PreviousToken() ==# 'await' ? 'Previous' : ''}Token() !=# 'for' || s:PreviousToken() == '.'")
     endif
-    return index(split('return const let import export extends yield default delete var await void typeof throw case new in instanceof')
-          \ ,tok) < (line('.') != a:firstline) || s:Pure('s:PreviousToken') == '.'
+    return match('return const let import export extends yield default delete var await void typeof throw case new in instanceof'
+          \ ,'\C\<'.tok.'\>') < (line('.') != a:firstline) || s:Pure('s:PreviousToken') == '.'
   elseif tok == '>'
     return getline('.')[col('.')-2] == '=' || s:SynAt(line('.'),col('.')) =~? 'jsflow\|^html'
   elseif tok == '*'
