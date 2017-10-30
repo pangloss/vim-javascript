@@ -303,6 +303,7 @@ endfunction
 function s:IsBlock()
   let tok = s:PreviousToken()
   if join(s:stack) =~? 'xml\|jsx' && s:SynAt(line('.'),col('.')-1) =~? 'xml\|jsx'
+    let s:injsx = 1
     return tok != '{'
   elseif tok =~ '\k'
     if tok ==# 'type'
@@ -311,8 +312,8 @@ function s:IsBlock()
       return s:Pure('eval',"!s:GetPair('[[({]','[])}]','bW',s:skip_expr) || s:LookingAt() != '(' ||"
             \ ."s:{s:PreviousToken() ==# 'await' ? 'Previous' : ''}Token() !=# 'for' || s:PreviousToken() == '.'")
     endif
-    return match('return const let import export extends yield default delete var await void typeof throw case new in instanceof'
-          \ ,'\C\<'.tok.'\>') < (line('.') != a:firstline) || s:Pure('s:PreviousToken') == '.'
+    return index(split('return const let import export extends yield default delete var await void typeof throw case new in instanceof')
+          \ ,tok) < (line('.') != a:firstline) || s:Pure('s:PreviousToken') == '.'
   elseif tok == '>'
     return getline('.')[col('.')-2] == '=' || s:SynAt(line('.'),col('.')) =~? 'jsflow\|^html'
   elseif tok == '*'
@@ -389,10 +390,10 @@ function GetJavascriptIndent()
 
   let [b:js_cache[0], num] = [v:lnum, b:js_cache[1]]
 
-  let [num_ind, is_op, b_l, l:switch_offset] = [s:Nat(indent(num)),0,0,0]
+  let [num_ind, is_op, b_l, l:switch_offset, s:injsx] = [s:Nat(indent(num)),0,0,0,0]
   if !num || s:LookingAt() == '{' && s:IsBlock()
     let ilnum = line('.')
-    if num && s:LookingAt() == ')' && s:GetPair('(',')','bW',s:skip_expr)
+    if num && !s:injsx && s:LookingAt() == ')' && s:GetPair('(',')','bW',s:skip_expr)
       if ilnum == num
         let [num, num_ind] = [line('.'), indent('.')]
       endif
