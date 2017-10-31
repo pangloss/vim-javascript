@@ -303,6 +303,7 @@ endfunction
 function s:IsBlock()
   let tok = s:PreviousToken()
   if join(s:stack) =~? 'xml\|jsx' && s:SynAt(line('.'),col('.')-1) =~? 'xml\|jsx'
+    let s:in_jsx = 1
     return tok != '{'
   elseif tok =~ '\k'
     if tok ==# 'type'
@@ -389,10 +390,10 @@ function GetJavascriptIndent()
 
   let [b:js_cache[0], num] = [v:lnum, b:js_cache[1]]
 
-  let [num_ind, is_op, b_l, l:switch_offset] = [s:Nat(indent(num)),0,0,0]
+  let [num_ind, is_op, b_l, l:switch_offset, s:in_jsx] = [s:Nat(indent(num)),0,0,0,0]
   if !num || s:LookingAt() == '{' && s:IsBlock()
     let ilnum = line('.')
-    if num && s:LookingAt() == ')' && s:GetPair('(',')','bW',s:skip_expr)
+    if num && !s:in_jsx && s:LookingAt() == ')' && s:GetPair('(',')','bW',s:skip_expr)
       if ilnum == num
         let [num, num_ind] = [line('.'), indent('.')]
       endif
