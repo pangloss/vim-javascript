@@ -162,8 +162,8 @@ endfunction
 function s:PreviousToken(...)
   let l:col = col('.')
   if search('\m\k\{1,}\|\S','ebW')
-    if getline('.')[col('.')-2:col('.')-1] == '*/' && eval(s:in_comm)
-      if s:SearchLoop('\S\ze\_s*\/[/*]','bW',s:in_comm)
+    if getline('.')[col('.')-2:col('.')-1] == '*/'
+      if !eval(s:in_comm) || s:SearchLoop('\S\ze\_s*\/[/*]','bW',s:in_comm)
         return s:Token()
       endif
     else
