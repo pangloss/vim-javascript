@@ -168,7 +168,7 @@ function s:PreviousToken(...)
       endif
     else
       let two = a:0 || line('.') != a:firstline ? searchpos('\/\/','cnbW',line('.')) : [0]
-      if two[0] && call('s:SynAt',two) =~? 'comment\|doc'
+      if two[0] && eval(s:in_comm)
         call call('cursor',two)
         let rec = s:PreviousToken(1)
         if rec isnot ''
