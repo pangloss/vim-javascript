@@ -167,9 +167,9 @@ function s:PreviousToken(...)
         return s:Token()
       endif
     else
-      let two = a:0 || line('.') != a:firstline ? searchpos('\/\/','cnbW',line('.')) : [0]
-      if two[0] && eval(s:in_comm)
-        call call('cursor',two)
+      let two = a:0 || line('.') != a:firstline ? strridx(getline('.')[:col('.')],'//') + 1 : 0
+      if two && eval(s:in_comm)
+        call cursor(0,two)
         let rec = s:PreviousToken(1)
         if rec isnot ''
           return rec
