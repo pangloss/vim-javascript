@@ -160,27 +160,28 @@ function s:Token()
 endfunction
 
 function s:PreviousToken(...)
-  let l:col = col('.')
+  let [l:pos, rec] = [getpos('.'), '']
   if search('\m\k\{1,}\|\S','ebW')
     if getline('.')[col('.')-2:col('.')-1] == '*/'
-      if !eval(s:in_comm) || s:SearchLoop('\S\ze\_s*\/[/*]','bW',s:in_comm)
-        return s:Token()
+      if eval(s:in_comm) && !s:SearchLoop('\S\ze\_s*\/[/*]','bW',s:in_comm)
+        call setpos('.',l:pos)
+      else
+        let rec = s:Token()
       endif
     else
-      let two = a:0 || line('.') != a:firstline ? strridx(getline('.')[:col('.')],'//') + 1 : 0
+      let two = a:0 || line('.') != l:pos[1] ? strridx(getline('.')[:col('.')],'//') + 1 : 0
       if two && eval(s:in_comm)
         call cursor(0,two)
         let rec = s:PreviousToken(1)
-        if rec isnot ''
-          return rec
+        if rec is ''
+          call setpos('.',l:pos)
         endif
       else
-        return s:Token()
+        let rec = s:Token()
       endif
     endif
-    call cursor(a:firstline, l:col)
   endif
-  return ''
+  return rec
 endfunction
 
 function s:Pure(f,...)
