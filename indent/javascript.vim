@@ -159,7 +159,7 @@ function s:Token()
   return s:LookingAt() =~ '\k' ? expand('<cword>') : s:LookingAt()
 endfunction
 
-function s:PreviousToken()
+function s:PreviousToken(...)
   let l:col = col('.')
   if search('\m\k\{1,}\|\S','ebW')
     if getline('.')[col('.')-2:col('.')-1] == '*/' && eval(s:in_comm)
@@ -167,10 +167,10 @@ function s:PreviousToken()
         return s:Token()
       endif
     else
-      let two = searchpos('\/\/','cnbW',line('.'))
+      let two = searchpos('\/\/','cnbW',a:0 ? line('.') : line('.') + (line('.') == a:firstline))
       if two[0] && call('s:SynAt',two) =~? 'comment\|doc'
         call call('cursor',two)
-        let rec = s:PreviousToken()
+        let rec = s:PreviousToken(1)
         if rec isnot ''
           return rec
         endif
