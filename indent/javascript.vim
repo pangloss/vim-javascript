@@ -162,14 +162,23 @@ endfunction
 function s:PreviousToken()
   let l:col = col('.')
   if search('\m\k\{1,}\|\S','ebW')
-    if search('\m\*\%#\/\|\/\/\%<'.a:firstline.'l','nbW',line('.')) && eval(s:in_comm)
+    if getline('.')[col('.')-2:col('.')-1] == '*/' && eval(s:in_comm)
       if s:SearchLoop('\S\ze\_s*\/[/*]','bW',s:in_comm)
         return s:Token()
       endif
-      call cursor(a:firstline, l:col)
     else
-      return s:Token()
+      let two = searchpos('\/\/','cnbW',line('.'))
+      if two[0] && call('s:SynAt',two) =~? 'comment\|doc'
+        call call('cursor',two)
+        let rec = s:PreviousToken()
+        if rec isnot ''
+          return rec
+        endif
+      else
+        return s:Token()
+      endif
     endif
+    call cursor(a:firstline, l:col)
   endif
   return ''
 endfunction
