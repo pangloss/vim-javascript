@@ -12,7 +12,8 @@ let b:did_indent = 1
 
 " indent correctly if inside <script>
 " vim/vim@690afe1 for the switch from cindent
-let b:html_indent_script1 = 'inc'
+" overridden with b:html_indent_script1
+call extend(g:,{'html_indent_script1': 'inc'},'keep')
 
 " Now, set up our indentation expression and keys that trigger it.
 setlocal indentexpr=GetJavascriptIndent()
