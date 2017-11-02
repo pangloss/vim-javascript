@@ -26,11 +26,16 @@ setlocal indentkeys+=0],0)
 let b:undo_indent = 'setlocal indentexpr< smartindent< autoindent< indentkeys<'
 
 " Regex of syntax group names that are or delimit string or are comments.
-let b:syng_strcom = get(b:,'syng_strcom','string\|comment\|regex\|special\|doc\|template\%(braces\)\@!')
-let b:syng_str = get(b:,'syng_str','string\|template\|special')
-" template strings may want to be excluded when editing graphql:
-" au! Filetype javascript let b:syng_str = '^\%(.*template\)\@!.*string\|special'
-" au! Filetype javascript let b:syng_strcom = '^\%(.*template\)\@!.*string\|comment\|regex\|special\|doc'
+
+function s:GetVars()
+  let b:syng_strcom = get(b:,'syng_strcom','string\|comment\|regex\|special\|doc\|template\%(braces\)\@!')
+  let b:syng_str = get(b:,'syng_str','string\|template\|special')
+  " template strings may want to be excluded when editing graphql:
+  " au! Filetype javascript let b:syng_str = '^\%(.*template\)\@!.*string\|special'
+  " au! Filetype javascript let b:syng_strcom = '^\%(.*template\)\@!.*string\|comment\|regex\|special\|doc'
+  let b:js_cache = get(b:,'js_cache',[0,0,0])
+endfunction
+
 
 " Only define the function once.
 if exists('*GetJavascriptIndent')
@@ -338,7 +343,7 @@ function s:IsBlock()
 endfunction
 
 function GetJavascriptIndent()
-  let b:js_cache = get(b:,'js_cache',[0,0,0])
+  call s:GetVars()
   let s:synid_cache = [[],[]]
   let l:line = getline(v:lnum)
   " use synstack as it validates syn state and works in an empty line
