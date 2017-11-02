@@ -35,13 +35,17 @@ endif
 let s:cpo_save = &cpo
 set cpo&vim
 
+let s:syng_strcom = 'string\|comment\|regex\|special\|doc\|template\%(braces\)\@!'
+let s:syng_str = 'string\|template\|special'
+" template strings may want to be excluded when editing graphql:
+" au! Filetype javascript let b:syng_str = '^\%(.*template\)\@!.*string\|special'
+" au! Filetype javascript let b:syng_strcom = '^\%(.*template\)\@!.*string\|comment\|regex\|special\|doc'
+let s:js_cache = [0,0,0]
+
 function s:GetVars()
-  let b:syng_strcom = get(b:,'syng_strcom','string\|comment\|regex\|special\|doc\|template\%(braces\)\@!')
-  let b:syng_str = get(b:,'syng_str','string\|template\|special')
-  " template strings may want to be excluded when editing graphql:
-  " au! Filetype javascript let b:syng_str = '^\%(.*template\)\@!.*string\|special'
-  " au! Filetype javascript let b:syng_strcom = '^\%(.*template\)\@!.*string\|comment\|regex\|special\|doc'
-  let b:js_cache = get(b:,'js_cache',[0,0,0])
+  for svar in ['syng_strcom', 'syng_str', 'js_cache']
+    let b:{svar} = get(b:,svar,copy(s:{svar}))
+  endfor
 endfunction
 
 " Get shiftwidth value
