@@ -27,6 +27,14 @@ let b:undo_indent = 'setlocal indentexpr< smartindent< autoindent< indentkeys<'
 
 " Regex of syntax group names that are or delimit string or are comments.
 
+" Only define the function once.
+if exists('*GetJavascriptIndent')
+  finish
+endif
+
+let s:cpo_save = &cpo
+set cpo&vim
+
 function s:GetVars()
   let b:syng_strcom = get(b:,'syng_strcom','string\|comment\|regex\|special\|doc\|template\%(braces\)\@!')
   let b:syng_str = get(b:,'syng_str','string\|template\|special')
@@ -35,15 +43,6 @@ function s:GetVars()
   " au! Filetype javascript let b:syng_strcom = '^\%(.*template\)\@!.*string\|comment\|regex\|special\|doc'
   let b:js_cache = get(b:,'js_cache',[0,0,0])
 endfunction
-
-
-" Only define the function once.
-if exists('*GetJavascriptIndent')
-  finish
-endif
-
-let s:cpo_save = &cpo
-set cpo&vim
 
 " Get shiftwidth value
 if exists('*shiftwidth')
