@@ -26,8 +26,6 @@ setlocal indentkeys+=0],0)
 
 let b:undo_indent = 'setlocal indentexpr< smartindent< autoindent< indentkeys<'
 
-" Regex of syntax group names that are or delimit string or are comments.
-
 " Only define the function once.
 if exists('*GetJavascriptIndent')
   finish
@@ -36,6 +34,7 @@ endif
 let s:cpo_save = &cpo
 set cpo&vim
 
+" Regex of syntax group names that are or delimit string or are comments.
 let s:bvars = {
       \ 'syng_strcom': 'string\|comment\|regex\|special\|doc\|template\%(braces\)\@!',
       \ 'syng_str': 'string\|template\|special' }
