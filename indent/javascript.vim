@@ -109,7 +109,7 @@ endfunction
 " GetJavascriptIndent does to find the containing [[{(] (side-effects)
 function s:SkipFunc()
   if s:top_col == 1 || exists('s:time') &&
-        \ reltimestr(reltime(s:time)) =~ '\%([2-9]\d*\|1\d\+\)\.'
+        \ reltimestr(reltime(s:time)) =~ '\%([2-9]\|1\d\)\d*\.'
     throw 'out of bounds'
   endif
   let s:top_col = 0
