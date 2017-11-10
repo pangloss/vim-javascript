@@ -108,8 +108,8 @@ endfunction
 " Optimized {skip} expr, only callable from the search loop which
 " GetJavascriptIndent does to find the containing [[{(] (side-effects)
 function s:SkipFunc()
-  if s:top_col == 1 ||
-        \ exists('s:time') && matchstr(reltimestr(reltime(s:time)),'[1-9].*\ze\.') >= 2
+  if s:top_col == 1 || exists('s:time') &&
+        \ matchstr(reltimestr(reltime(s:time)),'[1-9].*\ze\.') >= 2
     throw 'out of bounds'
   endif
   let s:top_col = 0
