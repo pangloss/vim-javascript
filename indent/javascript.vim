@@ -108,7 +108,8 @@ endfunction
 " Optimized {skip} expr, only callable from the search loop which
 " GetJavascriptIndent does to find the containing [[{(] (side-effects)
 function s:SkipFunc()
-  if s:top_col == 1
+  if s:top_col == 1 ||
+        \ exists('s:time') && matchstr(reltimestr(reltime(s:time)),'[1-9].*\ze\.') >= 2
     throw 'out of bounds'
   endif
   let s:top_col = 0
@@ -390,12 +391,16 @@ function GetJavascriptIndent()
   else
     let [s:looksyn, s:top_col, s:check_in, s:l1] = [v:lnum - 1,0,0,
           \ max([s:l1, &smc ? search('\m^.\{'.&smc.',}','nbW',s:l1 + 1) + 1 : 0])]
+    unlet! s:time
     try
       if idx != -1
         call s:GetPair(['\[','(','{'][idx],'])}'[idx],'bW','s:SkipFunc()')
       elseif getline(v:lnum) !~ '^\S' && s:stack[-1] =~? 'block\|^jsobject$'
         call s:GetPair('{','}','bW','s:SkipFunc()')
       else
+        if s:rel
+          let s:time = reltime()
+        endif
         call s:AlternatePair()
       endif
     catch /^\Cout of bounds$/
