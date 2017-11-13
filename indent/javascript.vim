@@ -299,6 +299,8 @@ function s:IsContOne(cont)
       let b_l += 1
     elseif !a:cont || b_l || ind < indent(a:firstline)
       break
+    elseif search('\m\*\/','ebW',line('.')) && eval(s:in_comm)
+      call search('\S','W')
     else
       call cursor(0,1)
     endif
