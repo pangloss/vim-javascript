@@ -111,7 +111,6 @@ function s:SkipFunc()
   if s:top_col == 1
     throw 'out of bounds'
   endif
-  let s:top_col = 0
   if s:check_in
     if eval(s:skip_expr)
       return 1
