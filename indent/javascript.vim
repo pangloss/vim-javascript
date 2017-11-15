@@ -454,7 +454,7 @@ function GetJavascriptIndent()
 
   " main return
   if l:line =~ '^[])}]\|^|}'
-    if l:line_raw[0] == ')' && getline(num)[b:js_cache[2]-1] == '('
+    if l:line_raw[0] == ')' && num
       if s:ParseCino('M')
         return indent(l:lnum)
       elseif &cino =~# 'm' && !s:ParseCino('m')
