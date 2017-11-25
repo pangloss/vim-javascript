@@ -240,18 +240,18 @@ function s:Continues()
 endfunction
 
 " Check if line 'lnum' has a balanced amount of parentheses.
-function s:Balanced(lnum)
-  let [l:open, l:line] = [0, getline(a:lnum)]
-  let pos = match(l:line, '[][(){}]')
+function s:Balanced(lnum,line)
+  let l:open = 0
+  let pos = match(a:line, '[][(){}]')
   while pos != -1
     if s:SynAt(a:lnum,pos + 1) !~? b:syng_strcom
-      let l:open += match(' ' . l:line[pos],'[[({]')
+      let l:open += match(' ' . a:line[pos],'[[({]')
       if l:open < 0
         return
       endif
     endif
-    let pos = match(l:line, !l:open ? '[][(){}]' : '()' =~ l:line[pos] ?
-          \ '[()]' : '{}' =~ l:line[pos] ? '[{}]' : '[][]', pos + 1)
+    let pos = match(a:line, !l:open ? '[][(){}]' : '()' =~ a:line[pos] ?
+          \ '[()]' : '{}' =~ a:line[pos] ? '[{}]' : '[][]', pos + 1)
   endwhile
   return !l:open
 endfunction
@@ -356,7 +356,7 @@ function GetJavascriptIndent()
       return -1
     endif
   elseif s:stack[-1] =~? b:syng_str
-    if b:js_cache[0] == v:lnum - 1 && s:Balanced(v:lnum-1)
+    if b:js_cache[0] == v:lnum - 1 && s:Balanced(v:lnum-1,getline(v:lnum-1))
       let b:js_cache[0] = v:lnum
     endif
     return -1
@@ -383,7 +383,7 @@ function GetJavascriptIndent()
   call cursor(v:lnum,1)
   let idx = index([']',')','}'],l:line[0])
   if b:js_cache[0] > l:lnum && b:js_cache[0] < v:lnum ||
-        \ b:js_cache[0] == l:lnum && s:Balanced(l:lnum)
+        \ b:js_cache[0] == l:lnum && s:Balanced(l:lnum,pline)
     call call('cursor',b:js_cache[1:])
   else
     let [s:looksyn, s:top_col, s:check_in, s:l1] = [v:lnum - 1,0,0,
