@@ -119,11 +119,14 @@ function s:SkipFunc()
     if eval(s:skip_expr)
       return 1
     endif
-  elseif search('\m`\|\${\|\*\/','nW'.s:z,s:looksyn) && eval(s:skip_expr)
-    let s:check_in = 1
-    return 1
+  elseif search('\m`\|\${\|\*\/','nW'.s:z,s:looksyn)
+    if eval(s:skip_expr)
+      let s:check_in = 1
+      return 1
+    endif
+  else
+    let s:synid_cache[:] += [[line2byte('.') + col('.') - 1], ['']]
   endif
-  let s:synid_cache[:] += [[line2byte('.') + col('.') - 1], ['']]
   let [s:looksyn, s:top_col] = getpos('.')[1:2]
 endfunction
 
