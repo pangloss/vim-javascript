@@ -68,12 +68,12 @@ let s:in_comm = s:skip_expr[:-14] . "'comment\\|doc'"
 let s:rel = has('reltime')
 " searchpair() wrapper
 if s:rel
-  function s:GetPair(start,end,flags,skip)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1,a:skip ==# 's:SkipFunc()' ? 2000 : 200)
+  function s:GetPair(start,end,flags,skip,...)
+    return searchpair('\m'.a:start,get(a:000,0,''),'\m'.a:end,a:flags,a:skip,s:l1,a:skip ==# 's:SkipFunc()' ? 2000 : 200)
   endfunction
 else
-  function s:GetPair(start,end,flags,skip)
-    return searchpair('\m'.a:start,'','\m'.a:end,a:flags,a:skip,s:l1)
+  function s:GetPair(start,end,flags,skip,...)
+    return searchpair('\m'.a:start,get(a:000,0,''),'\m'.a:end,a:flags,a:skip,s:l1)
   endfunction
 endif
 
@@ -196,7 +196,7 @@ function s:Pure(f,...)
 endfunction
 
 function s:SearchLoop(pat,flags,expr)
-  return s:GetPair(a:pat,'\_$.',a:flags,a:expr)
+  return s:GetPair('\_$.','\_$.',a:flags,a:expr,'\m'.a:pat)
 endfunction
 
 function s:ExprCol()
