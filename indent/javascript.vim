@@ -267,8 +267,13 @@ function s:OneScope()
           \ s:Pure('s:PreviousToken') != '.' && !(tok == 'while' && s:DoWhile())
   elseif s:Token() =~# '^else$\|^do$'
     return s:Pure('s:PreviousToken') != '.'
+  elseif strpart(getline('.'),col('.')-2,2) == '=>'
+    call cursor(0,col('.')-1)
+    if s:PreviousToken() == ')'
+      return s:GetPair('(', ')', 'bW', s:skip_expr)
+    endif
+    return 1
   endif
-  return strpart(getline('.'),col('.')-2,2) == '=>'
 endfunction
 
 function s:DoWhile()
