@@ -34,7 +34,7 @@ syntax region  jsFlowTypeStatement                                   start=/type
 syntax region  jsFlowTypeValue      contained     matchgroup=jsFlowNoise start=/=/       end=/[\n;]/ contains=@jsFlowCluster,jsFlowGroup,jsFlowMaybe
 syntax match   jsFlowTypeOperator   contained /=/ containedin=jsFlowTypeValue
 syntax match   jsFlowTypeOperator   contained /=/
-syntax keyword jsFlowTypeKeyword    contained type
+syntax keyword jsFlowTypeKeyword    contained type containedin=jsFlowTypeStatement
 
 syntax keyword jsFlowDeclare                  declare skipwhite skipempty nextgroup=jsFlowTypeStatement,jsClassDefinition,jsStorageClass,jsFlowModule,jsFlowInterface
 syntax match   jsFlowClassProperty  contained /\<[0-9a-zA-Z_$]*\>:\@=/ skipwhite skipempty nextgroup=jsFlowClassDef containedin=jsClassBlock
