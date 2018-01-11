@@ -248,7 +248,7 @@ function s:Balanced(lnum,line)
   let pos = match(a:line, '[][(){}]')
   while pos != -1
     if s:SynAt(a:lnum,pos + 1) !~? b:syng_strcom
-      let l:open += match(' ' . a:line[pos],'[[({]')
+      let l:open += matchend(a:line[pos],'[[({]')
       if l:open < 0
         return
       endif
