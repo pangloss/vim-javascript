@@ -371,7 +371,7 @@ function GetJavascriptIndent()
   if s:PreviousToken() is ''
     return
   endif
-  let [l:lnum, pline, lcol] = [line('.'), getline('.')[:col('.')-1], col('.')]
+  let [l:lnum, lcol, pline] = getpos('.')[1:2] + [getline('.')[:col('.')-1]]
 
   let l:line = substitute(l:line,'^\s*','','')
   let l:line_raw = l:line
