@@ -269,10 +269,7 @@ function s:OneScope()
     return s:Pure('s:PreviousToken') != '.'
   elseif strpart(getline('.'),col('.')-2,2) == '=>'
     call cursor(0,col('.')-1)
-    if s:PreviousToken() == ')'
-      return s:GetPair('(', ')', 'bW', s:skip_expr)
-    endif
-    return 1
+    return s:PreviousToken() != ')' || s:GetPair('(', ')', 'bW', s:skip_expr)
   endif
 endfunction
 
@@ -374,7 +371,7 @@ function GetJavascriptIndent()
   if s:PreviousToken() is ''
     return
   endif
-  let [l:lnum, pline] = [line('.'), getline('.')[:col('.')-1]]
+  let [l:lnum, pline, lcol] = [line('.'), getline('.')[:col('.')-1], col('.')]
 
   let l:line = substitute(l:line,'^\s*','','')
   let l:line_raw = l:line
@@ -427,7 +424,7 @@ function GetJavascriptIndent()
       endif
     endif
     if idx == -1 && pline[-1:] !~ '[{;]'
-      call cursor(l:lnum, len(pline))
+      call cursor(l:lnum, lcol)
       let sol = matchstr(l:line,s:opfirst)
       if sol is '' || sol == '/' && s:SynAt(v:lnum,
             \ 1 + len(getline(v:lnum)) - len(l:line)) =~? 'regex'
@@ -443,7 +440,7 @@ function GetJavascriptIndent()
       else
         let is_op = s:sw()
       endif
-      call cursor(l:lnum, len(pline))
+      call cursor(l:lnum, lcol)
       let b_l = s:Nat(s:IsContOne(is_op) - (!is_op && l:line =~ '^{')) * s:sw()
     endif
   elseif idx.s:LookingAt().&cino =~ '^-1(.*(' && (search('\m\S','nbW',num) || s:ParseCino('U'))
