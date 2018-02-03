@@ -469,7 +469,11 @@ function GetJavascriptIndent()
   elseif num
     return s:Nat(num_ind + get(l:,'case_offset',s:sw()) + l:switch_offset + b_l + is_op)
   endif
-  return b_l + is_op
+  let ret = b_l + is_op
+  if !ret && exists('b:hi_indent.blocklnr')
+    return indent(b:hi_indent.blocklnr) + s:sw()
+  endif
+  return ret
 endfunction
 
 let &cpo = s:cpo_save
