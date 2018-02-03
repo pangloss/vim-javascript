@@ -314,8 +314,8 @@ function s:IsContOne(cont)
 endfunction
 
 function s:IsSwitch()
-  call call('cursor',b:js_cache[1:])
-  return search('\m\C\%#.\_s*\%(\%(\/\/.*\_$\|\/\*\_.\{-}\*\/\)\@>\_s*\)*\%(case\|default\)\>','nWc'.s:z)
+  return search('\m\C\%'.join(b:js_cache[1:],'l\%').
+        \ 'c{\_s*\%(\%(\/\/.*\_$\|\/\*\_.\{-}\*\/\)\@>\_s*\)*\%(case\|default\)\>','nW'.s:z)
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
