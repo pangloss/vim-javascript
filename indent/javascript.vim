@@ -294,9 +294,9 @@ endfunction
 " encloses the entire context, 'cont' if whether a:firstline is a continued
 " expression, which could have started in a braceless context
 function s:IsContOne(cont)
-  let [l:num, b_l] = [b:js_cache[1] + !b:js_cache[1], 0]
-  let pind = b:js_cache[1] ? indent(b:js_cache[1]) + s:sw() : 0
-  let ind = indent('.') + !a:cont
+  let [l:num, pind] = b:js_cache[1] ?
+        \ [b:js_cache[1], indent(b:js_cache[1]) + s:sw()] : [1,0]
+  let [ind, b_l] = [indent('.') + !a:cont, 0]
   while line('.') > l:num && ind > pind || line('.') == l:num
     if indent('.') < ind && s:OneScope()
       let b_l += 1
