@@ -208,16 +208,16 @@ function s:ExprCol()
     if s:LookingAt() == ':'
       if getline('.')[col('.')-2] == ':'
         call cursor(0,col('.')-1)
-        continue
+      else
+        let bal -= 1
       endif
-      let bal -= 1
     elseif s:LookingAt() == '?'
       if getline('.')[col('.'):col('.')+1] =~ '^\.\d\@!'
-        continue
       elseif !bal
         return 1
+      else
+        let bal += 1
       endif
-      let bal += 1
     elseif s:LookingAt() == '{'
       return !s:IsBlock()
     elseif !s:GetPair('{','}','bW',s:skip_expr)
