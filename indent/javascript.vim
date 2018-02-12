@@ -155,7 +155,7 @@ function s:AlternatePair()
 endfunction
 
 function s:Nat(int)
-  return a:int * (a:int > 0)
+  if a:int > 0 | return a:int | endif
 endfunction
 
 function s:LookingAt()
