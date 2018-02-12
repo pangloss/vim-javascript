@@ -206,11 +206,7 @@ function s:ExprCol()
   let bal = 0
   while s:SearchLoop('[{}?:]','bW',s:skip_expr)
     if s:LookingAt() == ':'
-      if getline('.')[col('.')-2] == ':'
-        call cursor(0,col('.')-1)
-      else
-        let bal -= 1
-      endif
+      let bal -= !search(':\%#','bW')
     elseif s:LookingAt() == '?'
       if getline('.')[col('.'):col('.')+1] =~ '^\.\d\@!'
       elseif !bal
