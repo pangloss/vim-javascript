@@ -209,6 +209,7 @@ function s:ExprCol()
       let bal -= !search('\m:\%#','bW')
     elseif s:LookingAt() == '?'
       if getline('.')[col('.'):col('.')+1] =~ '^\.\d\@!'
+        " skip, ?. conditional property access (Babel)
       elseif !bal
         return 1
       else
