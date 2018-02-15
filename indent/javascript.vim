@@ -206,18 +206,15 @@ function s:ExprCol()
   let bal = 0
   while s:SearchLoop('[{}?:]','bW',s:skip_expr)
     if s:LookingAt() == ':'
-      if getline('.')[col('.')-2] == ':'
-        call cursor(0,col('.')-1)
-        continue
-      endif
-      let bal -= 1
+      let bal -= !search('\m:\%#','bW')
     elseif s:LookingAt() == '?'
       if getline('.')[col('.'):col('.')+1] =~ '^\.\d\@!'
-        continue
+        " ?. conditional chain, not ternary start
       elseif !bal
         return 1
+      else
+        let bal += 1
       endif
-      let bal += 1
     elseif s:LookingAt() == '{'
       return !s:IsBlock()
     elseif !s:GetPair('{','}','bW',s:skip_expr)
@@ -365,8 +362,8 @@ function GetJavascriptIndent()
     return -1
   endif
 
-  let s:l1 = max([0,prevnonblank(v:lnum) - (s:rel ? 2000 : 1000),
-        \ get(get(b:,'hi_indent',{}),'blocklnr')])
+  let nest = get(get(b:,'hi_indent',{}),'blocklnr')
+  let s:l1 = max([0, prevnonblank(v:lnum) - (s:rel ? 2000 : 1000), nest])
   call cursor(v:lnum,1)
   if s:PreviousToken() is ''
     return
@@ -468,9 +465,7 @@ function GetJavascriptIndent()
     return num_ind
   elseif num
     return s:Nat(num_ind + get(l:,'case_offset',s:sw()) + l:switch_offset + b_l + is_op)
-  endif
-  let nest = get(get(b:,'hi_indent',{}),'blocklnr')
-  if nest
+  elseif nest
     return indent(nest) + s:sw() + b_l + is_op
   endif
   return b_l + is_op
