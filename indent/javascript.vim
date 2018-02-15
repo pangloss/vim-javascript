@@ -209,7 +209,7 @@ function s:ExprCol()
       let bal -= !search('\m:\%#','bW')
     elseif s:LookingAt() == '?'
       if getline('.')[col('.'):col('.')+1] =~ '^\.\d\@!'
-        " ?. conditional chain, not ternary
+        " ?. conditional chain, not ternary start
       elseif !bal
         return 1
       else
