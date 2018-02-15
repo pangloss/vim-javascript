@@ -362,8 +362,8 @@ function GetJavascriptIndent()
     return -1
   endif
 
-  let s:l1 = max([0,prevnonblank(v:lnum) - (s:rel ? 2000 : 1000),
-        \ get(get(b:,'hi_indent',{}),'blocklnr')])
+  let nest = get(get(b:,'hi_indent',{}),'blocklnr')
+  let s:l1 = max([0, prevnonblank(v:lnum) - (s:rel ? 2000 : 1000), nest])
   call cursor(v:lnum,1)
   if s:PreviousToken() is ''
     return
@@ -466,7 +466,6 @@ function GetJavascriptIndent()
   elseif num
     return s:Nat(num_ind + get(l:,'case_offset',s:sw()) + l:switch_offset + b_l + is_op)
   endif
-  let nest = get(get(b:,'hi_indent',{}),'blocklnr')
   if nest
     return indent(nest) + s:sw() + b_l + is_op
   endif
