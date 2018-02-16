@@ -466,7 +466,7 @@ function GetJavascriptIndent()
   elseif num
     return s:Nat(num_ind + get(l:,'case_offset',s:sw()) + l:switch_offset + b_l + is_op)
   elseif nest
-    return indent(nest) + s:sw() + b_l + is_op
+    return indent(nextnonblank(nest+1)) + b_l + is_op
   endif
   return b_l + is_op
 endfunction
