@@ -312,8 +312,7 @@ endfunction
 
 function s:IsSwitch()
   return search(printf('\m\C\%%%dl\%%%dc%s',b:js_cache[1],b:js_cache[2],
-        \ '{\_s*\%(\%(\/\/.*\_$\|\/\*\_.\{-}\*\/\)\@>\_s*\)*\%(case\|default\)\>'),
-        \ 'nW'.s:z)
+        \ '{\_s*\%(\%(\/\/.*\_$\|\/\*\_.\{-}\*\/\)\@>\_s*\)*\%(case\|default\)\>'),'nW'.s:z)
 endfunction
 
 " https://github.com/sweet-js/sweet.js/wiki/design#give-lookbehind-to-the-reader
