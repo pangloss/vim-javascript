@@ -405,7 +405,7 @@ function GetJavascriptIndent()
   let [b:js_cache[0], num] = [v:lnum, b:js_cache[1]]
 
   let [num_ind, is_op, b_l, l:switch_offset, s:in_jsx] = [s:Nat(indent(num)),0,0,0,0]
-  if !num || s:LookingAt() == '{' && s:IsBlock()
+  if !num || s:LookingAt() == '{' && s:IsBlock() || (call('cursor',b:js_cache[1:]) && 0)
     let ilnum = line('.')
     if num && !s:in_jsx && s:LookingAt() == ')' && s:GetPair('(',')','bW',s:skip_expr)
       if ilnum == num
