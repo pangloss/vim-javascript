@@ -87,8 +87,8 @@ function s:SynAt(l,c)
 endfunction
 
 function s:ParseCino(f)
-  let [divider, n, cstr] = [0] + matchlist(&cino,
-        \ '\%(.*,\)\=\%(\%d'.char2nr(a:f).'\(-\)\=\([.s0-9]*\)\)\=')[1:2]
+  let [divider, n, cstr] = [0] + (matchlist(&cino,
+        \ '\%(.*,\)\=\%(\%d'.char2nr(a:f).'\(-\)\=\([.s0-9]*\)\)')+['',''])[1:2] 
   for c in split(cstr,'\zs')
     if c == '.' && !divider
       let divider = 1
@@ -405,7 +405,7 @@ function GetJavascriptIndent()
   let [b:js_cache[0], num] = [v:lnum, b:js_cache[1]]
 
   let [num_ind, is_op, b_l, l:switch_offset, s:in_jsx] = [s:Nat(indent(num)),0,0,0,0]
-  if !num || s:LookingAt() == '{' && s:IsBlock() || (call('cursor',b:js_cache[1:]) && 0)
+  if !num || s:LookingAt() == '{' && s:IsBlock()
     let ilnum = line('.')
     if num && !s:in_jsx && s:LookingAt() == ')' && s:GetPair('(',')','bW',s:skip_expr)
       if ilnum == num
@@ -445,10 +445,10 @@ function GetJavascriptIndent()
     let pval = s:ParseCino('(')
     if !pval
       let [Wval, vcol] = [s:ParseCino('W'), virtcol('.')]
-      if !search('\m'.get(g:,'javascript_indent_W_pat','\S'),'W',num)
-        return Wval ? s:Nat(num_ind + Wval) : vcol
+      if search('\m'.get(g:,'javascript_indent_W_pat','\S'),'W',num)
+        return s:ParseCino('w') ? vcol : virtcol('.')-1
       endif
-      return s:ParseCino('w') ? vcol : virtcol('.')-1
+      return Wval ? s:Nat(num_ind + Wval) : vcol
     endif
     return s:Nat(num_ind + pval + searchpair('\m(','','\m)','nbrmW',s:skip_expr,num) * s:sw())
   endif
