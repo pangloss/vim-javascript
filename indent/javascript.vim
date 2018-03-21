@@ -88,7 +88,7 @@ endfunction
 
 function s:ParseCino(f)
   let [divider, n, cstr] = [0] + (matchlist(&cino,
-        \ '\%(.*,\)\=\%(\%d'.char2nr(a:f).'\(-\)\=\([.s0-9]*\)\)')+['',''])[1:2] 
+        \ '\%(.*,\)\=\%(\%d'.char2nr(a:f).'\(-\)\=\([.s0-9]*\)\)')+['',''])[1:2]
   for c in split(cstr,'\zs')
     if c == '.' && !divider
       let divider = 1
@@ -440,8 +440,8 @@ function GetJavascriptIndent()
       call cursor(l:lnum, lcol)
       let b_l = s:Nat(s:IsContOne(is_op) - (!is_op && l:line =~ '^{')) * s:sw()
     endif
-  elseif idx == -1 && s:LookingAt() == '(' &&
-        \ &cino =~ '(' && (search('\m\S','nbW',num) || s:ParseCino('U'))
+  elseif idx == -1 && s:LookingAt() == '(' && &cino =~ '(' &&
+        \ (search('\m\S','nbW',num) || s:ParseCino('U'))
     let pval = s:ParseCino('(')
     if !pval
       let [Wval, vcol] = [s:ParseCino('W'), virtcol('.')]
