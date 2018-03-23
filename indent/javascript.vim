@@ -86,9 +86,13 @@ function s:SynAt(l,c)
   return s:synid_cache[1][pos]
 endfunction
 
-function s:ParseCino(f)
-  let [divider, n, cstr] = [0] + (matchlist(&cino,
-        \ '\%(.*,\)\=\%(\%d'.char2nr(a:f).'\(-\)\=\([.s0-9]*\)\)')+['',''])[1:2]
+function g:ParseCino(f)
+  let i = strridx(&cino,a:f)
+  if i == -1
+    return
+  endif
+  let [divider, n] = [0, &cino[i+1] == '-']
+  let [cstr, n] = [&cino[i+n+1 : stridx(&cino,',',i)], n ? '-' : '']
   for c in split(cstr,'\zs')
     if c == '.' && !divider
       let divider = 1
