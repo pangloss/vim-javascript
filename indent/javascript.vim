@@ -86,9 +86,13 @@ function s:SynAt(l,c)
   return s:synid_cache[1][pos]
 endfunction
 
-function s:ParseCino(f)
-  let [divider, n, cstr] = [0] + matchlist(&cino,
-        \ '\%(.*,\)\=\%(\%d'.char2nr(a:f).'\(-\)\=\([.s0-9]*\)\)\=')[1:2]
+function g:ParseCino(f)
+  let i = strridx(&cino,a:f)
+  if i == -1
+    return
+  endif
+  let [divider, n] = [0, &cino[i+1] == '-']
+  let [cstr, n] = [&cino[i+n+1 : stridx(&cino,',',i)], n ? '-' : '']
   for c in split(cstr,'\zs')
     if c == '.' && !divider
       let divider = 1
@@ -371,7 +375,7 @@ function GetJavascriptIndent()
   let [l:lnum, lcol, pline] = getpos('.')[1:2] + [getline('.')[:col('.')-1]]
 
   let l:line = substitute(l:line,'^\s*','','')
-  let l:line_raw = l:line
+  let l:line_s = l:line[0]
   if l:line[:1] == '/*'
     let l:line = substitute(l:line,'^\%(\/\*.\{-}\*\/\s*\)*','','')
   endif
@@ -445,7 +449,7 @@ function GetJavascriptIndent()
     let pval = s:ParseCino('(')
     if !pval
       let [Wval, vcol] = [s:ParseCino('W'), virtcol('.')]
-      if search('\m\S','W',num)
+      if search('\m'.get(g:,'javascript_indent_W_pat','\S'),'W',num)
         return s:ParseCino('w') ? vcol : virtcol('.')-1
       endif
       return Wval ? s:Nat(num_ind + Wval) : vcol
@@ -455,7 +459,7 @@ function GetJavascriptIndent()
 
   " main return
   if l:line =~ '^[])}]\|^|}'
-    if l:line_raw[0] == ')'
+    if l:line_s == ')'
       if s:ParseCino('M')
         return indent(l:lnum)
       elseif num && &cino =~# 'm' && !s:ParseCino('m')
