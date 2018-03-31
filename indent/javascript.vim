@@ -88,7 +88,7 @@ endfunction
 
 function g:ParseCino(f)
   let [n, cstr] = split(matchstr(&cino,
-        \ '\V\C\.\*'.escape(a:f,'\').'\zs\[^,]\*'),'-\zs')
+        \ '\V\C\.\*'.escape(a:f,'\').'\zs\[^,]\*'),'^-\zs')
   let divider = 0
   for c in split(cstr,'\zs')
     if c == '.' && !divider
