@@ -90,10 +90,11 @@ function s:ParseCino(f)
   try
     let [n, cstr] = matchlist(&cino,
           \ '\%(.*,\)\=\%d'.char2nr(a:f).'\(-\)\=\([^,]*\)')[1:2]
-    let divider = 0
+    let divider = 1
+    lockvar divider
     for c in split(cstr,'\zs')
       if c == '.'
-        let divider = 1
+        unlockvar divider
       elseif c ==# 's'
         if n !~ '\d'
           return n . s:sw() + 0
@@ -101,10 +102,10 @@ function s:ParseCino(f)
         let n = str2nr(n) * s:sw()
         break
       else
-        let [n, divider] .= [c, 0]
+        silent! let [n, divider] .= [c, 0]
       endif
     endfor
-    return str2nr(n) / max([divider,1])
+    return str2nr(n) / divider
   catch /E688/
   endtry
 endfunction
