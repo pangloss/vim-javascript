@@ -87,7 +87,7 @@ function s:SynAt(l,c)
 endfunction
 
 function s:ParseCino(f)
-  let [s, n, divider] = [strridx(&cino,a:f)+1,'',0]
+  let [s, n, divider] = [strridx(&cino, a:f)+1, '', 0]
   while s && &cino[ s ] =~ '[^,]'
     if &cino[ s ] == '.'
       let divider = 1
@@ -102,7 +102,7 @@ function s:ParseCino(f)
     endif
     let s += 1
   endwhile
-  return str2nr(n) / max([divider,1])
+  return str2nr(n) / max([divider, 1])
 endfunction
 
 " Optimized {skip} expr, only callable from the search loop which
