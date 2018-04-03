@@ -87,23 +87,22 @@ function s:SynAt(l,c)
 endfunction
 
 function s:ParseCino(f)
-  try | let [divider, n, cstr] = [0] + matchlist(&cino,
-        \ '\%(.*,\)\=\%(\%d'.char2nr(a:f).'\(-\)\=\([.s0-9]*\)\)')[1:2]
-  catch | return | endtry
-  for c in split(cstr,'\zs')
-    if c == '.' && !divider
+  let [s, n, divider] = [strridx(&cino, a:f)+1, '', 0]
+  while s && &cino[ s ] =~ '[^,]'
+    if &cino[ s ] == '.'
       let divider = 1
-    elseif c ==# 's'
+    elseif &cino[ s ] ==# 's'
       if n !~ '\d'
         return n . s:sw() + 0
       endif
       let n = str2nr(n) * s:sw()
       break
     else
-      let [n, divider] .= [c, 0]
+      let [n, divider] .= [&cino[ s ], 0]
     endif
-  endfor
-  return str2nr(n) / max([str2nr(divider),1])
+    let s += 1
+  endwhile
+  return str2nr(n) / max([divider, 1])
 endfunction
 
 " Optimized {skip} expr, only callable from the search loop which
