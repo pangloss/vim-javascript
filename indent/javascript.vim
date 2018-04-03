@@ -102,7 +102,7 @@ function s:ParseCino(f)
     endif
     let s += 1
   endwhile
-  return str2nr(n) / max([str2nr(divider),1])
+  return str2nr(n) / max([divider,1])
 endfunction
 
 " Optimized {skip} expr, only callable from the search loop which
