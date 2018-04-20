@@ -86,27 +86,23 @@ function s:SynAt(l,c)
   return s:synid_cache[1][pos]
 endfunction
 
-function g:ParseCino(f)
-  let i = strridx(&cino,a:f)
-  if i == -1
-    return
-  endif
-  let [divider, n] = [0, &cino[i+1] == '-']
-  let [cstr, n] = [&cino[i+n+1 : stridx(&cino,',',i)], n ? '-' : '']
-  for c in split(cstr,'\zs')
-    if c == '.' && !divider
+function s:ParseCino(f)
+  let [s, n, divider] = [strridx(&cino, a:f)+1, '', 0]
+  while s && &cino[ s ] =~ '[^,]'
+    if &cino[ s ] == '.'
       let divider = 1
-    elseif c ==# 's'
+    elseif &cino[ s ] ==# 's'
       if n !~ '\d'
         return n . s:sw() + 0
       endif
       let n = str2nr(n) * s:sw()
       break
     else
-      let [n, divider] .= [c, 0]
+      let [n, divider] .= [&cino[ s ], 0]
     endif
-  endfor
-  return str2nr(n) / max([str2nr(divider),1])
+    let s += 1
+  endwhile
+  return str2nr(n) / max([divider, 1])
 endfunction
 
 " Optimized {skip} expr, only callable from the search loop which
