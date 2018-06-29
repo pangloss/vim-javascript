@@ -286,6 +286,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsGenerator            jsFunction
   HiLink jsArrowFuncArgs        jsFuncArgs
   HiLink jsFuncName             Function
+  HiLink jsFuncCall             Function
   HiLink jsClassFuncName        jsFuncName
   HiLink jsObjectFuncName       Function
   HiLink jsArguments            Special
