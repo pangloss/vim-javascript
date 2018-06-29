@@ -13,7 +13,7 @@ if !exists("main_syntax")
 endif
 
 " Dollar sign is permitted anywhere in an identifier
-if v:version > 704 || v:version == 704 && has('patch1142')
+if (v:version > 704 || v:version == 704 && has('patch1142')) && main_syntax == 'javascript'
   syntax iskeyword @,48-57,_,192-255,$
 else
   setlocal iskeyword+=$
