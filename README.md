@@ -62,6 +62,13 @@ Enables code folding for javascript based on our syntax file.
 
 Please note this can have a dramatic effect on performance.
 
+You can choose, what to fold: 
+```
+let g:javascript_fold_blocks = 0
+let g:javascript_fold_comments = 0
+let g:javascript_fold_functions = 0
+```
+Default Value: 1
 
 ## Concealing Characters
 
