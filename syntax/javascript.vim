@@ -201,6 +201,7 @@ syntax region  jsDestructuringPropertyComputed  contained matchgroup=jsDestructu
 " Comments
 syntax keyword jsCommentTodo    contained TODO FIXME XXX TBD
 syntax region  jsComment        start=+//+ end=/$/ contains=jsCommentTodo,@Spell extend keepend
+syntax region  jsMultilineComment start="^\s*\/\/.*\n\%(^\s*\/\/\)\@=" end="^\s*\/\/.*\n\%(^\s*\/\/\)\@!" contains=jsCommentTodo,@Spell extend keepend fold
 syntax region  jsComment        start=+/\*+  end=+\*/+ contains=jsCommentTodo,@Spell fold extend keepend
 syntax region  jsEnvComment     start=/\%^#!/ end=/$/ display
 
@@ -232,7 +233,7 @@ if exists("javascript_plugin_flow")
   runtime extras/flow.vim
 endif
 
-syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsOperatorKeyword,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsDo,jsForAwait,jsAsyncKeyword,jsStatement,jsDot
+syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsOperatorKeyword,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsMultilineComment,jsArguments,jsThis,jsSuper,jsDo,jsForAwait,jsAsyncKeyword,jsStatement,jsDot
 syntax cluster jsAll         contains=@jsExpression,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsException,jsTry,jsNoise,jsBlockLabel
 
 " Define the default highlighting.
@@ -245,6 +246,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   else
     command -nargs=+ HiLink hi def link <args>
   endif
+  HiLink jsMultilineComment     Comment
   HiLink jsComment              Comment
   HiLink jsEnvComment           PreProc
   HiLink jsParensIfElse         jsParens
