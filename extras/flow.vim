@@ -17,6 +17,7 @@ syntax match   jsFlowObjectKey      contained /[0-9a-zA-Z_$?]*\(\s*:\)\@=/ conta
 syntax match   jsFlowOrOperator     contained /|/ skipwhite skipempty nextgroup=@jsFlowCluster
 syntax keyword jsFlowImportType     contained type typeof skipwhite skipempty nextgroup=jsModuleAsterisk,jsModuleKeyword,jsModuleGroup
 syntax match   jsFlowWildcard       contained /*/
+syntax region  jsFlowString         contained start=+\z(["']\)+  skip=+\\\%(\z1\|$\)+  end=+\z1+ end=+$+ extend skipwhite skipempty nextgroup=jsFlowOrOperator
 
 syntax match   jsFlowReturn         contained /:\s*/ contains=jsFlowNoise skipwhite skipempty nextgroup=@jsFlowReturnCluster,jsFlowArrow,jsFlowReturnParens
 syntax region  jsFlowReturnObject   contained matchgroup=jsFlowNoise start=/{/    end=/}/  contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturnOrOp extend fold
@@ -24,11 +25,12 @@ syntax region  jsFlowReturnArray    contained matchgroup=jsFlowNoise start=/\[/ 
 syntax region  jsFlowReturnParens   contained matchgroup=jsFlowNoise start=/(/    end=/)/  contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturnOrOp,jsFlowReturnArrow fold
 syntax match   jsFlowReturnArrow    contained /=>/ skipwhite skipempty nextgroup=@jsFlowReturnCluster
 syntax match   jsFlowReturnKeyword  contained /\k\+/ contains=jsFlowType,jsFlowTypeCustom skipwhite skipempty nextgroup=jsFlowReturnGroup,jsFuncBlock,jsFlowReturnOrOp,jsFlowReturnArray
-syntax match   jsFlowReturnMaybe    contained /?/ skipwhite skipempty nextgroup=jsFlowReturnKeyword,jsFlowReturnObject,jsFlowReturnParens
+syntax match   jsFlowReturnMaybe    contained /?/ skipwhite skipempty nextgroup=@jsFlowReturnCluster,jsFlowReturnKeyword,jsFlowReturnObject,jsFlowReturnParens
 syntax region  jsFlowReturnGroup    contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturnOrOp
 syntax match   jsFlowReturnOrOp     contained /\s*|\s*/ skipwhite skipempty nextgroup=@jsFlowReturnCluster
 syntax match   jsFlowWildcardReturn contained /*/ skipwhite skipempty nextgroup=jsFuncBlock
 syntax keyword jsFlowTypeofReturn   contained typeof skipempty skipwhite nextgroup=@jsFlowReturnCluster
+syntax region  jsFlowReturnString   contained start=+\z(["']\)+  skip=+\\\%(\z1\|$\)+  end=+\z1+ end=+$+ extend skipwhite skipempty nextgroup=jsFuncBlock,jsFlowReturnOrOp
 
 syntax region  jsFlowClassGroup         contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsClassBlock
 syntax region  jsFlowClassFunctionGroup contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncArgs
@@ -56,8 +58,8 @@ syntax region  jsFlowInterfaceBlock contained matchgroup=jsFlowNoise start=/{/ e
 
 syntax region  jsFlowParenAnnotation contained start=/:/ end=/[,=)]\@=/ containedin=jsParen contains=@jsFlowCluster
 
-syntax cluster jsFlowReturnCluster            contains=jsFlowNoise,jsFlowReturnObject,jsFlowReturnArray,jsFlowReturnKeyword,jsFlowReturnGroup,jsFlowReturnMaybe,jsFlowReturnOrOp,jsFlowWildcardReturn,jsFlowReturnArrow,jsFlowTypeofReturn,jsFlowGeneric
-syntax cluster jsFlowCluster                  contains=jsFlowArray,jsFlowObject,jsFlowExactObject,jsFlowNoise,jsFlowTypeof,jsFlowType,jsFlowGeneric,jsFlowMaybe,jsFlowParens,jsFlowOrOperator,jsFlowWildcard
+syntax cluster jsFlowReturnCluster            contains=jsFlowNoise,jsFlowReturnObject,jsFlowReturnArray,jsFlowReturnKeyword,jsFlowReturnGroup,jsFlowReturnMaybe,jsFlowReturnOrOp,jsFlowWildcardReturn,jsFlowReturnArrow,jsFlowTypeofReturn,jsFlowGeneric,jsFlowReturnString
+syntax cluster jsFlowCluster                  contains=jsFlowArray,jsFlowObject,jsFlowExactObject,jsFlowNoise,jsFlowTypeof,jsFlowType,jsFlowGeneric,jsFlowMaybe,jsFlowParens,jsFlowOrOperator,jsFlowWildcard,jsFlowString
 
 if version >= 508 || !exists("did_javascript_syn_inits")
   if version < 508
@@ -78,6 +80,8 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsFlowExactObject        PreProc
   HiLink jsFlowParens             PreProc
   HiLink jsFlowGeneric            PreProc
+  HiLink jsFlowString             PreProc
+  HiLink jsFlowReturnString       PreProc
   HiLink jsFlowFunctionGeneric    jsFlowGeneric
   HiLink jsFlowObjectGeneric      jsFlowGeneric
   HiLink jsFlowReturn             PreProc
