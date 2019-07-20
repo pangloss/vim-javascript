@@ -168,14 +168,14 @@ syntax keyword jsArguments            contained arguments
 syntax keyword jsForAwait             contained await skipwhite skipempty nextgroup=jsParenRepeat
 
 " Matches a single keyword argument with no parens
-syntax match   jsArrowFuncArgs  /\<\K\k*\ze\s*=>/ skipwhite contains=jsFuncArgs skipwhite skipempty nextgroup=jsArrowFunction extend
+syntax match   jsArrowFuncArgs  /\<\K\k*\ze\s*=>/ skipwhite skipwhite skipempty nextgroup=jsArrowFunctionArrow extend
 " Matches a series of arguments surrounded in parens
-syntax match   jsArrowFuncArgs  /([^()]*)\ze\s*=>/ contains=jsFuncArgs skipempty skipwhite nextgroup=jsArrowFunction extend
+syntax region  jsArrowFuncArgs        contained matchgroup=jsFuncParens      start=/\(\>\s*\)\@<!(/ end=/)\ze\s*\(:\|=>\)/ contains=jsFuncArgCommas,jsComment,jsFuncArgExpression,jsDestructuringBlock,jsDestructuringArray,jsRestExpression,jsFlowArgumentDef skipwhite skipempty nextgroup=jsArrowFunctionArrow,jsFlowReturn extend fold
 
 exe 'syntax match jsFunction /\<function\>/      skipwhite skipempty nextgroup=jsGenerator,jsFuncName,jsFuncArgs,jsFlowFunctionGroup skipwhite '.(exists('g:javascript_conceal_function') ? 'conceal cchar='.g:javascript_conceal_function : '')
-exe 'syntax match jsArrowFunction /=>/           skipwhite skipempty nextgroup=jsFuncBlock,jsCommentFunction '.(exists('g:javascript_conceal_arrow_function') ? 'conceal cchar='.g:javascript_conceal_arrow_function : '')
-exe 'syntax match jsArrowFunction /()\ze\s*=>/   skipwhite skipempty nextgroup=jsArrowFunction '.(exists('g:javascript_conceal_noarg_arrow_function') ? 'conceal cchar='.g:javascript_conceal_noarg_arrow_function : '')
-exe 'syntax match jsArrowFunction /_\ze\s*=>/    skipwhite skipempty nextgroup=jsArrowFunction '.(exists('g:javascript_conceal_underscore_arrow_function') ? 'conceal cchar='.g:javascript_conceal_underscore_arrow_function : '')
+exe 'syntax match jsArrowFunctionArrow /=>/      skipwhite skipempty nextgroup=jsFuncBlock,jsCommentFunction '.(exists('g:javascript_conceal_arrow_function') ? 'conceal cchar='.g:javascript_conceal_arrow_function : '')
+exe 'syntax match jsArrowFunction /()\ze\s*=>/   skipwhite skipempty nextgroup=jsArrowFunctionArrow '.(exists('g:javascript_conceal_noarg_arrow_function') ? 'conceal cchar='.g:javascript_conceal_noarg_arrow_function : '')
+exe 'syntax match jsArrowFunction /_\ze\s*=>/    skipwhite skipempty nextgroup=jsArrowFunctionArrow '.(exists('g:javascript_conceal_underscore_arrow_function') ? 'conceal cchar='.g:javascript_conceal_underscore_arrow_function : '')
 
 " Classes
 syntax keyword jsClassKeyword           contained class
@@ -282,7 +282,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsCatch                Exception
   HiLink jsAsyncKeyword         Keyword
   HiLink jsForAwait             Keyword
-  HiLink jsArrowFunction        Type
+  HiLink jsArrowFunctionArrow   Type
   HiLink jsFunction             Type
   HiLink jsGenerator            jsFunction
   HiLink jsArrowFuncArgs        jsFuncArgs
