@@ -4,8 +4,5 @@ fun! s:SelectJavascript()
   endif
 endfun
 
-augroup javascript_syntax_detection
-  autocmd!
-  autocmd BufNewFile,BufRead *.{js,mjs,jsm,es,es6},Jakefile setfiletype javascript
-  autocmd BufNewFile,BufRead * call s:SelectJavascript()
-augroup END
+autocmd BufNewFile,BufRead *.{js,mjs,jsm,es,es6},Jakefile setfiletype javascript
+autocmd BufNewFile,BufRead * call s:SelectJavascript()
