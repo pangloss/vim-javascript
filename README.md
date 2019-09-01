@@ -6,6 +6,12 @@ improved indentation.
 
 ## Installation
 
+### Install with native package manager
+
+      git clone https://github.com/pangloss/vim-javascript.git ~/.vim/pack/vim-javascript/start/vim-javascript
+
+since Vim 8.
+
 ### Install with [pathogen](https://github.com/tpope/vim-pathogen)
 
       git clone https://github.com/pangloss/vim-javascript.git ~/.vim/bundle/vim-javascript
