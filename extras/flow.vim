@@ -8,7 +8,8 @@ syntax match   jsFlowNoise          contained /[:;,<>]/
 syntax keyword jsFlowType           contained boolean number string null void any mixed JSON array Function object array bool class
 syntax keyword jsFlowTypeof         contained typeof skipempty skipwhite nextgroup=jsFlowTypeCustom,jsFlowType
 syntax match   jsFlowTypeCustom     contained /[0-9a-zA-Z_.]*/ skipwhite skipempty nextgroup=jsFlowGeneric
-syntax region  jsFlowGeneric                  matchgroup=jsFlowNoise start=/\k\@<=</ end=/>/ keepend extend contains=@jsFlowCluster containedin=@jsExpression,jsFlowDeclareBlock
+syntax region  jsFlowGeneric                  matchgroup=jsFlowNoise start=/\k\@<=</ end=/>/ keepend extend contains=@jsFlowCluster containedin=jsFlowDeclareBlock
+" syntax region  jsFlowGeneric                  matchgroup=jsFlowNoise start=/\k\@<=</ end=/>/ keepend extend contains=@jsFlowCluster containedin=@jsExpression,jsFlowDeclareBlock
 syntax region  jsFlowFunctionGeneric    contained matchgroup=jsFlowNoise start=/</ end=/>(\@=/ keepend extend oneline contains=@jsFlowCluster nextgroup=jsFuncArgs
 " syntax region  jsFlowFunctionGeneric contained matchgroup=jsFlowNoise start=/</ end=/>/ contains=@jsFlowCluster skipwhite skipempty nextgroup=jsFuncArgs
 " syntax region  jsFlowObjectGeneric  contained matchgroup=jsFlowNoise start=/\k\@<=</ end=/>/ keepend extend contains=@jsFlowCluster nextgroup=jsFuncArgs
