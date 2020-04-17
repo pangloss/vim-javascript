@@ -3,6 +3,8 @@
 " Maintainer:   vim-javascript community
 " URL:          https://github.com/pangloss/vim-javascript
 
+compiler eslint
+
 setlocal iskeyword+=$ suffixesadd+=.js
 
 if exists('b:undo_ftplugin')
