@@ -30,6 +30,13 @@ syntax match   jsObjectProp     contained /\<\K\k*/
 syntax match   jsFuncCall       /\<\K\k*\ze\s*(/
 syntax match   jsParensError    /[)}\]]/
 
+" Known Properties
+syntax keyword jsElementProp attributes classList className clientHeight containedin=htmlEventDQ,htmlEventSQ
+syntax keyword jsElementProp clientLeft clientTop clientWidth computedName containedin=htmlEventDQ,htmlEventSQ
+syntax keyword jsElementProp computedRole id innerHTML localName namespaceURI containedin=htmlEventDQ,htmlEventSQ
+syntax keyword jsElementProp outerHTML part prefix scrollHeight scrollLeft containedin=htmlEventDQ,htmlEventSQ
+syntax keyword jsElementProp scrollTop scrollWidth shadowRootRead tagName containedin=htmlEventDQ,htmlEventSQ
+
 " Program Keywords
 syntax keyword jsStorageClass   const var let skipwhite skipempty nextgroup=jsDestructuringBlock,jsDestructuringArray,jsVariableDef
 syntax match   jsVariableDef    contained /\<\K\k*/ skipwhite skipempty nextgroup=jsFlowDefinition
