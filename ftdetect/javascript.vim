@@ -1,4 +1,8 @@
 fun! s:SelectJavascript()
+  if expand('%:e') ==# 'ts'
+    return
+  endif
+
   if getline(1) =~# '^#!.*/bin/\%(env\s\+\)\?node\>'
     set ft=javascript
   endif
