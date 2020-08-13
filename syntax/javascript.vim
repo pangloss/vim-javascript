@@ -327,7 +327,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsRepeatBraces         Noise
   HiLink jsSwitchBraces         Noise
   HiLink jsSpecial              Special
-  HiLink jsTemplateBraces       Noise
+  HiLink jsTemplateBraces       Type
   HiLink jsGlobalObjects        Constant
   HiLink jsGlobalNodeObjects    Constant
   HiLink jsExceptions           Constant
