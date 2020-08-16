@@ -215,7 +215,7 @@ syntax match   jsDestructuringNoise             contained /[,[\]]/
 exec 'syntax region  jsDestructuringPropertyComputed  contained matchgroup=jsDestructuringBraces start=/\[/ end=/]/ contains=@jsExpression skipwhite skipempty nextgroup=jsDestructuringValue,jsDestructuringValueAssignment,jsDestructuringNoise extend' . fold_blocks
 
 " Comments
-syntax keyword jsCommentTodo    contained TODO FIXME XXX TBD
+syntax keyword jsCommentTodo    contained TODO FIXME XXX TBD NOTE
 syntax region  jsComment        start=+//+ end=/$/ contains=jsCommentTodo,@Spell extend keepend
 exec 'syntax region  jsComment        start=+/\*+  end=+\*/+ contains=jsCommentTodo,@Spell extend keepend' . fold_comments
 syntax region  jsEnvComment     start=/\%^#!/ end=/$/ display
