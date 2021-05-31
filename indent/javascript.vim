@@ -204,7 +204,8 @@ function s:ExprCol()
     return 1
   endif
   let bal = 0
-  while s:SearchLoop('[{}?:]','bW',s:skip_expr)
+  let lines = line('.')
+  while s:SearchLoop('[{}?:]','bW',s:skip_expr) && bal >= -lines
     if s:LookingAt() == ':'
       let bal -= !search('\m:\%#','bW')
     elseif s:LookingAt() == '?'
