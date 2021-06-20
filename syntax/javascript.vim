@@ -59,9 +59,10 @@ syntax keyword jsNumber           Infinity
 syntax match   jsFloat            /\c\<\%(\d\+\.\d\+\|\d\+\.\|\.\d\+\)\%(e[+-]\=\d\+\)\=\>/
 
 " Regular Expressions
-syntax match   jsSpecial            contained "\v\\%(x\x\x|u%(\x{4}|\{\x{4,5}})|c\u|.)"
+syntax match   jsSpecial            contained "\v\\%(x\x\x|u%(\x{4}|\{\x{4,5}})|.)"
+syntax match   jsSpecialRegexp      contained "\v\\c\a"
 syntax region  jsTemplateExpression contained matchgroup=jsTemplateBraces start=+${+ end=+}+ contains=@jsExpression keepend
-syntax region  jsRegexpCharClass    contained start=+\[+ skip=+\\.+ end=+\]+ contains=jsSpecial extend
+syntax region  jsRegexpCharClass    contained start=+\[+ skip=+\\.+ end=+\]+ contains=jsSpecial,jsSpecialRegexp extend
 syntax match   jsRegexpBoundary     contained "\v\c[$^]|\\b"
 syntax match   jsRegexpBackRef      contained "\v\\[1-9]\d*"
 syntax match   jsRegexpQuantifier   contained "\v[^\\]%([?*+]|\{\d+%(,\d*)?})\??"lc=1
@@ -69,7 +70,7 @@ syntax match   jsRegexpOr           contained "|"
 syntax match   jsRegexpMod          contained "\v\(\?[:=!>]"lc=1
 syntax region  jsRegexpGroup        contained start="[^\\]("lc=1 skip="\\.\|\[\(\\.\|[^]]\+\)\]" end=")" contains=jsRegexpCharClass,@jsRegexpSpecial keepend
 syntax region  jsRegexpString   start=+\%(\%(\<return\|\<typeof\|\_[^)\]'"[:blank:][:alnum:]_$]\)\s*\)\@<=/\ze[^*/]+ skip=+\\.\|\[[^]]\{1,}\]+ end=+/[gimyus]\{,6}+ contains=jsRegexpCharClass,jsRegexpGroup,@jsRegexpSpecial oneline keepend extend
-syntax cluster jsRegexpSpecial    contains=jsSpecial,jsRegexpBoundary,jsRegexpBackRef,jsRegexpQuantifier,jsRegexpOr,jsRegexpMod
+syntax cluster jsRegexpSpecial    contains=jsSpecial,jsSpecialRegexp,jsRegexpBoundary,jsRegexpBackRef,jsRegexpQuantifier,jsRegexpOr,jsRegexpMod
 
 " Objects
 syntax match   jsObjectShorthandProp contained /\<\k*\ze\s*/ skipwhite skipempty nextgroup=jsObjectSeparator
@@ -327,6 +328,7 @@ if version >= 508 || !exists("did_javascript_syn_inits")
   HiLink jsRepeatBraces         Noise
   HiLink jsSwitchBraces         Noise
   HiLink jsSpecial              Special
+  HiLink jsSpecialRegexp        Special
   HiLink jsTemplateBraces       Noise
   HiLink jsGlobalObjects        Constant
   HiLink jsGlobalNodeObjects    Constant
