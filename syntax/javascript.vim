@@ -27,7 +27,7 @@ syntax case match
 syntax match   jsNoise          /[:,;]/
 syntax match   jsDot            /\./ skipwhite skipempty nextgroup=jsObjectProp,jsFuncCall,jsPrototype,jsTaggedTemplate
 syntax match   jsObjectProp     contained /\<\K\k*/
-syntax match   jsFuncCall       /\<\K\k*\ze\s*(/
+syntax match   jsFuncCall       /\<\K\k*\ze[\s\n]*(/
 syntax match   jsParensError    /[)}\]]/
 
 " Program Keywords
