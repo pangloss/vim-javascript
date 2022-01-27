@@ -176,6 +176,8 @@ exe 'syntax match jsFunction /\<function\>/      skipwhite skipempty nextgroup=j
 exe 'syntax match jsArrowFunction /=>/           skipwhite skipempty nextgroup=jsFuncBlock,jsCommentFunction '.(exists('g:javascript_conceal_arrow_function') ? 'conceal cchar='.g:javascript_conceal_arrow_function : '')
 exe 'syntax match jsArrowFunction /()\ze\s*=>/   skipwhite skipempty nextgroup=jsArrowFunction '.(exists('g:javascript_conceal_noarg_arrow_function') ? 'conceal cchar='.g:javascript_conceal_noarg_arrow_function : '')
 exe 'syntax match jsArrowFunction /_\ze\s*=>/    skipwhite skipempty nextgroup=jsArrowFunction '.(exists('g:javascript_conceal_underscore_arrow_function') ? 'conceal cchar='.g:javascript_conceal_underscore_arrow_function : '')
+exe 'syntax match jsDoubleEqual   /=\{2}/        contained '.(exists('g:javascript_conceal_double_equal') ? 'conceal cchar='.g:javascript_conceal_double_equal : '')
+exe 'syntax match jsTripleEqual   /=\{3}/        contained '.(exists('g:javascript_conceal_triple_equal') ? 'conceal cchar='.g:javascript_conceal_triple_equal : '')
 
 " Classes
 syntax keyword jsClassKeyword           contained class
@@ -233,7 +235,7 @@ if exists("javascript_plugin_flow")
 endif
 
 syntax cluster jsExpression  contains=jsBracket,jsParen,jsObject,jsTernaryIf,jsTaggedTemplate,jsTemplateString,jsString,jsRegexpString,jsNumber,jsFloat,jsOperator,jsOperatorKeyword,jsBooleanTrue,jsBooleanFalse,jsNull,jsFunction,jsArrowFunction,jsGlobalObjects,jsExceptions,jsFutureKeys,jsDomErrNo,jsDomNodeConsts,jsHtmlEvents,jsFuncCall,jsUndefined,jsNan,jsPrototype,jsBuiltins,jsNoise,jsClassDefinition,jsArrowFunction,jsArrowFuncArgs,jsParensError,jsComment,jsArguments,jsThis,jsSuper,jsDo,jsForAwait,jsAsyncKeyword,jsStatement,jsDot
-syntax cluster jsAll         contains=@jsExpression,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsException,jsTry,jsNoise,jsBlockLabel
+syntax cluster jsAll         contains=@jsExpression,jsStorageClass,jsConditional,jsRepeat,jsReturn,jsException,jsTry,jsNoise,jsBlockLabel,jsDoubleEqual,jsTripleEqual
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
