@@ -54,12 +54,14 @@ syntax match   jsModuleComma        contained /,/ skipwhite skipempty nextgroup=
 syntax region  jsString           start=+\z(["']\)+  skip=+\\\%(\z1\|$\)+  end=+\z1+ end=+$+  contains=jsSpecial extend
 syntax region  jsTemplateString   start=+`+  skip=+\\`+  end=+`+     contains=jsTemplateExpression,jsSpecial extend
 syntax match   jsTaggedTemplate   /\<\K\k*\ze`/ nextgroup=jsTemplateString
-syntax match   jsNumber           /\c\<\%(\d\+\%(_\d\+\)\=\%(e[+-]\=\d\+\%(_\d\+\)\=\)\=\)n\=\>/
-syntax match   jsNumber           /\c\<\%(0b[01]\+\%(_[01]\+\)\=\)\n\=\>/
-syntax match   jsNumber           /\c\<\%(0o\o\+\%(_\o\+\)\=\)n\=\>/
-syntax match   jsNumber           /\c\<\%(0x\x\+\%(_\x\+\)\=\)n\=\>/
-syntax keyword jsNumber           Infinity
-syntax match   jsFloat            /\c\<\%(\%(\d\+\%(_\d\+\)\=\)\=\.\%(\d\+\%(_\d\+\)\=\)\=\)\%(e[+-]\=\d\+\%(_\d\+\)\=\)\=\>/
+
+syntax keyword jsNumber Infinity
+syntax match jsNumber /\c\<\%(\%(\d\|\d_\d\)\+\%(e[+-]\=\%(\d\|\d_\d\)\+\)\=\)n\=\>/
+syntax match jsNumber /\c\<\%(0b\%([01]\|[01]_[01]\)\+\)\n\=\>/
+syntax match jsNumber /\c\<\%(0o\%(\o\|\o_\o\)\+\)n\=\>/
+syntax match jsNumber /\c\<\%(0x\%(\x\|\x_\x\)\+\)n\=\>/
+
+syntax match jsFloat /\c\<\%(\%(\%(\d\|\d_\d\)\+\)\=\.\%(\%(\d\|\d_\d\)\+\)\=\)\%(e[+-]\=\%(\d\|\d_\d\)\+\)\=\>/
 
 " Regular Expressions
 syntax match   jsSpecial            contained "\v\\%(x\x\x|u%(\x{4}|\{\x{4,5}})|c\u|.)"
