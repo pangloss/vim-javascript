@@ -378,14 +378,8 @@ if version >= 508 || !exists("did_javascript_syn_inits")
 
   HiLink jsDomErrNo             Constant
   HiLink jsDomNodeConsts        Constant
-  HiLink jsDomElemAttrs         Label
-  HiLink jsDomElemFuncs         PreProc
 
   HiLink jsHtmlEvents           Special
-  HiLink jsHtmlElemAttrs        Label
-  HiLink jsHtmlElemFuncs        PreProc
-
-  HiLink jsCssStyles            Label
 
   delcommand HiLink
 endif
