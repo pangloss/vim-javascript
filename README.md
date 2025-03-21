@@ -66,7 +66,9 @@ augroup END
 
 Enables code folding for javascript based on our syntax file.
 
-Please note this can have a dramatic effect on performance.
+Please note this can have a dramatic effect on performance. In some terminals
+this may cause hangs during pasting. If you are affected by this, using
+a different foldmethod (such as indent) may provide a better experience.
 
 
 ## Concealing Characters
