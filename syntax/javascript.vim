@@ -163,6 +163,7 @@ syntax region  jsTernaryIf                    matchgroup=jsTernaryIfOperator   s
 " These must occur here or they will be override by jsTernaryIf
 syntax match   jsOperator           /?\.\ze\_D/
 syntax match   jsOperator           /??/ skipwhite skipempty nextgroup=@jsExpression
+syntax match   jsOperator           /?,/
 
 syntax match   jsGenerator            contained /\*/ skipwhite skipempty nextgroup=jsFuncName,jsFuncArgs,jsFlowFunctionGroup
 syntax match   jsFuncName             contained /\<\K\k*/ skipwhite skipempty nextgroup=jsFuncArgs,jsFlowFunctionGroup
